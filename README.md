@@ -44,7 +44,12 @@ Un petit **relais** (dossier `relay/`) lit les commentaires de ton live en temps
 ### Options du relais (facultatif)
 Dans Render, onglet **Environment** du service :
 - `ALLOWED_USERS` : ton pseudo TikTok, pour que personne d'autre n'utilise ton relais.
-- `EULER_API_KEY` : clé gratuite de [eulerstream.com](https://www.eulerstream.com), si la connexion à TikTok devient limitée.
+- `EULER_API_KEY` : clé gratuite de [eulerstream.com](https://www.eulerstream.com). **Recommandée** : sans clé, le service gratuit qui permet de se connecter aux lives TikTok est vite limité, surtout depuis Render. Le message « Limite gratuite du service de connexion TikTok atteinte » veut dire qu'il faut l'ajouter.
+
+### Ajouter la clé Euler Stream
+1. Crée un compte gratuit sur [eulerstream.com](https://www.eulerstream.com) et crée une clé API dans ton tableau de bord.
+2. Sur Render, ouvre le service **studio-quiz-relais**, puis l'onglet **Environment**.
+3. Ajoute la variable `EULER_API_KEY` avec ta clé comme valeur, puis enregistre. Render redémarre le relais tout seul, en une ou deux minutes.
 
 > ⚠️ La lecture du chat passe par une bibliothèque non officielle ([TikTok-Live-Connector](https://github.com/zerodytrash/TikTok-Live-Connector)). TikTok peut la casser lors d'une mise à jour, et ce type d'usage n'est pas prévu par ses conditions d'utilisation. En cas de panne, le bouton **+ Point** manuel fonctionne toujours.
 
