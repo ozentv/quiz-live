@@ -48,8 +48,8 @@ Dans Render, onglet **Environment** du service :
 
 > ⚠️ La lecture du chat passe par une bibliothèque non officielle ([TikTok-Live-Connector](https://github.com/zerodytrash/TikTok-Live-Connector)). TikTok peut la casser lors d'une mise à jour, et ce type d'usage n'est pas prévu par ses conditions d'utilisation. En cas de panne, le bouton **+ Point** manuel fonctionne toujours.
 
-## Thèmes (environ 40 questions chacun)
-Géographie, Animaux, Sciences, Histoire, Culture générale, Sport, Gastronomie, Corps humain, Mythologie, Langue française, Pays et capitales, Technologie, Vrai ou faux, ou **Au hasard**.
+## Thèmes (18 thèmes, 649 questions)
+Géographie, Animaux, Sciences, Histoire, Culture générale, Sport, Gastronomie, Corps humain, Mythologie, Langue française, Pays et capitales, Technologie et Vrai ou faux (environ 40 questions chacun), puis Cinéma, Musique, Jeux vidéo, Espace et Dessins animés (25 questions chacun). Le choix **Au hasard** mélange tous les thèmes.
 
 ## Voix off
 La voix utilise la synthèse vocale du navigateur (`speechSynthesis`) avec une voix française.
