@@ -111,10 +111,14 @@ wss.on("connection", (ws, req) => {
     const conn = new TikTokLiveConnection(user, { signApiKey: API_KEY, processInitialData: false });
     tt = conn;
     conn.on(WebcastEvent.CHAT, (d) => {
+      // Selon les versions de TikTok, le texte est dans « content » ou « comment »,
+      // et le pseudo (@…) dans « uniqueId » ou « displayId ».
       const u = (d && d.user) || {};
-      const id = String(u.uniqueId || u.userId || "").trim();
-      const name = String(u.nickname || u.uniqueId || "").trim();
-      const text = String((d && d.comment) || "");
+      const handle = String(u.uniqueId || u.displayId || "").trim();
+      const id = handle || String(u.userId || u.id || "").trim();
+      const name = String(u.nickname || handle || "").trim();
+      const text = String((d && (d.comment != null && d.comment !== "" ? d.comment : d.content)) || "");
+      if (!text) return;
       if (!id && !name) return;
       send({ type: "chat", id: id || name, name: name || id, text, t: Date.now() });
     });
