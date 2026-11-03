@@ -143,6 +143,25 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 #liveBar #bChat[data-s="connected"] { background: #1f8f4e; }
 #liveBar #bChat[data-s="error"] { background: #b23a3a; }
 #liveBar #bChat[data-s="waiting"] { background: #8a6a12; }
+.scene.hide-ch:not(.show):not(.rev) .card { opacity: 0; }
+.hd-count.bonus { color: var(--sacc); font-size: 44px; }
+.top3 { position: absolute; left: 60px; right: 60px; top: 46px; text-align: center; font-size: 34px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: .95; }
+.news { position: absolute; left: 60px; right: 60px; top: 1772px; text-align: center; font-size: 38px; font-weight: 800; color: #ffd60a; line-height: 1.2; }
+.vote-t { position: absolute; left: 0; right: 0; top: 330px; text-align: center; font-size: 130px; font-weight: 800; color: var(--sacc); }
+.vote-s { position: absolute; left: 80px; right: 80px; top: 500px; text-align: center; font-size: 50px; font-weight: 700; line-height: 1.2; }
+.vcard { position: absolute; left: 80px; width: 920px; height: 150px; border-radius: 44px; background: rgba(255, 255, 255, .14); border: 3px solid rgba(255, 255, 255, .38); display: flex; align-items: center; gap: 28px; padding: 0 40px 0 28px; }
+.vcard .bd { flex: none; width: 96px; height: 96px; border-radius: 50%; background: var(--sacc); color: #0f0f19; display: grid; place-items: center; font-size: 54px; font-weight: 800; }
+.vcard .lb { flex: 1; min-width: 0; font-size: 54px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vcard .vc { flex: none; font-size: 50px; font-weight: 800; }
+.vcard.won { background: #2ecc71; border-color: #2ecc71; }
+.vote-n { position: absolute; left: 0; right: 0; top: 1330px; text-align: center; font-size: 90px; font-weight: 800; }
+.pod-t { position: absolute; left: 0; right: 0; top: 170px; text-align: center; font-size: 120px; font-weight: 800; color: var(--sacc); }
+.pod-s { position: absolute; left: 0; right: 0; top: 320px; text-align: center; font-size: 48px; font-weight: 700; }
+.pod-col { position: absolute; width: 290px; bottom: 380px; border-radius: 30px 30px 0 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 26px; font-weight: 800; color: #0f0f19; }
+.pod-col .rk { font-size: 110px; line-height: 1; }
+.pod-col .pt { font-size: 44px; margin-top: 10px; }
+.pod-nm { position: absolute; width: 330px; text-align: center; font-size: 46px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pod-f { position: absolute; left: 80px; right: 80px; top: 1600px; text-align: center; font-size: 44px; font-weight: 700; }
 .stat { position: absolute; left: 80px; width: 920px; top: 1700px; text-align: center; font-size: 40px; font-weight: 800; opacity: .92; }
 @media (prefers-reduced-motion: reduce) { .scene, .rev .fact { animation: none; } }
 </style>
@@ -160,6 +179,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 
   <section aria-labelledby="h-theme">
     <h2 id="h-theme"><span class="step">2</span>Thème</h2>
+    <p class="note" style="margin:0 0 10px">Touche plusieurs thèmes pour les mélanger. « Au hasard » utilise tous les thèmes.</p>
     <div id="themes" class="chips"></div>
   </section>
 
@@ -168,6 +188,9 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     <div class="row" id="rowN"><span class="lab">Questions</span><div class="seg" id="segN" role="group" aria-label="Nombre de questions"></div></div>
     <div class="row" id="rowC"><span class="lab">Compte à rebours</span><div class="seg" id="segC" role="group" aria-label="Compte à rebours"></div></div>
     <div class="row" id="rowLC" hidden><span class="lab">Temps pour répondre</span><div class="seg" id="segLC" role="group" aria-label="Temps pour répondre"></div></div>
+    <div class="row" id="rowD"><span class="lab">Difficulté</span><div class="seg" id="segD" role="group" aria-label="Difficulté"></div></div>
+    <p class="note" id="diffNote" style="margin:0"></p>
+    <div class="row" id="rowBonus" hidden><span class="lab">Question bonus ×2</span><div class="seg" id="segBonus" role="group" aria-label="Fréquence des questions bonus"></div></div>
     <div class="row" id="rowLB" hidden><span class="lab">Classement automatique</span><div class="seg" id="segLB" role="group" aria-label="Fréquence du classement"></div></div>
     <div class="row" id="rowChat" hidden>
       <div class="voice-line">
@@ -178,6 +201,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
           <div class="chat-test"><button class="btn ghost small" id="chatTest" type="button">Tester la connexion</button><span id="chatState" class="chat-st" role="status"></span></div>
           <div class="chat-last" id="chatLast" aria-live="polite"></div>
           <div class="chat-test"><span class="lab">Décalage du live TikTok</span><div class="seg" id="segLag" role="group" aria-label="Décalage du live"></div></div>
+          <div class="chat-test"><span class="lab">Le chat vote pour le thème</span><div class="seg" id="segVote" role="group" aria-label="Vote du chat"></div></div>
           <p class="note" style="margin:0">Le relais lit les commentaires : la première lettre A, B, C ou D de chaque personne compte. Le plus rapide gagne 3 points, les deux suivants 2 points, les autres bons 1 point. Écris <b>demo</b> comme pseudo pour tester sans être en live.</p>
         </div>
       </div>
@@ -1337,9 +1361,12 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   };
   var KEYS = Object.keys(BANK);
   var RATES = [["Lente", 0.9], ["Normale", 1.05], ["Rapide", 1.2]];
-  var S = { theme: "random", n: 4, count: 3, voiceOn: true, voiceName: "", rate: 1.05, mode: "video", liveCount: 15, boardMin: 5, chatOn: false, ttUser: "", relay: "", lag: 6 };
+  var S = { theme: "random", n: 4, count: 3, voiceOn: true, voiceName: "", rate: 1.05, mode: "video", liveCount: 15, boardMin: 5, chatOn: false, ttUser: "", relay: "", lag: 6, themes: null, diff: "normal", bonusEvery: 5, voteEvery: 0 };
   try { Object.assign(S, JSON.parse(localStorage.getItem("sq-set") || "{}")); } catch (e) {}
+  if (!Array.isArray(S.themes)) S.themes = S.theme && S.theme !== "random" && BANK[S.theme] ? [S.theme] : [];
+  S.themes = S.themes.filter(function (k) { return BANK[k]; });
   function save() { try { localStorage.setItem("sq-set", JSON.stringify(S)); } catch (e) {} }
+  function selKeys() { return S.themes.length ? S.themes.slice() : KEYS.slice(); }
   function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 
@@ -1361,10 +1388,15 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       var b = document.createElement("button");
       b.type = "button"; b.className = "chip";
       b.innerHTML = "<i style=\"background:" + t[2] + "\"></i><span>" + esc(t[0]) + "</span>";
-      b.setAttribute("aria-pressed", String(S.theme === t[1]));
-      b.onclick = function () { S.theme = t[1]; save(); Array.prototype.forEach.call(box.children, function (c, i) { c.setAttribute("aria-pressed", String(all[i][1] === S.theme)); }); };
+      b.onclick = function () {
+        if (t[1] === "random") S.themes = [];
+        else { var i = S.themes.indexOf(t[1]); if (i >= 0) S.themes.splice(i, 1); else S.themes.push(t[1]); }
+        save(); mark();
+      };
       box.appendChild(b);
     });
+    function mark() { Array.prototype.forEach.call(box.children, function (c, i) { var k = all[i][1]; c.setAttribute("aria-pressed", String(k === "random" ? !S.themes.length : S.themes.indexOf(k) >= 0)); }); }
+    mark();
   }
   seg($("#segN"), [["3", 3], ["4", 4], ["5", 5]], function () { return S.n; }, function (v) { S.n = v; });
   seg($("#segC"), [["3 s", 3], ["5 s", 5]], function () { return S.count; }, function (v) { S.count = v; });
@@ -1373,10 +1405,14 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   seg($("#segLB"), [["3 min", 3], ["5 min", 5], ["10 min", 10]], function () { return S.boardMin; }, function (v) { S.boardMin = v; });
   function applyMode() {
     var lv = S.mode === "live";
-    $("#rowN").hidden = lv; $("#rowC").hidden = lv; $("#rowLC").hidden = !lv; $("#rowLB").hidden = !lv; $("#rowChat").hidden = !lv;
+    $("#rowN").hidden = lv; $("#rowC").hidden = lv; $("#rowLC").hidden = !lv; $("#rowLB").hidden = !lv; $("#rowChat").hidden = !lv; $("#rowBonus").hidden = !lv;
     $("#secRec").hidden = lv; $("#secLive").hidden = !lv;
     $("#go").textContent = lv ? "Lancer le live" : "Lancer le quiz";
   }
+  var DIFF_NOTE = { facile: "Facile : seulement 2 choix de réponse.", normal: "Normal : 4 choix de réponse.", expert: "Expert : les choix n'apparaissent qu'à la moitié du temps." };
+  seg($("#segD"), [["Facile", "facile"], ["Normal", "normal"], ["Expert", "expert"]], function () { return S.diff; }, function (v) { S.diff = v; $("#diffNote").textContent = DIFF_NOTE[v]; });
+  $("#diffNote").textContent = DIFF_NOTE[S.diff] || "";
+  seg($("#segBonus"), [["Jamais", 0], ["1 sur 5", 5], ["1 sur 10", 10]], function () { return S.bonusEvery; }, function (v) { S.bonusEvery = v; });
   seg($("#segR"), RATES, function () { return S.rate; }, function (v) { S.rate = v; });
   buildThemes();
   applyMode();
@@ -1507,24 +1543,41 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   }
   function prep(q) {
     var choices = q[1].slice(), good = q[1][q[2]];
-    if (choices.length > 2 && !choices.every(function (x) { return /^\d+$/.test(x.trim()); })) shuffle(choices);
-    return { q: q[0], choices: choices, a: choices.indexOf(good), f: q[3] };
+    var numeric = choices.every(function (x) { return /^\d+$/.test(x.trim()); });
+    if (S.diff === "facile" && choices.length > 2) {
+      var wrong = choices.filter(function (x) { return x !== good; }), w = wrong[Math.floor(Math.random() * wrong.length)];
+      choices = choices.filter(function (x) { return x === good || x === w; });
+      if (!numeric && Math.random() < 0.5) choices.reverse();
+    } else if (choices.length > 2 && !numeric) shuffle(choices);
+    return { q: q[0], choices: choices, a: choices.indexOf(good), f: q[3], hide: S.diff === "expert" };
   }
-  function qScene(T, qi, n, q, lv) {
+  function askText(q) {
+    if (q.hide) return speakable(q.q) + " Les réponses arrivent à la moitié du temps !";
+    return speakable(q.q) + " " + q.choices.map(function (c, j) { return "ABCD"[j] + " : " + speakable(c) + "."; }).join(" ");
+  }
+  function armHide(scene, q, sec) { if (q.hide) setTimeout(function () { scene.classList.add("show"); tick(false); }, sec * 500); }
+  function top3Text() {
+    var r = ranking().slice(0, 3), med = ["🥇", "🥈", "🥉"];
+    return r.map(function (x, i) { return med[i] + " " + esc(x.n) + " " + x.p; }).join("   ");
+  }
+  function renderTop3() { var el = $("#top3"); if (el) el.innerHTML = top3Text(); }
+  function qScene(T, qi, n, q, lv, bonus) {
     var bars = ""; for (var i = 0; i < n; i++) bars += "<span class=\"" + (i < qi ? "done" : i === qi ? "cur" : "") + "\"></span>";
     var C = 2 * Math.PI * 98, cards = "";
     q.choices.forEach(function (c, i) {
       cards += "<div class=\"card " + (i === q.a ? "good" : "dim") + "\" style=\"top:" + (940 + i * 148) + "px\"><div class=\"bd\">" + "ABCD"[i] + "</div><div class=\"lb\">" + esc(c) + "</div>" +
         "<div class=\"ck\"><svg width=\"30\" height=\"30\" viewBox=\"0 0 30 30\"><path d=\"M5 16 L12 23 L25 8\" fill=\"none\" stroke=\"#2ecc71\" stroke-width=\"5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div></div>";
     });
-    return "<div class=\"hd-pill\">" + esc(T.title) + "</div><div class=\"hd-count\">" + (lv ? "Q" + (qi + 1) : (qi + 1) + "/" + n) + "</div><div class=\"bars\">" + bars + "</div>" +
+    return (lv ? "<div class=\"top3\" id=\"top3\">" + top3Text() + "</div><div class=\"news\" id=\"news\"></div>" : "") +
+      "<div class=\"hd-pill\">" + esc(T.title) + "</div><div class=\"hd-count" + (bonus ? " bonus" : "") + "\">" + (bonus ? "⭐ BONUS ×2" : lv ? "Q" + (qi + 1) : (qi + 1) + "/" + n) + "</div><div class=\"bars\">" + bars + "</div>" +
       "<div class=\"ring\"><svg viewBox=\"0 0 280 280\"><circle cx=\"140\" cy=\"140\" r=\"98\" fill=\"none\" stroke=\"rgba(255,255,255,.22)\" stroke-width=\"20\"/>" +
       "<circle id=\"arc\" cx=\"140\" cy=\"140\" r=\"98\" fill=\"none\" stroke=\"var(--sacc)\" stroke-width=\"20\" stroke-linecap=\"round\" stroke-dasharray=\"" + C + "\" stroke-dashoffset=\"0\"/></svg><div class=\"num\" id=\"num\">" + (lv ? S.liveCount : S.count) + "</div></div>" +
       "<div class=\"fact\"><b>LE SAVIEZ-VOUS ?</b><div class=\"ft\" id=\"ft\">" + esc(q.f) + "</div></div>" +
       "<div class=\"qbox\"><div class=\"qt\" id=\"qt\">" + esc(q.q) + "</div></div>" + cards +
       (lv ? "<div class=\"cta\">Écris " + (q.choices.length === 2 ? "A ou B" : "A, B, C ou D") + " en commentaire !" + (S.chatOn ? " 1 seule réponse compte" : "") + "</div><div class=\"win\" id=\"win\" hidden></div>" + (S.chatOn ? "<div class=\"stat\" id=\"stat\">💬 0 réponse</div>" : "") : "");
   }
-  function fitQ(scene) {
+  function fitQ(scene, q) {
+    if (q && q.hide) scene.classList.add("hide-ch");
     fit($("#qt"), 330, 74, 50);
     Array.prototype.forEach.call(sceneBox.querySelectorAll(".lb"), function (l) { fit(l, 104, 48, 30); });
     scene.classList.add("rev"); fit($("#ft"), 150, 46, 32); scene.classList.remove("rev");
@@ -1547,7 +1600,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     runId++; clearTimeout(curTimer);
     try { if (synth) synth.cancel(); } catch (e) {}
     $("#preroll").hidden = true; $("#endsheet").hidden = true; wrap.hidden = true;
-    $("#liveBar").hidden = true; $("#addSheet").hidden = true; closeBoard(); curQ = false; round = null; chatClose();
+    $("#liveBar").hidden = true; $("#addSheet").hidden = true; finaleOn = false; closeBoard(); curQ = false; round = null; vote = null; chatClose();
     renderScores();
     try { if (wake) { wake.release(); wake = null; } } catch (e) {}
   }
@@ -1637,7 +1690,9 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       box.appendChild(b);
     });
   }
+  var curBonus = false;
   function give(p) {
+    if (curQ && curBonus) p *= 2;
     var r = addPoints($("#nm").value, p);
     if (!r) { msg("Tape d'abord un pseudo."); return; }
     var first = curQ && !curWinner;
@@ -1657,12 +1712,37 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     msg("Dernier point annulé."); renderRecent(); renderScores();
   };
   $("#bBoard").onclick = function () { showBoard(12000); };
-  $("#lbLayer").onclick = closeBoard;
-  $("#lbClose").onclick = function (e) { e.stopPropagation(); try { if (synth) synth.cancel(); } catch (x) {} closeBoard(); };
+  $("#lbLayer").onclick = function () { if (!finaleOn) closeBoard(); };
+  $("#lbClose").onclick = function (e) {
+    e.stopPropagation(); try { if (synth) synth.cancel(); } catch (x) {}
+    if (finaleOn) { finaleOn = false; stopAll(); } else closeBoard();
+  };
+  var finaleOn = false;
+  function podiumHTML() {
+    var r = ranking().slice(0, 3), cols = [[0, 395, 620, "#ffd60a"], [1, 85, 460, "#d9dde6"], [2, 705, 340, "#e0a46b"]], html = "";
+    cols.forEach(function (c) {
+      var x = r[c[0]]; if (!x) return;
+      html += "<div class=\"pod-nm\" style=\"left:" + (c[1] - 20) + "px;bottom:" + (380 + c[2] + 20) + "px\">" + esc(x.n) + "</div>" +
+        "<div class=\"pod-col\" style=\"left:" + c[1] + "px;height:" + c[2] + "px;background:" + c[3] + "\"><div class=\"rk\">" + (c[0] + 1) + "</div><div class=\"pt\">" + pts(x.p) + "</div></div>";
+    });
+    return "<div class=\"pod-t\">🏆 PODIUM</div><div class=\"pod-s\">Merci d'avoir joué !</div>" + html + "<div class=\"pod-f\">Abonne-toi pour le prochain quiz en live</div>";
+  }
+  function finale() {
+    var r = ranking();
+    if (S.mode !== "live" || !r.length) { stopAll(); return; }
+    runId++; clearTimeout(curTimer); round = null; vote = null; curQ = false;
+    try { if (synth) synth.cancel(); } catch (e) {}
+    $("#liveBar").hidden = true; $("#addSheet").hidden = true;
+    closeBoard(); finaleOn = true;
+    $("#lbIn").innerHTML = podiumHTML(); $("#lbLayer").hidden = false; sweep(); setTimeout(chime, 500);
+    var v = "Fin du live ! Le grand vainqueur est " + r[0].n + ", avec " + pts(r[0].p) + " !";
+    if (r[1]) v += " Bravo aussi à " + r[1].n + (r[2] ? " et à " + r[2].n : "") + ".";
+    say(v + " Merci d'avoir joué !");
+  }
   var stopArm = null;
   $("#bStop").onclick = function () {
     var b = this;
-    if (stopArm) { clearTimeout(stopArm); stopArm = null; b.textContent = "Arrêter"; stopAll(); return; }
+    if (stopArm) { clearTimeout(stopArm); stopArm = null; b.textContent = "Arrêter"; finale(); return; }
     b.textContent = "Sûr ?"; stopArm = setTimeout(function () { stopArm = null; b.textContent = "Arrêter"; }, 3000);
   };
   var resetArm = null;
@@ -1676,6 +1756,8 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   /* ---------- chat TikTok (via le relais) ---------- */
   var chat = { ws: null, want: false, retry: null, state: "off", count: 0, last: [] };
   var round = null; // { open, n, choices, answers: [{ k, name, a }], seen: {} }
+  var vote = null;  // { open, keys: [k1, k2, k3], counts: [..], seen: {} }
+  var streak = {};  // série de bonnes réponses d'affilée, par joueur
   function cleanUser(s) { return String(s || "").trim().replace(/^https?:\/\/(www\.)?tiktok\.com\//i, "").replace(/^@+/, "").replace(/\/.*$/, ""); }
   function relayWsUrl() {
     var u = String(S.relay || "").trim().replace(/\/+$/, "");
@@ -1747,7 +1829,21 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     if (tk.length <= 4 && single.length === 1 && /^[a-d]$/.test(tk[0]) && !/^(est|etait|a|as)$/.test(tk[1] || "")) return idx(tk[0]);
     return -1;
   }
+  function parseVote(text, keys) {
+    var t = plain(text); if (!t) return -1;
+    var m = t.match(/^(?:(?:le|la|vote|je vote|theme)\s+)*([1-3])$/);
+    if (m) { var i = +m[1] - 1; return i < keys.length ? i : -1; }
+    for (var j = 0; j < keys.length; j++) if (plain(BANK[keys[j]].title) === t) return j;
+    return -1;
+  }
   function onChat(m) {
+    if (vote && vote.open) {
+      var vi = parseVote(m.text, vote.keys); if (vi < 0) return;
+      var vk = "tt:" + String(m.id || m.name).toLowerCase();
+      if (vote.seen[vk]) return; vote.seen[vk] = 1; vote.counts[vi]++;
+      var ve = $("#vc" + vi); if (ve) ve.textContent = vote.counts[vi];
+      return;
+    }
     if (!round || !round.open) return;
     var a = parseAnswer(m.text, round.choices); if (a < 0) return;
     var k = "tt:" + String(m.id || m.name).toLowerCase();
@@ -1756,15 +1852,31 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     round.answers.push({ k: k, name: m.name || m.id, a: a });
     var st = $("#stat"); if (st) st.textContent = "💬 " + round.answers.length + " réponse" + (round.answers.length > 1 ? "s" : "");
   }
-  function scoreRound(good) {
-    if (!round) return [];
+  function scoreRound(good, mult) {
+    var res = []; res.news = []; res.streaks = [];
+    if (!round) return res;
     round.open = false;
-    var ok = round.answers.filter(function (x) { return x.a === good; });
-    ok.forEach(function (x, i) { addPoints(x.name, i === 0 ? 3 : i < 3 ? 2 : 1, x.k, true); });
+    var ok = round.answers.filter(function (x) { return x.a === good; }), okKeys = {};
+    ok.forEach(function (x, i) {
+      if (!scores[x.k] || scores[x.k].p <= 0) res.news.push(x.name);
+      addPoints(x.name, (i === 0 ? 3 : i < 3 ? 2 : 1) * (mult || 1), x.k, true);
+      okKeys[x.k] = 1; streak[x.k] = (streak[x.k] || 0) + 1;
+      var n = streak[x.k]; if (n === 3 || n === 5 || (n >= 10 && n % 5 === 0)) res.streaks.push({ name: x.name, n: n });
+      res.push(x);
+    });
+    Object.keys(streak).forEach(function (k) { if (!okKeys[k]) delete streak[k]; });
     var st = $("#stat");
     if (st) st.textContent = round.answers.length ? "✅ " + ok.length + " bonne" + (ok.length > 1 ? "s" : "") + " réponse" + (ok.length > 1 ? "s" : "") + " sur " + round.answers.length : "";
-    if (ok.length) renderScores();
-    return ok;
+    if (ok.length) { renderScores(); renderTop3(); }
+    return res;
+  }
+  function listNames(a) { a = a.slice(0, 3); return a.length < 2 ? a.join("") : a.slice(0, -1).join(", ") + " et " + a[a.length - 1]; }
+  function newsLine(res) {
+    var parts = [], voice = [];
+    if (res.news.length) { parts.push("🎉 Bienvenue " + esc(listNames(res.news)) + (res.news.length > 3 ? " +" + (res.news.length - 3) : "") + " !"); voice.push("Bienvenue " + listNames(res.news) + " !"); }
+    res.streaks.slice(0, 2).forEach(function (x) { parts.push("🔥 " + esc(x.name) + " : " + x.n + " d'affilée !"); voice.push(x.name + " enchaîne " + x.n + " bonnes réponses !"); });
+    var el = $("#news"); if (el) el.innerHTML = parts.join(" · ");
+    return voice.join(" ");
   }
   $("#chatOn").checked = !!S.chatOn;
   $("#chatFields").hidden = !S.chatOn;
@@ -1776,6 +1888,36 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   $("#chatTest").onclick = chatConnect;
   seg($("#segLag"), [["3 s", 3], ["6 s", 6], ["10 s", 10]], function () { return S.lag; }, function (v) { S.lag = v; });
   $("#bChat").onclick = chatConnect;
+  seg($("#segVote"), [["Non", 0], ["Toutes les 5", 5], ["Toutes les 10", 10]], function () { return S.voteEvery; }, function (v) { S.voteEvery = v; });
+
+  /* ---------- vote du chat ---------- */
+  async function runVote(keys, my, ok) {
+    var cand = shuffle(keys.slice()).slice(0, 3), dur = 15;
+    setPalette(BANK[cand[0]].pal);
+    var cards = cand.map(function (k, i) { return "<div class=\"vcard\" id=\"vcard" + i + "\" style=\"top:" + (720 + i * 190) + "px\"><div class=\"bd\">" + (i + 1) + "</div><div class=\"lb\">" + esc(BANK[k].title) + "</div><div class=\"vc\" id=\"vc" + i + "\">0</div></div>"; }).join("");
+    setScene("<div class=\"top3\" id=\"top3\">" + top3Text() + "</div><div class=\"vote-t\">VOTE !</div><div class=\"vote-s\">Écris " + cand.map(function (_, i) { return i + 1; }).join(", ").replace(/, (\d)$/, " ou $1") + " pour choisir le prochain thème</div>" + cards + "<div class=\"vote-n\" id=\"voteN\">" + dur + "</div>");
+    vote = { open: true, keys: cand, counts: cand.map(function () { return 0; }), seen: {} };
+    sweep();
+    await ok(say("Votez pour le prochain thème ! " + cand.map(function (k, i) { return (i + 1) + " : " + BANK[k].title + "."; }).join(" ")));
+    var end = Date.now() + dur * 1000;
+    while (Date.now() < end) {
+      var n = $("#voteN"); if (n) n.textContent = Math.ceil((end - Date.now()) / 1000);
+      await ok(sleep(250));
+    }
+    var nEl = $("#voteN"); if (nEl) nEl.textContent = "⏳";
+    await ok(sleep((S.lag || 0) * 1000));
+    vote.open = false;
+    var max = Math.max.apply(null, vote.counts), best = [];
+    vote.counts.forEach(function (c, i) { if (c === max) best.push(i); });
+    var win = best[Math.floor(Math.random() * best.length)];
+    var wc = $("#vcard" + win); if (wc) wc.classList.add("won");
+    if (nEl) nEl.textContent = max ? "🏆 " + BANK[cand[win]].title : "Personne n'a voté";
+    chime();
+    await ok(say(max ? "Le chat a choisi : " + BANK[cand[win]].title + " !" : "Personne n'a voté, je choisis : " + BANK[cand[win]].title + " !"));
+    await ok(sleep(1200));
+    vote = null;
+    return cand[win];
+  }
 
   /* ---------- live non-stop ---------- */
   async function live() {
@@ -1786,7 +1928,8 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       $("#endsheet").hidden = true; $("#addSheet").hidden = true; wrap.hidden = false; $("#liveBar").hidden = false;
       $("#bChat").hidden = !S.chatOn;
       if (S.chatOn && !chat.ws) chatConnect();
-      var keys = S.theme === "random" ? KEYS : [S.theme], queue = [], last = null, num = 0, lastBoard = Date.now();
+      var keys = selKeys(), queue = [], last = null, num = 0, lastBoard = Date.now(), used = {}, forced = null;
+      streak = {}; vote = null;
       var T0 = BANK[keys[0]]; setPalette(T0.pal); fitStage(); setScene("");
       try { await ok(document.fonts.ready); } catch (e) { if (my !== runId) return; }
       try { if (navigator.wakeLock) navigator.wakeLock.request("screen").then(function (w) { wake = w; }, function () {}); } catch (e) {}
@@ -1801,17 +1944,33 @@ ol.sc b { font-variant-numeric: tabular-nums; }
           await ok(Promise.all([say(boardVoice()), showBoard(11000)]));
           await ok(sleep(300)); lastBoard = Date.now();
         }
-        var it = queue.shift(); last = it;
+        // Vote du chat pour le thème, au début puis toutes les N questions
+        if (S.voteEvery && S.chatOn && chat.state === "connected" && keys.length > 1 && num % S.voteEvery === 0 && !forced) {
+          var chosen = await runVote(keys, my, ok);
+          if (chosen) forced = { key: chosen, left: S.voteEvery };
+        }
+        var it;
+        if (forced) {
+          var fk = forced.key, free = BANK[fk].q.map(function (_, i) { return i; }).filter(function (i) { return !used[fk + ":" + i]; });
+          if (!free.length) { BANK[fk].q.forEach(function (_, i) { delete used[fk + ":" + i]; }); free = BANK[fk].q.map(function (_, i) { return i; }); }
+          it = [fk, free[Math.floor(Math.random() * free.length)]];
+          if (--forced.left <= 0) forced = null;
+        } else {
+          do { if (!queue.length) { refill(); used = {}; } it = queue.shift(); } while (used[it[0] + ":" + it[1]] && queue.length);
+        }
+        used[it[0] + ":" + it[1]] = 1; last = it;
         var T = BANK[it[0]], q = prep(T.q[it[1]]); num++;
-        curWinner = null; curQ = true;
+        var bonus = !!(S.bonusEvery && num % S.bonusEvery === 0);
+        curWinner = null; curQ = true; curBonus = bonus;
         setPalette(T.pal);
-        var scene = setScene(qScene(T, num - 1, 0, q, true));
-        fitQ(scene);
+        var scene = setScene(qScene(T, num - 1, 0, q, true, bonus));
+        fitQ(scene, q);
         round = S.chatOn ? { open: true, choices: q.choices, answers: [], seen: {} } : null;
-        var letters = q.choices.map(function (c, j) { return "ABCD"[j] + " : " + speakable(c) + "."; }).join(" ");
         await ok(sleep(400));
-        await ok(Promise.all([say(speakable(q.q) + " " + letters), sleep(1500)]));
+        if (bonus) { sweep(); await ok(say("Question bonus ! Points doublés !")); }
+        await ok(Promise.all([say(askText(q)), sleep(1500)]));
         await ok(sleep(250));
+        armHide(scene, q, S.liveCount);
         await ok(countdown(S.liveCount, my));
         var tEnd = Date.now();
         scene.classList.add("rev"); chime();
@@ -1819,11 +1978,14 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         await ok(Promise.all([say("ABCD"[q.a] + ", " + speakable(q.choices[q.a]) + ". " + speakable(q.f)), sleep(2500)]));
         // Le live TikTok a plusieurs secondes de retard : les réponses arrivées pendant ce délai comptent encore.
         if (round) await ok(sleep(Math.max(0, (S.lag || 0) * 1000 - (Date.now() - tEnd))));
-        var okList = scoreRound(q.a);
+        var okList = scoreRound(q.a, bonus ? 2 : 1);
         if (!curWinner && okList.length) setWinner(okList[0].name);
-        if (curWinner) await ok(say("Winner : " + curWinner + " !" + (okList.length > 1 ? " " + okList.length + " bonnes réponses." : "")));
+        var extra = newsLine(okList);
+        if (curWinner) await ok(say("Winner : " + curWinner + " !" + (okList.length > 1 ? " " + okList.length + " bonnes réponses." : "") + (extra ? " " + extra : "")));
+        else if (extra) await ok(say(extra));
+        renderTop3();
         await ok(sleep(2200));
-        curQ = false; round = null;
+        curQ = false; curBonus = false; round = null;
       }
     } catch (e) { if (e !== 0) { console.error(e); stopAll(); } }
   }
@@ -1833,7 +1995,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     var my = ++runId;
     var ok = async function (p) { await p; if (my !== runId) throw 0; };
     try {
-      var key = S.theme === "random" ? KEYS[Math.floor(Math.random() * KEYS.length)] : S.theme;
+      var ks = selKeys(), key = ks[Math.floor(Math.random() * ks.length)];
       var T = BANK[key], qs = pick(key, S.n), n = qs.length;
       $("#endsheet").hidden = true; wrap.hidden = false;
       setPalette(T.pal); fitStage();
@@ -1850,11 +2012,11 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 
       for (var i = 0; i < n; i++) {
         var q = qs[i], scene = setScene(qScene(T, i, n, q));
-        fitQ(scene);
-        var letters = q.choices.map(function (c, j) { return "ABCD"[j] + " : " + speakable(c) + "."; }).join(" ");
+        fitQ(scene, q);
         await ok(sleep(400));
-        await ok(Promise.all([say(speakable(q.q) + " " + letters), sleep(1500)]));
+        await ok(Promise.all([say(askText(q)), sleep(1500)]));
         await ok(sleep(250));
+        armHide(scene, q, S.count);
         await ok(countdown(S.count, my));
         scene.classList.add("rev"); chime();
         await ok(sleep(450));

@@ -18,6 +18,18 @@ Le quiz tient dans un seul fichier, `index.html`, sans rien à installer. Le rel
 3. Quand quelqu'un trouve la bonne réponse, touche **+ Point** et tape son pseudo. Le premier pseudo validé s'affiche comme **WINNER**.
 4. Le classement s'affiche tout seul toutes les 3, 5 ou 10 minutes, ou quand tu touches **Classement**.
 
+## ✨ Options de jeu
+
+- **Plusieurs thèmes à la fois** : touche plusieurs thèmes pour les mélanger. « Au hasard » utilise tous les thèmes.
+- **Difficulté** : *Facile* (2 choix), *Normal* (4 choix) ou *Expert* (les choix n'apparaissent qu'à la moitié du temps : il faut connaître la réponse).
+
+### En live
+- **Top 3 en direct** en haut de l'écran pendant les questions.
+- **Bienvenue** affichée et annoncée quand un joueur marque son premier point, et **séries** 🔥 à 3, 5 et 10 bonnes réponses d'affilée.
+- **Question bonus ×2** : 1 question sur 5 ou sur 10 rapporte deux fois plus de points (aussi avec + Point).
+- **Vote du chat pour le thème** : au début, puis toutes les 5 ou 10 questions, le chat écrit 1, 2 ou 3 pour choisir le thème suivant parmi les thèmes sélectionnés (avec les points automatiques).
+- **Podium final** : en touchant **Arrêter** deux fois, le top 3 s'affiche sur un podium et le vainqueur est annoncé. **✕ Fermer** termine le live.
+
 ## 🤖 Points automatiques avec le chat TikTok (mode live)
 
 Un petit **relais** (dossier `relay/`) lit les commentaires de ton live en temps réel et les envoie au quiz :
