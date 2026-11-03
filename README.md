@@ -53,9 +53,9 @@ Dans Render, onglet **Environment** du service :
 
 > ⚠️ La lecture du chat passe par une bibliothèque non officielle ([TikTok-Live-Connector](https://github.com/zerodytrash/TikTok-Live-Connector)). TikTok peut la casser lors d'une mise à jour, et ce type d'usage n'est pas prévu par ses conditions d'utilisation. En cas de panne, le bouton **+ Point** manuel fonctionne toujours.
 
-## Thèmes (23 thèmes, 849 questions)
-- **Environ 40 questions** : Géographie, Animaux, Sciences, Histoire, Culture générale, Sport, Gastronomie, Corps humain, Mythologie, Langue française, Pays et capitales, Technologie, Cinéma, Musique, Jeux vidéo, Espace, Dessins animés, Vrai ou faux.
-- **25 questions** : Football, Drapeaux, Séries, Marques et logos, France.
+## Thèmes (27 thèmes, 1024 questions)
+- **Environ 40 questions** : Géographie, Animaux, Sciences, Histoire, Culture générale, Sport, Gastronomie, Corps humain, Mythologie, Langue française, Pays et capitales, Technologie, Cinéma, Musique, Jeux vidéo, Espace, Dessins animés, Football, Drapeaux, Séries, Marques et logos, France, Vrai ou faux.
+- **25 questions** : Calcul mental, Monuments du monde, Inventions, Nature.
 - **Au hasard** mélange tous les thèmes.
 
 ## Voix off
