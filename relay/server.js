@@ -99,7 +99,8 @@ wss.on("connection", (ws, req) => {
     const extra = ["trop dur", "salut !", "😂😂", "je sais pas", "go go go"];
     demoT = setInterval(() => {
       const n = names[Math.floor(Math.random() * names.length)];
-      const text = Math.random() < 0.8 ? "ABCD"[Math.floor(Math.random() * 4)] : extra[Math.floor(Math.random() * extra.length)];
+      const r = Math.random();
+      const text = r < 0.7 ? "ABCD"[Math.floor(Math.random() * 4)] : r < 0.85 ? String(1 + Math.floor(Math.random() * 3)) : extra[Math.floor(Math.random() * extra.length)];
       send({ type: "chat", id: n.toLowerCase().replace(/[^a-z0-9_]/g, ""), name: n, text, t: Date.now() });
     }, 700);
   }
