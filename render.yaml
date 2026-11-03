@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: studio-quiz-relais
+    runtime: node
+    rootDir: relay
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /
