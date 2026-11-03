@@ -14,7 +14,7 @@
 
 import http from "node:http";
 import { WebSocketServer } from "ws";
-import { TikTokLiveConnection, WebcastEvent, ControlEvent } from "tiktok-live-connector";
+import { TikTokLiveConnection, WebcastEvent, ControlEvent, SignatureRateLimitError } from "tiktok-live-connector";
 
 const PORT = Number(process.env.PORT) || 10000;
 const API_KEY = process.env.EULER_API_KEY || undefined;
@@ -32,13 +32,28 @@ function cleanUser(s) {
     .toLowerCase();
 }
 
+function isRateLimit(err) {
+  const msg = String((err && err.message) || "");
+  return err instanceof SignatureRateLimitError || /rate limited|too many connections|\b429\b/i.test(msg);
+}
+
+// Renvoie { message, wait } : le texte à afficher et le délai avant la prochaine tentative (ms).
 function explain(err) {
   const name = (err && (err.name || (err.constructor && err.constructor.name))) || "";
   const msg = String((err && err.message) || err || "");
-  if (/offline/i.test(name) || /offline|online|not.*live|isn.t live/i.test(msg)) return "Le live n'est pas lancé sur ce compte. Lance ton live puis réessaie.";
-  if (/rate|429|limit/i.test(msg)) return "Trop de connexions au service TikTok. Réessaie dans une minute, ou ajoute une clé EULER_API_KEY.";
-  if (/not.*found|404|user/i.test(msg)) return "Compte TikTok introuvable. Vérifie le pseudo.";
-  return "Connexion au live impossible : " + msg.slice(0, 160);
+  if (isRateLimit(err)) {
+    const wait = Math.max(60000, Math.min(15 * 60000, (err && err.retryAfter) || 0));
+    const mins = Math.ceil(wait / 60000);
+    return {
+      wait,
+      message: API_KEY
+        ? "Limite de connexions atteinte sur ta clé Euler Stream. Nouvelle tentative automatique dans " + mins + " min."
+        : "Limite gratuite du service de connexion TikTok atteinte. Ajoute une clé gratuite EULER_API_KEY sur Render (voir le README). Nouvelle tentative dans " + mins + " min.",
+    };
+  }
+  if (/offline/i.test(name) || /offline|isn.t online|not.*live|isn.t live/i.test(msg)) return { wait: 20000, message: "Le live n'est pas lancé sur ce compte. Lance ton live : la connexion se fera toute seule." };
+  if (/not.*found|404|doesn.t exist|does not exist/i.test(msg)) return { wait: 60000, message: "Compte TikTok introuvable. Vérifie le pseudo." };
+  return { wait: 30000, message: "Connexion au live impossible : " + msg.slice(0, 160) };
 }
 
 const server = http.createServer((req, res) => {
@@ -121,8 +136,9 @@ wss.on("connection", (ws, req) => {
     } catch (e) {
       if (closed || tt !== conn) return;
       console.error("[" + user + "] échec", e && e.message ? e.message : e);
-      send({ type: "status", state: "error", message: explain(e) });
-      retry(15000);
+      const ex = explain(e);
+      send({ type: "status", state: "error", message: ex.message });
+      retry(ex.wait);
     }
   }
 
