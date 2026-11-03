@@ -1,0 +1,958 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Studio Quiz</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800&family=Figtree:wght@400;600;700&display=swap">
+<style>
+/* Concept : un réglage rapide en trois étapes, puis un plan de tournage plein écran 9:16 qui reprend le look des vidéos (dégradé du thème, pastille d'accent, cartes de réponses). */
+:root {
+  --bg: #f2f5f9; --surface: #ffffff; --surface-2: #e6edf5; --fg: #0c1a30; --muted: #4a5c75;
+  --line: #cbd6e4; --accent: #0b8a82; --accent-fg: #ffffff; --warn-bg: #fff2d6; --warn-fg: #5c3d00;
+  --display: "Outfit", system-ui, sans-serif; --body: "Figtree", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #081326; --surface: #0f2038; --surface-2: #16304f; --fg: #eaf1fb; --muted: #9db0c9;
+    --line: #25405f; --accent: #2ec4b6; --accent-fg: #06222a; --warn-bg: #3a2c0a; --warn-fg: #ffd98a; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #081326; --surface: #0f2038; --surface-2: #16304f; --fg: #eaf1fb; --muted: #9db0c9;
+  --line: #25405f; --accent: #2ec4b6; --accent-fg: #06222a; --warn-bg: #3a2c0a; --warn-fg: #ffd98a; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font: 16px/1.5 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 0;
+}
+.app { max-width: 520px; margin: 0 auto; display: grid; gap: 28px; padding-bottom: 24px; }
+h1, h2 { font-family: var(--display); margin: 0; text-wrap: balance; }
+h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.05; }
+h2 { font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.lead { margin: 8px 0 0; color: var(--muted); max-width: 46ch; }
+.step { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: var(--accent-fg); font-size: .9rem; }
+.chips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.chip { display: flex; align-items: center; gap: 10px; padding: 14px; min-height: 52px; text-align: left; background: var(--surface); border: 2px solid var(--line); border-radius: 14px; font-weight: 700; }
+.chip i { flex: none; width: 18px; height: 18px; border-radius: 50%; }
+.chip[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.row:last-of-type { border-bottom: 0; }
+.row > label, .row > .lab { font-weight: 600; min-width: 0; }
+.seg { display: flex; background: var(--surface-2); border-radius: 12px; padding: 3px; gap: 3px; }
+.seg button { border: 0; background: transparent; padding: 8px 14px; border-radius: 9px; min-height: 40px; font-weight: 700; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--fg); box-shadow: 0 1px 3px rgba(0, 0, 0, .18); }
+select { font: inherit; color: var(--fg); background: var(--surface); border: 2px solid var(--line); border-radius: 12px; padding: 10px 12px; min-height: 44px; max-width: 100%; min-width: 0; }
+.voice-line { display: grid; gap: 10px; width: 100%; }
+.switch { display: inline-flex; align-items: center; gap: 10px; font-weight: 600; }
+.switch input { width: 22px; height: 22px; accent-color: var(--accent); }
+.btn { border: 0; background: var(--accent); color: var(--accent-fg); font-weight: 800; border-radius: 14px; padding: 12px 18px; min-height: 48px; }
+.btn.ghost { background: var(--surface-2); color: var(--fg); }
+.warn { background: var(--warn-bg); color: var(--warn-fg); padding: 12px 14px; border-radius: 12px; margin: 8px 0 0; font-size: .95rem; }
+ol.steps { margin: 0; padding-left: 1.3em; display: grid; gap: 10px; }
+ol.steps li::marker { font-weight: 800; color: var(--accent); }
+.note { color: var(--muted); font-size: .92rem; margin: 12px 0 0; }
+.dock { position: sticky; bottom: 0; background: var(--bg); padding-block: 12px 14px; border-top: 1px solid var(--line); margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); padding-inline: max(16px, env(safe-area-inset-left, 0px)); }
+.dock .btn { display: block; width: 100%; max-width: 520px; margin: 0 auto; min-height: 56px; font-size: 1.1rem; font-family: var(--display); }
+
+/* ---------- plan de tournage : même look que les vidéos, volontairement indépendant du thème clair/sombre ---------- */
+#stageWrap { position: fixed; inset: 0; z-index: 100; overflow: hidden; background: linear-gradient(180deg, var(--s1, #0e346e), var(--s2, #061634)); touch-action: manipulation; -webkit-user-select: none; user-select: none; }
+#stage { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 0 0; font-family: var(--display); color: #fff; }
+.deco { position: absolute; border: 6px solid var(--sacc, #2ec4b6); border-radius: 50%; opacity: .18; }
+.scene { position: absolute; inset: 0; animation: sin .35s ease-out both; }
+@keyframes sin { from { opacity: 0; } to { opacity: 1; } }
+.hd-pill { position: absolute; left: 80px; top: 140px; height: 74px; line-height: 74px; padding: 0 32px; border-radius: 37px; background: var(--sacc); color: #0f0f19; font-size: 38px; font-weight: 800; text-transform: uppercase; white-space: nowrap; }
+.hd-count { position: absolute; right: 80px; top: 140px; line-height: 74px; font-size: 48px; font-weight: 800; }
+.bars { position: absolute; left: 80px; top: 244px; width: 920px; height: 12px; display: flex; gap: 14px; }
+.bars span { flex: 1; border-radius: 6px; background: rgba(255, 255, 255, .28); }
+.bars span.done { background: #fff; }
+.bars span.cur { background: var(--sacc); }
+.ring { position: absolute; left: 400px; top: 275px; width: 280px; height: 280px; }
+.ring svg { width: 280px; height: 280px; transform: rotate(-90deg); }
+.ring .num { position: absolute; inset: 0; display: grid; place-items: center; font-size: 104px; font-weight: 800; }
+.fact { position: absolute; left: 80px; top: 290px; width: 920px; height: 250px; border: 4px solid var(--sacc); border-radius: 44px; background: rgba(0, 0, 0, .32); padding: 28px 50px; text-align: center; display: none; }
+.fact b { display: block; font-size: 34px; letter-spacing: .06em; color: var(--sacc); margin-bottom: 14px; }
+.fact .ft { font-size: 46px; font-weight: 600; line-height: 1.2; }
+.rev .ring { display: none; }
+.rev .fact { display: block; animation: sin .3s ease-out both; }
+.qbox { position: absolute; left: 90px; top: 580px; width: 900px; height: 330px; display: flex; align-items: center; justify-content: center; text-align: center; }
+.qt { font-size: 74px; font-weight: 800; line-height: 1.18; text-shadow: 0 4px 10px rgba(0, 0, 0, .35); width: 100%; }
+.card { position: absolute; left: 80px; width: 920px; height: 128px; border-radius: 40px; background: rgba(255, 255, 255, .14); border: 3px solid rgba(255, 255, 255, .38); display: flex; align-items: center; gap: 28px; padding: 0 34px 0 26px; transition: opacity .25s, background .25s, border-color .25s; }
+.card .bd { flex: none; width: 80px; height: 80px; border-radius: 50%; background: var(--sacc); color: #0f0f19; display: grid; place-items: center; font-size: 44px; font-weight: 800; }
+.card .lb { flex: 1; min-width: 0; font-size: 48px; font-weight: 800; line-height: 1.12; }
+.card .ck { display: none; flex: none; width: 56px; height: 56px; border-radius: 50%; background: #fff; place-items: center; }
+.rev .card.dim { opacity: .38; background: rgba(255, 255, 255, .06); }
+.rev .card.good { background: #2ecc71; border-color: #2ecc71; }
+.rev .card.good .bd { background: #fff; color: #147846; }
+.rev .card.good .ck { display: grid; }
+.intro, .outro { position: absolute; left: 0; right: 0; text-align: center; padding: 0 70px; }
+.intro { top: 470px; }
+.intro .big { font-size: 260px; line-height: 1; font-weight: 800; color: var(--sacc); }
+.intro .ttl { font-size: 110px; font-weight: 800; text-transform: uppercase; margin-top: 30px; line-height: 1.1; }
+.intro .sub { font-size: 60px; font-weight: 600; margin-top: 110px; opacity: .92; }
+.bigpill { display: inline-block; margin-top: 60px; background: var(--sacc); color: #0f0f19; padding: 0 70px; line-height: 110px; border-radius: 55px; font-size: 46px; font-weight: 800; }
+.outro { top: 560px; }
+.outro .big { font-size: 124px; font-weight: 800; color: var(--sacc); line-height: 1.1; }
+.outro .sub { font-size: 64px; font-weight: 700; margin-top: 50px; }
+.outro .bigpill { background: #fff; font-size: 42px; margin-top: 70px; }
+.overlay { position: absolute; left: 0; right: 0; bottom: 0; padding: 18px max(16px, env(safe-area-inset-left, 0px)) max(18px, env(safe-area-inset-bottom, 0px)); background: rgba(6, 12, 24, .94); color: #fff; font-family: var(--body); border-top-left-radius: 22px; border-top-right-radius: 22px; display: grid; gap: 12px; z-index: 5; }
+.overlay h3 { margin: 0; font-family: var(--display); font-size: 1.25rem; }
+.overlay p { margin: 0; color: #c8d4e6; font-size: .95rem; }
+.overlay .acts { display: flex; gap: 10px; flex-wrap: wrap; }
+.overlay .acts button { flex: 1 1 130px; }
+.overlay .btn.ghost { background: #22364f; color: #fff; }
+.overlay .btn { background: #2ec4b6; color: #06222a; }
+.overlay textarea { width: 100%; min-height: 84px; resize: none; font: 14px/1.4 var(--body); color: #fff; background: #12233a; border: 1px solid #2c4666; border-radius: 12px; padding: 10px; user-select: text; -webkit-user-select: text; }
+.overlay .big-n { font-family: var(--display); font-size: 2.4rem; font-weight: 800; color: #2ec4b6; line-height: 1; }
+.cta { position: absolute; left: 80px; width: 920px; top: 1556px; text-align: center; font-size: 40px; font-weight: 800; color: var(--sacc); }
+.rev .cta { display: none; }
+.win { position: absolute; left: 80px; width: 920px; top: 1548px; height: 118px; border-radius: 59px; background: #ffd60a; color: #0f0f19; display: flex; align-items: center; justify-content: center; gap: 22px; padding: 0 40px; font-size: 52px; display: none; font-weight: 800; white-space: nowrap; overflow: hidden; }
+.win span { overflow: hidden; text-overflow: ellipsis; }
+.rev .win { display: flex; animation: sin .3s ease-out both; }
+#lbLayer { position: absolute; inset: 0; z-index: 3; background: linear-gradient(180deg, var(--s1, #0e346e), var(--s2, #061634)); }
+#lbIn { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 0 0; font-family: var(--display); color: #fff; }
+.lb-t { position: absolute; left: 0; right: 0; top: 200px; text-align: center; font-size: 124px; font-weight: 800; color: var(--sacc); line-height: 1.1; }
+.lb-s { position: absolute; left: 0; right: 0; top: 350px; text-align: center; font-size: 46px; font-weight: 600; opacity: .9; }
+.lb-row { position: absolute; left: 80px; width: 920px; height: 116px; border-radius: 36px; background: rgba(255, 255, 255, .14); border: 3px solid rgba(255, 255, 255, .3); display: flex; align-items: center; gap: 24px; padding: 0 34px 0 22px; }
+.lb-row.r1 { background: var(--sacc); border-color: var(--sacc); color: #0f0f19; }
+.lb-rk { flex: none; width: 76px; height: 76px; border-radius: 50%; background: var(--sacc); color: #0f0f19; display: grid; place-items: center; font-size: 42px; font-weight: 800; }
+.lb-row.r1 .lb-rk { background: #0f0f19; color: var(--sacc); }
+.lb-nm { flex: 1; min-width: 0; font-size: 46px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lb-pt { flex: none; font-size: 46px; font-weight: 800; }
+.lb-none { position: absolute; left: 80px; width: 920px; top: 640px; text-align: center; font-size: 54px; font-weight: 600; line-height: 1.3; opacity: .9; }
+.lb-f { position: absolute; left: 80px; width: 920px; top: 1620px; text-align: center; font-size: 40px; font-weight: 700; }
+#liveBar { position: absolute; right: max(10px, env(safe-area-inset-right, 0px)); bottom: max(10px, env(safe-area-inset-bottom, 0px)); display: flex; gap: 8px; z-index: 6; opacity: .8; }
+#liveBar button { border: 0; border-radius: 999px; padding: 0 14px; min-height: 42px; font: 700 14px var(--body); background: rgba(6, 12, 24, .78); color: #fff; }
+.overlay input { width: 100%; font: 16px var(--body); color: #fff; background: #12233a; border: 1px solid #2c4666; border-radius: 12px; padding: 12px; min-height: 48px; user-select: text; -webkit-user-select: text; }
+.nmrow { display: flex; flex-wrap: wrap; gap: 8px; }
+.nmchip { border: 0; background: #22364f; color: #fff; border-radius: 999px; padding: 0 14px; min-height: 40px; font-weight: 700; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+#addSheet { z-index: 7; }
+ol.sc { margin: 0; padding-left: 1.6em; display: grid; gap: 6px; }
+ol.sc li::marker { font-weight: 800; color: var(--accent); }
+ol.sc b { font-variant-numeric: tabular-nums; }
+.btn.small { min-height: 42px; padding: 8px 14px; font-size: .95rem; }
+@media (prefers-reduced-motion: reduce) { .scene, .rev .fact { animation: none; } }
+</style>
+
+<main class="app">
+  <header>
+    <h1>Studio Quiz</h1>
+    <p class="lead">Un quiz joué en plein écran avec la voix de ton téléphone : en vidéo à enregistrer, ou en live non-stop avec classement.</p>
+  </header>
+
+  <section aria-labelledby="h-mode">
+    <h2 id="h-mode"><span class="step">1</span>Mode</h2>
+    <div class="seg" id="segM" role="group" aria-label="Mode"></div>
+  </section>
+
+  <section aria-labelledby="h-theme">
+    <h2 id="h-theme"><span class="step">2</span>Thème</h2>
+    <div id="themes" class="chips"></div>
+  </section>
+
+  <section aria-labelledby="h-set">
+    <h2 id="h-set"><span class="step">3</span>Réglages</h2>
+    <div class="row" id="rowN"><span class="lab">Questions</span><div class="seg" id="segN" role="group" aria-label="Nombre de questions"></div></div>
+    <div class="row" id="rowC"><span class="lab">Compte à rebours</span><div class="seg" id="segC" role="group" aria-label="Compte à rebours"></div></div>
+    <div class="row" id="rowLC" hidden><span class="lab">Temps pour répondre</span><div class="seg" id="segLC" role="group" aria-label="Temps pour répondre"></div></div>
+    <div class="row" id="rowLB" hidden><span class="lab">Classement automatique</span><div class="seg" id="segLB" role="group" aria-label="Fréquence du classement"></div></div>
+    <div class="row">
+      <div class="voice-line">
+        <label class="switch"><input type="checkbox" id="voiceOn"> Voix off qui lit tout</label>
+        <select id="voiceSel" aria-label="Voix"></select>
+        <div class="seg" id="segR" role="group" aria-label="Vitesse de la voix"></div>
+        <div><button class="btn ghost" id="hear" type="button">Écouter la voix</button></div>
+      </div>
+    </div>
+    <p class="warn" id="voiceWarn" hidden>Aucune voix française trouvée sur ce téléphone. Sur iPhone : Réglages, Accessibilité, Contenu énoncé, Voix, puis Français. Sans voix, le quiz se joue avec le texte seul.</p>
+  </section>
+
+  <section id="secRec" aria-labelledby="h-rec">
+    <h2 id="h-rec"><span class="step">4</span>Enregistrer</h2>
+    <ol class="steps">
+      <li>Touche <b>Lancer le quiz</b>. Un compte à rebours de 10 secondes te laisse démarrer l'enregistrement d'écran.</li>
+      <li>iPhone : ouvre le Centre de contrôle et touche le bouton d'enregistrement. Android : ouvre le menu rapide et touche Enregistreur d'écran, avec le son du média activé.</li>
+      <li>Laisse jouer jusqu'au panneau Terminé, puis arrête l'enregistrement.</li>
+      <li>Dans la galerie, coupe le début avant l'intro. Poste sur TikTok avec la légende copiée.</li>
+    </ol>
+    <p class="note">Mets la sonnerie (pas le mode silencieux) et un volume moyen. Un appui long sur l'écran arrête le quiz. La qualité de la voix dépend de ton téléphone.</p>
+  </section>
+  <section id="secLive" aria-labelledby="h-live" hidden>
+    <h2 id="h-live"><span class="step">4</span>Passer en live</h2>
+    <ol class="steps">
+      <li>Lance ton live TikTok et partage l'écran du téléphone (selon ton compte), puis reviens sur cette page.</li>
+      <li>Touche <b>Lancer le live</b> : les questions s'enchaînent sans s'arrêter, sans répéter avant d'avoir tout vu.</li>
+      <li>Quand quelqu'un trouve, touche <b>+ Point</b>, tape son pseudo et valide. Cette page ne peut pas lire les commentaires TikTok : c'est toi qui donnes les points.</li>
+      <li>Le classement s'affiche seul à intervalle régulier, ou quand tu touches <b>Classement</b>.</li>
+    </ol>
+    <p class="note">Les petits boutons en bas à droite apparaissent aussi sur l'écran partagé. Appui long sur l'écran : tout arrêter.</p>
+  </section>
+
+  <section aria-labelledby="h-sc">
+    <h2 id="h-sc">Classement</h2>
+    <div id="scoreList"></div>
+    <div class="row"><span class="lab" id="scN"></span><button class="btn ghost small" id="resetScores" type="button">Effacer les points</button></div>
+  </section>
+</main>
+<div class="dock"><button class="btn" id="go" type="button">Lancer le quiz</button></div>
+
+<div id="stageWrap" hidden>
+  <div id="stage"><div id="deco"></div><div id="scene"></div></div>
+  <div id="lbLayer" hidden><div id="lbIn"></div></div>
+  <div id="liveBar" hidden>
+    <button id="bBoard" type="button">Classement</button>
+    <button id="bAdd" type="button">+ Point</button>
+    <button id="bStop" type="button">Arrêter</button>
+  </div>
+  <div class="overlay" id="addSheet" hidden>
+    <h3>Qui a trouvé en premier ?</h3>
+    <input id="nm" type="text" placeholder="Pseudo TikTok" autocomplete="off" autocapitalize="off" autocorrect="off" enterkeyhint="done" aria-label="Pseudo">
+    <div class="nmrow" id="recent"></div>
+    <p id="addMsg">Le premier pseudo validé sur une question devient le WINNER affiché à l'écran.</p>
+    <div class="acts"><button class="btn" id="p1" type="button">+1 point</button><button class="btn" id="p3" type="button">+3 points</button><button class="btn ghost" id="undo" type="button">Annuler</button><button class="btn ghost" id="addClose" type="button">Fermer</button></div>
+  </div>
+  <div class="overlay" id="preroll" hidden>
+    <h3>Lance l'enregistrement d'écran maintenant</h3>
+    <div class="big-n" id="preN">10</div>
+    <p>Le quiz démarre à zéro. Appui long sur l'écran : tout arrêter.</p>
+    <div class="acts"><button class="btn" id="skip" type="button">Démarrer maintenant</button><button class="btn ghost" id="cancel" type="button">Annuler</button></div>
+  </div>
+  <div class="overlay" id="endsheet" hidden>
+    <h3>Terminé. Arrête l'enregistrement.</h3>
+    <p>Légende prête pour TikTok :</p>
+    <textarea id="cap" readonly></textarea>
+    <div class="acts"><button class="btn" id="copy" type="button">Copier la légende</button><button class="btn ghost" id="again" type="button">Rejouer</button><button class="btn ghost" id="back" type="button">Réglages</button></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var $ = function (s) { return document.querySelector(s); };
+  var BANK = {
+    geographie: { title: "Géographie", pal: ["#0e346e", "#061634", "#2ec4b6"], tags: ["geographie", "voyage", "monde"], q: [
+      ["Quel est le plus grand océan du monde ?", ["Atlantique", "Indien", "Pacifique", "Arctique"], 2, "Il couvre environ un tiers de la surface de la Terre."],
+      ["Quel est le plus grand désert chaud du monde ?", ["Gobi", "Kalahari", "Sahara", "Atacama"], 2, "Le Sahara est à peu près aussi vaste que les États-Unis."],
+      ["Quelle est la plus haute montagne du monde ?", ["K2", "Everest", "Mont Blanc", "Kilimandjaro"], 1, "L'Everest culmine à environ 8 849 mètres d'altitude."],
+      ["Quelle est la capitale de l'Australie ?", ["Sydney", "Canberra", "Melbourne", "Perth"], 1, "Canberra a été choisie comme compromis entre Sydney et Melbourne, qui rivalisaient pour le titre."],
+      ["Quel est le plus long fleuve de France ?", ["La Seine", "La Loire", "Le Rhône", "La Garonne"], 1, "La Loire mesure environ 1 000 km, de l'Ardèche jusqu'à l'Atlantique."],
+      ["Quel est le pays le plus peuplé du monde ?", ["Chine", "États-Unis", "Inde", "Indonésie"], 2, "L'Inde a dépassé la Chine en 2023."],
+      ["Quel est le plus petit pays du monde ?", ["Monaco", "Saint-Marin", "Vatican", "Liechtenstein"], 2, "Il fait moins d'un demi-kilomètre carré."],
+      ["Quel pays possède le plus de fuseaux horaires ?", ["Russie", "États-Unis", "France", "Chine"], 2, "Grâce à ses territoires d'outre-mer, la France en compte 12 (13 avec la Terre Adélie)."],
+      ["Quelle est la capitale du Canada ?", ["Toronto", "Ottawa", "Montréal", "Vancouver"], 1, "Ottawa se trouve en Ontario, à la frontière avec le Québec."],
+      ["Quel fleuve traverse Paris ?", ["La Loire", "La Seine", "Le Rhône", "La Marne"], 1, "Elle mesure environ 780 km et se jette dans la Manche."],
+      ["Quel pays a la forme d'une botte ?", ["Espagne", "Grèce", "Italie", "Portugal"], 2, "La Sicile se trouve juste devant la pointe de la botte."],
+      ["Quel est le plus grand pays du monde par sa superficie ?", ["Canada", "Chine", "Russie", "États-Unis"], 2, "Il s'étend sur 11 fuseaux horaires."],
+      ["Quel est le point le plus bas de la Terre émergée ?", ["Mer Morte", "Vallée de la Mort", "Lac Baïkal", "Mer Caspienne"], 0, "Ses rives sont à environ 430 mètres sous le niveau de la mer."],
+      ["Quel est le plus grand lac d'eau douce du monde par sa superficie ?", ["Lac Victoria", "Lac Supérieur", "Lac Baïkal", "Lac Léman"], 1, "Le Baïkal est le plus profond du monde."],
+      ["Dans quel pays se trouve le Taj Mahal ?", ["Pakistan", "Inde", "Bangladesh", "Népal"], 1, "Il a été construit au dix-septième siècle, à Agra."],
+      ["Quelle est la capitale du Japon ?", ["Kyoto", "Osaka", "Tokyo", "Nagoya"], 2, "Kyoto a été capitale impériale pendant plus de mille ans."],
+      ["Quel détroit sépare l'Europe de l'Afrique à l'entrée de la Méditerranée ?", ["Bosphore", "Gibraltar", "Ormuz", "Magellan"], 1, "Il mesure environ 14 kilomètres à son point le plus étroit."],
+      ["Quel est le plus grand pays d'Amérique du Sud ?", ["Argentine", "Pérou", "Brésil", "Colombie"], 2, "Il occupe environ la moitié du continent."],
+      ["Sur quel continent se trouve le désert d'Atacama ?", ["Afrique", "Asie", "Amérique du Sud", "Océanie"], 2, "C'est l'un des endroits les plus secs de la planète."],
+      ["Quelle chaîne de montagnes sépare la France et l'Espagne ?", ["Alpes", "Vosges", "Pyrénées", "Jura"], 2, "Elle s'étend sur environ 430 kilomètres."]
+    ] },
+    animaux: { title: "Animaux", pal: ["#1c5c3a", "#0a281c", "#ffc43d"], tags: ["animaux", "nature", "savaistu"], q: [
+      ["Combien de pattes a une araignée ?", ["6", "8", "10", "12"], 1, "Les araignées sont des arachnides, pas des insectes."],
+      ["Quel est le plus grand animal terrestre ?", ["Girafe", "Éléphant d'Afrique", "Rhinocéros blanc", "Hippopotame"], 1, "Un mâle peut peser plus de 6 tonnes."],
+      ["Quel est le plus gros animal de la planète ?", ["Éléphant", "Requin-baleine", "Baleine bleue", "Cachalot"], 2, "Elle peut mesurer jusqu'à 30 mètres de long."],
+      ["Quel animal est le plus rapide du monde ?", ["Guépard", "Faucon pèlerin", "Espadon", "Autruche"], 1, "En piqué, le faucon pèlerin dépasse les 300 km/h."],
+      ["Combien de temps un koala dort-il par jour ?", ["Environ 6 h", "Environ 10 h", "Environ 14 h", "Jusqu'à 20 h"], 3, "Les feuilles d'eucalyptus sont très pauvres en énergie, il économise ses forces."],
+      ["Combien de cœurs a une pieuvre ?", ["1", "2", "3", "4"], 2, "Deux cœurs alimentent les branchies, le troisième irrigue le reste du corps."],
+      ["Quel mammifère est capable de voler vraiment ?", ["Écureuil volant", "Chauve-souris", "Pangolin", "Lémurien"], 1, "L'écureuil volant plane, seule la chauve-souris bat des ailes."],
+      ["Quel animal peut survivre dans l'espace ?", ["Cafard", "Tardigrade", "Scorpion", "Fourmi"], 1, "Des tardigrades ont survécu au vide spatial lors d'expériences en orbite."],
+      ["Quel animal est surnommé le roi de la jungle ?", ["Tigre", "Lion", "Éléphant", "Gorille"], 1, "En réalité, le lion vit dans la savane et pas dans la jungle."],
+      ["Quel insecte produit le miel ?", ["Guêpe", "Abeille", "Fourmi", "Mouche"], 1, "Une abeille produit environ un douzième de cuillère à café de miel dans sa vie."],
+      ["Quel oiseau est le symbole de la paix ?", ["Aigle", "Colombe", "Hibou", "Cygne"], 1, "La colombe tient un rameau d'olivier dans la tradition biblique."],
+      ["Quel est le plus grand félin du monde ?", ["Lion", "Tigre", "Jaguar", "Panthère"], 1, "Le tigre de Sibérie peut dépasser 200 kilos."],
+      ["Combien de bosses a un dromadaire ?", ["1", "2", "3", "4"], 0, "Le chameau de Bactriane en a deux."],
+      ["Quel animal change de couleur pour se camoufler ?", ["Iguane", "Caméléon", "Gecko", "Crocodile"], 1, "Il change aussi de couleur pour communiquer avec les autres."],
+      ["Quel mammifère pond des œufs ?", ["Koala", "Ornithorynque", "Kangourou", "Pangolin"], 1, "Avec l'échidné, c'est l'un des rares mammifères qui pondent."],
+      ["Quel est l'animal terrestre le plus rapide ?", ["Lion", "Guépard", "Autruche", "Antilope"], 1, "Il atteint environ 100 km/h en pointe."],
+      ["Combien de vies un chat a-t-il, selon l'expression française ?", ["3", "7", "9", "12"], 1, "En anglais, on dit qu'il en a neuf."],
+      ["Quel est le seul oiseau capable de voler en arrière ?", ["Martinet", "Colibri", "Hirondelle", "Pigeon"], 1, "Ses ailes battent plus de 50 fois par seconde."],
+      ["Combien de temps dure la gestation d'une éléphante ?", ["9 mois", "12 mois", "22 mois", "36 mois"], 2, "C'est la plus longue gestation des mammifères terrestres."],
+      ["Quel animal est le meilleur ami de l'homme, selon l'expression ?", ["Cheval", "Chien", "Chat", "Perroquet"], 1, "Il a été domestiqué il y a plus de 15 000 ans."]
+    ] },
+    sciences: { title: "Sciences", pal: ["#46208c", "#160c3c", "#00e0ff"], tags: ["sciences", "espace", "apprendresurtiktok"], q: [
+      ["Quelle planète est la plus proche du Soleil ?", ["Vénus", "Mercure", "Mars", "Terre"], 1, "Mercure fait le tour du Soleil en seulement 88 jours."],
+      ["Quel gaz les plantes absorbent-elles pour la photosynthèse ?", ["Oxygène", "Azote", "Dioxyde de carbone", "Hélium"], 2, "En retour, elles rejettent de l'oxygène."],
+      ["Combien d'os compte le corps d'un adulte ?", ["106", "206", "306", "256"], 1, "Un nouveau-né en a près de 300, certains se soudent en grandissant."],
+      ["Quelle est la planète la plus chaude du système solaire ?", ["Mercure", "Vénus", "Mars", "Jupiter"], 1, "Son atmosphère épaisse piège la chaleur : plus de 460 °C en surface."],
+      ["Quel est le symbole chimique de l'or ?", ["Or", "Ag", "Au", "Fe"], 2, "Au vient du mot latin « aurum »."],
+      ["Quel est le plus petit os du corps humain ?", ["Le marteau", "L'étrier", "L'enclume", "La rotule"], 1, "Il mesure environ 3 mm et se trouve dans l'oreille."],
+      ["À quelle vitesse va la lumière dans le vide ?", ["30 000 km/s", "150 000 km/s", "300 000 km/s", "3 000 000 km/s"], 2, "La lumière du Soleil met environ 8 minutes à nous parvenir."],
+      ["Quel est l'élément le plus abondant de l'Univers ?", ["Oxygène", "Carbone", "Hydrogène", "Hélium"], 2, "Il représente environ 75 % de la matière ordinaire."],
+      ["À quelle température l'eau bout-elle au niveau de la mer ?", ["90 °C", "100 °C", "110 °C", "120 °C"], 1, "En altitude, elle bout à une température plus basse."],
+      ["Quelle planète est surnommée la planète rouge ?", ["Vénus", "Jupiter", "Mars", "Mercure"], 2, "Sa couleur vient de l'oxyde de fer présent dans son sol."],
+      ["De quels éléments est faite une molécule d'eau ?", ["Deux hydrogènes et un oxygène", "Un hydrogène et deux oxygènes", "Deux oxygènes et un carbone", "Un hydrogène et un carbone"], 0, "Sa formule chimique est H2O."],
+      ["Combien de planètes compte le système solaire ?", ["7", "8", "9", "10"], 1, "Pluton est classée planète naine depuis 2006."],
+      ["Quel est le plus grand organe du corps humain ?", ["Foie", "Peau", "Poumons", "Intestin"], 1, "Chez un adulte, elle couvre environ 2 mètres carrés."],
+      ["Qui a formulé la théorie de la relativité ?", ["Newton", "Einstein", "Galilée", "Bohr"], 1, "Il a reçu le prix Nobel de physique en 1921."],
+      ["Quel métal est liquide à température ambiante ?", ["Plomb", "Mercure", "Étain", "Zinc"], 1, "Il était utilisé dans les anciens thermomètres."],
+      ["Quel est le satellite naturel de la Terre ?", ["Phobos", "Titan", "La Lune", "Europe"], 2, "Elle s'éloigne de la Terre d'environ 4 centimètres par an."],
+      ["Quelle particule de l'atome a une charge négative ?", ["Proton", "Neutron", "Électron", "Photon"], 2, "Les électrons se déplacent autour du noyau de l'atome."],
+      ["Combien de chromosomes l'être humain possède-t-il ?", ["23", "44", "46", "48"], 2, "Soit 23 paires, dont une moitié vient de chaque parent."],
+      ["Quel gaz est le plus présent dans l'air que nous respirons ?", ["Oxygène", "Azote", "Dioxyde de carbone", "Argon"], 1, "L'azote représente environ 78 % de l'air."],
+      ["Quelle est la planète la plus grosse du système solaire ?", ["Saturne", "Jupiter", "Neptune", "Uranus"], 1, "Elle pourrait contenir plus de 1 300 Terres."]
+    ] },
+    histoire: { title: "Histoire", pal: ["#7a341c", "#30140e", "#ffb84d"], tags: ["histoire", "histoiredefrance", "culturehistorique"], q: [
+      ["Quel navire a coulé en 1912 lors de son voyage inaugural ?", ["Lusitania", "Titanic", "Britannic", "Queen Mary"], 1, "Il a heurté un iceberg dans la nuit du 14 au 15 avril."],
+      ["Qui a été le premier homme à marcher sur la Lune ?", ["Buzz Aldrin", "Youri Gagarine", "Neil Armstrong", "Michael Collins"], 2, "C'était en juillet 1969, lors de la mission Apollo 11."],
+      ["En quelle année la Révolution française a-t-elle commencé ?", ["1689", "1789", "1815", "1848"], 1, "La prise de la Bastille a eu lieu le 14 juillet 1789."],
+      ["Quel mur est tombé en 1989 ?", ["Mur d'Hadrien", "Mur de Berlin", "Grande Muraille", "Mur des Lamentations"], 1, "Il séparait Berlin-Est et Berlin-Ouest depuis 1961."],
+      ["Quelle civilisation a construit le Machu Picchu ?", ["Aztèques", "Mayas", "Incas", "Romains"], 2, "La cité est perchée à environ 2 400 mètres d'altitude, au Pérou."],
+      ["Quel pharaon est célèbre pour son masque funéraire en or ?", ["Ramsès II", "Khéops", "Toutânkhamon", "Akhenaton"], 2, "Sa tombe a été découverte en 1922 par Howard Carter."],
+      ["En quelle année Napoléon a-t-il été sacré empereur ?", ["1789", "1799", "1804", "1815"], 2, "Il s'est couronné lui-même à Notre-Dame, devant le pape Pie VII."],
+      ["Quelle guerre a opposé le Nord et le Sud des États-Unis de 1861 à 1865 ?", ["Guerre d'indépendance", "Guerre de Sécession", "Guerre de 1812", "Guerre du Vietnam"], 1, "Elle s'est achevée par l'abolition de l'esclavage."],
+      ["Quel roi de France était surnommé le Roi-Soleil ?", ["Louis XIV", "Louis XVI", "François Ier", "Henri IV"], 0, "Il a régné 72 ans, un record en Europe."],
+      ["En quelle année la Seconde Guerre mondiale s'est-elle terminée ?", ["1918", "1939", "1945", "1950"], 2, "Elle avait commencé en 1939."],
+      ["Qui a atteint l'Amérique en 1492 ?", ["Magellan", "Christophe Colomb", "Vasco de Gama", "Cabral"], 1, "Il pensait avoir atteint les Indes."],
+      ["Quelle ville a été ensevelie par l'éruption du Vésuve en 79 ?", ["Athènes", "Pompéi", "Carthage", "Syracuse"], 1, "Elle a été retrouvée presque intacte sous les cendres."],
+      ["Quelle reine d'Égypte est célèbre pour sa liaison avec Jules César ?", ["Néfertiti", "Cléopâtre", "Hatchepsout", "Isis"], 1, "Elle a aussi été l'alliée de Marc Antoine."],
+      ["Qui a été le premier président de la Ve République ?", ["Charles de Gaulle", "Georges Pompidou", "François Mitterrand", "René Coty"], 0, "Il a été élu en décembre 1958."],
+      ["En quelle année a eu lieu le débarquement de Normandie ?", ["1942", "1943", "1944", "1945"], 2, "Il a eu lieu le 6 juin, le jour J."],
+      ["Quel peuple a construit les pyramides de Gizeh ?", ["Les Mayas", "Les Égyptiens", "Les Romains", "Les Grecs"], 1, "La Grande Pyramide a été bâtie il y a environ 4 500 ans."],
+      ["Quelle bataille a mis fin à l'empire de Napoléon en 1815 ?", ["Austerlitz", "Waterloo", "Trafalgar", "Iéna"], 1, "Elle s'est déroulée en Belgique, le 18 juin."],
+      ["Quelle cité grecque était célèbre pour ses guerriers ?", ["Athènes", "Sparte", "Corinthe", "Thèbes"], 1, "Les enfants y étaient entraînés au combat dès l'âge de 7 ans."],
+      ["Qui a inventé l'imprimerie en Europe vers 1450 ?", ["Gutenberg", "Léonard de Vinci", "Galilée", "Luther"], 0, "Son premier grand livre imprimé est la Bible."],
+      ["Quel pays a offert la statue de la Liberté aux États-Unis ?", ["Angleterre", "France", "Espagne", "Italie"], 1, "Elle a été inaugurée à New York en 1886."]
+    ] },
+    culture: { title: "Culture générale", pal: ["#961e5a", "#320a28", "#ffd60a"], tags: ["culturegenerale", "quiz", "testtaculture"], q: [
+      ["Combien y a-t-il de couleurs dans un arc-en-ciel ?", ["5", "6", "7", "8"], 2, "Rouge, orange, jaune, vert, bleu, indigo et violet."],
+      ["Qui a peint La Joconde ?", ["Michel-Ange", "Léonard de Vinci", "Raphaël", "Botticelli"], 1, "Elle est exposée au musée du Louvre, à Paris."],
+      ["Combien y a-t-il de pièces au départ sur un échiquier ?", ["24", "32", "36", "40"], 1, "16 pour chaque joueur."],
+      ["À quelle hauteur est fixé un panier de basket ?", ["2,50 m", "2,80 m", "3,05 m", "3,50 m"], 2, "Soit 10 pieds, une hauteur inchangée depuis l'invention du jeu."],
+      ["Dans quelle ville se trouve la Sagrada Família ?", ["Madrid", "Séville", "Barcelone", "Valence"], 2, "Sa construction a débuté en 1882."],
+      ["D'où vient le chocolat à l'origine ?", ["Suisse", "Belgique", "Afrique de l'Ouest", "Amérique centrale"], 3, "Mayas et Aztèques buvaient déjà du cacao il y a des siècles."],
+      ["Quelle est l'épice la plus chère du monde ?", ["Vanille", "Safran", "Cardamome", "Poivre long"], 1, "Il faut plus de 100 000 fleurs de crocus pour un seul kilo."],
+      ["Quelle est la langue maternelle la plus parlée au monde ?", ["Anglais", "Espagnol", "Mandarin", "Hindi"], 2, "Plus de 900 millions de personnes la parlent comme langue maternelle."],
+      ["Combien de joueurs une équipe de football aligne-t-elle sur le terrain ?", ["9", "10", "11", "12"], 2, "Gardien de but compris."],
+      ["Quelle langue parle-t-on au Brésil ?", ["Espagnol", "Portugais", "Anglais", "Français"], 1, "C'est le seul pays d'Amérique du Sud où l'on parle portugais."],
+      ["Qui a écrit Les Misérables ?", ["Émile Zola", "Victor Hugo", "Honoré de Balzac", "Gustave Flaubert"], 1, "Le roman a été publié en 1862."],
+      ["Combien un piano standard compte-t-il de touches blanches ?", ["36", "52", "60", "88"], 1, "Avec les touches noires, il en compte 88 au total."],
+      ["Dans quelle ville se trouve le Colisée ?", ["Athènes", "Rome", "Naples", "Florence"], 1, "Il pouvait accueillir environ 50 000 spectateurs."],
+      ["Quel peintre s'est coupé une partie de l'oreille ?", ["Picasso", "Van Gogh", "Monet", "Dalí"], 1, "Il a peint La Nuit étoilée en 1889."],
+      ["Quelle est la monnaie du Japon ?", ["Won", "Yen", "Yuan", "Dollar"], 1, "Son symbole est ¥."],
+      ["Quelle ville est surnommée la Grosse Pomme ?", ["Los Angeles", "New York", "Chicago", "Boston"], 1, "Ce surnom s'est répandu dans les années 1920."],
+      ["Quel est le plus petit nombre premier ?", ["0", "1", "2", "3"], 2, "C'est aussi le seul nombre premier pair."],
+      ["Quel sport se joue à Roland-Garros ?", ["Golf", "Tennis", "Rugby", "Football"], 1, "Le tournoi se joue sur terre battue."],
+      ["Combien de cordes a une guitare classique ?", ["4", "5", "6", "7"], 2, "Une basse en a généralement quatre."],
+      ["Quel pays est célèbre pour ses champs de tulipes ?", ["Belgique", "Pays-Bas", "Danemark", "Allemagne"], 1, "Les champs fleurissent au printemps."]
+    ] },
+    sport: { title: "Sport", pal: ["#0b4f6c", "#05202e", "#ff7a3d"], tags: ["sport", "foot", "jeuxolympiques"], q: [
+      ["Combien de joueurs une équipe de basket aligne-t-elle sur le terrain ?", ["4", "5", "6", "7"], 1, "Un match se joue en quatre quarts-temps."],
+      ["Quel sport se pratique avec un volant ?", ["Tennis", "Badminton", "Squash", "Ping-pong"], 1, "Un smash peut dépasser 400 km/h."],
+      ["Quelle distance mesure un marathon ?", ["21,097 km", "42,195 km", "50 km", "30 km"], 1, "Cette distance vient des Jeux de Londres de 1908."],
+      ["Tous les combien d'années ont lieu les Jeux olympiques d'été ?", ["2 ans", "3 ans", "4 ans", "5 ans"], 2, "Les premiers Jeux modernes ont eu lieu à Athènes en 1896."],
+      ["Quel pays a remporté la première Coupe du monde de football en 1930 ?", ["Brésil", "Uruguay", "Argentine", "Italie"], 1, "Il l'organisait aussi cette année-là."],
+      ["Combien de points vaut un essai au rugby à XV ?", ["3", "4", "5", "7"], 2, "La transformation ajoute 2 points."],
+      ["Quelle couleur porte le maillot du leader du Tour de France ?", ["Vert", "Jaune", "Rouge", "Blanc"], 1, "Le maillot jaune existe depuis 1919."],
+      ["Combien de joueurs une équipe de volley aligne-t-elle sur le terrain ?", ["5", "6", "7", "8"], 1, "Chaque équipe peut toucher le ballon trois fois."],
+      ["Quel sport traditionnel japonais oppose deux lutteurs dans un cercle ?", ["Judo", "Sumo", "Karaté", "Aïkido"], 1, "Les combats durent souvent quelques secondes."],
+      ["Combien d'anneaux compte le drapeau olympique ?", ["4", "5", "6", "7"], 1, "Ils représentent traditionnellement les cinq continents."],
+      ["Quel sport se joue avec un palet sur la glace ?", ["Curling", "Hockey sur glace", "Patinage", "Bobsleigh"], 1, "Le palet est en caoutchouc."],
+      ["Quel sprinteur détient le record du monde du 100 mètres ?", ["Carl Lewis", "Usain Bolt", "Justin Gatlin", "Tyson Gay"], 1, "Il a couru en 9 secondes 58 en 2009."],
+      ["Quel footballeur français est surnommé Zizou ?", ["Thierry Henry", "Zinédine Zidane", "Michel Platini", "Didier Deschamps"], 1, "Il a marqué deux buts de la tête en finale de 1998."],
+      ["Combien de sets faut-il gagner pour remporter un match en cinq sets au tennis ?", ["2", "3", "4", "5"], 1, "C'est le format des tournois du Grand Chelem masculins."],
+      ["Dans quel sport rencontre-t-on des bunkers et des greens ?", ["Golf", "Hockey", "Cricket", "Polo"], 0, "Un parcours compte généralement 18 trous."],
+      ["Combien de temps dure un match de football, sans prolongation ?", ["60 minutes", "80 minutes", "90 minutes", "120 minutes"], 2, "Deux mi-temps de 45 minutes."],
+      ["Quelle est la forme d'un ballon de rugby ?", ["Ronde", "Ovale", "Carrée", "Triangulaire"], 1, "Les premiers ballons étaient des vessies de porc gonflées."],
+      ["Quel sport se pratique sur un tatami ?", ["Boxe", "Judo", "Escrime", "Tennis"], 1, "Le judo est devenu olympique en 1964."],
+      ["Quelle ville a accueilli les Jeux olympiques de 2024 ?", ["Los Angeles", "Paris", "Tokyo", "Londres"], 1, "Paris les avait déjà accueillis en 1900 et en 1924."],
+      ["Quel pays est à l'origine du football moderne ?", ["Brésil", "Angleterre", "Italie", "France"], 1, "Les premières règles ont été écrites en 1863."]
+    ] },
+    gastronomie: { title: "Gastronomie", pal: ["#8a2b2b", "#2e0f0f", "#ffd166"], tags: ["gastronomie", "cuisine", "foodtok"], q: [
+      ["De quel pays vient la pizza ?", ["Italie", "Grèce", "Espagne", "France"], 0, "Elle est née à Naples."],
+      ["Avec quoi prépare-t-on le guacamole ?", ["Concombre", "Avocat", "Courgette", "Poivron"], 1, "Son nom vient d'une langue aztèque."],
+      ["Quel fromage est fabriqué avec du lait de brebis ?", ["Camembert", "Roquefort", "Comté", "Brie"], 1, "Il est affiné dans des caves naturelles."],
+      ["Quelle céréale sert à fabriquer la farine du pain français ?", ["Riz", "Blé", "Maïs", "Orge"], 1, "Une baguette tradition ne contient que de la farine, de l'eau, du sel et de la levure."],
+      ["Quel pays est célèbre pour son sirop d'érable ?", ["Canada", "Suède", "Irlande", "Australie"], 0, "Il en produit plus de 70 % du volume mondial."],
+      ["Avec quel fruit fabrique-t-on le vin ?", ["Pomme", "Raisin", "Poire", "Cerise"], 1, "On compte des milliers de cépages dans le monde."],
+      ["Quel légume fait pleurer quand on le coupe ?", ["Carotte", "Oignon", "Poireau", "Radis"], 1, "Il libère un gaz irritant pour les yeux."],
+      ["Quelle boisson est fabriquée à partir de l'agave ?", ["Rhum", "Tequila", "Vodka", "Whisky"], 1, "Elle est surtout produite dans la région de Jalisco, au Mexique."],
+      ["De quelle plante vient le chocolat ?", ["Caféier", "Cacaoyer", "Vanillier", "Théier"], 1, "Les fèves poussent dans de gros fruits appelés cabosses."],
+      ["Quel plat italien se compose de couches de pâtes, de viande et de béchamel ?", ["Ravioli", "Lasagnes", "Gnocchi", "Risotto"], 1, "On les fait gratiner au four."],
+      ["Combien de temps faut-il environ pour cuire un œuf dur ?", ["3 minutes", "6 minutes", "10 minutes", "20 minutes"], 2, "On le plonge ensuite dans l'eau froide pour l'écaler plus facilement."],
+      ["De quelle région vient la ratatouille ?", ["Bretagne", "Alsace", "Provence", "Normandie"], 2, "Elle est originaire de la région de Nice."],
+      ["Quelle épice donne sa couleur jaune au curry ?", ["Paprika", "Curcuma", "Cannelle", "Piment"], 1, "On l'appelle parfois le safran des Indes."],
+      ["De quel pays vient le kebab ?", ["Grèce", "Turquie", "Liban", "Iran"], 1, "Döner signifie « qui tourne » en turc."],
+      ["De quelle ville espagnole vient la paella ?", ["Madrid", "Séville", "Valence", "Barcelone"], 2, "Elle se cuit dans une grande poêle plate appelée paellera."],
+      ["Quel pays est célèbre pour la fondue au fromage ?", ["Suisse", "Norvège", "Portugal", "Irlande"], 0, "Elle se prépare avec du fromage fondu et du vin blanc."],
+      ["Comment s'appelle le gâteau de Noël en forme de tronc d'arbre ?", ["La galette", "La bûche", "La brioche", "Le kouglof"], 1, "Elle rappelle la bûche que l'on brûlait autrefois."],
+      ["Quel fruit sec est la base du massepain ?", ["Noisette", "Amande", "Noix", "Pistache"], 1, "C'est un mélange d'amandes et de sucre."],
+      ["Quel fruit sert à fabriquer le cidre ?", ["Poire", "Pomme", "Raisin", "Prune"], 1, "La Normandie et la Bretagne en sont des régions réputées."],
+      ["Quel produit obtient-on en barattant de la crème ?", ["Le fromage", "Le beurre", "Le yaourt", "Le lait ribot"], 1, "Il faut environ 20 litres de lait pour obtenir un kilo de beurre."]
+    ] },
+    corps: { title: "Corps humain", pal: ["#5c1a47", "#1f0818", "#ff6b9d"], tags: ["corpshumain", "sante", "savaistu"], q: [
+      ["Combien de dents un adulte possède-t-il ?", ["28", "30", "32", "36"], 2, "Y compris les quatre dents de sagesse."],
+      ["Quel organe pompe le sang dans le corps ?", ["Foie", "Cœur", "Poumon", "Rein"], 1, "Il bat environ 100 000 fois par jour."],
+      ["Quel est l'os le plus long du corps ?", ["Tibia", "Fémur", "Humérus", "Radius"], 1, "Il se trouve dans la cuisse."],
+      ["Combien de litres de sang un adulte possède-t-il environ ?", ["2", "5", "8", "12"], 1, "Cela représente environ 7 % de son poids."],
+      ["Quel organe filtre le sang et produit l'urine ?", ["Foie", "Rein", "Rate", "Estomac"], 1, "On possède normalement deux reins."],
+      ["Quel sens utilise la cochlée, dans l'oreille interne ?", ["La vue", "L'ouïe", "L'odorat", "Le goût"], 1, "Elle a la forme d'un petit escargot."],
+      ["Quelle partie colorée de l'œil règle la quantité de lumière ?", ["Cornée", "Iris", "Rétine", "Cristallin"], 1, "Elle fait varier la taille de la pupille."],
+      ["Quel est le plus gros muscle du corps humain ?", ["Biceps", "Quadriceps", "Grand fessier", "Deltoïde"], 2, "Il permet de se tenir debout et de courir."],
+      ["Quel groupe sanguin est considéré comme donneur universel ?", ["A positif", "AB positif", "O négatif", "B négatif"], 2, "Il peut être donné à presque tous les patients."],
+      ["Quel organe produit l'insuline ?", ["Foie", "Pancréas", "Rate", "Estomac"], 1, "L'insuline régule le taux de sucre dans le sang."],
+      ["Combien de côtes compte un adulte ?", ["12", "18", "24", "32"], 2, "Elles protègent le cœur et les poumons."],
+      ["Quel organe est responsable du goût ?", ["Le nez", "La langue", "Le palais", "La gorge"], 1, "Elle porte des milliers de papilles gustatives."],
+      ["Quelle vitamine le corps fabrique-t-il grâce au soleil ?", ["A", "C", "D", "K"], 2, "Elle aide à fixer le calcium dans les os."],
+      ["Combien de poumons un humain possède-t-il ?", ["1", "2", "3", "4"], 1, "Le poumon droit est un peu plus gros que le gauche."],
+      ["Quelle est la température normale du corps humain ?", ["35 °C", "37 °C", "39 °C", "40 °C"], 1, "Elle varie un peu au cours de la journée."],
+      ["Quel organe consomme environ 20 % de l'énergie du corps ?", ["Le cœur", "Le cerveau", "Le foie", "Les muscles"], 1, "Il est protégé par le crâne."],
+      ["Quel est le plus long nerf du corps humain ?", ["Nerf vague", "Nerf sciatique", "Nerf optique", "Nerf radial"], 1, "Il descend de la hanche jusqu'au pied."],
+      ["Que mesure un tensiomètre ?", ["La température", "La tension artérielle", "Le taux de sucre", "La vue"], 1, "On la note par exemple 12 sur 8."],
+      ["De quelle couleur est le plasma sanguin ?", ["Rouge", "Jaune pâle", "Bleu", "Transparent"], 1, "Il représente un peu plus de la moitié du volume du sang."],
+      ["Quel liquide transporte l'oxygène dans le corps ?", ["La lymphe", "Le sang", "La bile", "La salive"], 1, "Grâce à l'hémoglobine des globules rouges."]
+    ] },
+    mythologie: { title: "Mythologie", pal: ["#3a3a8c", "#101037", "#f4c95d"], tags: ["mythologie", "mythesgrecs", "culture"], q: [
+      ["Qui est le roi des dieux dans la mythologie grecque ?", ["Apollon", "Zeus", "Poséidon", "Hadès"], 1, "Il lance la foudre."],
+      ["Quel dieu romain correspond à Zeus ?", ["Mars", "Jupiter", "Mercure", "Neptune"], 1, "La plus grosse planète du système solaire porte son nom."],
+      ["Quelle déesse est née de l'écume de la mer ?", ["Athéna", "Aphrodite", "Héra", "Artémis"], 1, "Les Romains l'appelaient Vénus."],
+      ["Quel héros a tué la Méduse ?", ["Persée", "Thésée", "Achille", "Ulysse"], 0, "Son regard transformait en pierre."],
+      ["Quel héros grec a accompli douze travaux ?", ["Achille", "Héraclès", "Ulysse", "Thésée"], 1, "Les Romains l'appelaient Hercule."],
+      ["Quel dieu égyptien a une tête de chacal ?", ["Horus", "Anubis", "Rê", "Osiris"], 1, "Il guide les morts dans l'au-delà."],
+      ["Quel est le dieu nordique du tonnerre ?", ["Odin", "Thor", "Loki", "Baldr"], 1, "Il se bat avec un marteau magique."],
+      ["Quel monstre à tête de taureau vit dans le labyrinthe de Crète ?", ["Cyclope", "Minotaure", "Hydre", "Centaure"], 1, "Il a été tué par Thésée."],
+      ["Comment s'appelle le cheval ailé de la mythologie grecque ?", ["Pégase", "Bucéphale", "Sleipnir", "Licorne"], 0, "Il est né du sang de la Méduse."],
+      ["Quelle déesse protège la ville d'Athènes ?", ["Héra", "Athéna", "Déméter", "Artémis"], 1, "La ville porte son nom."],
+      ["Quel dieu grec règne sur les mers ?", ["Zeus", "Poséidon", "Hadès", "Arès"], 1, "Son arme est le trident."],
+      ["Quel dieu grec règne sur les Enfers ?", ["Arès", "Hadès", "Hermès", "Hélios"], 1, "Il possède un casque qui rend invisible."],
+      ["Quel dieu grec est le messager aux sandales ailées ?", ["Apollon", "Hermès", "Arès", "Dionysos"], 1, "Les Romains l'appelaient Mercure."],
+      ["Qui a ouvert la boîte qui contenait tous les maux du monde ?", ["Pandore", "Hélène", "Pénélope", "Ariane"], 0, "Au fond de la boîte restait l'espoir."],
+      ["Quel héros a mis dix ans à rentrer chez lui après la guerre de Troie ?", ["Achille", "Ulysse", "Hector", "Ajax"], 1, "Son voyage est raconté dans l'Odyssée."],
+      ["Quel est le seul point faible d'Achille ?", ["Le cœur", "Le talon", "Le genou", "Le dos"], 1, "Sa mère l'avait plongé dans le Styx en le tenant par le talon."],
+      ["Quel est le dieu du soleil dans l'Égypte antique ?", ["Osiris", "Rê", "Seth", "Thot"], 1, "On le représente avec un disque solaire sur la tête."],
+      ["Quelle créature a un corps de lion et une tête humaine ?", ["Griffon", "Sphinx", "Chimère", "Hydre"], 1, "Le grand Sphinx se trouve à Gizeh."],
+      ["Quel dieu grec est celui du vin ?", ["Dionysos", "Apollon", "Arès", "Hermès"], 0, "Les Romains l'appelaient Bacchus."],
+      ["Combien de têtes a Cerbère, le chien des Enfers ?", ["2", "3", "5", "9"], 1, "Il garde l'entrée des Enfers."]
+    ] },
+    langue: { title: "Langue française", pal: ["#14405f", "#06202e", "#9be15d"], tags: ["langagefrancais", "orthographe", "francais"], q: [
+      ["Quel est le féminin de roi ?", ["Roine", "Reine", "Roie", "Rayne"], 1, "Le féminin de empereur est impératrice."],
+      ["Combien de lettres compte l'alphabet français ?", ["24", "26", "28", "30"], 1, "Il y a six voyelles : a, e, i, o, u et y."],
+      ["Quel mot est un synonyme de rapide ?", ["Lent", "Véloce", "Paisible", "Docile"], 1, "Il vient du latin velox."],
+      ["Comment appelle-t-on un mot qui a le même sens qu'un autre ?", ["Antonyme", "Synonyme", "Homonyme", "Acronyme"], 1, "Le contraire s'appelle un antonyme."],
+      ["Comment écrit-on le pluriel de cheval ?", ["Chevals", "Chevaux", "Chevauxs", "Chevaus"], 1, "Beaucoup de mots en al font leur pluriel en aux."],
+      ["Quel est le participe passé du verbe prendre ?", ["Prendu", "Pris", "Prit", "Prénu"], 1, "Il se conjugue avec l'auxiliaire avoir."],
+      ["Quel est le contraire de généreux ?", ["Avare", "Gentil", "Calme", "Franc"], 0, "Molière en a fait le héros d'une pièce célèbre."],
+      ["Quel accent trouve-t-on sur le a de à ?", ["Aigu", "Grave", "Circonflexe", "Tréma"], 1, "L'accent aigu penche vers la droite."],
+      ["Quel est le féminin de acteur ?", ["Acteuse", "Actrice", "Actrise", "Acteure"], 1, "Le suffixe teur donne souvent trice."],
+      ["Comment dit-on 70 en Belgique et en Suisse ?", ["Soixante-dix", "Septante", "Septent", "Dix-sept"], 1, "On y dit aussi nonante pour 90."],
+      ["Quelle figure de style compare avec le mot comme ?", ["Métaphore", "Comparaison", "Hyperbole", "Antithèse"], 1, "La métaphore compare sans outil de comparaison."],
+      ["Comment appelle-t-on un poème de quatorze vers ?", ["Haïku", "Sonnet", "Ode", "Fable"], 1, "Il compte deux quatrains et deux tercets."],
+      ["Que signifie procrastiner ?", ["Remettre à plus tard", "Se dépêcher", "Se plaindre", "Tout organiser"], 0, "Le mot vient du latin cras, qui veut dire demain."],
+      ["Quelle est la lettre la plus utilisée en français ?", ["A", "E", "S", "T"], 1, "Georges Perec a écrit un roman entier sans la lettre e."],
+      ["Qui a écrit Le Petit Prince ?", ["Saint-Exupéry", "Camus", "Hugo", "Sartre"], 0, "Il a été publié en 1943."],
+      ["Comment appelle-t-on une phrase sans verbe ?", ["Phrase nominale", "Phrase passive", "Phrase simple", "Phrase complexe"], 0, "Quel beau temps ! en est un exemple."],
+      ["Que signifie le mot bredouille ?", ["Avec joie", "Sans rien avoir obtenu", "En colère", "Très fatigué"], 1, "On dit rentrer bredouille de la chasse."],
+      ["De quelle langue le français est-il issu ?", ["Du grec", "Du latin", "De l'arabe", "De l'allemand"], 1, "Il vient du latin parlé par les Romains en Gaule."],
+      ["Quelle est la bonne orthographe ?", ["Accomoder", "Accommoder", "Acomoder", "Acommoder"], 1, "Il prend deux c et deux m."],
+      ["Quel est le pluriel de journal ?", ["Journals", "Journaux", "Journeaux", "Journaus"], 1, "Même règle que pour cheval et chevaux."]
+    ] },
+    capitales: { title: "Pays et capitales", pal: ["#7a4a12", "#2b1905", "#5ad1e6"], tags: ["capitales", "geographie", "voyage"], q: [
+      ["Quelle est la capitale de l'Espagne ?", ["Barcelone", "Madrid", "Séville", "Valence"], 1, "C'est la plus haute capitale de l'Union européenne."],
+      ["Quelle est la capitale de l'Allemagne ?", ["Munich", "Berlin", "Francfort", "Hambourg"], 1, "Elle est redevenue capitale du pays réunifié en 1990."],
+      ["Quelle est la capitale de l'Italie ?", ["Milan", "Rome", "Naples", "Turin"], 1, "On l'appelle la ville éternelle."],
+      ["Quelle est la capitale du Portugal ?", ["Porto", "Lisbonne", "Faro", "Coimbra"], 1, "Elle est construite sur sept collines."],
+      ["Quelle est la capitale du Brésil ?", ["Rio de Janeiro", "São Paulo", "Brasilia", "Salvador"], 2, "Elle a été inaugurée en 1960."],
+      ["Quelle est la capitale de la Turquie ?", ["Istanbul", "Ankara", "Izmir", "Bursa"], 1, "Istanbul est la plus grande ville du pays."],
+      ["Quelle est la capitale de l'Égypte ?", ["Alexandrie", "Le Caire", "Louxor", "Gizeh"], 1, "Elle se trouve au bord du Nil."],
+      ["Quelle est la capitale du Maroc ?", ["Casablanca", "Rabat", "Marrakech", "Fès"], 1, "Casablanca est la plus grande ville du pays."],
+      ["Quelle est la capitale de la Suisse ?", ["Zurich", "Berne", "Genève", "Bâle"], 1, "Sa vieille ville est classée au patrimoine mondial."],
+      ["Quelle est la capitale de la Pologne ?", ["Cracovie", "Varsovie", "Wroclaw", "Lublin"], 1, "Elle a été largement reconstruite après 1945."],
+      ["Quelle est la capitale de la Norvège ?", ["Bergen", "Oslo", "Stavanger", "Trondheim"], 1, "C'est là que l'on remet le prix Nobel de la paix."],
+      ["Quelle est la capitale de la Grèce ?", ["Thessalonique", "Athènes", "Patras", "Héraklion"], 1, "C'est l'une des plus anciennes villes d'Europe."],
+      ["Quelle est la capitale de la Corée du Sud ?", ["Busan", "Séoul", "Incheon", "Daegu"], 1, "Elle compte plus de 9 millions d'habitants."],
+      ["Quelle est la capitale de l'Argentine ?", ["Córdoba", "Buenos Aires", "Rosario", "Mendoza"], 1, "C'est l'une des villes d'origine du tango."],
+      ["Quelle est la capitale du Kenya ?", ["Mombasa", "Nairobi", "Kisumu", "Nakuru"], 1, "Un parc national s'étend à côté de la ville."],
+      ["Quelle est la capitale de la Thaïlande ?", ["Phuket", "Bangkok", "Chiang Mai", "Pattaya"], 1, "Son nom complet est l'un des plus longs du monde."],
+      ["Quelle est la capitale du Vietnam ?", ["Hô Chi Minh-Ville", "Hanoï", "Hué", "Da Nang"], 1, "Hô Chi Minh-Ville est la plus grande ville du pays."],
+      ["Quelle est la capitale de la Nouvelle-Zélande ?", ["Auckland", "Wellington", "Christchurch", "Queenstown"], 1, "C'est la capitale nationale la plus au sud du monde."],
+      ["Quelle est la capitale du Pérou ?", ["Cusco", "Lima", "Arequipa", "Trujillo"], 1, "Elle est située au bord de l'océan Pacifique."],
+      ["Quelle est la capitale des Pays-Bas ?", ["La Haye", "Amsterdam", "Rotterdam", "Utrecht"], 1, "Le gouvernement siège pourtant à La Haye."]
+    ] },
+    techno: { title: "Technologie", pal: ["#1b2a49", "#0a1020", "#6ee7b7"], tags: ["technologie", "tech", "informatique"], q: [
+      ["Quelle entreprise a créé l'iPhone ?", ["Samsung", "Apple", "Nokia", "Google"], 1, "Apple a été fondée en 1976 par Steve Jobs, Steve Wozniak et Ronald Wayne."],
+      ["Que signifie le sigle USB ?", ["Universal Serial Bus", "United System Box", "Ultra Speed Byte", "Universal Signal Base"], 0, "Il sert à brancher des appareils à un ordinateur."],
+      ["Qui a fondé Microsoft avec Paul Allen ?", ["Steve Jobs", "Bill Gates", "Mark Zuckerberg", "Larry Page"], 1, "L'entreprise a été créée en 1975."],
+      ["Combien de bits comporte un octet ?", ["4", "8", "16", "32"], 1, "Un kilooctet vaut environ mille octets."],
+      ["Quel moteur de recherche est le plus utilisé dans le monde ?", ["Bing", "Google", "Yahoo", "Qwant"], 1, "Il a été fondé en 1998."],
+      ["Que signifie le sigle WWW ?", ["World Wide Web", "World Web Window", "Wide World Web", "Web World Wire"], 0, "Il a été inventé par Tim Berners-Lee en 1989."],
+      ["Quel langage sert à structurer les pages web ?", ["Python", "HTML", "SQL", "Java"], 1, "Il signifie langage de balisage hypertexte."],
+      ["Que signifie le sigle IA ?", ["Intelligence artificielle", "Internet avancé", "Information automatique", "Interface active"], 0, "L'expression est apparue dans les années 1950."],
+      ["Quelle unité mesure la fréquence d'un processeur ?", ["Watt", "Hertz", "Volt", "Ampère"], 1, "Un gigahertz vaut un milliard de hertz."],
+      ["Quel est le système d'exploitation mobile de Google ?", ["iOS", "Android", "Windows", "Linux"], 1, "Son logo est un petit robot vert."],
+      ["Qui a créé Facebook ?", ["Mark Zuckerberg", "Elon Musk", "Jeff Bezos", "Jack Dorsey"], 0, "Il l'a lancé en 2004 depuis sa chambre d'étudiant à Harvard."],
+      ["Que signifie le sigle GPS ?", ["Global Positioning System", "General Path Signal", "Geo Pilot Service", "Global Planet Scanner"], 0, "Il repose sur des satellites en orbite."],
+      ["Comment appelle-t-on le plus petit élément d'une image numérique ?", ["Octet", "Pixel", "Vecteur", "Bit"], 1, "Le mot vient de l'anglais picture element."],
+      ["À quoi sert un antivirus ?", ["À accélérer internet", "À protéger contre les logiciels malveillants", "À régler l'écran", "À libérer de la mémoire"], 1, "Il faut le mettre à jour régulièrement."],
+      ["Quelle entreprise fabrique la console PlayStation ?", ["Nintendo", "Sony", "Microsoft", "Sega"], 1, "La première est sortie en 1994 au Japon."],
+      ["Comment s'appelle l'assistant vocal d'Apple ?", ["Alexa", "Siri", "Cortana", "Bixby"], 1, "Il est apparu sur iPhone en 2011."],
+      ["En quelle année le premier iPhone a-t-il été lancé ?", ["2005", "2007", "2009", "2011"], 1, "Il n'avait pas encore de boutique d'applications."],
+      ["Quel langage fait fonctionner les pages web dans le navigateur ?", ["Java", "JavaScript", "C", "Ruby"], 1, "Malgré son nom, il n'a rien à voir avec Java."],
+      ["Que signifie le sigle SMS ?", ["Short Message Service", "Simple Mobile Signal", "Smart Message System", "Super Mail Send"], 0, "Le premier SMS a été envoyé en 1992."],
+      ["Qu'est-ce qu'un cookie sur un site web ?", ["Un petit fichier enregistré par le site", "Un virus", "Une publicité", "Un mot de passe"], 0, "Il sert par exemple à retenir ta connexion."]
+    ] },
+    vraifaux: { title: "Vrai ou faux", pal: ["#2b2d6e", "#0e0f33", "#ff5c8a"], tags: ["vraioufaux", "saviezvous", "idéesrecues"], q: [
+      ["La Grande Muraille de Chine est visible à l'œil nu depuis la Lune.", ["Vrai", "Faux"], 1, "Elle est trop étroite pour être distinguée depuis la Lune."],
+      ["Les chauves-souris sont aveugles.", ["Vrai", "Faux"], 1, "Elles voient, et utilisent aussi l'écholocation."],
+      ["Le Soleil est une étoile.", ["Vrai", "Faux"], 0, "C'est l'étoile la plus proche de la Terre."],
+      ["Les tomates sont des fruits.", ["Vrai", "Faux"], 0, "Du point de vue botanique, ce sont bien des fruits."],
+      ["Un jour sur Vénus dure plus longtemps qu'une année vénusienne.", ["Vrai", "Faux"], 0, "Elle tourne très lentement sur elle-même."],
+      ["Les humains n'utilisent que 10 % de leur cerveau.", ["Vrai", "Faux"], 1, "On utilise l'ensemble du cerveau, à des moments différents."],
+      ["La foudre ne tombe jamais deux fois au même endroit.", ["Vrai", "Faux"], 1, "L'Empire State Building est frappé plusieurs fois par an."],
+      ["Les dauphins sont des poissons.", ["Vrai", "Faux"], 1, "Ce sont des mammifères qui respirent de l'air."],
+      ["Le Mont Blanc est le plus haut sommet des Alpes.", ["Vrai", "Faux"], 0, "Il culmine à environ 4 806 mètres."],
+      ["Napoléon était très petit.", ["Vrai", "Faux"], 1, "Il mesurait environ 1,69 mètre, une taille moyenne à l'époque."],
+      ["Le miel ne se périme pratiquement jamais.", ["Vrai", "Faux"], 0, "Sa faible teneur en eau empêche les bactéries de se développer."],
+      ["Les chats voient dans l'obscurité totale.", ["Vrai", "Faux"], 1, "Ils voient bien avec très peu de lumière, mais pas sans aucune lumière."],
+      ["Il y a plus d'étoiles dans l'Univers que de grains de sable sur Terre.", ["Vrai", "Faux"], 0, "On estime qu'il y en a plus de mille milliards de milliards."],
+      ["Les requins sont des mammifères.", ["Vrai", "Faux"], 1, "Ce sont des poissons au squelette de cartilage."],
+      ["L'Everest est la montagne dont le sommet est le plus loin du centre de la Terre.", ["Vrai", "Faux"], 1, "C'est le Chimborazo, en Équateur, à cause du renflement de la Terre."],
+      ["La banane est une baie au sens botanique.", ["Vrai", "Faux"], 0, "La fraise, elle, n'en est pas une."],
+      ["La Terre est parfaitement ronde.", ["Vrai", "Faux"], 1, "Elle est légèrement aplatie aux pôles."],
+      ["Les autruches enfoncent leur tête dans le sable quand elles ont peur.", ["Vrai", "Faux"], 1, "C'est un mythe : elles se couchent au sol."],
+      ["Le verre est un liquide très lent qui coule avec le temps.", ["Vrai", "Faux"], 1, "Les vitres anciennes sont plus épaisses en bas à cause de leur fabrication."],
+      ["Un éclair est plus chaud que la surface du Soleil.", ["Vrai", "Faux"], 0, "Il peut atteindre environ 30 000 degrés."],
+      ["Le Sahara a toujours été un désert.", ["Vrai", "Faux"], 1, "Il y a quelques milliers d'années, c'était une savane verte."],
+      ["On perd la plus grande partie de sa chaleur par la tête.", ["Vrai", "Faux"], 1, "La chaleur se perd en proportion de la surface exposée."],
+      ["La Lune produit sa propre lumière.", ["Vrai", "Faux"], 1, "Elle reflète la lumière du Soleil."],
+      ["Les poissons rouges ont une mémoire de trois secondes.", ["Vrai", "Faux"], 1, "Ils peuvent se souvenir de choses pendant plusieurs mois."]
+    ] }
+  };
+  var KEYS = Object.keys(BANK);
+  var RATES = [["Lente", 0.9], ["Normale", 1.05], ["Rapide", 1.2]];
+  var S = { theme: "random", n: 4, count: 3, voiceOn: true, voiceName: "", rate: 1.05, mode: "video", liveCount: 15, boardMin: 5 };
+  try { Object.assign(S, JSON.parse(localStorage.getItem("sq-set") || "{}")); } catch (e) {}
+  function save() { try { localStorage.setItem("sq-set", JSON.stringify(S)); } catch (e) {} }
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  /* ---------- réglages ---------- */
+  function seg(el, items, get, set) {
+    el.innerHTML = "";
+    items.forEach(function (it) {
+      var b = document.createElement("button");
+      b.type = "button"; b.textContent = it[0];
+      b.setAttribute("aria-pressed", String(get() === it[1]));
+      b.onclick = function () { set(it[1]); save(); Array.prototype.forEach.call(el.children, function (c, i) { c.setAttribute("aria-pressed", String(items[i][1] === it[1])); }); };
+      el.appendChild(b);
+    });
+  }
+  function buildThemes() {
+    var box = $("#themes"); box.innerHTML = "";
+    var all = [["Au hasard", "random", "linear-gradient(135deg,#2ec4b6,#ffc43d,#961e5a)"]].concat(KEYS.map(function (k) { return [BANK[k].title, k, BANK[k].pal[2]]; }));
+    all.forEach(function (t) {
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "chip";
+      b.innerHTML = "<i style=\"background:" + t[2] + "\"></i><span>" + esc(t[0]) + "</span>";
+      b.setAttribute("aria-pressed", String(S.theme === t[1]));
+      b.onclick = function () { S.theme = t[1]; save(); Array.prototype.forEach.call(box.children, function (c, i) { c.setAttribute("aria-pressed", String(all[i][1] === S.theme)); }); };
+      box.appendChild(b);
+    });
+  }
+  seg($("#segN"), [["3", 3], ["4", 4], ["5", 5]], function () { return S.n; }, function (v) { S.n = v; });
+  seg($("#segC"), [["3 s", 3], ["5 s", 5]], function () { return S.count; }, function (v) { S.count = v; });
+  seg($("#segM"), [["Vidéo à enregistrer", "video"], ["Live non-stop", "live"]], function () { return S.mode; }, function (v) { S.mode = v; applyMode(); });
+  seg($("#segLC"), [["10 s", 10], ["15 s", 15], ["20 s", 20]], function () { return S.liveCount; }, function (v) { S.liveCount = v; });
+  seg($("#segLB"), [["3 min", 3], ["5 min", 5], ["10 min", 10]], function () { return S.boardMin; }, function (v) { S.boardMin = v; });
+  function applyMode() {
+    var lv = S.mode === "live";
+    $("#rowN").hidden = lv; $("#rowC").hidden = lv; $("#rowLC").hidden = !lv; $("#rowLB").hidden = !lv;
+    $("#secRec").hidden = lv; $("#secLive").hidden = !lv;
+    $("#go").textContent = lv ? "Lancer le live" : "Lancer le quiz";
+  }
+  seg($("#segR"), RATES, function () { return S.rate; }, function (v) { S.rate = v; });
+  buildThemes();
+  applyMode();
+
+  /* ---------- voix ---------- */
+  var synth = window.speechSynthesis || null;
+  var frVoices = [];
+  function loadVoices() {
+    var all = synth ? (synth.getVoices() || []) : [];
+    frVoices = all.filter(function (v) { return /^fr[-_]/i.test(v.lang) || /^fr$/i.test(v.lang); });
+    frVoices.sort(function (a, b) {
+      function sc(v) { return (/fr[-_]FR/i.test(v.lang) ? 2 : 0) + (/premium|enhanced|natural|neural|siri|google|amélie|thomas|audrey/i.test(v.name) ? 1 : 0); }
+      return sc(b) - sc(a);
+    });
+    var sel = $("#voiceSel"); sel.innerHTML = "";
+    frVoices.forEach(function (v) {
+      var o = document.createElement("option"); o.value = v.name; o.textContent = v.name + " (" + v.lang.replace("_", "-") + ")"; sel.appendChild(o);
+    });
+    if (S.voiceName && frVoices.some(function (v) { return v.name === S.voiceName; })) sel.value = S.voiceName;
+    else if (frVoices.length) { S.voiceName = frVoices[0].name; sel.value = S.voiceName; }
+    $("#voiceWarn").hidden = frVoices.length > 0;
+    if (!synth) { $("#voiceWarn").hidden = false; $("#voiceWarn").textContent = "Ce navigateur ne propose pas de synthèse vocale. Le quiz se joue avec le texte seul."; }
+    sel.disabled = !frVoices.length;
+  }
+  if (synth) { synth.onvoiceschanged = loadVoices; }
+  loadVoices();
+  $("#voiceOn").checked = !!S.voiceOn;
+  $("#voiceOn").onchange = function () { S.voiceOn = this.checked; save(); };
+  $("#voiceSel").onchange = function () { S.voiceName = this.value; save(); };
+
+  function speakable(t) {
+    t = t.trim();
+    var sp = { Au: "A U", Ag: "A G", Fe: "F E" };
+    if (sp[t]) return sp[t];
+    var L = "[\\p{L}\\d]";
+    var rules = [
+      [new RegExp("(\\d)\\s*km/s(?!" + L + ")", "gu"), "$1 kilomètres par seconde"],
+      [new RegExp("(\\d)\\s*km/h(?!" + L + ")", "gu"), "$1 kilomètres par heure"],
+      [new RegExp("(\\d)\\s*°C", "gu"), "$1 degrés Celsius"],
+      [new RegExp("(\\d)\\s*mm(?!" + L + ")", "gu"), "$1 millimètres"],
+      [new RegExp("(\\d)\\s*km(?!" + L + ")", "gu"), "$1 kilomètres"],
+      [new RegExp("(\\d)\\s*m(?!" + L + ")", "gu"), "$1 mètres"],
+      [new RegExp("(\\d)\\s*h(?!" + L + ")", "gu"), "$1 heures"],
+      [new RegExp("(\\d)\\s*%", "gu"), "$1 pour cent"],
+      [new RegExp("(?<!\\p{L})II(?!\\p{L})", "gu"), "deux"]
+    ];
+    rules.forEach(function (r) { t = t.replace(r[0], r[1]); });
+    t = t.replace(/Louis XIV/g, "Louis quatorze").replace(/Louis XVI/g, "Louis seize").replace(/Pie VII/g, "Pie sept")
+      .replace(/François Ier/g, "François premier").replace(/Ve République/g, "cinquième République").replace(/H2O/g, "H deux O").replace(/iOS/g, "i O S");
+    t = t.replace(/(?<![\p{L}\d])([A-Z]{2,4})(?![\p{L}\d])/gu, function (m) { return m.split("").join(" "); });
+    return t.replace(/\s+/g, " ");
+  }
+  var curTimer = null;
+  function say(text) {
+    return new Promise(function (res) {
+      var words = text.split(/\s+/).length, rate = S.rate;
+      var est = (words * 0.36 / rate + 1.2) * 1000;
+      if (!S.voiceOn || !synth || !frVoices.length) { setTimeout(res, est); return; }
+      var u = new SpeechSynthesisUtterance(text), done = false;
+      u.lang = "fr-FR"; u.rate = rate;
+      var v = frVoices.filter(function (x) { return x.name === S.voiceName; })[0] || frVoices[0];
+      if (v) { u.voice = v; u.lang = v.lang; }
+      function fin() { if (!done) { done = true; clearTimeout(curTimer); res(); } }
+      u.onend = fin; u.onerror = fin;
+      curTimer = setTimeout(fin, est * 2 + 3000);
+      try { synth.cancel(); synth.speak(u); } catch (e) { fin(); }
+    });
+  }
+  $("#hear").onclick = function () {
+    unlockAudio();
+    var was = S.voiceOn; S.voiceOn = true;
+    say(speakable("Quelle est la capitale de l'Australie ? A : Sydney. B : Canberra.")).then(function () { S.voiceOn = was; });
+  };
+
+  /* ---------- sons ---------- */
+  var ac = null;
+  function unlockAudio() {
+    try {
+      if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+      if (ac.state === "suspended") ac.resume();
+      if (synth && S.voiceOn) { var u = new SpeechSynthesisUtterance(" "); u.volume = 0; synth.speak(u); }
+    } catch (e) {}
+  }
+  function beep(f, d, v, at) {
+    if (!ac) return;
+    try {
+      var o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime + (at || 0);
+      o.frequency.value = f; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+      o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + d + 0.02);
+    } catch (e) {}
+  }
+  function tick(last) { beep(last ? 1500 : 1000, 0.09, 0.12); }
+  function chime() { beep(880, 0.8, 0.12); beep(1318.5, 0.7, 0.1, 0.09); beep(1760, 0.6, 0.08, 0.18); }
+  function sweep() { beep(300, 0.5, 0.08); beep(500, 0.5, 0.07, 0.15); beep(800, 0.6, 0.07, 0.3); }
+
+  /* ---------- plan de tournage ---------- */
+  var wrap = $("#stageWrap"), stage = $("#stage"), sceneBox = $("#scene");
+  var runId = 0, wake = null;
+  function fitStage() {
+    var w = wrap.clientWidth, h = wrap.clientHeight, s = Math.min(w / 1080, h / 1920);
+    var tr = "translate(" + ((w - 1080 * s) / 2) + "px," + ((h - 1920 * s) / 2) + "px) scale(" + s + ")";
+    stage.style.transform = tr; $("#lbIn").style.transform = tr;
+  }
+  window.addEventListener("resize", fitStage);
+  function setPalette(p) {
+    wrap.style.setProperty("--s1", p[0]); wrap.style.setProperty("--s2", p[1]); wrap.style.setProperty("--sacc", p[2]);
+    $("#deco").innerHTML =
+      "<div class=\"deco\" style=\"left:700px;top:-160px;width:540px;height:540px\"></div>" +
+      "<div class=\"deco\" style=\"left:-220px;top:1400px;width:520px;height:520px\"></div>" +
+      "<div class=\"deco\" style=\"left:820px;top:1280px;width:320px;height:320px;border-color:#fff;opacity:.08\"></div>";
+  }
+  function fit(el, maxH, max, min) {
+    var s = max; el.style.fontSize = s + "px";
+    while (el.offsetHeight > maxH && s > min) { s -= 2; el.style.fontSize = s + "px"; }
+  }
+  function setScene(html) { sceneBox.innerHTML = "<div class=\"scene\">" + html + "</div>"; return sceneBox.firstChild; }
+  function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function pick(key, n) {
+    var T = BANK[key], used = {};
+    try { used = JSON.parse(localStorage.getItem("sq-used") || "{}"); } catch (e) {}
+    var u = used[key] || [], idx = T.q.map(function (_, i) { return i; });
+    var pool = idx.filter(function (i) { return u.indexOf(i) < 0; });
+    if (pool.length < n) { pool = idx.slice(); u = []; }
+    var ch = shuffle(pool).slice(0, Math.min(n, pool.length)).sort(function (a, b) { return a - b; });
+    used[key] = u.concat(ch);
+    try { localStorage.setItem("sq-used", JSON.stringify(used)); } catch (e) {}
+    return ch.map(function (i) { return prep(T.q[i]); });
+  }
+  function prep(q) {
+    var choices = q[1].slice(), good = q[1][q[2]];
+    if (choices.length > 2 && !choices.every(function (x) { return /^\d+$/.test(x.trim()); })) shuffle(choices);
+    return { q: q[0], choices: choices, a: choices.indexOf(good), f: q[3] };
+  }
+  function qScene(T, qi, n, q, lv) {
+    var bars = ""; for (var i = 0; i < n; i++) bars += "<span class=\"" + (i < qi ? "done" : i === qi ? "cur" : "") + "\"></span>";
+    var C = 2 * Math.PI * 98, cards = "";
+    q.choices.forEach(function (c, i) {
+      cards += "<div class=\"card " + (i === q.a ? "good" : "dim") + "\" style=\"top:" + (940 + i * 148) + "px\"><div class=\"bd\">" + "ABCD"[i] + "</div><div class=\"lb\">" + esc(c) + "</div>" +
+        "<div class=\"ck\"><svg width=\"30\" height=\"30\" viewBox=\"0 0 30 30\"><path d=\"M5 16 L12 23 L25 8\" fill=\"none\" stroke=\"#2ecc71\" stroke-width=\"5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div></div>";
+    });
+    return "<div class=\"hd-pill\">" + esc(T.title) + "</div><div class=\"hd-count\">" + (lv ? "Q" + (qi + 1) : (qi + 1) + "/" + n) + "</div><div class=\"bars\">" + bars + "</div>" +
+      "<div class=\"ring\"><svg viewBox=\"0 0 280 280\"><circle cx=\"140\" cy=\"140\" r=\"98\" fill=\"none\" stroke=\"rgba(255,255,255,.22)\" stroke-width=\"20\"/>" +
+      "<circle id=\"arc\" cx=\"140\" cy=\"140\" r=\"98\" fill=\"none\" stroke=\"var(--sacc)\" stroke-width=\"20\" stroke-linecap=\"round\" stroke-dasharray=\"" + C + "\" stroke-dashoffset=\"0\"/></svg><div class=\"num\" id=\"num\">" + (lv ? S.liveCount : S.count) + "</div></div>" +
+      "<div class=\"fact\"><b>LE SAVIEZ-VOUS ?</b><div class=\"ft\" id=\"ft\">" + esc(q.f) + "</div></div>" +
+      "<div class=\"qbox\"><div class=\"qt\" id=\"qt\">" + esc(q.q) + "</div></div>" + cards +
+      (lv ? "<div class=\"cta\">Écris A, B, C ou D en commentaire !</div><div class=\"win\" id=\"win\" hidden></div>" : "");
+  }
+  function fitQ(scene) {
+    fit($("#qt"), 330, 74, 50);
+    Array.prototype.forEach.call(sceneBox.querySelectorAll(".lb"), function (l) { fit(l, 104, 48, 30); });
+    scene.classList.add("rev"); fit($("#ft"), 150, 46, 32); scene.classList.remove("rev");
+  }
+  function countdown(sec, my) {
+    return new Promise(function (res) {
+      var t0 = performance.now(), C = 2 * Math.PI * 98, arc = $("#arc"), num = $("#num"), last = -1;
+      function f() {
+        if (my !== runId || !arc) return res();
+        var rem = Math.max(0, sec - (performance.now() - t0) / 1000), d = Math.max(1, Math.ceil(rem - 1e-9));
+        arc.style.strokeDashoffset = String(C * (1 - rem / sec));
+        if (d !== last) { last = d; num.textContent = d; arc.style.stroke = d <= 2 ? "#ff5c5c" : "var(--sacc)"; tick(d === 1); }
+        if (rem <= 0) return res();
+        requestAnimationFrame(f);
+      }
+      requestAnimationFrame(f);
+    });
+  }
+  function stopAll() {
+    runId++; clearTimeout(curTimer);
+    try { if (synth) synth.cancel(); } catch (e) {}
+    $("#preroll").hidden = true; $("#endsheet").hidden = true; wrap.hidden = true;
+    $("#liveBar").hidden = true; $("#addSheet").hidden = true; closeBoard(); curQ = false;
+    renderScores();
+    try { if (wake) { wake.release(); wake = null; } } catch (e) {}
+  }
+  var skipFn = null;
+  function preroll(my) {
+    return new Promise(function (res) {
+      var n = 10, box = $("#preroll"), num = $("#preN"), iv;
+      box.hidden = false; num.textContent = n;
+      function end() { clearInterval(iv); skipFn = null; box.hidden = true; res(); }
+      skipFn = end;
+      iv = setInterval(function () { if (my !== runId) { clearInterval(iv); return res(); } n--; num.textContent = n; if (n <= 0) end(); }, 1000);
+    });
+  }
+
+
+  /* ---------- classement ---------- */
+  var scores = {}, lastAdd = null, curQ = false, curWinner = null, boardDone = null, lbT = null;
+  try { scores = JSON.parse(localStorage.getItem("sq-scores") || "{}") || {}; } catch (e) { scores = {}; }
+  function saveScores() { try { localStorage.setItem("sq-scores", JSON.stringify(scores)); } catch (e) {} }
+  function normName(s) { return String(s).replace(/^\s*@+/, "").replace(/\s+/g, " ").trim().slice(0, 24); }
+  function ranking() {
+    return Object.keys(scores).map(function (k) { return scores[k]; }).sort(function (a, b) { return b.p - a.p || a.t - b.t; });
+  }
+  function addPoints(name, pts) {
+    name = normName(name); if (!name) return null;
+    var k = name.toLowerCase(), r = scores[k];
+    if (!r) r = scores[k] = { n: name, p: 0, t: 0 };
+    r.p += pts; r.t = Date.now(); lastAdd = { k: k, pts: pts }; saveScores(); return r;
+  }
+  function undoLast() {
+    if (!lastAdd) return null;
+    var x = lastAdd, r = scores[x.k];
+    if (r) { r.p -= x.pts; if (r.p <= 0) delete scores[x.k]; }
+    lastAdd = null; saveScores(); return x;
+  }
+  function pts(n) { return n + " point" + (n > 1 ? "s" : ""); }
+  function renderScores() {
+    var r = ranking(), box = $("#scoreList");
+    if (!r.length) { box.innerHTML = "<p class=\"note\">Aucun point pour l'instant.</p>"; $("#scN").textContent = ""; return; }
+    box.innerHTML = "<ol class=\"sc\">" + r.slice(0, 10).map(function (x) { return "<li>" + esc(x.n) + " : <b>" + pts(x.p) + "</b></li>"; }).join("") + "</ol>";
+    $("#scN").textContent = r.length + " joueur" + (r.length > 1 ? "s" : "");
+  }
+  function boardHTML() {
+    var r = ranking().slice(0, 8), rows = "";
+    r.forEach(function (x, i) {
+      rows += "<div class=\"lb-row" + (i === 0 ? " r1" : "") + "\" style=\"top:" + (480 + i * 136) + "px\"><div class=\"lb-rk\">" + (i + 1) + "</div><div class=\"lb-nm\">" + esc(x.n) + "</div><div class=\"lb-pt\">" + pts(x.p) + "</div></div>";
+    });
+    if (!r.length) rows = "<div class=\"lb-none\">Personne n'a encore marqué de point.<br>Sois le premier !</div>";
+    return "<div class=\"lb-t\">CLASSEMENT</div><div class=\"lb-s\">Les meilleurs du live</div>" + rows + "<div class=\"lb-f\">Trouve la bonne réponse en premier pour gagner des points</div>";
+  }
+  function closeBoard() {
+    clearTimeout(lbT); $("#lbLayer").hidden = true;
+    var d = boardDone; boardDone = null; if (d) d();
+  }
+  function showBoard(ms) {
+    return new Promise(function (res) {
+      closeBoard();
+      $("#lbIn").innerHTML = boardHTML(); $("#lbLayer").hidden = false;
+      boardDone = res;
+      if (ms) lbT = setTimeout(closeBoard, ms);
+    });
+  }
+  function boardVoice() {
+    var top = ranking().slice(0, 3), lab = ["En tête", "Deuxième", "Troisième"];
+    if (!top.length) return "Classement. Personne n'a encore marqué de point.";
+    return "Classement. " + top.map(function (x, i) { return lab[i] + " : " + x.n + ", " + pts(x.p) + "."; }).join(" ");
+  }
+  function setWinner(name) {
+    curWinner = name;
+    var w = $("#win"); if (!w) return;
+    w.innerHTML = "<span>🏆 WINNER</span><span>" + esc(name) + "</span>"; w.hidden = false;
+  }
+  function msg(t) { $("#addMsg").textContent = t; }
+  function renderRecent() {
+    var box = $("#recent"); box.innerHTML = "";
+    ranking().sort(function (a, b) { return b.t - a.t; }).slice(0, 8).forEach(function (r) {
+      var b = document.createElement("button"); b.type = "button"; b.className = "nmchip"; b.textContent = r.n;
+      b.onclick = function () { $("#nm").value = r.n; };
+      box.appendChild(b);
+    });
+  }
+  function give(p) {
+    var r = addPoints($("#nm").value, p);
+    if (!r) { msg("Tape d'abord un pseudo."); return; }
+    var first = curQ && !curWinner;
+    if (first) setWinner(r.n);
+    msg("✓ " + r.n + " +" + p + " (total " + r.p + ")" + (first ? " — WINNER de cette question" : ""));
+    $("#nm").value = ""; renderRecent(); renderScores();
+  }
+  function openAdd() { $("#addSheet").hidden = false; $("#liveBar").hidden = true; renderRecent(); msg("Le premier pseudo validé sur une question devient le WINNER affiché à l'écran."); $("#nm").focus(); }
+  function closeAdd() { $("#addSheet").hidden = true; if (!wrap.hidden && S.mode === "live") $("#liveBar").hidden = false; }
+  $("#bAdd").onclick = openAdd;
+  $("#addClose").onclick = closeAdd;
+  $("#p1").onclick = function () { give(1); };
+  $("#p3").onclick = function () { give(3); };
+  $("#nm").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); give(1); } });
+  $("#undo").onclick = function () {
+    var x = undoLast(); if (!x) { msg("Rien à annuler."); return; }
+    msg("Dernier point annulé."); renderRecent(); renderScores();
+  };
+  $("#bBoard").onclick = function () { showBoard(12000); };
+  $("#lbLayer").onclick = closeBoard;
+  var stopArm = null;
+  $("#bStop").onclick = function () {
+    var b = this;
+    if (stopArm) { clearTimeout(stopArm); stopArm = null; b.textContent = "Arrêter"; stopAll(); return; }
+    b.textContent = "Sûr ?"; stopArm = setTimeout(function () { stopArm = null; b.textContent = "Arrêter"; }, 3000);
+  };
+  var resetArm = null;
+  $("#resetScores").onclick = function () {
+    var b = this;
+    if (resetArm) { clearTimeout(resetArm); resetArm = null; b.textContent = "Effacer les points"; scores = {}; lastAdd = null; saveScores(); renderScores(); return; }
+    b.textContent = "Confirmer l'effacement"; resetArm = setTimeout(function () { resetArm = null; b.textContent = "Effacer les points"; }, 3000);
+  };
+  renderScores();
+
+  /* ---------- live non-stop ---------- */
+  async function live() {
+    unlockAudio();
+    var my = ++runId;
+    var ok = async function (p) { await p; if (my !== runId) throw 0; };
+    try {
+      $("#endsheet").hidden = true; $("#addSheet").hidden = true; wrap.hidden = false; $("#liveBar").hidden = false;
+      var keys = S.theme === "random" ? KEYS : [S.theme], queue = [], last = null, num = 0, lastBoard = Date.now();
+      var T0 = BANK[keys[0]]; setPalette(T0.pal); fitStage(); setScene("");
+      try { await ok(document.fonts.ready); } catch (e) { if (my !== runId) return; }
+      try { if (navigator.wakeLock) navigator.wakeLock.request("screen").then(function (w) { wake = w; }, function () {}); } catch (e) {}
+      function refill() {
+        var a = []; keys.forEach(function (k) { BANK[k].q.forEach(function (_, i) { a.push([k, i]); }); });
+        shuffle(a); if (last && a.length > 1 && a[0][0] === last[0] && a[0][1] === last[1]) a.push(a.shift());
+        queue = a;
+      }
+      while (true) {
+        if (!queue.length) refill();
+        if (Date.now() - lastBoard >= S.boardMin * 60000 && ranking().length) {
+          await ok(Promise.all([say(boardVoice()), showBoard(11000)]));
+          await ok(sleep(300)); lastBoard = Date.now();
+        }
+        var it = queue.shift(); last = it;
+        var T = BANK[it[0]], q = prep(T.q[it[1]]); num++;
+        curWinner = null; curQ = true;
+        setPalette(T.pal);
+        var scene = setScene(qScene(T, num - 1, 0, q, true));
+        fitQ(scene);
+        var letters = q.choices.map(function (c, j) { return "ABCD"[j] + " : " + speakable(c) + "."; }).join(" ");
+        await ok(sleep(400));
+        await ok(Promise.all([say(speakable(q.q) + " " + letters), sleep(1500)]));
+        await ok(sleep(250));
+        await ok(countdown(S.liveCount, my));
+        scene.classList.add("rev"); chime();
+        await ok(sleep(450));
+        if (curWinner) await ok(say("Winner : " + curWinner + " !"));
+        await ok(Promise.all([say("ABCD"[q.a] + ", " + speakable(q.choices[q.a]) + ". " + speakable(q.f)), sleep(2500)]));
+        await ok(sleep(2200));
+        curQ = false;
+      }
+    } catch (e) { if (e !== 0) { console.error(e); stopAll(); } }
+  }
+
+  async function play() {
+    unlockAudio();
+    var my = ++runId;
+    var ok = async function (p) { await p; if (my !== runId) throw 0; };
+    try {
+      var key = S.theme === "random" ? KEYS[Math.floor(Math.random() * KEYS.length)] : S.theme;
+      var T = BANK[key], qs = pick(key, S.n), n = qs.length;
+      $("#endsheet").hidden = true; wrap.hidden = false;
+      setPalette(T.pal); fitStage();
+      try { await ok(document.fonts.ready); } catch (e) { if (my !== runId) return; }
+      try { if (navigator.wakeLock) navigator.wakeLock.request("screen").then(function (w) { wake = w; }, function () {}); } catch (e) {}
+
+      setScene("<div class=\"intro\"><div class=\"big\">QUIZ</div><div class=\"ttl\" id=\"ttl\">" + esc(T.title) + "</div><div class=\"sub\">" + n + " questions</div><div class=\"bigpill\">Tu fais combien sur " + n + " ?</div></div>");
+      fit($("#ttl"), 125, 110, 60);
+      await ok(preroll(my));
+
+      sweep();
+      await ok(Promise.all([say(speakable("Quiz " + T.title + ". " + n + " questions. Tu fais combien sur " + n + " ?")), sleep(2600)]));
+      await ok(sleep(400));
+
+      for (var i = 0; i < n; i++) {
+        var q = qs[i], scene = setScene(qScene(T, i, n, q));
+        fitQ(scene);
+        var letters = q.choices.map(function (c, j) { return "ABCD"[j] + " : " + speakable(c) + "."; }).join(" ");
+        await ok(sleep(400));
+        await ok(Promise.all([say(speakable(q.q) + " " + letters), sleep(1500)]));
+        await ok(sleep(250));
+        await ok(countdown(S.count, my));
+        scene.classList.add("rev"); chime();
+        await ok(sleep(450));
+        await ok(Promise.all([say("ABCD"[q.a] + ", " + speakable(q.choices[q.a]) + ". " + speakable(q.f)), sleep(2500)]));
+        await ok(sleep(350));
+      }
+
+      setScene("<div class=\"outro\"><div class=\"big\">TON SCORE ?</div><div class=\"sub\">Dis-le en commentaire</div><div class=\"bigpill\">Abonne-toi pour le prochain quiz</div></div>");
+      chime();
+      await ok(Promise.all([say("Ton score ? Dis-le en commentaire, et abonne-toi pour le prochain quiz !"), sleep(3200)]));
+      await ok(sleep(800));
+
+      var tags = ["quiz", "culturegenerale", "fyp", "pourtoi"].concat(T.tags);
+      $("#cap").value = "Quiz " + T.title + " : tu fais combien sur " + n + " ? 👀 Dis ton score en commentaire ! " + tags.map(function (t) { return "#" + t; }).join(" ");
+      $("#copy").textContent = "Copier la légende";
+      $("#endsheet").hidden = false;
+    } catch (e) { if (e !== 0) { console.error(e); stopAll(); } }
+  }
+
+  $("#go").onclick = function () { if (S.mode === "live") live(); else play(); };
+  $("#again").onclick = play;
+  $("#back").onclick = stopAll;
+  $("#cancel").onclick = stopAll;
+  $("#skip").onclick = function () { if (skipFn) skipFn(); };
+  $("#copy").onclick = function () {
+    var btn = this, ta = $("#cap");
+    function fallback() { ta.focus(); ta.select(); try { document.execCommand("copy"); btn.textContent = "Copié"; } catch (e) { btn.textContent = "Sélectionne le texte"; } }
+    try { navigator.clipboard.writeText(ta.value).then(function () { btn.textContent = "Copié"; }, fallback); } catch (e) { fallback(); }
+  };
+  var lp = null;
+  wrap.addEventListener("pointerdown", function (e) { if (e.target.closest(".overlay, #liveBar")) return; lp = setTimeout(stopAll, 800); });
+  ["pointerup", "pointercancel", "pointerleave"].forEach(function (ev) { wrap.addEventListener(ev, function () { clearTimeout(lp); }); });
+})();
+</script>
+
+</body></html>
