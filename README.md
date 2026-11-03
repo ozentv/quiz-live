@@ -21,7 +21,9 @@ Le quiz tient dans un seul fichier, `index.html`, sans rien à installer. Le rel
 ## 🤖 Points automatiques avec le chat TikTok (mode live)
 
 Un petit **relais** (dossier `relay/`) lit les commentaires de ton live en temps réel et les envoie au quiz :
-- la **première** réponse de chaque personne compte : `A`, `b`, `réponse C`, ou le texte exact de la réponse (`Canberra`). Envoyer plusieurs lettres ne sert à rien ;
+- la **première** réponse de chaque personne compte : `A`, `b`, `réponse C`, `je dis B`, `B Canberra`, 🅱️, ou le texte de la réponse (`Canberra`). Les messages ambigus comme `A ou B ?` sont ignorés, et envoyer plusieurs lettres ne sert à rien ;
+- comme le live TikTok a quelques secondes de retard, les réponses comptent encore pendant le **décalage** choisi dans les réglages (3, 6 ou 10 secondes) après la fin du compte à rebours ;
+- le bouton **Chat ✓** affiche le nombre de commentaires reçus, et les réglages montrent les derniers commentaires : pratique pour vérifier que le chat arrive bien ;
 - à la fin du compte à rebours, le **plus rapide** gagne **3 points** et devient **WINNER**, les deux suivants gagnent **2 points** et tous les autres bons **1 point** ;
 - le nombre de réponses s'affiche pendant la question, puis le nombre de bonnes réponses ;
 - le bouton **+ Point** manuel reste disponible.
