@@ -135,6 +135,8 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 .btn.small { min-height: 42px; padding: 8px 14px; font-size: .95rem; }
 .field { width: 100%; font: inherit; color: var(--fg); background: var(--surface); border: 2px solid var(--line); border-radius: 12px; padding: 10px 12px; min-height: 44px; }
 .chat-test { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.chat-last { font-size: .92rem; color: var(--muted); }
+.chat-last b { color: var(--fg); }
 .chat-st { font-weight: 600; font-size: .95rem; color: var(--muted); min-width: 0; }
 .chat-st[data-s="connected"] { color: var(--accent); }
 .chat-st[data-s="error"] { color: #c0392b; }
@@ -174,6 +176,8 @@ ol.sc b { font-variant-numeric: tabular-nums; }
           <input class="field" id="ttUser" type="text" placeholder="Ton pseudo TikTok (sans @)" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Ton pseudo TikTok">
           <input class="field" id="relayUrl" type="url" inputmode="url" placeholder="Adresse du relais (ex. studio-quiz-relais.onrender.com)" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Adresse du relais">
           <div class="chat-test"><button class="btn ghost small" id="chatTest" type="button">Tester la connexion</button><span id="chatState" class="chat-st" role="status"></span></div>
+          <div class="chat-last" id="chatLast" aria-live="polite"></div>
+          <div class="chat-test"><span class="lab">Décalage du live TikTok</span><div class="seg" id="segLag" role="group" aria-label="Décalage du live"></div></div>
           <p class="note" style="margin:0">Le relais lit les commentaires : la première lettre A, B, C ou D de chaque personne compte. Le plus rapide gagne 3 points, les deux suivants 2 points, les autres bons 1 point. Écris <b>demo</b> comme pseudo pour tester sans être en live.</p>
         </div>
       </div>
@@ -1333,7 +1337,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   };
   var KEYS = Object.keys(BANK);
   var RATES = [["Lente", 0.9], ["Normale", 1.05], ["Rapide", 1.2]];
-  var S = { theme: "random", n: 4, count: 3, voiceOn: true, voiceName: "", rate: 1.05, mode: "video", liveCount: 15, boardMin: 5, chatOn: false, ttUser: "", relay: "" };
+  var S = { theme: "random", n: 4, count: 3, voiceOn: true, voiceName: "", rate: 1.05, mode: "video", liveCount: 15, boardMin: 5, chatOn: false, ttUser: "", relay: "", lag: 6 };
   try { Object.assign(S, JSON.parse(localStorage.getItem("sq-set") || "{}")); } catch (e) {}
   function save() { try { localStorage.setItem("sq-set", JSON.stringify(S)); } catch (e) {} }
   function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
@@ -1670,7 +1674,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   renderScores();
 
   /* ---------- chat TikTok (via le relais) ---------- */
-  var chat = { ws: null, want: false, retry: null, state: "off" };
+  var chat = { ws: null, want: false, retry: null, state: "off", count: 0, last: [] };
   var round = null; // { open, n, choices, answers: [{ k, name, a }], seen: {} }
   function cleanUser(s) { return String(s || "").trim().replace(/^https?:\/\/(www\.)?tiktok\.com\//i, "").replace(/^@+/, "").replace(/\/.*$/, ""); }
   function relayWsUrl() {
@@ -1683,7 +1687,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     chat.state = st;
     var el = $("#chatState"); el.textContent = txt || ""; el.setAttribute("data-s", st);
     var b = $("#bChat"); b.setAttribute("data-s", st);
-    b.textContent = st === "connected" ? "Chat ✓" : st === "error" ? "Chat ✕" : "Chat …";
+    b.textContent = st === "connected" ? "Chat ✓ " + chat.count : st === "error" ? "Chat ✕" : "Chat …";
     b.title = txt || "";
   }
   function chatClose() {
@@ -1702,7 +1706,13 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     ws.onmessage = function (ev) {
       if (chat.ws !== ws) return;
       var m; try { m = JSON.parse(ev.data); } catch (e) { return; }
-      if (m.type === "chat") onChat(m);
+      if (m.type === "chat") {
+        chat.count++;
+        chat.last.unshift(m); chat.last = chat.last.slice(0, 3);
+        if (chat.state === "connected") $("#bChat").textContent = "Chat ✓ " + chat.count;
+        $("#chatLast").innerHTML = "Commentaires reçus : <b>" + chat.count + "</b><br>" + chat.last.map(function (x) { return "« " + esc(String(x.text).slice(0, 40)) + " » (" + esc(x.name || x.id) + ")"; }).join("<br>");
+        onChat(m);
+      }
       else if (m.type === "status") chatSet(m.state === "connected" ? "connected" : m.state === "error" ? "error" : "waiting", m.message || "");
     };
     ws.onclose = function () {
@@ -1716,10 +1726,25 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   }
   function plain(t) { return String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
   function parseAnswer(text, choices) {
-    var t = plain(text); if (!t) return -1;
-    var m = t.match(/^(?:(?:reponse|rep|la|le|c est|cest)\s+)*([a-d])$/);
-    if (m) { var i = "abcd".indexOf(m[1]); return i < choices.length ? i : -1; }
-    for (var j = 0; j < choices.length; j++) if (plain(choices[j]) === t) return j;
+    var raw = String(text || "").replace(/\u{1F170}\uFE0F?/gu, " A ").replace(/\u{1F171}\uFE0F?/gu, " B "), t = plain(raw); if (!t) return -1;
+    var n = choices.length;
+    function idx(l) { var i = "abcd".indexOf(l); return i >= 0 && i < n ? i : -1; }
+    // 1. « B », « b ! », « réponse C », « c'est la D »
+    var m = t.match(/^(?:(?:reponse|rep|la|le|c est|cest|je dis|je pense|moi|pour moi)\s+)*([a-d])$/);
+    if (m) return idx(m[1]);
+    // 2. le texte d'une réponse dans le message (« Canberra », « je pense Canberra »)
+    var words = " " + t + " ", hits = [];
+    for (var j = 0; j < n; j++) { var c = plain(choices[j]); if (c.length >= 3 && words.indexOf(" " + c + " ") >= 0) hits.push(j); }
+    if (hits.length === 1) return hits[0];
+    if (hits.length > 1) return -1;
+    // 3. une seule lettre majuscule isolée : « je dis B », « B Canberra »
+    var caps = {}, nc = 0;
+    raw.split(/[^A-Za-zÀ-ÿ]+/).forEach(function (w) { if (/^[A-D]$/.test(w) && !caps[w]) { caps[w] = 1; nc++; } });
+    if (nc === 1) return idx(Object.keys(caps)[0].toLowerCase());
+    // 4. message court qui commence par une lettre : « b je crois »
+    var tk = t.split(" ");
+    var single = tk.filter(function (w) { return /^[a-d]$/.test(w); });
+    if (tk.length <= 4 && single.length === 1 && /^[a-d]$/.test(tk[0]) && !/^(est|etait|a|as)$/.test(tk[1] || "")) return idx(tk[0]);
     return -1;
   }
   function onChat(m) {
@@ -1749,6 +1774,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   $("#ttUser").oninput = function () { S.ttUser = cleanUser(this.value); save(); };
   $("#relayUrl").oninput = function () { S.relay = this.value.trim(); save(); };
   $("#chatTest").onclick = chatConnect;
+  seg($("#segLag"), [["3 s", 3], ["6 s", 6], ["10 s", 10]], function () { return S.lag; }, function (v) { S.lag = v; });
   $("#bChat").onclick = chatConnect;
 
   /* ---------- live non-stop ---------- */
@@ -1787,12 +1813,15 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         await ok(Promise.all([say(speakable(q.q) + " " + letters), sleep(1500)]));
         await ok(sleep(250));
         await ok(countdown(S.liveCount, my));
-        var okList = scoreRound(q.a);
-        if (!curWinner && okList.length) setWinner(okList[0].name);
+        var tEnd = Date.now();
         scene.classList.add("rev"); chime();
         await ok(sleep(450));
-        if (curWinner) await ok(say("Winner : " + curWinner + " !" + (okList.length > 1 ? " " + okList.length + " bonnes réponses." : "")));
         await ok(Promise.all([say("ABCD"[q.a] + ", " + speakable(q.choices[q.a]) + ". " + speakable(q.f)), sleep(2500)]));
+        // Le live TikTok a plusieurs secondes de retard : les réponses arrivées pendant ce délai comptent encore.
+        if (round) await ok(sleep(Math.max(0, (S.lag || 0) * 1000 - (Date.now() - tEnd))));
+        var okList = scoreRound(q.a);
+        if (!curWinner && okList.length) setWinner(okList[0].name);
+        if (curWinner) await ok(say("Winner : " + curWinner + " !" + (okList.length > 1 ? " " + okList.length + " bonnes réponses." : "")));
         await ok(sleep(2200));
         curQ = false; round = null;
       }
