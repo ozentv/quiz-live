@@ -132,6 +132,15 @@ ol.sc { margin: 0; padding-left: 1.6em; display: grid; gap: 6px; }
 ol.sc li::marker { font-weight: 800; color: var(--accent); }
 ol.sc b { font-variant-numeric: tabular-nums; }
 .btn.small { min-height: 42px; padding: 8px 14px; font-size: .95rem; }
+.field { width: 100%; font: inherit; color: var(--fg); background: var(--surface); border: 2px solid var(--line); border-radius: 12px; padding: 10px 12px; min-height: 44px; }
+.chat-test { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.chat-st { font-weight: 600; font-size: .95rem; color: var(--muted); min-width: 0; }
+.chat-st[data-s="connected"] { color: var(--accent); }
+.chat-st[data-s="error"] { color: #c0392b; }
+#liveBar #bChat[data-s="connected"] { background: #1f8f4e; }
+#liveBar #bChat[data-s="error"] { background: #b23a3a; }
+#liveBar #bChat[data-s="waiting"] { background: #8a6a12; }
+.stat { position: absolute; left: 80px; width: 920px; top: 1700px; text-align: center; font-size: 40px; font-weight: 800; opacity: .92; }
 @media (prefers-reduced-motion: reduce) { .scene, .rev .fact { animation: none; } }
 </style>
 
@@ -157,6 +166,17 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     <div class="row" id="rowC"><span class="lab">Compte à rebours</span><div class="seg" id="segC" role="group" aria-label="Compte à rebours"></div></div>
     <div class="row" id="rowLC" hidden><span class="lab">Temps pour répondre</span><div class="seg" id="segLC" role="group" aria-label="Temps pour répondre"></div></div>
     <div class="row" id="rowLB" hidden><span class="lab">Classement automatique</span><div class="seg" id="segLB" role="group" aria-label="Fréquence du classement"></div></div>
+    <div class="row" id="rowChat" hidden>
+      <div class="voice-line">
+        <label class="switch"><input type="checkbox" id="chatOn"> Points automatiques avec le chat TikTok</label>
+        <div class="voice-line" id="chatFields">
+          <input class="field" id="ttUser" type="text" placeholder="Ton pseudo TikTok (sans @)" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Ton pseudo TikTok">
+          <input class="field" id="relayUrl" type="url" inputmode="url" placeholder="Adresse du relais (ex. studio-quiz-relais.onrender.com)" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Adresse du relais">
+          <div class="chat-test"><button class="btn ghost small" id="chatTest" type="button">Tester la connexion</button><span id="chatState" class="chat-st" role="status"></span></div>
+          <p class="note" style="margin:0">Le relais lit les commentaires : la première lettre A, B, C ou D de chaque personne compte. Le plus rapide gagne 3 points, les deux suivants 2 points, les autres bons 1 point. Écris <b>demo</b> comme pseudo pour tester sans être en live.</p>
+        </div>
+      </div>
+    </div>
     <div class="row">
       <div class="voice-line">
         <label class="switch"><input type="checkbox" id="voiceOn"> Voix off qui lit tout</label>
@@ -183,7 +203,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     <ol class="steps">
       <li>Lance ton live TikTok et partage l'écran du téléphone (selon ton compte), puis reviens sur cette page.</li>
       <li>Touche <b>Lancer le live</b> : les questions s'enchaînent sans s'arrêter, sans répéter avant d'avoir tout vu.</li>
-      <li>Quand quelqu'un trouve, touche <b>+ Point</b>, tape son pseudo et valide. Cette page ne peut pas lire les commentaires TikTok : c'est toi qui donnes les points.</li>
+      <li>Avec les <b>points automatiques</b> activés, les réponses du chat sont comptées toutes seules et le plus rapide devient WINNER. Sinon, quand quelqu'un trouve, touche <b>+ Point</b>, tape son pseudo et valide.</li>
       <li>Le classement s'affiche seul à intervalle régulier, ou quand tu touches <b>Classement</b>.</li>
     </ol>
     <p class="note">Les petits boutons en bas à droite apparaissent aussi sur l'écran partagé. Appui long sur l'écran : tout arrêter.</p>
@@ -201,6 +221,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   <div id="stage"><div id="deco"></div><div id="scene"></div></div>
   <div id="lbLayer" hidden><div id="lbIn"></div></div>
   <div id="liveBar" hidden>
+    <button id="bChat" type="button" hidden>Chat</button>
     <button id="bBoard" type="button">Classement</button>
     <button id="bAdd" type="button">+ Point</button>
     <button id="bStop" type="button">Arrêter</button>
@@ -523,7 +544,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   };
   var KEYS = Object.keys(BANK);
   var RATES = [["Lente", 0.9], ["Normale", 1.05], ["Rapide", 1.2]];
-  var S = { theme: "random", n: 4, count: 3, voiceOn: true, voiceName: "", rate: 1.05, mode: "video", liveCount: 15, boardMin: 5 };
+  var S = { theme: "random", n: 4, count: 3, voiceOn: true, voiceName: "", rate: 1.05, mode: "video", liveCount: 15, boardMin: 5, chatOn: false, ttUser: "", relay: "" };
   try { Object.assign(S, JSON.parse(localStorage.getItem("sq-set") || "{}")); } catch (e) {}
   function save() { try { localStorage.setItem("sq-set", JSON.stringify(S)); } catch (e) {} }
   function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
@@ -559,7 +580,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   seg($("#segLB"), [["3 min", 3], ["5 min", 5], ["10 min", 10]], function () { return S.boardMin; }, function (v) { S.boardMin = v; });
   function applyMode() {
     var lv = S.mode === "live";
-    $("#rowN").hidden = lv; $("#rowC").hidden = lv; $("#rowLC").hidden = !lv; $("#rowLB").hidden = !lv;
+    $("#rowN").hidden = lv; $("#rowC").hidden = lv; $("#rowLC").hidden = !lv; $("#rowLB").hidden = !lv; $("#rowChat").hidden = !lv;
     $("#secRec").hidden = lv; $("#secLive").hidden = !lv;
     $("#go").textContent = lv ? "Lancer le live" : "Lancer le quiz";
   }
@@ -708,7 +729,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       "<circle id=\"arc\" cx=\"140\" cy=\"140\" r=\"98\" fill=\"none\" stroke=\"var(--sacc)\" stroke-width=\"20\" stroke-linecap=\"round\" stroke-dasharray=\"" + C + "\" stroke-dashoffset=\"0\"/></svg><div class=\"num\" id=\"num\">" + (lv ? S.liveCount : S.count) + "</div></div>" +
       "<div class=\"fact\"><b>LE SAVIEZ-VOUS ?</b><div class=\"ft\" id=\"ft\">" + esc(q.f) + "</div></div>" +
       "<div class=\"qbox\"><div class=\"qt\" id=\"qt\">" + esc(q.q) + "</div></div>" + cards +
-      (lv ? "<div class=\"cta\">Écris A, B, C ou D en commentaire !</div><div class=\"win\" id=\"win\" hidden></div>" : "");
+      (lv ? "<div class=\"cta\">Écris " + (q.choices.length === 2 ? "A ou B" : "A, B, C ou D") + " en commentaire !" + (S.chatOn ? " 1 seule réponse compte" : "") + "</div><div class=\"win\" id=\"win\" hidden></div>" + (S.chatOn ? "<div class=\"stat\" id=\"stat\">💬 0 réponse</div>" : "") : "");
   }
   function fitQ(scene) {
     fit($("#qt"), 330, 74, 50);
@@ -733,7 +754,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     runId++; clearTimeout(curTimer);
     try { if (synth) synth.cancel(); } catch (e) {}
     $("#preroll").hidden = true; $("#endsheet").hidden = true; wrap.hidden = true;
-    $("#liveBar").hidden = true; $("#addSheet").hidden = true; closeBoard(); curQ = false;
+    $("#liveBar").hidden = true; $("#addSheet").hidden = true; closeBoard(); curQ = false; round = null; chatClose();
     renderScores();
     try { if (wake) { wake.release(); wake = null; } } catch (e) {}
   }
@@ -757,11 +778,19 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   function ranking() {
     return Object.keys(scores).map(function (k) { return scores[k]; }).sort(function (a, b) { return b.p - a.p || a.t - b.t; });
   }
-  function addPoints(name, pts) {
+  function addPoints(name, pts, key, auto) {
     name = normName(name); if (!name) return null;
-    var k = name.toLowerCase(), r = scores[k];
+    var k = key;
+    if (!k) {
+      var low = name.toLowerCase();
+      k = Object.keys(scores).filter(function (x) { return scores[x].n.toLowerCase() === low; })[0] || low;
+    }
+    var r = scores[k];
     if (!r) r = scores[k] = { n: name, p: 0, t: 0 };
-    r.p += pts; r.t = Date.now(); lastAdd = { k: k, pts: pts }; saveScores(); return r;
+    if (auto) r.n = name;
+    r.p += pts; r.t = Date.now();
+    if (!auto) lastAdd = { k: k, pts: pts };
+    saveScores(); return r;
   }
   function undoLast() {
     if (!lastAdd) return null;
@@ -850,6 +879,88 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   };
   renderScores();
 
+  /* ---------- chat TikTok (via le relais) ---------- */
+  var chat = { ws: null, want: false, retry: null, state: "off" };
+  var round = null; // { open, n, choices, answers: [{ k, name, a }], seen: {} }
+  function cleanUser(s) { return String(s || "").trim().replace(/^https?:\/\/(www\.)?tiktok\.com\//i, "").replace(/^@+/, "").replace(/\/.*$/, ""); }
+  function relayWsUrl() {
+    var u = String(S.relay || "").trim().replace(/\/+$/, "");
+    if (!u) return "";
+    if (!/^[a-z]+:\/\//i.test(u)) u = "https://" + u;
+    return u.replace(/^http/i, "ws") + "/?user=" + encodeURIComponent(cleanUser(S.ttUser));
+  }
+  function chatSet(st, txt) {
+    chat.state = st;
+    var el = $("#chatState"); el.textContent = txt || ""; el.setAttribute("data-s", st);
+    var b = $("#bChat"); b.setAttribute("data-s", st);
+    b.textContent = st === "connected" ? "Chat ✓" : st === "error" ? "Chat ✕" : "Chat …";
+    b.title = txt || "";
+  }
+  function chatClose() {
+    chat.want = false; clearTimeout(chat.retry);
+    if (chat.ws) { var w = chat.ws; chat.ws = null; try { w.close(); } catch (e) {} }
+    chatSet("off", "");
+  }
+  function chatConnect() {
+    chatClose(); chat.want = true;
+    var url = relayWsUrl();
+    if (!url || !cleanUser(S.ttUser)) { chat.want = false; chatSet("error", "Renseigne ton pseudo TikTok et l'adresse du relais."); return; }
+    chatSet("waiting", "Connexion au relais… (le premier démarrage peut prendre une minute)");
+    var ws;
+    try { ws = new WebSocket(url); } catch (e) { chat.want = false; chatSet("error", "Adresse du relais invalide."); return; }
+    chat.ws = ws;
+    ws.onmessage = function (ev) {
+      if (chat.ws !== ws) return;
+      var m; try { m = JSON.parse(ev.data); } catch (e) { return; }
+      if (m.type === "chat") onChat(m);
+      else if (m.type === "status") chatSet(m.state === "connected" ? "connected" : m.state === "error" ? "error" : "waiting", m.message || "");
+    };
+    ws.onclose = function () {
+      if (chat.ws !== ws) return;
+      chat.ws = null;
+      if (chat.want) {
+        if (chat.state !== "error") chatSet("waiting", "Relais injoignable, nouvelle tentative…");
+        chat.retry = setTimeout(function () { if (chat.want) chatConnect(); }, 5000);
+      }
+    };
+  }
+  function plain(t) { return String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+  function parseAnswer(text, choices) {
+    var t = plain(text); if (!t) return -1;
+    var m = t.match(/^(?:(?:reponse|rep|la|le|c est|cest)\s+)*([a-d])$/);
+    if (m) { var i = "abcd".indexOf(m[1]); return i < choices.length ? i : -1; }
+    for (var j = 0; j < choices.length; j++) if (plain(choices[j]) === t) return j;
+    return -1;
+  }
+  function onChat(m) {
+    if (!round || !round.open) return;
+    var a = parseAnswer(m.text, round.choices); if (a < 0) return;
+    var k = "tt:" + String(m.id || m.name).toLowerCase();
+    if (round.seen[k]) return; // une seule réponse par personne et par question
+    round.seen[k] = 1;
+    round.answers.push({ k: k, name: m.name || m.id, a: a });
+    var st = $("#stat"); if (st) st.textContent = "💬 " + round.answers.length + " réponse" + (round.answers.length > 1 ? "s" : "");
+  }
+  function scoreRound(good) {
+    if (!round) return [];
+    round.open = false;
+    var ok = round.answers.filter(function (x) { return x.a === good; });
+    ok.forEach(function (x, i) { addPoints(x.name, i === 0 ? 3 : i < 3 ? 2 : 1, x.k, true); });
+    var st = $("#stat");
+    if (st) st.textContent = round.answers.length ? "✅ " + ok.length + " bonne" + (ok.length > 1 ? "s" : "") + " réponse" + (ok.length > 1 ? "s" : "") + " sur " + round.answers.length : "";
+    if (ok.length) renderScores();
+    return ok;
+  }
+  $("#chatOn").checked = !!S.chatOn;
+  $("#chatFields").hidden = !S.chatOn;
+  $("#ttUser").value = S.ttUser || "";
+  $("#relayUrl").value = S.relay || "";
+  $("#chatOn").onchange = function () { S.chatOn = this.checked; save(); $("#chatFields").hidden = !S.chatOn; if (!S.chatOn) chatClose(); };
+  $("#ttUser").oninput = function () { S.ttUser = cleanUser(this.value); save(); };
+  $("#relayUrl").oninput = function () { S.relay = this.value.trim(); save(); };
+  $("#chatTest").onclick = chatConnect;
+  $("#bChat").onclick = chatConnect;
+
   /* ---------- live non-stop ---------- */
   async function live() {
     unlockAudio();
@@ -857,6 +968,8 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     var ok = async function (p) { await p; if (my !== runId) throw 0; };
     try {
       $("#endsheet").hidden = true; $("#addSheet").hidden = true; wrap.hidden = false; $("#liveBar").hidden = false;
+      $("#bChat").hidden = !S.chatOn;
+      if (S.chatOn && !chat.ws) chatConnect();
       var keys = S.theme === "random" ? KEYS : [S.theme], queue = [], last = null, num = 0, lastBoard = Date.now();
       var T0 = BANK[keys[0]]; setPalette(T0.pal); fitStage(); setScene("");
       try { await ok(document.fonts.ready); } catch (e) { if (my !== runId) return; }
@@ -878,17 +991,20 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         setPalette(T.pal);
         var scene = setScene(qScene(T, num - 1, 0, q, true));
         fitQ(scene);
+        round = S.chatOn ? { open: true, choices: q.choices, answers: [], seen: {} } : null;
         var letters = q.choices.map(function (c, j) { return "ABCD"[j] + " : " + speakable(c) + "."; }).join(" ");
         await ok(sleep(400));
         await ok(Promise.all([say(speakable(q.q) + " " + letters), sleep(1500)]));
         await ok(sleep(250));
         await ok(countdown(S.liveCount, my));
+        var okList = scoreRound(q.a);
+        if (!curWinner && okList.length) setWinner(okList[0].name);
         scene.classList.add("rev"); chime();
         await ok(sleep(450));
-        if (curWinner) await ok(say("Winner : " + curWinner + " !"));
+        if (curWinner) await ok(say("Winner : " + curWinner + " !" + (okList.length > 1 ? " " + okList.length + " bonnes réponses." : "")));
         await ok(Promise.all([say("ABCD"[q.a] + ", " + speakable(q.choices[q.a]) + ". " + speakable(q.f)), sleep(2500)]));
         await ok(sleep(2200));
-        curQ = false;
+        curQ = false; round = null;
       }
     } catch (e) { if (e !== 0) { console.error(e); stopAll(); } }
   }
