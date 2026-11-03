@@ -111,6 +111,7 @@ ol.steps li::marker { font-weight: 800; color: var(--accent); }
 .win span { overflow: hidden; text-overflow: ellipsis; }
 .rev .win { display: flex; animation: sin .3s ease-out both; }
 #lbLayer { position: absolute; inset: 0; z-index: 3; background: linear-gradient(180deg, var(--s1, #0e346e), var(--s2, #061634)); }
+#lbClose { position: absolute; top: max(14px, env(safe-area-inset-top, 0px)); right: max(14px, env(safe-area-inset-right, 0px)); z-index: 2; border: 0; border-radius: 999px; padding: 0 18px; min-height: 46px; font: 700 16px var(--body); background: rgba(6, 12, 24, .78); color: #fff; }
 #lbIn { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 0 0; font-family: var(--display); color: #fff; }
 .lb-t { position: absolute; left: 0; right: 0; top: 200px; text-align: center; font-size: 124px; font-weight: 800; color: var(--sacc); line-height: 1.1; }
 .lb-s { position: absolute; left: 0; right: 0; top: 350px; text-align: center; font-size: 46px; font-weight: 600; opacity: .9; }
@@ -219,7 +220,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 
 <div id="stageWrap" hidden>
   <div id="stage"><div id="deco"></div><div id="scene"></div></div>
-  <div id="lbLayer" hidden><div id="lbIn"></div></div>
+  <div id="lbLayer" hidden><div id="lbIn"></div><button id="lbClose" type="button" aria-label="Fermer le classement">✕ Fermer</button></div>
   <div id="liveBar" hidden>
     <button id="bChat" type="button" hidden>Chat</button>
     <button id="bBoard" type="button">Classement</button>
@@ -865,6 +866,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   };
   $("#bBoard").onclick = function () { showBoard(12000); };
   $("#lbLayer").onclick = closeBoard;
+  $("#lbClose").onclick = function (e) { e.stopPropagation(); try { if (synth) synth.cancel(); } catch (x) {} closeBoard(); };
   var stopArm = null;
   $("#bStop").onclick = function () {
     var b = this;
@@ -1066,7 +1068,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     try { navigator.clipboard.writeText(ta.value).then(function () { btn.textContent = "Copié"; }, fallback); } catch (e) { fallback(); }
   };
   var lp = null;
-  wrap.addEventListener("pointerdown", function (e) { if (e.target.closest(".overlay, #liveBar")) return; lp = setTimeout(stopAll, 800); });
+  wrap.addEventListener("pointerdown", function (e) { if (e.target.closest(".overlay, #liveBar, #lbClose")) return; lp = setTimeout(stopAll, 800); });
   ["pointerup", "pointercancel", "pointerleave"].forEach(function (ev) { wrap.addEventListener(ev, function () { clearTimeout(lp); }); });
 })();
 </script>
