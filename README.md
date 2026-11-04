@@ -40,6 +40,22 @@ Un petit **relais** (dossier `relay/`) lit les commentaires de ton live en temps
 - le nombre de réponses s'affiche pendant la question, puis le nombre de bonnes réponses ;
 - le bouton **+ Point** manuel reste disponible.
 
+### 🎁 Effets des cadeaux TikTok
+Avec les points automatiques, chaque cadeau reçu en live déclenche un effet selon sa valeur (option « Effets des cadeaux TikTok » dans les réglages) :
+
+| Cadeau (exemples) | Pièces | Effet |
+|---|---|---|
+| 🌹 Rose, GG | 1 – 4 | +1 point par cadeau (les combos comptent : Rose ×5 = +5) |
+| 🫰 Cœur avec les doigts | 5 – 9 | 🛡️ bouclier contre les malus pendant 5 questions |
+| 🌹 Rosa | 10 – 19 | ⭐ prochaine bonne réponse ×2 |
+| 🧴 Parfum | 20 – 29 | 💡 joker 50/50 : 2 mauvaises réponses disparaissent pour tous |
+| 🍩 Donut | 30 – 99 | ❄️ gèle le joueur juste devant (0 point à la question suivante) |
+| 🫶 Cœurs avec les mains, 🎉 Confettis | 100 – 499 | 💣 vole 3 points au joueur juste devant |
+| 🔫 Money Gun… | 500 et + | 👑 choisit le thème : 5 questions bonus ×2 |
+| 🌌 Galaxie | — | remet le classement à zéro (annulable avec **+ Point → Annuler la Galaxie**) |
+
+Les effets sont calculés selon la valeur en pièces envoyée par TikTok, donc ils marchent même si le nom d'un cadeau change. Les prix des cadeaux peuvent varier selon le pays. Les points des bonnes réponses restent la source principale : on peut gagner sans rien envoyer. Il n'y a ni hasard payant ni récompense réelle.
+
 ### Installation depuis ton téléphone (une seule fois, gratuit)
 1. Crée un compte sur [render.com](https://render.com) avec ton compte GitHub.
 2. Touche ce bouton, puis **Apply** :

@@ -97,7 +97,12 @@ wss.on("connection", (ws, req) => {
     send({ type: "status", state: "connected", message: "Mode démo : faux commentaires." });
     const names = ["Lina", "Yanis", "Chloé", "Max_93", "Inès", "Tom", "Sarah ✨", "Noah", "Jade", "Ethan", "Léa", "Adam"];
     const extra = ["trop dur", "salut !", "😂😂", "je sais pas", "go go go"];
+    const gifts = [["Rose", 1], ["Finger Heart", 5], ["Rosa", 10], ["Perfume", 20], ["Doughnut", 30], ["Hand Hearts", 100], ["Money Gun", 500], ["Galaxy", 1000]];
     demoT = setInterval(() => {
+      if (Math.random() < 0.06) {
+        const g = gifts[Math.floor(Math.random() * (Math.random() < 0.9 ? 6 : gifts.length))], n0 = names[Math.floor(Math.random() * names.length)];
+        send({ type: "gift", id: n0.toLowerCase().replace(/[^a-z0-9_]/g, ""), name: n0, gift: g[0], coins: g[1], count: g[1] === 1 ? 1 + Math.floor(Math.random() * 5) : 1, t: Date.now() });
+      }
       const n = names[Math.floor(Math.random() * names.length)];
       const r = Math.random();
       const text = r < 0.7 ? "ABCD"[Math.floor(Math.random() * 4)] : r < 0.85 ? String(1 + Math.floor(Math.random() * 3)) : extra[Math.floor(Math.random() * extra.length)];
@@ -109,7 +114,7 @@ wss.on("connection", (ws, req) => {
     if (closed) return;
     if (user === "demo") { startDemo(); return; }
     send({ type: "status", state: "waiting", message: "Connexion au live de @" + user + "…" });
-    const conn = new TikTokLiveConnection(user, { signApiKey: API_KEY, processInitialData: false });
+    const conn = new TikTokLiveConnection(user, { signApiKey: API_KEY, processInitialData: false, enableExtendedGiftInfo: true });
     tt = conn;
     conn.on(WebcastEvent.CHAT, (d) => {
       // Selon les versions de TikTok, le texte est dans « content » ou « comment »,
@@ -122,6 +127,22 @@ wss.on("connection", (ws, req) => {
       if (!text) return;
       if (!id && !name) return;
       send({ type: "chat", id: id || name, name: name || id, text, t: Date.now() });
+    });
+    // Cadeaux : on attend la fin d'un combo (giftType 1) pour envoyer le total.
+    conn.on(WebcastEvent.GIFT, (d) => {
+      const u = (d && d.user) || {};
+      const det = (d && d.giftDetails) || {};
+      const ext = (d && d.extendedGiftInfo) || {};
+      const type = det.giftType != null ? det.giftType : d.giftType;
+      if (type === 1 && !d.repeatEnd) return;
+      const handle = String(u.uniqueId || u.displayId || "").trim();
+      const id = handle || String(u.userId || u.id || "").trim();
+      const name = String(u.nickname || handle || "").trim();
+      const gift = String(det.giftName || ext.name || d.giftName || "Cadeau");
+      const coins = Number(det.diamondCount || ext.diamond_count || d.diamondCount || 0);
+      const count = Math.max(1, Number(d.repeatCount || 1));
+      if (!id && !name) return;
+      send({ type: "gift", id: id || name, name: name || id, gift, coins, count, t: Date.now() });
     });
     conn.on(WebcastEvent.STREAM_END, () => {
       send({ type: "status", state: "ended", message: "Le live est terminé." });

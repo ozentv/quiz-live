@@ -162,6 +162,15 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 .pod-col .pt { font-size: 44px; margin-top: 10px; }
 .pod-nm { position: absolute; width: 330px; text-align: center; font-size: 46px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pod-f { position: absolute; left: 80px; right: 80px; top: 1600px; text-align: center; font-size: 44px; font-weight: 700; }
+#giftToast { position: absolute; left: 60px; right: 60px; top: 150px; z-index: 4; display: none; padding: 26px 34px; border-radius: 40px; background: #0b0d1c; border: 4px solid #ffd60a; text-align: center; font-size: 50px; font-weight: 800; line-height: 1.2; box-shadow: 0 20px 50px rgba(0, 0, 0, .45); }
+#giftToast.on { display: block; animation: sin .25s ease-out both; }
+#giftToast small { display: block; font-size: 36px; font-weight: 700; color: #ffd60a; margin-top: 8px; }
+#giftToast.galaxy { border-color: #b388ff; background: linear-gradient(135deg, #28105a, #080a28); font-size: 58px; }
+.card.gone { opacity: .12 !important; }
+.card.gone .lb { text-decoration: line-through; }
+.gift-tbl { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.gift-tbl td { padding: 4px 6px; border-top: 1px solid var(--line); vertical-align: top; }
+.gift-tbl td:first-child { white-space: nowrap; font-weight: 700; }
 .stat { position: absolute; left: 80px; width: 920px; top: 1700px; text-align: center; font-size: 40px; font-weight: 800; opacity: .92; }
 @media (prefers-reduced-motion: reduce) { .scene, .rev .fact { animation: none; } }
 </style>
@@ -202,6 +211,17 @@ ol.sc b { font-variant-numeric: tabular-nums; }
           <div class="chat-last" id="chatLast" aria-live="polite"></div>
           <div class="chat-test"><span class="lab">Décalage du live TikTok</span><div class="seg" id="segLag" role="group" aria-label="Décalage du live"></div></div>
           <div class="chat-test"><span class="lab">Le chat vote pour le thème</span><div class="seg" id="segVote" role="group" aria-label="Vote du chat"></div></div>
+          <label class="switch"><input type="checkbox" id="giftsOn"> Effets des cadeaux TikTok</label>
+          <table class="gift-tbl" id="giftTbl"><tbody>
+            <tr><td>1 – 4 pièces</td><td>🌹 Rose, GG… : +1 point par cadeau</td></tr>
+            <tr><td>5 – 9</td><td>🫰 Cœur avec les doigts : 🛡️ bouclier 5 questions</td></tr>
+            <tr><td>10 – 19</td><td>🌹 Rosa : ⭐ prochaine bonne réponse ×2</td></tr>
+            <tr><td>20 – 29</td><td>🧴 Parfum : 💡 joker 50/50 pour tous</td></tr>
+            <tr><td>30 – 99</td><td>🍩 Donut : ❄️ gèle le joueur juste devant</td></tr>
+            <tr><td>100 – 499</td><td>🫶 Cœurs, 🎉 Confettis : 💣 vole 3 points au joueur devant</td></tr>
+            <tr><td>500 et +</td><td>🔫 Money Gun… : 👑 choisit le thème (5 questions ×2)</td></tr>
+            <tr><td>Galaxie</td><td>🌌 remet le classement à zéro (annulable avec + Point)</td></tr>
+          </tbody></table>
           <p class="note" style="margin:0">Le relais lit les commentaires : la première lettre A, B, C ou D de chaque personne compte. Le plus rapide gagne 3 points, les deux suivants 2 points, les autres bons 1 point. Écris <b>demo</b> comme pseudo pour tester sans être en live.</p>
         </div>
       </div>
@@ -247,7 +267,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 <div class="dock"><button class="btn" id="go" type="button">Lancer le quiz</button></div>
 
 <div id="stageWrap" hidden>
-  <div id="stage"><div id="deco"></div><div id="scene"></div></div>
+  <div id="stage"><div id="deco"></div><div id="scene"></div><div id="giftToast"></div></div>
   <div id="lbLayer" hidden><div id="lbIn"></div><button id="lbClose" type="button" aria-label="Fermer le classement">✕ Fermer</button></div>
   <div id="liveBar" hidden>
     <button id="bChat" type="button" hidden>Chat</button>
@@ -260,7 +280,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     <input id="nm" type="text" placeholder="Pseudo TikTok" autocomplete="off" autocapitalize="off" autocorrect="off" enterkeyhint="done" aria-label="Pseudo">
     <div class="nmrow" id="recent"></div>
     <p id="addMsg">Le premier pseudo validé sur une question devient le WINNER affiché à l'écran.</p>
-    <div class="acts"><button class="btn" id="p1" type="button">+1 point</button><button class="btn" id="p3" type="button">+3 points</button><button class="btn ghost" id="undo" type="button">Annuler</button><button class="btn ghost" id="addClose" type="button">Fermer</button></div>
+    <div class="acts"><button class="btn" id="p1" type="button">+1 point</button><button class="btn" id="p3" type="button">+3 points</button><button class="btn ghost" id="undo" type="button">Annuler</button><button class="btn ghost" id="undoGalaxy" type="button" hidden>Annuler la Galaxie</button><button class="btn ghost" id="addClose" type="button">Fermer</button></div>
   </div>
   <div class="overlay" id="preroll" hidden>
     <h3>Lance l'enregistrement d'écran maintenant</h3>
@@ -1361,7 +1381,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   };
   var KEYS = Object.keys(BANK);
   var RATES = [["Lente", 0.9], ["Normale", 1.05], ["Rapide", 1.2]];
-  var S = { theme: "random", n: 4, count: 3, voiceOn: true, voiceName: "", rate: 1.05, mode: "video", liveCount: 15, boardMin: 5, chatOn: false, ttUser: "", relay: "", lag: 6, themes: null, diff: "normal", bonusEvery: 5, voteEvery: 0 };
+  var S = { theme: "random", n: 4, count: 3, voiceOn: true, voiceName: "", rate: 1.05, mode: "video", liveCount: 15, boardMin: 5, chatOn: false, ttUser: "", relay: "", lag: 6, giftsOn: true, themes: null, diff: "normal", bonusEvery: 5, voteEvery: 0 };
   try { Object.assign(S, JSON.parse(localStorage.getItem("sq-set") || "{}")); } catch (e) {}
   if (!Array.isArray(S.themes)) S.themes = S.theme && S.theme !== "random" && BANK[S.theme] ? [S.theme] : [];
   S.themes = S.themes.filter(function (k) { return BANK[k]; });
@@ -1795,6 +1815,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         $("#chatLast").innerHTML = "Commentaires reçus : <b>" + chat.count + "</b><br>" + chat.last.map(function (x) { return "« " + esc(String(x.text).slice(0, 40)) + " » (" + esc(x.name || x.id) + ")"; }).join("<br>");
         onChat(m);
       }
+      else if (m.type === "gift") onGift(m);
       else if (m.type === "status") chatSet(m.state === "connected" ? "connected" : m.state === "error" ? "error" : "waiting", m.message || "");
     };
     ws.onclose = function () {
@@ -1840,6 +1861,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     if (vote && vote.open) {
       var vi = parseVote(m.text, vote.keys); if (vi < 0) return;
       var vk = "tt:" + String(m.id || m.name).toLowerCase();
+      if (vote.only && vk !== vote.only) return;
       if (vote.seen[vk]) return; vote.seen[vk] = 1; vote.counts[vi]++;
       var ve = $("#vc" + vi); if (ve) ve.textContent = vote.counts[vi];
       return;
@@ -1859,17 +1881,94 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     var ok = round.answers.filter(function (x) { return x.a === good; }), okKeys = {};
     ok.forEach(function (x, i) {
       if (!scores[x.k] || scores[x.k].p <= 0) res.news.push(x.name);
-      addPoints(x.name, (i === 0 ? 3 : i < 3 ? 2 : 1) * (mult || 1), x.k, true);
+      var gain = (i === 0 ? 3 : i < 3 ? 2 : 1) * (mult || 1);
+      if (fx.frozen[x.k]) gain = 0;
+      else if (fx.dbl[x.k]) { gain *= 2; delete fx.dbl[x.k]; }
+      if (gain) addPoints(x.name, gain, x.k, true);
       okKeys[x.k] = 1; streak[x.k] = (streak[x.k] || 0) + 1;
       var n = streak[x.k]; if (n === 3 || n === 5 || (n >= 10 && n % 5 === 0)) res.streaks.push({ name: x.name, n: n });
       res.push(x);
     });
     Object.keys(streak).forEach(function (k) { if (!okKeys[k]) delete streak[k]; });
+    fxAfterRound();
     var st = $("#stat");
     if (st) st.textContent = round.answers.length ? "✅ " + ok.length + " bonne" + (ok.length > 1 ? "s" : "") + " réponse" + (ok.length > 1 ? "s" : "") + " sur " + round.answers.length : "";
     if (ok.length) { renderScores(); renderTop3(); }
     return res;
   }
+  /* ---------- effets des cadeaux ---------- */
+  var fx = { shield: {}, dbl: {}, frozen: {}, joker: false, pick: null, galaxyBackup: null };
+  var toastQ = [], toastBusy = false;
+  function toast(html, cls) {
+    toastQ.push([html, cls || ""]);
+    if (toastBusy) return;
+    (function next() {
+      var it = toastQ.shift(), el = $("#giftToast");
+      if (!it) { toastBusy = false; el.className = ""; return; }
+      toastBusy = true; el.innerHTML = it[0]; el.className = "on " + it[1];
+      setTimeout(function () { el.className = ""; setTimeout(next, 150); }, it[1] === "galaxy" ? 5000 : 3200);
+    })();
+  }
+  function fxAfterRound() {
+    fx.frozen = {};
+    Object.keys(fx.shield).forEach(function (k) { if (--fx.shield[k] <= 0) delete fx.shield[k]; });
+  }
+  function playerAbove(k) {
+    var keys = Object.keys(scores).sort(function (a, b) { return scores[b].p - scores[a].p || scores[a].t - scores[b].t; });
+    var i = keys.indexOf(k);
+    if (i === 0) return null;                                        // déjà premier
+    if (i < 0) return keys.length ? keys[keys.length - 1] : null;    // pas encore classé : le dernier du classement
+    return keys[i - 1];
+  }
+  function applyJoker() {
+    var cards = sceneBox.querySelectorAll(".card"), sc = sceneBox.querySelector(".scene");
+    if (!round || !round.open || !sc || sc.classList.contains("rev") || cards.length < 4) { fx.joker = true; return false; }
+    var bad = []; Array.prototype.forEach.call(cards, function (c) { if (!c.classList.contains("good")) bad.push(c); });
+    shuffle(bad).slice(0, 2).forEach(function (c) { c.classList.add("gone"); });
+    fx.joker = false; return true;
+  }
+  function onGift(m) {
+    if (!S.giftsOn || S.mode !== "live" || wrap.hidden) return;
+    var k = "tt:" + String(m.id || m.name).toLowerCase(), who = esc(m.name || m.id), coins = Number(m.coins) || 0, n = Math.max(1, Number(m.count) || 1);
+    var gname = esc(m.gift || "cadeau") + (n > 1 ? " ×" + n : "");
+    var rec = scores[k]; if (rec) { rec.c = (rec.c || 0) + coins * n; saveScores(); }
+    if (/galax/i.test(m.gift || "")) {
+      fx.galaxyBackup = JSON.parse(JSON.stringify(scores));
+      scores = {}; streak = {}; lastAdd = null; saveScores(); renderScores(); renderTop3();
+      $("#undoGalaxy").hidden = false;
+      sweep(); setTimeout(chime, 400);
+      toast("🌌 " + who + " envoie une GALAXIE !<small>Le classement repart à zéro</small>", "galaxy");
+      return;
+    }
+    if (coins >= 500) { fx.pick = { k: k, name: m.name || m.id }; chime(); toast("👑 " + who + " — " + gname + "<small>choisit le prochain thème : 5 questions ×2</small>"); return; }
+    if (coins >= 100) {
+      var t = playerAbove(k);
+      if (!t) { addPoints(m.name || m.id, 3, k, true); toast("💣 " + who + " — " + gname + "<small>déjà premier : +3 points</small>"); }
+      else if (fx.shield[t]) toast("💣 " + who + " attaque " + esc(scores[t].n) + "<small>🛡️ bloqué par le bouclier !</small>");
+      else { var v = Math.min(3, scores[t].p); scores[t].p -= v; addPoints(m.name || m.id, v, k, true); toast("💣 " + who + " vole " + v + " point" + (v > 1 ? "s" : "") + " à " + esc(scores[t].n) + " !<small>" + gname + "</small>"); }
+      renderScores(); renderTop3(); sweep(); return;
+    }
+    if (coins >= 30) {
+      var f = playerAbove(k);
+      if (!f) toast("❄️ " + who + " — " + gname + "<small>personne devant à geler !</small>");
+      else if (fx.shield[f]) toast("❄️ " + who + " veut geler " + esc(scores[f].n) + "<small>🛡️ bloqué par le bouclier !</small>");
+      else { fx.frozen[f] = 1; toast("❄️ " + who + " gèle " + esc(scores[f].n) + " !<small>0 point à la prochaine question</small>"); }
+      tick(true); return;
+    }
+    if (coins >= 20) { var now = applyJoker(); toast("💡 " + who + " — " + gname + "<small>Joker 50/50 " + (now ? "pour tout le monde !" : "à la prochaine question") + "</small>"); chime(); return; }
+    if (coins >= 10) { fx.dbl[k] = 1; toast("⭐ " + who + " — " + gname + "<small>prochaine bonne réponse ×2</small>"); chime(); return; }
+    if (coins >= 5) { fx.shield[k] = 5; toast("🛡️ " + who + " — " + gname + "<small>bouclier pendant 5 questions</small>"); chime(); return; }
+    addPoints(m.name || m.id, n, k, true); renderScores(); renderTop3();
+    toast("🎁 " + who + " — " + gname + "<small>+" + n + " point" + (n > 1 ? "s" : "") + "</small>"); tick(false);
+  }
+  $("#giftsOn").checked = S.giftsOn !== false;
+  $("#giftTbl").hidden = !$("#giftsOn").checked;
+  $("#giftsOn").onchange = function () { S.giftsOn = this.checked; save(); $("#giftTbl").hidden = !this.checked; };
+  $("#undoGalaxy").onclick = function () {
+    if (!fx.galaxyBackup) return;
+    scores = fx.galaxyBackup; fx.galaxyBackup = null; saveScores(); renderScores(); renderTop3();
+    this.hidden = true; msg("Classement d'avant la Galaxie rétabli.");
+  };
   function listNames(a) { a = a.slice(0, 3); return a.length < 2 ? a.join("") : a.slice(0, -1).join(", ") + " et " + a[a.length - 1]; }
   function newsLine(res) {
     var parts = [], voice = [];
@@ -1891,14 +1990,14 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   seg($("#segVote"), [["Non", 0], ["Toutes les 5", 5], ["Toutes les 10", 10]], function () { return S.voteEvery; }, function (v) { S.voteEvery = v; });
 
   /* ---------- vote du chat ---------- */
-  async function runVote(keys, my, ok) {
-    var cand = shuffle(keys.slice()).slice(0, 3), dur = 15;
+  async function runVote(keys, my, ok, only) {
+    var cand = shuffle((keys.length > 1 ? keys : KEYS).slice()).slice(0, 3), dur = 15;
     setPalette(BANK[cand[0]].pal);
     var cards = cand.map(function (k, i) { return "<div class=\"vcard\" id=\"vcard" + i + "\" style=\"top:" + (720 + i * 190) + "px\"><div class=\"bd\">" + (i + 1) + "</div><div class=\"lb\">" + esc(BANK[k].title) + "</div><div class=\"vc\" id=\"vc" + i + "\">0</div></div>"; }).join("");
-    setScene("<div class=\"top3\" id=\"top3\">" + top3Text() + "</div><div class=\"vote-t\">VOTE !</div><div class=\"vote-s\">Écris " + cand.map(function (_, i) { return i + 1; }).join(", ").replace(/, (\d)$/, " ou $1") + " pour choisir le prochain thème</div>" + cards + "<div class=\"vote-n\" id=\"voteN\">" + dur + "</div>");
-    vote = { open: true, keys: cand, counts: cand.map(function () { return 0; }), seen: {} };
+    setScene("<div class=\"top3\" id=\"top3\">" + top3Text() + "</div><div class=\"vote-t\">VOTE !</div><div class=\"vote-s\">" + (only ? "👑 " + esc(only.name) + ", écris " : "Écris ") + cand.map(function (_, i) { return i + 1; }).join(", ").replace(/, (\d)$/, " ou $1") + " pour choisir le prochain thème</div>" + cards + "<div class=\"vote-n\" id=\"voteN\">" + dur + "</div>");
+    vote = { open: true, keys: cand, counts: cand.map(function () { return 0; }), seen: {}, only: only ? only.k : null };
     sweep();
-    await ok(say("Votez pour le prochain thème ! " + cand.map(function (k, i) { return (i + 1) + " : " + BANK[k].title + "."; }).join(" ")));
+    await ok(say((only ? only.name + ", choisis le prochain thème ! " : "Votez pour le prochain thème ! ") + cand.map(function (k, i) { return (i + 1) + " : " + BANK[k].title + "."; }).join(" ")));
     var end = Date.now() + dur * 1000;
     while (Date.now() < end) {
       var n = $("#voteN"); if (n) n.textContent = Math.ceil((end - Date.now()) / 1000);
@@ -1929,7 +2028,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       $("#bChat").hidden = !S.chatOn;
       if (S.chatOn && !chat.ws) chatConnect();
       var keys = selKeys(), queue = [], last = null, num = 0, lastBoard = Date.now(), used = {}, forced = null;
-      streak = {}; vote = null;
+      streak = {}; vote = null; fx.shield = {}; fx.dbl = {}; fx.frozen = {}; fx.joker = false; fx.pick = null;
       var T0 = BANK[keys[0]]; setPalette(T0.pal); fitStage(); setScene("");
       try { await ok(document.fonts.ready); } catch (e) { if (my !== runId) return; }
       try { if (navigator.wakeLock) navigator.wakeLock.request("screen").then(function (w) { wake = w; }, function () {}); } catch (e) {}
@@ -1945,10 +2044,15 @@ ol.sc b { font-variant-numeric: tabular-nums; }
           await ok(sleep(300)); lastBoard = Date.now();
         }
         // Vote du chat pour le thème, au début puis toutes les N questions
-        if (S.voteEvery && S.chatOn && chat.state === "connected" && keys.length > 1 && num % S.voteEvery === 0 && !forced) {
+        if (fx.pick) {
+          var who = fx.pick; fx.pick = null;
+          var pk = await runVote(keys, my, ok, who);
+          if (pk) forced = { key: pk, left: 5, bonus: true };
+        } else if (S.voteEvery && S.chatOn && chat.state === "connected" && keys.length > 1 && num % S.voteEvery === 0 && !forced) {
           var chosen = await runVote(keys, my, ok);
           if (chosen) forced = { key: chosen, left: S.voteEvery };
         }
+        var forcedBonus = !!(forced && forced.bonus);
         var it;
         if (forced) {
           var fk = forced.key, free = BANK[fk].q.map(function (_, i) { return i; }).filter(function (i) { return !used[fk + ":" + i]; });
@@ -1960,12 +2064,13 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         }
         used[it[0] + ":" + it[1]] = 1; last = it;
         var T = BANK[it[0]], q = prep(T.q[it[1]]); num++;
-        var bonus = !!(S.bonusEvery && num % S.bonusEvery === 0);
+        var bonus = forcedBonus || !!(S.bonusEvery && num % S.bonusEvery === 0);
         curWinner = null; curQ = true; curBonus = bonus;
         setPalette(T.pal);
         var scene = setScene(qScene(T, num - 1, 0, q, true, bonus));
         fitQ(scene, q);
         round = S.chatOn ? { open: true, choices: q.choices, answers: [], seen: {} } : null;
+        if (fx.joker) applyJoker();
         await ok(sleep(400));
         if (bonus) { sweep(); await ok(say("Question bonus ! Points doublés !")); }
         await ok(Promise.all([say(askText(q)), sleep(1500)]));
