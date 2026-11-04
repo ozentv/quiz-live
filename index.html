@@ -182,6 +182,22 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 .gf-row .n small { display: block; font-size: 30px; font-weight: 600; opacity: .75; }
 .gf-row .x { flex: none; max-width: 430px; text-align: right; font-size: 38px; font-weight: 800; color: #ffd60a; line-height: 1.1; }
 .gf-f { position: absolute; left: 80px; right: 80px; top: 1640px; text-align: center; font-size: 40px; font-weight: 700; }
+.card { overflow: hidden; }
+.card > *:not(.pb) { position: relative; z-index: 1; }
+.card .pb { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: rgba(255, 255, 255, .2); transition: width .7s ease-out; }
+.rev .card.good .pb { background: rgba(255, 255, 255, .28); }
+.card .pc { flex: none; font-size: 40px; font-weight: 800; opacity: 0; transition: opacity .4s; }
+.card .pc.on { opacity: 1; }
+.likes { position: absolute; left: 330px; right: 330px; top: 96px; height: 36px; border-radius: 18px; background: rgba(0, 0, 0, .35); border: 2px solid rgba(255, 255, 255, .45); overflow: hidden; }
+.likes i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: linear-gradient(90deg, #ff3d71, #ff8fb1); transition: width .4s; }
+.likes b { position: relative; display: block; text-align: center; font-size: 24px; line-height: 32px; white-space: nowrap; }
+.av { display: inline-block; width: 40px; height: 40px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin: 0 6px 0 4px; background: rgba(255, 255, 255, .2); }
+.lb-av { flex: none; width: 80px; height: 80px; border-radius: 50%; object-fit: cover; background: rgba(255, 255, 255, .2); }
+.pod-pic { position: absolute; width: 160px; height: 160px; border-radius: 50%; object-fit: cover; border: 6px solid #fff; background: rgba(255, 255, 255, .2); }
+.cf { position: absolute; top: -60px; width: 18px; height: 30px; z-index: 6; animation: cf linear forwards; }
+@keyframes cf { to { transform: translate(var(--dx), 2050px) rotate(var(--r)); } }
+#stage.shake, #lbIn.shake { animation: shake .5s; }
+@keyframes shake { 0%, 100% { translate: 0 0; } 20% { translate: -18px 6px; } 40% { translate: 16px -8px; } 60% { translate: -12px 4px; } 80% { translate: 8px -2px; } }
 #giftToast { position: absolute; left: 60px; right: 60px; top: 150px; z-index: 4; display: none; padding: 26px 34px; border-radius: 40px; background: #0b0d1c; border: 4px solid #ffd60a; text-align: center; font-size: 50px; font-weight: 800; line-height: 1.2; box-shadow: 0 20px 50px rgba(0, 0, 0, .45); }
 #giftToast.on { display: block; animation: sin .25s ease-out both; }
 #giftToast small { display: block; font-size: 36px; font-weight: 700; color: #ffd60a; margin-top: 8px; }
@@ -231,6 +247,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
           <div class="chat-last" id="chatLast" aria-live="polite"></div>
           <div class="chat-test"><span class="lab">Décalage du live TikTok</span><div class="seg" id="segLag" role="group" aria-label="Décalage du live"></div></div>
           <div class="chat-test"><span class="lab">Le chat vote pour le thème</span><div class="seg" id="segVote" role="group" aria-label="Vote du chat"></div></div>
+          <div class="chat-test"><span class="lab">❤️ Likes pour débloquer une question ×3</span><div class="seg" id="segLike" role="group" aria-label="Objectif de likes"></div></div>
           <label class="switch"><input type="checkbox" id="giftsOn"> Effets des cadeaux TikTok</label>
           <table class="gift-tbl" id="giftTbl"><tbody>
             <tr><td>1 – 4 pièces</td><td>🌹 Rose, GG… : +1 point par cadeau</td></tr>
@@ -1415,7 +1432,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   };
   var KEYS = Object.keys(BANK);
   var RATES = [["Lente", 0.9], ["Normale", 1.05], ["Rapide", 1.2]];
-  var S = { theme: "random", n: 4, count: 3, voiceOn: true, voiceName: "", rate: 1.05, mode: "video", liveCount: 15, boardMin: 5, chatOn: false, ttUser: "", relay: "", lag: 6, giftsOn: true, gameOn: true, musicOn: true, musicVol: 1, themes: null, diff: "normal", bonusEvery: 5, voteEvery: 0 };
+  var S = { theme: "random", n: 4, count: 3, voiceOn: true, voiceName: "", rate: 1.05, mode: "video", liveCount: 15, boardMin: 5, chatOn: false, ttUser: "", relay: "", lag: 6, likeGoal: 1000, giftsOn: true, gameOn: true, musicOn: true, musicVol: 1, themes: null, diff: "normal", bonusEvery: 5, voteEvery: 0 };
   try { Object.assign(S, JSON.parse(localStorage.getItem("sq-set") || "{}")); } catch (e) {}
   if (!Array.isArray(S.themes)) S.themes = S.theme && S.theme !== "random" && BANK[S.theme] ? [S.theme] : [];
   S.themes = S.themes.filter(function (k) { return BANK[k]; });
@@ -1797,20 +1814,22 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     return speakable(q.q) + " " + q.choices.map(function (c, j) { return "ABCD"[j] + " : " + speakable(c) + "."; }).join(" ");
   }
   function armHide(scene, q, sec) { if (q.hide) setTimeout(function () { scene.classList.add("show"); tick(false); }, sec * 500); }
+  var pics = {};
+  function avImg(x, cls) { return x && x.pic ? "<img class=\"" + cls + "\" src=\"" + esc(x.pic) + "\" alt=\"\" referrerpolicy=\"no-referrer\" onerror=\"this.style.visibility='hidden'\">" : ""; }
   function top3Text() {
     var r = ranking().slice(0, 3), med = ["🥇", "🥈", "🥉"];
-    return r.map(function (x, i) { return med[i] + " " + esc(x.n) + " " + x.p; }).join("   ");
+    return r.map(function (x, i) { return med[i] + avImg(x, "av") + esc(x.n) + " " + x.p; }).join("   ");
   }
   function renderTop3() { var el = $("#top3"); if (el) el.innerHTML = top3Text(); }
   function qScene(T, qi, n, q, lv, bonus) {
     var bars = ""; for (var i = 0; i < n; i++) bars += "<span class=\"" + (i < qi ? "done" : i === qi ? "cur" : "") + "\"></span>";
     var C = 2 * Math.PI * 98, cards = "";
     q.choices.forEach(function (c, i) {
-      cards += "<div class=\"card " + (i === q.a ? "good" : "dim") + "\" style=\"top:" + (940 + i * 148) + "px\"><div class=\"bd\">" + "ABCD"[i] + "</div><div class=\"lb\">" + esc(c) + "</div>" +
+      cards += "<div class=\"card " + (i === q.a ? "good" : "dim") + "\" style=\"top:" + (940 + i * 148) + "px\">" + (lv && S.chatOn ? "<div class=\"pb\"></div>" : "") + "<div class=\"bd\">" + "ABCD"[i] + "</div><div class=\"lb\">" + esc(c) + "</div>" + (lv && S.chatOn ? "<div class=\"pc\"></div>" : "") +
         "<div class=\"ck\"><svg width=\"30\" height=\"30\" viewBox=\"0 0 30 30\"><path d=\"M5 16 L12 23 L25 8\" fill=\"none\" stroke=\"#2ecc71\" stroke-width=\"5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div></div>";
     });
-    return (lv ? "<div class=\"top3\" id=\"top3\">" + top3Text() + "</div><div class=\"news\" id=\"news\"></div>" + (S.chatOn && S.giftsOn ? "<div class=\"ticker\" id=\"ticker\"><span>🎁 " + GIFT_INFO[tickI % GIFT_INFO.length].join(" ") + "</span></div>" : "") : "") +
-      "<div class=\"hd-pill\">" + esc(T.title) + "</div><div class=\"hd-count" + (bonus ? " bonus" : "") + "\">" + (bonus ? "⭐ BONUS ×2" : lv ? "Q" + (qi + 1) : (qi + 1) + "/" + n) + "</div><div class=\"bars\">" + bars + "</div>" +
+    return (lv ? "<div class=\"top3\" id=\"top3\">" + top3Text() + "</div><div class=\"news\" id=\"news\"></div>" + (S.chatOn && S.giftsOn ? "<div class=\"ticker\" id=\"ticker\"><span>🎁 " + GIFT_INFO[tickI % GIFT_INFO.length].join(" ") + "</span></div>" : "") + (S.chatOn && S.likeGoal ? "<div class=\"likes\" id=\"likes\">" + likesInner() + "</div>" : "") : "") +
+      "<div class=\"hd-pill\">" + esc(T.title) + "</div><div class=\"hd-count" + (bonus ? " bonus" : "") + "\">" + (bonus === 3 ? "❤️ BONUS ×3" : bonus ? "⭐ BONUS ×2" : lv ? "Q" + (qi + 1) : (qi + 1) + "/" + n) + "</div><div class=\"bars\">" + bars + "</div>" +
       "<div class=\"ring\"><svg viewBox=\"0 0 280 280\"><circle cx=\"140\" cy=\"140\" r=\"98\" fill=\"none\" stroke=\"rgba(255,255,255,.22)\" stroke-width=\"20\"/>" +
       "<circle id=\"arc\" cx=\"140\" cy=\"140\" r=\"98\" fill=\"none\" stroke=\"var(--sacc)\" stroke-width=\"20\" stroke-linecap=\"round\" stroke-dasharray=\"" + C + "\" stroke-dashoffset=\"0\"/></svg><div class=\"num\" id=\"num\">" + (lv ? S.liveCount : S.count) + "</div></div>" +
       "<div class=\"fact\"><b>LE SAVIEZ-VOUS ?</b><div class=\"ft\" id=\"ft\">" + esc(q.f) + "</div></div>" +
@@ -1830,7 +1849,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         if (my !== runId || !arc) return res();
         var rem = Math.max(0, sec - (performance.now() - t0) / 1000), d = Math.max(1, Math.ceil(rem - 1e-9));
         arc.style.strokeDashoffset = String(C * (1 - rem / sec));
-        if (d !== last) { last = d; num.textContent = d; arc.style.stroke = d <= 2 ? "#ff5c5c" : "var(--sacc)"; tick(d === 1); }
+        if (d !== last) { last = d; num.textContent = d; arc.style.stroke = d <= 2 ? "#ff5c5c" : "var(--sacc)"; tick(d === 1); if (d <= 5 && sec > 5) heartbeat(); }
         if (rem <= 0) return res();
         requestAnimationFrame(f);
       }
@@ -1875,7 +1894,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     var r = scores[k];
     if (!r) r = scores[k] = { n: name, p: 0, t: 0 };
     if (auto) r.n = name;
-    r.p += pts; r.t = Date.now();
+    r.p += pts; r.t = Date.now(); if (pics[k]) r.pic = pics[k];
     if (!auto) lastAdd = { k: k, pts: pts };
     saveScores(); return r;
   }
@@ -1895,7 +1914,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   function boardHTML() {
     var r = ranking().slice(0, 8), rows = "";
     r.forEach(function (x, i) {
-      rows += "<div class=\"lb-row" + (i === 0 ? " r1" : "") + "\" style=\"top:" + (480 + i * 136) + "px\"><div class=\"lb-rk\">" + (i + 1) + "</div><div class=\"lb-nm\">" + esc(x.n) + "</div><div class=\"lb-pt\">" + pts(x.p) + "</div></div>";
+      rows += "<div class=\"lb-row" + (i === 0 ? " r1" : "") + "\" style=\"top:" + (480 + i * 136) + "px\"><div class=\"lb-rk\">" + (i + 1) + "</div>" + avImg(x, "lb-av") + "<div class=\"lb-nm\">" + esc(x.n) + "</div><div class=\"lb-pt\">" + pts(x.p) + "</div></div>";
     });
     if (!r.length) rows = "<div class=\"lb-none\">Personne n'a encore marqué de point.<br>Sois le premier !</div>";
     return "<div class=\"lb-t\">CLASSEMENT</div><div class=\"lb-s\">Les meilleurs du live</div>" + rows + "<div class=\"lb-f\">Trouve la bonne réponse en premier pour gagner des points</div>";
@@ -1949,7 +1968,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   }
   var curBonus = false;
   function give(p) {
-    if (curQ && curBonus) p *= 2;
+    if (curQ && curBonus > 1) p *= curBonus;
     var r = addPoints($("#nm").value, p);
     if (!r) { msg("Tape d'abord un pseudo."); return; }
     var first = curQ && !curWinner;
@@ -1980,7 +1999,8 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     var r = ranking().slice(0, 3), cols = [[0, 395, 620, "#ffd60a"], [1, 85, 460, "#d9dde6"], [2, 705, 340, "#e0a46b"]], html = "";
     cols.forEach(function (c) {
       var x = r[c[0]]; if (!x) return;
-      html += "<div class=\"pod-nm\" style=\"left:" + (c[1] - 20) + "px;bottom:" + (380 + c[2] + 20) + "px\">" + esc(x.n) + "</div>" +
+      html += (x.pic ? avImg(x, "pod-pic").replace("<img ", "<img style=\"left:" + (c[1] + 65) + "px;bottom:" + (380 + c[2] + 90) + "px\" ") : "") +
+        "<div class=\"pod-nm\" style=\"left:" + (c[1] - 20) + "px;bottom:" + (380 + c[2] + 20) + "px\">" + esc(x.n) + "</div>" +
         "<div class=\"pod-col\" style=\"left:" + c[1] + "px;height:" + c[2] + "px;background:" + c[3] + "\"><div class=\"rk\">" + (c[0] + 1) + "</div><div class=\"pt\">" + pts(x.p) + "</div></div>";
     });
     return "<div class=\"pod-t\">🏆 PODIUM</div><div class=\"pod-s\">Merci d'avoir joué !</div>" + html + "<div class=\"pod-f\">Abonne-toi pour le prochain quiz en live</div>";
@@ -1993,6 +2013,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     $("#liveBar").hidden = true; $("#addSheet").hidden = true;
     closeBoard(); finaleOn = true;
     $("#lbIn").innerHTML = podiumHTML(); $("#lbLayer").hidden = false; sweep(); setTimeout(chime, 500);
+    setTimeout(function () { confetti($("#lbIn"), 140); applause(2.4); }, 400);
     var v = "Fin du live ! Le grand vainqueur est " + r[0].n + ", avec " + pts(r[0].p) + " !";
     if (r[1]) v += " Bravo aussi à " + r[1].n + (r[2] ? " et à " + r[2].n : "") + ".";
     say(v + " Merci d'avoir joué !");
@@ -2046,6 +2067,10 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     ws.onmessage = function (ev) {
       if (chat.ws !== ws) return;
       var m; try { m = JSON.parse(ev.data); } catch (e) { return; }
+      if (m.pic && (m.id || m.name)) {
+        var pk = "tt:" + String(m.id || m.name).toLowerCase(); pics[pk] = m.pic;
+        if (scores[pk] && scores[pk].pic !== m.pic) { scores[pk].pic = m.pic; }
+      }
       if (m.type === "chat") {
         chat.count++;
         chat.last.unshift(m); chat.last = chat.last.slice(0, 3);
@@ -2054,6 +2079,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         onChat(m);
       }
       else if (m.type === "gift") onGift(m);
+      else if (m.type === "like") onLike(m);
       else if (m.type === "status") chatSet(m.state === "connected" ? "connected" : m.state === "error" ? "error" : "waiting", m.message || "");
     };
     ws.onclose = function () {
@@ -2110,7 +2136,8 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     if (round.seen[k]) return; // une seule réponse par personne et par question
     round.seen[k] = 1;
     round.answers.push({ k: k, name: m.name || m.id, a: a });
-    var st = $("#stat"); if (st) st.textContent = "💬 " + round.answers.length + " réponse" + (round.answers.length > 1 ? "s" : "");
+    if (round.answers.length === 1) { round.first = m.name || m.id; beep(1320, 0.08, 0.07); beep(1760, 0.1, 0.06, 0.08); }
+    var st = $("#stat"); if (st) st.textContent = "💬 " + round.answers.length + " réponse" + (round.answers.length > 1 ? "s" : "") + " · ⚡ " + round.first + " en premier";
   }
   function scoreRound(good, mult) {
     var res = []; res.news = []; res.streaks = [];
@@ -2184,14 +2211,14 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       if (!t) { addPoints(m.name || m.id, 3, k, true); toast("💣 " + who + " — " + gname + "<small>déjà premier : +3 points</small>"); }
       else if (fx.shield[t]) toast("💣 " + who + " attaque " + esc(scores[t].n) + "<small>🛡️ bloqué par le bouclier !</small>");
       else { var v = Math.min(3, scores[t].p); scores[t].p -= v; addPoints(m.name || m.id, v, k, true); toast("💣 " + who + " vole " + v + " point" + (v > 1 ? "s" : "") + " à " + esc(scores[t].n) + " !<small>" + gname + "</small>"); }
-      renderScores(); renderTop3(); sweep(); return;
+      renderScores(); renderTop3(); sweep(); shake(); return;
     }
     if (coins >= 30) {
       var f = playerAbove(k);
       if (!f) toast("❄️ " + who + " — " + gname + "<small>personne devant à geler !</small>");
       else if (fx.shield[f]) toast("❄️ " + who + " veut geler " + esc(scores[f].n) + "<small>🛡️ bloqué par le bouclier !</small>");
       else { fx.frozen[f] = 1; toast("❄️ " + who + " gèle " + esc(scores[f].n) + " !<small>0 point à la prochaine question</small>"); }
-      tick(true); return;
+      tick(true); shake(); return;
     }
     if (coins >= 20) { var now = applyJoker(); toast("💡 " + who + " — " + gname + "<small>Joker 50/50 " + (now ? "pour tout le monde !" : "à la prochaine question") + "</small>"); chime(); return; }
     if (coins >= 10) { fx.dbl[k] = 1; toast("⭐ " + who + " — " + gname + "<small>prochaine bonne réponse ×2</small>"); chime(); return; }
@@ -2207,6 +2234,68 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     scores = fx.galaxyBackup; fx.galaxyBackup = null; saveScores(); renderScores(); renderTop3();
     this.hidden = true; msg("Classement d'avant la Galaxie rétabli.");
   };
+  function showDist() {
+    if (!round || !round.answers.length) return;
+    var n = round.choices.length, cnt = []; for (var i = 0; i < n; i++) cnt.push(0);
+    round.answers.forEach(function (x) { if (x.a < n) cnt[x.a]++; });
+    var tot = round.answers.length;
+    Array.prototype.forEach.call(sceneBox.querySelectorAll(".card"), function (c, i) {
+      var pc = Math.round(cnt[i] * 100 / tot), pb = c.querySelector(".pb"), lab = c.querySelector(".pc");
+      if (pb) pb.style.width = pc + "%"; if (lab) { lab.textContent = pc + " %"; lab.classList.add("on"); }
+    });
+  }
+  /* ---------- likes ---------- */
+  var likes = { base: null, session: 0, next: 0 };
+  function likesInner() { var g = S.likeGoal || 1000, done = likes.session - (likes.next - g); return "<i style=\"width:" + Math.max(0, Math.min(100, done * 100 / g)) + "%\"></i><b>❤️ " + Math.max(0, done) + " / " + g + " → ×3</b>"; }
+  function renderLikes() { var el = $("#likes"); if (el) el.innerHTML = likesInner(); }
+  function onLike(m) {
+    if (S.mode !== "live" || wrap.hidden || !S.likeGoal) return;
+    var total = Number(m.total) || 0;
+    if (total) { if (likes.base == null || total < likes.base) likes.base = Math.max(0, total - (Number(m.count) || 0)); likes.session = total - likes.base; }
+    else likes.session += Number(m.count) || 0;
+    if (!likes.next) likes.next = S.likeGoal;
+    while (likes.session >= likes.next) {
+      fx.likeBonus = true; likes.next += S.likeGoal;
+      toast("❤️ " + (likes.next - S.likeGoal).toLocaleString("fr-FR") + " likes !<small>La prochaine question vaut ×3 !</small>");
+      applause(0.6);
+    }
+    renderLikes();
+  }
+  /* ---------- sons et animations de jeu télé ---------- */
+  var nbuf = null;
+  function noiseBuf() { if (!nbuf) { nbuf = ac.createBuffer(1, ac.sampleRate * 0.5, ac.sampleRate); var d = nbuf.getChannelData(0); for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; } return nbuf; }
+  function nhit(t, type, freq, peak, dur, q) {
+    var src = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
+    src.buffer = noiseBuf(); f.type = type; f.frequency.value = freq; if (q) f.Q.value = q;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(f); f.connect(g); g.connect(ac.destination); src.start(t, Math.random() * 0.3); src.stop(t + dur + 0.05);
+  }
+  function heartbeat() { if (!ac) return; try { var t = ac.currentTime; [0, 0.18].forEach(function (o, i) { var os = ac.createOscillator(), g = ac.createGain(); os.frequency.value = 62; g.gain.setValueAtTime(0.0001, t + o); g.gain.exponentialRampToValueAtTime(i ? 0.16 : 0.24, t + o + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + o + 0.16); os.connect(g); g.connect(ac.destination); os.start(t + o); os.stop(t + o + 0.2); }); } catch (e) {} }
+  function drumroll(ms) { if (!ac) return; try { var t = ac.currentTime, n = Math.round(ms / 32); for (var i = 0; i < n; i++) nhit(t + i * 0.032, "bandpass", 420 + i * 6, 0.06 + 0.12 * i / n, 0.05, 1.2); nhit(t + ms / 1000, "highpass", 5000, 0.14, 0.9); } catch (e) {} }
+  function applause(sec) { if (!ac) return; try { var t = ac.currentTime, n = Math.round(110 * (sec || 1.6)); for (var i = 0; i < n; i++) { var at = Math.pow(Math.random(), 1.6) * (sec || 1.6); nhit(t + at, "bandpass", 1500 + Math.random() * 1400, 0.03 + Math.random() * 0.05, 0.03 + Math.random() * 0.03, 0.9); } } catch (e) {} }
+  function sadTrombone() {
+    if (!ac) return; try {
+      var t = ac.currentTime, f = ac.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 1400; f.connect(ac.destination);
+      [[392, 0], [370, 0.38], [349, 0.76], [330, 1.14]].forEach(function (nt, i) {
+        var o = ac.createOscillator(), g = ac.createGain(), d = i === 3 ? 0.9 : 0.34; o.type = "sawtooth"; o.frequency.setValueAtTime(nt[0], t + nt[1]);
+        if (i === 3) { var l = ac.createOscillator(), lg = ac.createGain(); l.frequency.value = 6; lg.gain.value = 7; l.connect(lg); lg.connect(o.frequency); l.start(t + nt[1]); l.stop(t + nt[1] + d); }
+        g.gain.setValueAtTime(0.0001, t + nt[1]); g.gain.exponentialRampToValueAtTime(0.05, t + nt[1] + 0.03); g.gain.exponentialRampToValueAtTime(0.0001, t + nt[1] + d);
+        o.connect(g); g.connect(f); o.start(t + nt[1]); o.stop(t + nt[1] + d + 0.05);
+      });
+    } catch (e) {}
+  }
+  function confetti(host, n) {
+    host = host || stage; var cols = ["#ffd60a", "#2ecc71", "#ff5c8a", "#4fc3ff", "#ffffff", "#ff9f1c", "#b388ff"];
+    for (var i = 0; i < (n || 90); i++) {
+      var c = document.createElement("div"); c.className = "cf";
+      c.style.left = (Math.random() * 1080) + "px"; c.style.background = cols[i % cols.length];
+      c.style.setProperty("--dx", (Math.random() * 300 - 150) + "px"); c.style.setProperty("--r", (Math.random() * 900 - 450) + "deg");
+      c.style.animationDuration = (1.8 + Math.random() * 1.4) + "s"; c.style.animationDelay = (Math.random() * 0.4) + "s";
+      if (Math.random() < 0.4) c.style.borderRadius = "50%";
+      host.appendChild(c); setTimeout(function (el) { el.remove(); }.bind(null, c), 3800);
+    }
+  }
+  function shake(el) { el = el || stage; el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake"); setTimeout(function () { el.classList.remove("shake"); }, 600); }
   function listNames(a) { a = a.slice(0, 3); return a.length < 2 ? a.join("") : a.slice(0, -1).join(", ") + " et " + a[a.length - 1]; }
   function newsLine(res) {
     var parts = [], voice = [];
@@ -2225,6 +2314,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   $("#chatTest").onclick = chatConnect;
   seg($("#segLag"), [["3 s", 3], ["6 s", 6], ["10 s", 10]], function () { return S.lag; }, function (v) { S.lag = v; });
   $("#bChat").onclick = chatConnect;
+  seg($("#segLike"), [["Non", 0], ["500", 500], ["1 000", 1000], ["2 000", 2000]], function () { return S.likeGoal; }, function (v) { S.likeGoal = v; likes.next = likes.session - (likes.session % (v || 1)) + v; renderLikes(); });
   seg($("#segVote"), [["Non", 0], ["Toutes les 5", 5], ["Toutes les 10", 10]], function () { return S.voteEvery; }, function (v) { S.voteEvery = v; });
 
   /* ---------- vote du chat ---------- */
@@ -2267,7 +2357,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       $("#bGifts").hidden = !(S.chatOn && S.giftsOn);
       if (S.chatOn && !chat.ws) chatConnect();
       var keys = selKeys(), queue = [], last = null, num = 0, lastBoard = Date.now(), used = {}, forced = null;
-      streak = {}; vote = null; fx.shield = {}; fx.dbl = {}; fx.frozen = {}; fx.joker = false; fx.pick = null;
+      streak = {}; vote = null; likes = { base: null, session: 0, next: S.likeGoal || 0 }; fx.likeBonus = false; fx.shield = {}; fx.dbl = {}; fx.frozen = {}; fx.joker = false; fx.pick = null;
       var T0 = BANK[keys[0]]; setPalette(T0.pal); fitStage(); setScene("");
       try { await ok(document.fonts.ready); } catch (e) { if (my !== runId) return; }
       try { if (navigator.wakeLock) navigator.wakeLock.request("screen").then(function (w) { wake = w; }, function () {}); } catch (e) {}
@@ -2307,7 +2397,8 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         }
         used[it[0] + ":" + it[1]] = 1; last = it;
         var T = BANK[it[0]], q = prep(T.q[it[1]]); num++;
-        var bonus = forcedBonus || !!(S.bonusEvery && num % S.bonusEvery === 0);
+        var bonus = fx.likeBonus ? 3 : (forcedBonus || !!(S.bonusEvery && num % S.bonusEvery === 0)) ? 2 : 0;
+        var likeQ = fx.likeBonus; fx.likeBonus = false;
         curWinner = null; curQ = true; curBonus = bonus;
         setPalette(T.pal);
         var scene = setScene(qScene(T, num - 1, 0, q, true, bonus));
@@ -2315,25 +2406,29 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         round = S.chatOn ? { open: true, choices: q.choices, answers: [], seen: {} } : null;
         if (fx.joker) applyJoker();
         await ok(sleep(400));
-        if (bonus) { sweep(); await ok(say("Question bonus ! Points doublés !")); }
+        if (bonus) { sweep(); await ok(say(likeQ ? "Question bonus grâce à vos likes ! Points triplés !" : "Question bonus ! Points doublés !")); }
         await ok(Promise.all([say(askText(q)), sleep(1500)]));
         await ok(sleep(250));
         armHide(scene, q, S.liveCount);
         await ok(countdown(S.liveCount, my));
         var tEnd = Date.now();
-        scene.classList.add("rev"); chime();
+        drumroll(800); await ok(sleep(900));
+        scene.classList.add("rev"); chime(); showDist();
         await ok(sleep(450));
         await ok(Promise.all([say("ABCD"[q.a] + ", " + speakable(q.choices[q.a]) + ". " + speakable(q.f)), sleep(2500)]));
         // Le live TikTok a plusieurs secondes de retard : les réponses arrivées pendant ce délai comptent encore.
         if (round) await ok(sleep(Math.max(0, (S.lag || 0) * 1000 - (Date.now() - tEnd))));
-        var okList = scoreRound(q.a, bonus ? 2 : 1);
+        var okList = scoreRound(q.a, bonus || 1);
+        showDist();
         if (!curWinner && okList.length) setWinner(okList[0].name);
+        if (curWinner) { confetti(); applause(1.6); }
+        else if (round && round.answers.length) sadTrombone();
         var extra = newsLine(okList);
         if (curWinner) await ok(say("Winner : " + curWinner + " !" + (okList.length > 1 ? " " + okList.length + " bonnes réponses." : "") + (extra ? " " + extra : "")));
         else if (extra) await ok(say(extra));
         renderTop3();
         await ok(sleep(2200));
-        curQ = false; curBonus = false; round = null;
+        curQ = false; curBonus = 0; round = null;
       }
     } catch (e) { if (e !== 0) { console.error(e); stopAll(); } }
   }
@@ -2366,6 +2461,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         await ok(sleep(250));
         armHide(scene, q, S.count);
         await ok(countdown(S.count, my));
+        drumroll(600); await ok(sleep(700));
         scene.classList.add("rev"); chime();
         await ok(sleep(450));
         await ok(Promise.all([say("ABCD"[q.a] + ", " + speakable(q.choices[q.a]) + ". " + speakable(q.f)), sleep(2500)]));

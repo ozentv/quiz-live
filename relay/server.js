@@ -38,6 +38,12 @@ function isRateLimit(err) {
 }
 
 // Renvoie { message, wait } : le texte à afficher et le délai avant la prochaine tentative (ms).
+// Photo de profil TikTok (petite taille de préférence).
+function picOf(u) {
+  const pick = (img) => img && Array.isArray(img.urlList || img.url) && (img.urlList || img.url)[0];
+  return String(pick(u.avatarThumb) || pick(u.avatarMedium) || pick(u.avatarLarge) || u.profilePictureUrl || "").slice(0, 600);
+}
+
 function explain(err) {
   const name = (err && (err.name || (err.constructor && err.constructor.name))) || "";
   const msg = String((err && err.message) || err || "");
@@ -98,7 +104,9 @@ wss.on("connection", (ws, req) => {
     const names = ["Lina", "Yanis", "Chloé", "Max_93", "Inès", "Tom", "Sarah ✨", "Noah", "Jade", "Ethan", "Léa", "Adam"];
     const extra = ["trop dur", "salut !", "😂😂", "je sais pas", "go go go"];
     const gifts = [["Rose", 1], ["Finger Heart", 5], ["Rosa", 10], ["Perfume", 20], ["Doughnut", 30], ["Hand Hearts", 100], ["Money Gun", 500], ["Galaxy", 1000]];
+    let demoLikes = 0;
     demoT = setInterval(() => {
+      if (Math.random() < 0.5) { const c = 1 + Math.floor(Math.random() * 30); demoLikes += c; send({ type: "like", total: demoLikes, count: c, t: Date.now() }); }
       if (Math.random() < 0.06) {
         const g = gifts[Math.floor(Math.random() * (Math.random() < 0.9 ? 6 : gifts.length))], n0 = names[Math.floor(Math.random() * names.length)];
         send({ type: "gift", id: n0.toLowerCase().replace(/[^a-z0-9_]/g, ""), name: n0, gift: g[0], coins: g[1], count: g[1] === 1 ? 1 + Math.floor(Math.random() * 5) : 1, t: Date.now() });
@@ -126,7 +134,7 @@ wss.on("connection", (ws, req) => {
       const text = String((d && (d.comment != null && d.comment !== "" ? d.comment : d.content)) || "");
       if (!text) return;
       if (!id && !name) return;
-      send({ type: "chat", id: id || name, name: name || id, text, t: Date.now() });
+      send({ type: "chat", id: id || name, name: name || id, text, pic: picOf(u), t: Date.now() });
     });
     // Cadeaux : on attend la fin d'un combo (giftType 1) pour envoyer le total.
     conn.on(WebcastEvent.GIFT, (d) => {
@@ -142,7 +150,12 @@ wss.on("connection", (ws, req) => {
       const coins = Number(det.diamondCount || ext.diamond_count || d.diamondCount || 0);
       const count = Math.max(1, Number(d.repeatCount || 1));
       if (!id && !name) return;
-      send({ type: "gift", id: id || name, name: name || id, gift, coins, count, t: Date.now() });
+      send({ type: "gift", id: id || name, name: name || id, gift, coins, count, pic: picOf(u), t: Date.now() });
+    });
+    // Likes : total du live (totalLikeCount) et nombre envoyé dans ce paquet.
+    conn.on(WebcastEvent.LIKE, (d) => {
+      const total = Number((d && d.totalLikeCount) || 0), count = Number((d && d.likeCount) || 0);
+      if (total || count) send({ type: "like", total, count, t: Date.now() });
     });
     conn.on(WebcastEvent.STREAM_END, () => {
       send({ type: "status", state: "ended", message: "Le live est terminé." });
