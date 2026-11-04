@@ -155,4 +155,4 @@ Dans `index.html`, l'objet `BANK` contient tous les thèmes. Chaque question a c
 ```
 (`indexBonneRéponse` commence à 0.)
 
-Après un merge, le site se met à jour en une à deux minutes. Si l’ancienne version s’affiche, recharge la page.
+Après un merge, le site se met à jour en une à deux minutes environ. Si l’ancienne version s’affiche, recharge la page.
