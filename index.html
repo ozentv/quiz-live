@@ -162,6 +162,17 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 .pod-col .pt { font-size: 44px; margin-top: 10px; }
 .pod-nm { position: absolute; width: 330px; text-align: center; font-size: 46px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pod-f { position: absolute; left: 80px; right: 80px; top: 1600px; text-align: center; font-size: 44px; font-weight: 700; }
+.pip { position: absolute; z-index: 3; overflow: hidden; background: #000; display: none; }
+.pip video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pip-cam { left: 845px; top: 1712px; width: 200px; height: 200px; border-radius: 50%; border: 6px solid var(--sacc); box-shadow: 0 10px 30px rgba(0, 0, 0, .45); }
+.pip-cam video { transform: scaleX(-1); }
+.pip-game { left: 35px; top: 1712px; width: 347px; height: 195px; border-radius: 26px; border: 5px solid rgba(255, 255, 255, .55); box-shadow: 0 10px 30px rgba(0, 0, 0, .45); }
+.pip.on { display: block; }
+#stage.pip-on .cta { top: 1530px; font-size: 36px; }
+#stage.pip-on .win { top: 1528px; height: 100px; font-size: 46px; }
+#stage.pip-on .stat { top: 1640px; font-size: 36px; }
+#stage.pip-on .news { top: 1682px; font-size: 32px; left: 400px; right: 250px; }
+.pip-row { display: grid; gap: 8px; width: 100%; }
 #giftToast { position: absolute; left: 60px; right: 60px; top: 150px; z-index: 4; display: none; padding: 26px 34px; border-radius: 40px; background: #0b0d1c; border: 4px solid #ffd60a; text-align: center; font-size: 50px; font-weight: 800; line-height: 1.2; box-shadow: 0 20px 50px rgba(0, 0, 0, .45); }
 #giftToast.on { display: block; animation: sin .25s ease-out both; }
 #giftToast small { display: block; font-size: 36px; font-weight: 700; color: #ffd60a; margin-top: 8px; }
@@ -234,6 +245,16 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         <div><button class="btn ghost" id="hear" type="button">Écouter la voix</button></div>
       </div>
     </div>
+    <div class="row">
+      <div class="pip-row">
+        <label class="switch"><input type="checkbox" id="camOn"> 📷 Ma caméra dans une bulle</label>
+        <span class="chat-st" id="camState"></span>
+        <label class="switch"><input type="checkbox" id="gameOn"> 🎮 Vidéo de jeu en petit</label>
+        <input class="field" type="file" id="gameFile" accept="video/*" aria-label="Choisir la vidéo de jeu">
+        <span class="chat-st" id="gameState"></span>
+        <p class="note" style="margin:0">La bulle s'affiche en bas à droite, la vidéo de jeu en bas à gauche. Pour le jeu : enregistre un extrait sur ta PlayStation (bouton Créer), envoie-le sur ton téléphone, puis choisis-le ici. Il tourne en boucle, sans le son. À rechoisir après avoir rechargé la page.</p>
+      </div>
+    </div>
     <p class="warn" id="voiceWarn" hidden>Aucune voix française trouvée sur ce téléphone. Sur iPhone : Réglages, Accessibilité, Contenu énoncé, Voix, puis Français. Sans voix, le quiz se joue avec le texte seul.</p>
   </section>
 
@@ -267,7 +288,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 <div class="dock"><button class="btn" id="go" type="button">Lancer le quiz</button></div>
 
 <div id="stageWrap" hidden>
-  <div id="stage"><div id="deco"></div><div id="scene"></div><div id="giftToast"></div></div>
+  <div id="stage"><div id="deco"></div><div id="scene"></div><div id="giftToast"></div><div class="pip pip-game" id="pipGame"><video id="gameVid" muted loop playsinline></video></div><div class="pip pip-cam" id="pipCam"><video id="camVid" muted autoplay playsinline></video></div></div>
   <div id="lbLayer" hidden><div id="lbIn"></div><button id="lbClose" type="button" aria-label="Fermer le classement">✕ Fermer</button></div>
   <div id="liveBar" hidden>
     <button id="bChat" type="button" hidden>Chat</button>
@@ -1381,7 +1402,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   };
   var KEYS = Object.keys(BANK);
   var RATES = [["Lente", 0.9], ["Normale", 1.05], ["Rapide", 1.2]];
-  var S = { theme: "random", n: 4, count: 3, voiceOn: true, voiceName: "", rate: 1.05, mode: "video", liveCount: 15, boardMin: 5, chatOn: false, ttUser: "", relay: "", lag: 6, giftsOn: true, themes: null, diff: "normal", bonusEvery: 5, voteEvery: 0 };
+  var S = { theme: "random", n: 4, count: 3, voiceOn: true, voiceName: "", rate: 1.05, mode: "video", liveCount: 15, boardMin: 5, chatOn: false, ttUser: "", relay: "", lag: 6, giftsOn: true, camOn: false, gameOn: false, themes: null, diff: "normal", bonusEvery: 5, voteEvery: 0 };
   try { Object.assign(S, JSON.parse(localStorage.getItem("sq-set") || "{}")); } catch (e) {}
   if (!Array.isArray(S.themes)) S.themes = S.theme && S.theme !== "random" && BANK[S.theme] ? [S.theme] : [];
   S.themes = S.themes.filter(function (k) { return BANK[k]; });
@@ -1537,6 +1558,38 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     stage.style.transform = tr; $("#lbIn").style.transform = tr;
   }
   window.addEventListener("resize", fitStage);
+
+  /* ---------- incrustations : caméra et vidéo de jeu ---------- */
+  var camStream = null, gameUrl = null;
+  function pipLayout() {
+    var cam = !!(S.camOn && camStream), game = !!(S.gameOn && gameUrl);
+    $("#pipCam").classList.toggle("on", cam);
+    $("#pipGame").classList.toggle("on", game);
+    stage.classList.toggle("pip-on", cam || game);
+    if (game) { var v = $("#gameVid"); v.play().catch(function () {}); }
+  }
+  function camStart() {
+    if (camStream) { pipLayout(); return Promise.resolve(); }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { $("#camState").textContent = "Caméra non disponible sur ce navigateur."; return Promise.resolve(); }
+    $("#camState").textContent = "Autorise la caméra…";
+    return navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: { ideal: 480 }, height: { ideal: 480 } }, audio: false }).then(function (st) {
+      camStream = st; var v = $("#camVid"); v.srcObject = st; v.play().catch(function () {});
+      $("#camState").textContent = "✓ Caméra prête"; pipLayout();
+    }, function () { $("#camState").textContent = "Caméra refusée : autorise-la dans les réglages du navigateur."; S.camOn = false; save(); $("#camOn").checked = false; pipLayout(); });
+  }
+  function camStop() { if (camStream) { camStream.getTracks().forEach(function (t) { t.stop(); }); camStream = null; } $("#camVid").srcObject = null; $("#camState").textContent = ""; pipLayout(); }
+  $("#camOn").checked = !!S.camOn;
+  $("#camOn").onchange = function () { S.camOn = this.checked; save(); if (S.camOn) camStart(); else camStop(); };
+  $("#gameOn").checked = !!S.gameOn;
+  $("#gameFile").hidden = !S.gameOn;
+  $("#gameOn").onchange = function () { S.gameOn = this.checked; save(); $("#gameFile").hidden = !S.gameOn; if (S.gameOn && !gameUrl) $("#gameState").textContent = "Choisis une vidéo de jeu."; pipLayout(); };
+  if (S.gameOn) $("#gameState").textContent = "Choisis une vidéo de jeu.";
+  $("#gameFile").onchange = function () {
+    var f = this.files && this.files[0]; if (!f) return;
+    if (gameUrl) URL.revokeObjectURL(gameUrl);
+    gameUrl = URL.createObjectURL(f); var v = $("#gameVid"); v.src = gameUrl; v.muted = true;
+    $("#gameState").textContent = "✓ " + f.name; pipLayout();
+  };
   function setPalette(p) {
     wrap.style.setProperty("--s1", p[0]); wrap.style.setProperty("--s2", p[1]); wrap.style.setProperty("--sacc", p[2]);
     $("#deco").innerHTML =
@@ -2141,7 +2194,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     } catch (e) { if (e !== 0) { console.error(e); stopAll(); } }
   }
 
-  $("#go").onclick = function () { if (S.mode === "live") live(); else play(); };
+  $("#go").onclick = function () { if (S.camOn && !camStream) camStart(); pipLayout(); if (S.mode === "live") live(); else play(); };
   $("#again").onclick = play;
   $("#back").onclick = stopAll;
   $("#cancel").onclick = stopAll;
