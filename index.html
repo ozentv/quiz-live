@@ -257,6 +257,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 .card .avs .ini { display: grid; place-items: center; font-size: 28px; font-weight: 800; color: #fff; }
 .card .avs .more { width: auto; min-width: 58px; padding: 0 10px; display: grid; place-items: center; font-size: 26px; font-weight: 800; background: #0f0f19; color: #fff; border-radius: 29px; }
 @keyframes avin { from { transform: scale(0); } to { transform: none; } }
+.bdg { font-size: .85em; margin-left: 6px; }
 #giftToast { position: absolute; left: 60px; right: 60px; top: 150px; z-index: 4; display: none; padding: 26px 34px; border-radius: 40px; background: #0b0d1c; border: 4px solid #ffd60a; text-align: center; font-size: 50px; font-weight: 800; line-height: 1.2; box-shadow: 0 20px 50px rgba(0, 0, 0, .45); }
 #giftToast.on { display: block; animation: sin .25s ease-out both; }
 #giftToast small { display: block; font-size: 36px; font-weight: 700; color: #ffd60a; margin-top: 8px; }
@@ -308,6 +309,12 @@ ol.sc b { font-variant-numeric: tabular-nums; }
           <div class="chat-test"><span class="lab">Décalage du live TikTok</span><div class="seg" id="segLag" role="group" aria-label="Décalage du live"></div></div>
           <div class="chat-test"><span class="lab">Le chat vote pour le thème</span><div class="seg" id="segVote" role="group" aria-label="Vote du chat"></div></div>
           <div class="chat-test"><span class="lab">❤️ Likes pour débloquer une question ×3</span><div class="seg" id="segLike" role="group" aria-label="Objectif de likes"></div></div>
+          <div class="pip-row">
+            <span class="lab">🏆 Classement public du mois</span>
+            <input class="field" id="lbKey" type="password" placeholder="Clé du classement (ADMIN_KEY sur Render)" autocomplete="off" aria-label="Clé du classement public">
+            <span class="chat-st" id="lbState"></span>
+            <a class="btn ghost small" id="lbLink" href="classement.html" target="_blank" rel="noopener" style="text-align:center;text-decoration:none">Ouvrir le classement public</a>
+          </div>
           <label class="switch"><input type="checkbox" id="giftsOn"> Effets des cadeaux TikTok</label>
           <table class="gift-tbl" id="giftTbl"><tbody>
             <tr><td>1 – 4 pièces</td><td>🌹 Rose, GG… : +1 point par cadeau</td></tr>
@@ -1493,7 +1500,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   };
   var KEYS = Object.keys(BANK);
   var RATES = [["Lente", 0.9], ["Normale", 1.05], ["Rapide", 1.2]];
-  var S = { theme: "random", n: 4, count: 3, voiceOn: true, voiceName: "", rate: 1.05, mode: "video", liveCount: 15, boardMin: 5, chatOn: false, ttUser: "", relay: "", lag: 6, recapSec: 7, likeGoal: 1000, giftsOn: true, gameOn: true, musicOn: true, musicVol: 1, tvOn: true, themes: null, diff: "normal", bonusEvery: 5, voteEvery: 0 };
+  var S = { theme: "random", n: 4, count: 3, voiceOn: true, voiceName: "", rate: 1.05, mode: "video", liveCount: 15, boardMin: 5, chatOn: false, ttUser: "", relay: "", lag: 6, lbKey: "", recapSec: 7, likeGoal: 1000, giftsOn: true, gameOn: true, musicOn: true, musicVol: 1, tvOn: true, themes: null, diff: "normal", bonusEvery: 5, voteEvery: 0 };
   try { Object.assign(S, JSON.parse(localStorage.getItem("sq-set") || "{}")); } catch (e) {}
   if (!Array.isArray(S.themes)) S.themes = S.theme && S.theme !== "random" && BANK[S.theme] ? [S.theme] : [];
   S.themes = S.themes.filter(function (k) { return BANK[k]; });
@@ -1923,7 +1930,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   function avImg(x, cls) { return x && x.pic ? "<img class=\"" + cls + "\" src=\"" + esc(x.pic) + "\" alt=\"\" referrerpolicy=\"no-referrer\" onerror=\"this.style.visibility='hidden'\">" : ""; }
   function top3Text() {
     var r = ranking().slice(0, 3), med = ["🥇", "🥈", "🥉"];
-    return r.map(function (x, i) { return med[i] + avImg(x, "av") + esc(x.n) + " " + x.p; }).join("   ");
+    return r.map(function (x, i) { return med[i] + avImg(x, "av") + esc(x.n) + badgeOf(x.k) + " " + x.p; }).join("   ");
   }
   function renderTop3() { var el = $("#top3"); if (el) el.innerHTML = top3Text(); }
   function qScene(T, qi, n, q, lv, bonus) {
@@ -2000,6 +2007,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     if (!r) r = scores[k] = { n: name, p: 0, t: 0 };
     if (auto) r.n = name;
     r.p += pts; r.t = Date.now(); r.k = k; if (pics[k]) r.pic = pics[k];
+    if (pts > 0 && S.mode === "live") pushScore(k, r.n, { pts: pts, pic: r.pic });
     if (!auto) lastAdd = { k: k, pts: pts };
     saveScores(); return r;
   }
@@ -2019,10 +2027,10 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   function boardHTML() {
     var r = ranking().slice(0, 8), rows = "";
     r.forEach(function (x, i) {
-      rows += "<div class=\"lb-row" + (i === 0 ? " r1" : "") + "\" style=\"top:" + (480 + i * 136) + "px\"><div class=\"lb-rk\">" + (i + 1) + "</div>" + avImg(x, "lb-av") + "<div class=\"lb-nm\">" + esc(x.n) + "</div><div class=\"lb-pt\">" + pts(x.p) + "</div></div>";
+      rows += "<div class=\"lb-row" + (i === 0 ? " r1" : "") + "\" style=\"top:" + (480 + i * 136) + "px\"><div class=\"lb-rk\">" + (i + 1) + "</div>" + avImg(x, "lb-av") + "<div class=\"lb-nm\">" + esc(x.n) + badgeOf(x.k) + "</div><div class=\"lb-pt\">" + pts(x.p) + "</div></div>";
     });
     if (!r.length) rows = "<div class=\"lb-none\">Personne n'a encore marqué de point.<br>Sois le premier !</div>";
-    return "<div class=\"lb-t\">CLASSEMENT</div><div class=\"lb-s\">Les meilleurs du live</div>" + rows + "<div class=\"lb-f\">Trouve la bonne réponse en premier pour gagner des points</div>";
+    return "<div class=\"lb-t\">CLASSEMENT</div><div class=\"lb-s\">Les meilleurs du live</div>" + rows + "<div class=\"lb-f\">" + (S.lbKey ? "🏆 Classement du mois : ozentv.github.io/quiz-live/classement.html" : "Trouve la bonne réponse en premier pour gagner des points") + "</div>";
   }
   function closeBoard() {
     clearTimeout(lbT); $("#lbLayer").hidden = true;
@@ -2149,7 +2157,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     var u = String(S.relay || "").trim().replace(/\/+$/, "");
     if (!u) return "";
     if (!/^[a-z]+:\/\//i.test(u)) u = "https://" + u;
-    return u.replace(/^http/i, "ws") + "/?user=" + encodeURIComponent(cleanUser(S.ttUser));
+    return u.replace(/^http/i, "ws") + "/?user=" + encodeURIComponent(cleanUser(S.ttUser)) + (S.lbKey ? "&key=" + encodeURIComponent(S.lbKey) : "");
   }
   function chatSet(st, txt) {
     chat.state = st;
@@ -2187,6 +2195,8 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       }
       else if (m.type === "gift") onGift(m);
       else if (m.type === "like") onLike(m);
+      else if (m.type === "follow" || m.type === "share") onSocial(m);
+      else if (m.type === "board") { $("#lbState").textContent = m.message || ""; $("#lbState").setAttribute("data-s", m.state === "ok" ? "connected" : "error"); if (m.state === "ok") fetchBadges(); }
       else if (m.type === "status") chatSet(m.state === "connected" ? "connected" : m.state === "error" ? "error" : "waiting", m.message || "");
     };
     ws.onclose = function () {
@@ -2260,6 +2270,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       x.gain = gain; x.fz = !!fx.frozen[x.k]; x.mult = mult || 1; x.dbl = !x.fz && gain > (i === 0 ? 3 : i < 3 ? 2 : 1) * (mult || 1);
       if (gain) addPoints(x.name, gain, x.k, true);
       okKeys[x.k] = 1; streak[x.k] = (streak[x.k] || 0) + 1;
+      if (streak[x.k] >= 2) pushScore(x.k, x.name, { streak: streak[x.k] });
       var n = streak[x.k]; if (n === 3 || n === 5 || (n >= 10 && n % 5 === 0)) res.streaks.push({ name: x.name, n: n });
       res.push(x);
     });
@@ -2306,6 +2317,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     var k = "tt:" + String(m.id || m.name).toLowerCase(), who = esc(m.name || m.id), coins = Number(m.coins) || 0, n = Math.max(1, Number(m.count) || 1);
     var gname = esc(m.gift || "cadeau") + (n > 1 ? " ×" + n : "");
     var rec = scores[k]; if (rec) { rec.c = (rec.c || 0) + coins * n; saveScores(); }
+    if (coins) pushScore(k, m.name || m.id, { coins: coins * n, pic: m.pic || pics[k] });
     if (/galax/i.test(m.gift || "")) {
       fx.galaxyBackup = JSON.parse(JSON.stringify(scores));
       scores = {}; streak = {}; lastAdd = null; saveScores(); renderScores(); renderTop3();
@@ -2319,7 +2331,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       var t = playerAbove(k);
       if (!t) { addPoints(m.name || m.id, 3, k, true); toast("💣 " + who + " — " + gname + "<small>déjà premier : +3 points</small>"); }
       else if (fx.shield[t]) toast("💣 " + who + " attaque " + esc(scores[t].n) + "<small>🛡️ bloqué par le bouclier !</small>");
-      else { var v = Math.min(3, scores[t].p); scores[t].p -= v; addPoints(m.name || m.id, v, k, true); toast("💣 " + who + " vole " + v + " point" + (v > 1 ? "s" : "") + " à " + esc(scores[t].n) + " !<small>" + gname + "</small>"); }
+      else { var v = Math.min(3, scores[t].p); scores[t].p -= v; if (v) pushScore(t, scores[t].n, { pts: -v }); addPoints(m.name || m.id, v, k, true); toast("💣 " + who + " vole " + v + " point" + (v > 1 ? "s" : "") + " à " + esc(scores[t].n) + " !<small>" + gname + "</small>"); }
       renderScores(); renderTop3(); sweep(); shake(); return;
     }
     if (coins >= 30) {
@@ -2360,6 +2372,51 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     var d = document.createElement("div"), h = 0; for (var j = 0; j < k.length; j++) h = (h * 31 + k.charCodeAt(j)) | 0;
     d.className = "ini"; d.textContent = (String(name).trim()[0] || "?").toUpperCase(); d.style.background = FACE_COLORS[Math.abs(h) % FACE_COLORS.length];
     return d;
+  }
+  /* ---------- classement public : envoi des points, badges ---------- */
+  function rawId(k) { return String(k || "").replace(/^tt:/, ""); }
+  function pushScore(k, name, extra) {
+    if (!S.lbKey || !chat.ws || chat.ws.readyState !== 1 || cleanUser(S.ttUser).toLowerCase() === "demo") return;
+    var o = { type: "score", id: rawId(k), name: name }; for (var x in extra) if (extra[x] != null && extra[x] !== "") o[x] = extra[x];
+    try { chat.ws.send(JSON.stringify(o)); } catch (e) {}
+  }
+  var badges = {};
+  function badgeOf(k) {
+    var b = (badges[rawId(k).toLowerCase()] || []).slice();
+    if (k && (streak[k] || 0) >= 5 && b.indexOf("🔥") < 0) b.push("🔥");
+    return b.length ? " <span class=\"bdg\">" + b.join("") + "</span>" : "";
+  }
+  function relayHttp() { var u = String(S.relay || "").trim().replace(/\/+$/, ""); if (!u) return ""; if (!/^[a-z]+:\/\//i.test(u)) u = "https://" + u; return u; }
+  var badgeT = 0;
+  function fetchBadges() {
+    var u = relayHttp(), ch = cleanUser(S.ttUser); if (!u || !ch || ch.toLowerCase() === "demo") return;
+    if (Date.now() - badgeT < 60000) return; badgeT = Date.now();
+    fetch(u + "/classement?user=" + encodeURIComponent(ch)).then(function (r) { return r.json(); }).then(function (j) {
+      if (!j || !j.players) return; var nb = {}; j.players.forEach(function (p) { if (p.badges && p.badges.length) nb[String(p.id).toLowerCase()] = p.badges; }); badges = nb; renderTop3();
+    }).catch(function () {});
+  }
+  setInterval(function () { if (S.mode === "live" && !wrap.hidden && chat.state === "connected") { badgeT = 0; fetchBadges(); } }, 180000);
+  function updateLbLink() {
+    var a = $("#lbLink"); if (!a) return;
+    var ch = cleanUser(S.ttUser), r = String(S.relay || "").replace(/^https?:\/\//, "").replace(/\/+$/, "");
+    a.href = "classement.html" + (ch ? "?u=" + encodeURIComponent(ch) + (r ? "&r=" + encodeURIComponent(r) : "") : "");
+  }
+  /* ---------- remerciements : abonnements et partages ---------- */
+  var socialQ = { follow: [], share: [] }, socialT = null;
+  function onSocial(m) {
+    if (S.mode !== "live" || wrap.hidden) return;
+    var list = socialQ[m.type]; if (list.indexOf(m.name) < 0) list.push(m.name);
+    if (!socialT) socialT = setTimeout(flushSocial, 3500);
+  }
+  function flushSocial() {
+    socialT = null;
+    [["follow", "💙", "pour l'abonnement", "pour vos abonnements"], ["share", "🔁", "pour le partage", "pour vos partages"]].forEach(function (t) {
+      var l = socialQ[t[0]]; if (!l.length) return;
+      var who = l.length <= 2 ? l.map(esc).join(" et ") : esc(l[0]) + ", " + esc(l[1]) + " et " + (l.length - 2) + " autre" + (l.length > 3 ? "s" : "");
+      toast(t[1] + " Merci " + who + " !<small>" + (l.length > 1 ? t[3] : t[2]) + "</small>");
+      note("sine", 1046, 0, 0.35, 0.06); note("sine", 1568, 0.12, 0.5, 0.05);
+      socialQ[t[0]] = [];
+    });
   }
   function showDist() {
     if (!round || !round.answers.length) return;
@@ -2451,7 +2508,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     show.forEach(function (x, i) {
       var rec = scores[x.k] || {}, tag = x.fz ? "❄️ gelé" : x.dbl ? "⭐ ×2" : x.mult === 3 ? "❤️ ×3" : x.mult === 2 ? "⭐ ×2" : "";
       html += "<div class=\"rc-row" + (i === 0 ? " first" : "") + "\" style=\"top:" + (300 + i * 112) + "px\"><div class=\"rk\">" + (i === 0 ? "⚡" : i + 1) + "</div>" + avImg({ pic: rec.pic || pics[x.k] }, "av2") +
-        "<div class=\"nm\">" + esc(x.name) + "</div>" + (tag ? "<div class=\"tg\">" + tag + "</div>" : "") + "<div class=\"pt" + (x.gain ? "" : " zero") + "\">+" + x.gain + "</div></div>";
+        "<div class=\"nm\">" + esc(x.name) + badgeOf(x.k) + "</div>" + (tag ? "<div class=\"tg\">" + tag + "</div>" : "") + "<div class=\"pt" + (x.gain ? "" : " zero") + "\">+" + x.gain + "</div></div>";
     });
     if (okList.length > 6) html += "<div class=\"rc-more\" style=\"top:" + (300 + 6 * 112 + 4) + "px\">+ " + (okList.length - 6) + " autre" + (okList.length - 6 > 1 ? "s" : "") + " bonne" + (okList.length - 6 > 1 ? "s" : "") + " réponse" + (okList.length - 6 > 1 ? "s" : "") + "</div>";
     html += "<div class=\"rc-h\">🏆 CLASSEMENT</div>";
@@ -2459,7 +2516,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     if (!r.length) html += "<div class=\"rc-more\" style=\"top:1170px\">Personne n'a encore de points</div>";
     r.forEach(function (x, i) {
       var key = x.k || x.n.toLowerCase(), was = before[key], mv = was == null ? "<div class=\"mv up\">NEW</div>" : was > i ? "<div class=\"mv up\">▲" + (was - i) + "</div>" : was < i ? "<div class=\"mv down\">▼" + (i - was) + "</div>" : "<div class=\"mv eq\">=</div>";
-      html += "<div class=\"rc-row" + (i === 0 ? " first" : "") + "\" style=\"top:" + (1140 + i * 112) + "px\"><div class=\"rk\">" + ["🥇", "🥈", "🥉", "4", "5"][i] + "</div>" + avImg(x, "av2") + "<div class=\"nm\">" + esc(x.n) + "</div><div class=\"tot\">" + pts(x.p) + "</div>" + mv + "</div>";
+      html += "<div class=\"rc-row" + (i === 0 ? " first" : "") + "\" style=\"top:" + (1140 + i * 112) + "px\"><div class=\"rk\">" + ["🥇", "🥈", "🥉", "4", "5"][i] + "</div>" + avImg(x, "av2") + "<div class=\"nm\">" + esc(x.n) + badgeOf(x.k) + "</div><div class=\"tot\">" + pts(x.p) + "</div>" + mv + "</div>";
     });
     return html;
   }
@@ -2479,6 +2536,9 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   $("#ttUser").oninput = function () { S.ttUser = cleanUser(this.value); save(); };
   $("#relayUrl").oninput = function () { S.relay = this.value.trim(); save(); };
   $("#chatTest").onclick = chatConnect;
+  $("#lbKey").value = S.lbKey || "";
+  $("#lbKey").oninput = function () { S.lbKey = this.value.trim(); save(); };
+  $("#ttUser").addEventListener("input", updateLbLink); $("#relayUrl").addEventListener("input", updateLbLink); updateLbLink();
   seg($("#segLag"), [["3 s", 3], ["6 s", 6], ["10 s", 10]], function () { return S.lag; }, function (v) { S.lag = v; });
   $("#bChat").onclick = chatConnect;
   seg($("#segLike"), [["Non", 0], ["500", 500], ["1 000", 1000], ["2 000", 2000]], function () { return S.likeGoal; }, function (v) { S.likeGoal = v; likes.next = likes.session - (likes.session % (v || 1)) + v; renderLikes(); });

@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Classement du mois · Studio Quiz</title>
+<meta name="description" content="Le classement du mois du quiz en live : points, places gagnées, donateurs.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800&family=Figtree:wght@400;600;700&display=swap">
+<style>
+:root { --bg: #070b1a; --card: #10172e; --line: #1f2a4a; --fg: #eef2ff; --muted: #9aa6c7; --acc: #ffd60a; --up: #2ecc71; --down: #ff5c6c; --live: #ff3d57; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: radial-gradient(1200px 600px at 50% -200px, #1b2a6b 0%, var(--bg) 60%) fixed, var(--bg); color: var(--fg); font: 16px/1.45 Figtree, system-ui, sans-serif; padding: 0 max(16px, env(safe-area-inset-left)) 40px; }
+.wrap { max-width: 560px; margin: 0 auto; }
+header { padding: 28px 0 8px; }
+.tags { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.kick { font: 700 .82rem/1 ui-monospace, monospace; color: var(--acc); letter-spacing: .06em; text-transform: uppercase; }
+.live { display: none; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(255, 61, 87, .5); background: rgba(255, 61, 87, .12); color: #ff8a9a; font-weight: 700; font-size: .9rem; }
+.live.on { display: inline-flex; }
+.live i { width: 9px; height: 9px; border-radius: 50%; background: var(--live); animation: blink 1.2s infinite; }
+@keyframes blink { 50% { opacity: .25; } }
+h1 { font: 800 2.4rem/1.05 Outfit, sans-serif; margin: 12px 0 2px; }
+.sub { color: var(--muted); margin: 0; }
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 18px; margin: 22px 0 6px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+.stats small { display: block; color: var(--muted); font-size: .85rem; }
+.stats b { font: 800 1.45rem Outfit, sans-serif; }
+.row { display: flex; align-items: center; gap: 12px; padding: 12px 6px; border-bottom: 1px solid var(--line); }
+.rk { width: 34px; flex: none; text-align: center; font: 800 1.05rem Outfit, sans-serif; color: var(--muted); }
+.rk small { display: block; font: 700 .72rem Figtree, sans-serif; margin-top: 2px; }
+.up { color: var(--up); } .down { color: var(--down); } .eq { color: var(--muted); opacity: .7; } .new { color: var(--acc); }
+.av { width: 46px; height: 46px; flex: none; border-radius: 50%; object-fit: cover; background: #26305a; display: grid; place-items: center; font: 800 1.1rem Outfit; color: #fff; }
+.who { flex: 1; min-width: 0; }
+.nm { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bd { font-size: .95rem; }
+.pt { text-align: right; flex: none; }
+.pt b { display: block; font: 800 1.15rem Outfit, sans-serif; color: var(--acc); }
+.pt small { color: var(--muted); font-size: .8rem; }
+.podium .row { border: 0; margin: 6px 0; padding: 14px 12px; background: var(--card); border-radius: 16px; }
+.podium .row:nth-child(1) { outline: 2px solid rgba(255, 214, 10, .55); }
+.podium .r1 .rk { color: #ffd60a; } .podium .r2 .rk { color: #d9dde6; } .podium .r3 .rk { color: #e0a46b; }
+.search { margin: 20px 0 6px; position: relative; }
+.search input { width: 100%; font: inherit; color: var(--fg); background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 13px 14px 13px 42px; min-height: 48px; }
+.search input:focus-visible { outline: 3px solid var(--acc); outline-offset: 2px; }
+.search svg { position: absolute; left: 14px; top: 14px; opacity: .6; }
+.hint { color: var(--muted); font-size: .85rem; margin: 6px 0 14px; }
+h2 { font: 700 .82rem/1 ui-monospace, monospace; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin: 22px 0 6px; display: flex; align-items: center; gap: 12px; }
+h2::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.pager { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 16px 0; }
+.pager button { font: 700 .95rem Figtree; color: var(--fg); background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 16px; min-height: 44px; cursor: pointer; }
+.pager button:disabled { opacity: .4; cursor: default; }
+.state { text-align: center; color: var(--muted); padding: 40px 10px; }
+.spin { width: 38px; height: 38px; margin: 0 auto 14px; border-radius: 50%; border: 4px solid var(--line); border-top-color: var(--acc); animation: sp .8s linear infinite; }
+@keyframes sp { to { transform: rotate(360deg); } }
+.legend { color: var(--muted); font-size: .9rem; margin-top: 22px; line-height: 1.6; }
+.foot { color: var(--muted); font-size: .85rem; text-align: center; margin-top: 26px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="tags"><span class="kick">Saison en cours</span><span class="live" id="live"><i></i>En direct maintenant</span></div>
+    <h1 id="title">Classement du mois</h1>
+    <p class="sub" id="sub">Quiz en live</p>
+    <div class="stats">
+      <div><small>Joueurs classés</small><b id="sPlayers">–</b></div>
+      <div><small>Donateurs ce mois-ci</small><b id="sDonors">–</b></div>
+      <div><small>Fin de saison dans</small><b id="sEnd">–</b></div>
+      <div><small>Mis à jour</small><b id="sUpd">–</b></div>
+    </div>
+  </header>
+  <main id="main"><div class="state"><div class="spin"></div>Chargement du classement…<br><small id="wake"></small></div></main>
+  <p class="legend">👑 champion de la semaine dernière · 🎁 meilleur donateur du mois · 🔥 série de 5 bonnes réponses ou plus<br>Les points repartent de zéro le 1er de chaque mois à 00 h 00.</p>
+  <p class="foot">Réponds A, B, C ou D dans le chat pendant le live pour gagner des points.</p>
+</div>
+<script>
+(function () {
+  var qs = new URLSearchParams(location.search);
+  var USER = (qs.get("u") || "tonpotelecon1").replace(/^@/, "");
+  var RELAY = (qs.get("r") || "studio-quiz-relais.onrender.com").replace(/\/+$/, "");
+  var BASE = /^https?:\/\//i.test(RELAY) ? RELAY : "https://" + RELAY;
+  var PER = 50, page = 0, data = null, filter = "";
+  var $ = function (s) { return document.querySelector(s); };
+  function esc(t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function n(x) { return Number(x || 0).toLocaleString("fr-FR"); }
+  var MONTHS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+  function av(p) {
+    var ini = esc((String(p.name || "?").trim()[0] || "?").toUpperCase());
+    return p.pic ? "<img class=\"av\" src=\"" + esc(p.pic) + "\" alt=\"\" referrerpolicy=\"no-referrer\" onerror=\"this.outerHTML='<div class=av>" + ini + "</div>'\">" : "<div class=\"av\">" + ini + "</div>";
+  }
+  function mv(p) {
+    if (p.move == null) return "<small class=\"new\">NEW</small>";
+    if (p.move > 0) return "<small class=\"up\">▲" + p.move + "</small>";
+    if (p.move < 0) return "<small class=\"down\">▼" + (-p.move) + "</small>";
+    return "<small class=\"eq\">=</small>";
+  }
+  function row(p, cls) {
+    return "<div class=\"row " + (cls || "") + "\"><div class=\"rk\">" + p.rank + mv(p) + "</div>" + av(p) +
+      "<div class=\"who\"><div class=\"nm\">" + esc(p.name) + "</div><div class=\"bd\">" + (p.badges || []).join(" ") + "</div></div>" +
+      "<div class=\"pt\"><b>" + n(p.p) + "</b><small>points</small></div></div>";
+  }
+  function render() {
+    var d = data, m = $("#main");
+    var parts = String(d.season).split("-"), mo = MONTHS[(+parts[1] || 1) - 1];
+    $("#title").textContent = mo.charAt(0).toUpperCase() + mo.slice(1) + " " + parts[0];
+    $("#sub").textContent = "Classement du mois · @" + USER;
+    $("#live").classList.toggle("on", !!d.live);
+    $("#sPlayers").textContent = n(d.total); $("#sDonors").textContent = n(d.donorCount);
+    $("#sUpd").textContent = "à l'instant";
+    if (!d.players.length) { m.innerHTML = "<div class=\"state\">Personne n'a encore marqué de point ce mois-ci.<br>Rejoins le prochain live pour être le premier !</div>"; return; }
+    var list = d.players;
+    if (filter) list = list.filter(function (p) { return String(p.name).toLowerCase().indexOf(filter) >= 0; });
+    var html = "";
+    if (!filter) {
+      html += "<div class=\"podium\">" + list.slice(0, 3).map(function (p, i) { return row(p, "r" + (i + 1)); }).join("") + "</div>";
+    }
+    html += "<div class=\"search\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"M20 20l-3.5-3.5\"/></svg><input id=\"q\" type=\"search\" placeholder=\"Cherche ton pseudo…\" value=\"" + esc(filter) + "\" aria-label=\"Chercher un pseudo\"></div>" +
+      "<p class=\"hint\">▲▼ places gagnées ou perdues depuis hier.</p>";
+    var rest = filter ? list : list.slice(3), pages = Math.max(1, Math.ceil(rest.length / PER));
+    page = Math.min(page, pages - 1);
+    var slice = rest.slice(page * PER, page * PER + PER);
+    if (!filter && page === 0) {
+      var t10 = slice.filter(function (p) { return p.rank <= 10; }), t50 = slice.filter(function (p) { return p.rank > 10; });
+      if (t10.length) html += "<h2>Top 10</h2>" + t10.map(function (p) { return row(p); }).join("");
+      if (t50.length) html += "<h2>Top 50</h2>" + t50.map(function (p) { return row(p); }).join("");
+    } else {
+      html += slice.length ? slice.map(function (p) { return row(p); }).join("") : "<div class=\"state\">Aucun joueur ne correspond à « " + esc(filter) + " ».</div>";
+    }
+    if (pages > 1) html += "<div class=\"pager\"><button id=\"prev\" type=\"button\"" + (page ? "" : " disabled") + ">Précédent</button><span>Page " + (page + 1) + " sur " + pages + "</span><button id=\"next\" type=\"button\"" + (page < pages - 1 ? "" : " disabled") + ">Suivant</button></div>";
+    if (!filter && d.donors && d.donors.length) {
+      html += "<h2>Les donateurs du mois</h2>" + d.donors.map(function (x, i) {
+        return "<div class=\"row\"><div class=\"rk\">" + (i === 0 ? "🎁" : i + 1) + "</div>" + av(x) + "<div class=\"who\"><div class=\"nm\">" + esc(x.name) + "</div></div><div class=\"pt\"><b>" + n(x.coins) + "</b><small>pièces</small></div></div>";
+      }).join("") + "<p class=\"hint\">" + n(d.donorCount) + " personne" + (d.donorCount > 1 ? "s ont" : " a") + " offert des cadeaux ce mois-ci.</p>";
+    }
+    m.innerHTML = html;
+    var q = $("#q"); if (q) { q.oninput = function () { filter = this.value.trim().toLowerCase(); page = 0; render(); var q2 = $("#q"); q2.focus(); q2.setSelectionRange(q2.value.length, q2.value.length); }; }
+    var pv = $("#prev"), nx = $("#next");
+    if (pv) pv.onclick = function () { page--; render(); scrollTo(0, 0); };
+    if (nx) nx.onclick = function () { page++; render(); scrollTo(0, 0); };
+  }
+  function countdown() {
+    if (!data) return;
+    var ms = Math.max(0, data.endsAt - Date.now()), d = Math.floor(ms / 86400000), h = Math.floor(ms / 3600000) % 24, mi = Math.floor(ms / 60000) % 60;
+    $("#sEnd").textContent = d + " j " + h + " h " + mi + " min";
+    var ago = Math.round((Date.now() - data.fetched) / 60000);
+    $("#sUpd").textContent = ago < 1 ? "à l'instant" : "il y a " + ago + " min";
+  }
+  var slowT = setTimeout(function () { var w = $("#wake"); if (w) w.textContent = "Le serveur se réveille, ça peut prendre jusqu'à une minute…"; }, 4000);
+  function load(first) {
+    fetch(BASE + "/classement?user=" + encodeURIComponent(USER), { cache: "no-store" })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        clearTimeout(slowT);
+        if (j.error) { if (first) $("#main").innerHTML = "<div class=\"state\">" + esc(j.error) + "</div>"; return; }
+        j.fetched = Date.now(); data = j; render(); countdown();
+      })
+      .catch(function () { if (first) $("#main").innerHTML = "<div class=\"state\">Impossible de charger le classement pour le moment.<br>Réessaie dans une minute.</div>"; });
+  }
+  load(true);
+  setInterval(countdown, 30000);
+  setInterval(function () { if (!document.hidden && !$("#q:focus")) load(false); }, 60000);
+})();
+</script>
+</body>
+</html>
