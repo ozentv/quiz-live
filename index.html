@@ -272,7 +272,44 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 .gift-tbl td { padding: 4px 6px; border-top: 1px solid var(--line); vertical-align: top; }
 .gift-tbl td:first-child { white-space: nowrap; font-weight: 700; }
 /* ---------- style « Néon » (plateau de jeu) ---------- */
-#stage.neon { --glow: 0 0 18px var(--sacc), 0 0 2px var(--sacc); }
+/* ---------- style « Néon » : roulette, vote, classements, récap, cadeaux, podium ---------- */
+#stageWrap.neon { --glow: 0 0 18px var(--sacc), 0 0 2px var(--sacc); }
+#stageWrap.neon .lb-t, #stageWrap.neon .rc-t, #stageWrap.neon .rc-h, #stageWrap.neon .gf-t, #stageWrap.neon .pod-t, #stageWrap.neon .vote-t, #stageWrap.neon .rl-t { left: 90px; right: 90px; --cut: 56px; clip-path: polygon(var(--cut) 0, calc(100% - var(--cut)) 0, 100% 50%, calc(100% - var(--cut)) 100%, var(--cut) 100%, 0 50%); background: var(--sacc); isolation: isolate; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; overflow: hidden; text-shadow: 0 0 22px currentColor; }
+#stageWrap.neon .lb-t::before, #stageWrap.neon .rc-t::before, #stageWrap.neon .rc-h::before, #stageWrap.neon .gf-t::before, #stageWrap.neon .pod-t::before, #stageWrap.neon .vote-t::before, #stageWrap.neon .rl-t::before { content: ""; position: absolute; inset: 5px; z-index: -1; clip-path: polygon(var(--cut) 0, calc(100% - var(--cut)) 0, 100% 50%, calc(100% - var(--cut)) 100%, var(--cut) 100%, 0 50%); background: linear-gradient(180deg, rgba(10, 22, 30, .94), rgba(4, 10, 16, .97)); }
+#stageWrap.neon .lb-t { top: 184px; height: 140px; line-height: 140px; font-size: 80px; }
+#stageWrap.neon .rc-t { top: 92px; height: 112px; line-height: 112px; font-size: 58px; }
+#stageWrap.neon .rc-h { top: 1028px; height: 104px; line-height: 104px; font-size: 54px; }
+#stageWrap.neon .gf-t { top: 160px; height: 128px; line-height: 128px; font-size: 74px; }
+#stageWrap.neon .pod-t { top: 156px; height: 140px; line-height: 140px; font-size: 84px; }
+#stageWrap.neon .vote-t { top: 318px; height: 150px; line-height: 150px; font-size: 90px; }
+#stageWrap.neon .rl-t { top: 360px; height: 130px; line-height: 130px; font-size: 64px; color: #fff; }
+#stageWrap.neon .lb-row, #stageWrap.neon .rc-row, #stageWrap.neon .gf-row, #stageWrap.neon .vcard, #stageWrap.neon .rl-box, #stageWrap.neon .bigpill { --cut: 36px; clip-path: polygon(var(--cut) 0, calc(100% - var(--cut)) 0, 100% 50%, calc(100% - var(--cut)) 100%, var(--cut) 100%, 0 50%); background: var(--sacc); border: 0; border-radius: 0; isolation: isolate; box-shadow: none; }
+#stageWrap.neon .lb-row::before, #stageWrap.neon .rc-row::before, #stageWrap.neon .gf-row::before, #stageWrap.neon .vcard::before, #stageWrap.neon .rl-box::before, #stageWrap.neon .bigpill::before { content: ""; position: absolute; inset: 4px; z-index: -1; clip-path: polygon(var(--cut) 0, calc(100% - var(--cut)) 0, 100% 50%, calc(100% - var(--cut)) 100%, var(--cut) 100%, 0 50%); background: linear-gradient(180deg, rgba(10, 22, 30, .92), rgba(4, 10, 16, .96)); }
+#stageWrap.neon .lb-row, #stageWrap.neon .rc-row, #stageWrap.neon .gf-row { padding-left: 44px; padding-right: 48px; }
+#stageWrap.neon .vcard { padding: 0 60px 0 50px; }
+#stageWrap.neon .gf-row { gap: 16px; }
+#stageWrap.neon .gf-row .n { font-size: 34px; }
+#stageWrap.neon .gf-row .n small { font-size: 26px; }
+#stageWrap.neon .gf-row .x { font-size: 32px; max-width: 470px; }
+#stageWrap.neon .lb-row.r1 { color: #fff; }
+#stageWrap.neon .lb-row.r1::before { background: linear-gradient(90deg, color-mix(in srgb, var(--sacc) 50%, #04090d), rgba(4, 10, 16, .96)); }
+#stageWrap.neon .lb-row.r1 .lb-rk { background: var(--sacc); color: #0f0f19; box-shadow: var(--glow); }
+#stageWrap.neon .rc-row.first, #stageWrap.neon .vcard.won { background: #2ecc71; }
+#stageWrap.neon .rc-row.first::before, #stageWrap.neon .vcard.won::before { background: linear-gradient(90deg, rgba(20, 110, 60, .95), rgba(6, 40, 22, .97)); }
+#stageWrap.neon .lb-s, #stageWrap.neon .rc-s, #stageWrap.neon .gf-s, #stageWrap.neon .pod-s, #stageWrap.neon .vote-s, #stageWrap.neon .rl-s { color: var(--sacc); text-shadow: 0 0 14px rgba(0, 0, 0, .6); }
+#stageWrap.neon .lb-f, #stageWrap.neon .gf-f, #stageWrap.neon .pod-f { left: 90px; right: 90px; width: auto; padding: 18px 30px; border: 3px solid var(--sacc); border-radius: 40px; background: rgba(0, 0, 0, .5); box-shadow: var(--glow); }
+#stageWrap.neon .lb-none, #stageWrap.neon .rc-none { text-shadow: 0 0 16px rgba(0, 0, 0, .5); }
+#stageWrap.neon .vote-n { color: var(--sacc); text-shadow: var(--glow); }
+#stageWrap.neon .pod-col { box-shadow: 0 0 34px rgba(255, 255, 255, .35), inset 0 6px 0 rgba(255, 255, 255, .55); }
+#stageWrap.neon .pod-pic { border-color: var(--sacc); box-shadow: var(--glow); }
+#stageWrap.neon .rl-spin { box-shadow: var(--glow); }
+#stageWrap.neon .rl-box { --cut: 70px; }
+#stageWrap.neon .rl-box .rl-name { text-shadow: 0 0 20px currentColor; }
+#stageWrap.neon .rl-box.done::before { background: linear-gradient(180deg, color-mix(in srgb, var(--sacc) 85%, #fff), var(--sacc)); }
+#stageWrap.neon .intro .big, #stageWrap.neon .outro .big { text-shadow: 0 0 40px var(--sacc), 0 0 4px var(--sacc); }
+#stageWrap.neon .bigpill { padding: 0 90px; color: #fff; }
+#stageWrap.neon .outro .bigpill { background: var(--sacc); }
+#lbLayer { isolation: isolate; }
 #stage.neon .hd-pill, #stage.neon .hd-count, #stage.neon .bars, #stage.neon .top3, #stage.neon .ticker, #stage.neon .cta, #stage.neon .stat { display: none; }
 #stage.neon .hd-logo { top: 112px; transform: translateX(-50%) rotate(-4deg) scale(1.22); }
 #stage.neon .hd-logo::before { content: ""; position: absolute; left: 50%; top: 54%; width: 320px; height: 118px; transform: translate(-50%, -50%); border: 4px solid var(--sacc); border-radius: 50%; box-shadow: var(--glow), inset 0 0 22px var(--sacc); background: rgba(0, 0, 0, .35); z-index: -1; }
@@ -2642,7 +2679,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   };
   pipLayout();
   function tvLayout() {
-    stage.classList.toggle("tv", !!S.tvOn); stage.classList.toggle("neon", S.skin === "neon");
+    stage.classList.toggle("tv", !!S.tvOn); stage.classList.toggle("neon", S.skin === "neon"); wrap.classList.toggle("neon", S.skin === "neon");
     var html = ""; for (var i = 0; i < 22; i++) html += "<i></i>";
     Array.prototype.forEach.call(document.querySelectorAll(".leds"), function (l) { if (!l.children.length) l.innerHTML = html; });
   }
