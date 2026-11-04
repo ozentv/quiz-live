@@ -32,6 +32,7 @@ Le quiz tient dans un seul fichier, `index.html`, sans rien à installer. Le rel
 - **Bienvenue** affichée et annoncée quand un joueur marque son premier point, et **séries** 🔥 à 3, 5 et 10 bonnes réponses d'affilée.
 - **Question bonus ×2** : 1 question sur 5 ou sur 10 rapporte deux fois plus de points (aussi avec + Point).
 - **Vote du chat pour le thème** : au début, puis toutes les 5 ou 10 questions, le chat écrit 1, 2 ou 3 pour choisir le thème suivant parmi les thèmes sélectionnés (avec les points automatiques).
+- **Récap après chaque question** (5, 7 ou 10 secondes, ou désactivé) : la liste des bonnes réponses avec la photo, le pseudo et les points gagnés (+3, +2, +1, ⭐ ×2, ❤️ ×3, ❄️ gelé), puis le top 5 du classement avec les places gagnées ou perdues (▲▼, NEW).
 - **Répartition des réponses** : à la révélation, chaque choix affiche le pourcentage du chat, avec une barre.
 - **⚡ Premier à répondre** : le pseudo du plus rapide s'affiche pendant la question, sans dévoiler sa réponse.
 - **Effets de jeu télé** : battements de cœur pendant les 5 dernières secondes, roulement de tambour avant la réponse, confettis et applaudissements pour le WINNER, « ouuuh » quand personne n'a trouvé, tremblement de l'écran lors d'un gel ou d'un vol.
