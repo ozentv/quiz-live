@@ -252,6 +252,11 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 .rl-s { position: absolute; left: 0; right: 0; top: 1110px; text-align: center; font-size: 50px; font-weight: 700; opacity: .9; }
 .rl-dots::after { content: ""; animation: rldots 1s steps(4) infinite; }
 @keyframes rldots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
+.card .avs { flex: none; display: flex; align-items: center; flex-direction: row-reverse; padding-left: 16px; }
+.card .avs > * { flex: none; width: 58px; height: 58px; margin-left: -18px; border-radius: 50%; border: 4px solid rgba(255, 255, 255, .9); object-fit: cover; background: #555; box-shadow: 0 4px 10px rgba(0, 0, 0, .35); animation: avin .35s cubic-bezier(.2, 1.6, .4, 1) both; }
+.card .avs .ini { display: grid; place-items: center; font-size: 28px; font-weight: 800; color: #fff; }
+.card .avs .more { width: auto; min-width: 58px; padding: 0 10px; display: grid; place-items: center; font-size: 26px; font-weight: 800; background: #0f0f19; color: #fff; border-radius: 29px; }
+@keyframes avin { from { transform: scale(0); } to { transform: none; } }
 #giftToast { position: absolute; left: 60px; right: 60px; top: 150px; z-index: 4; display: none; padding: 26px 34px; border-radius: 40px; background: #0b0d1c; border: 4px solid #ffd60a; text-align: center; font-size: 50px; font-weight: 800; line-height: 1.2; box-shadow: 0 20px 50px rgba(0, 0, 0, .45); }
 #giftToast.on { display: block; animation: sin .25s ease-out both; }
 #giftToast small { display: block; font-size: 36px; font-weight: 700; color: #ffd60a; margin-top: 8px; }
@@ -1925,7 +1930,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     var bars = ""; for (var i = 0; i < n; i++) bars += "<span class=\"" + (i < qi ? "done" : i === qi ? "cur" : "") + "\"></span>";
     var C = 2 * Math.PI * 98, cards = "";
     q.choices.forEach(function (c, i) {
-      cards += "<div class=\"card " + (i === q.a ? "good" : "dim") + "\" style=\"top:" + (940 + i * 148) + "px\">" + (lv && S.chatOn ? "<div class=\"pb\"></div>" : "") + "<div class=\"bd\">" + "ABCD"[i] + "</div><div class=\"lb\">" + esc(c) + "</div>" + (lv && S.chatOn ? "<div class=\"pc\"></div>" : "") +
+      cards += "<div class=\"card " + (i === q.a ? "good" : "dim") + "\" style=\"top:" + (940 + i * 148) + "px\">" + (lv && S.chatOn ? "<div class=\"pb\"></div>" : "") + "<div class=\"bd\">" + "ABCD"[i] + "</div><div class=\"lb\">" + esc(c) + "</div>" + (lv && S.chatOn ? "<div class=\"avs\" id=\"avs" + i + "\"></div><div class=\"pc\"></div>" : "") +
         "<div class=\"ck\"><svg width=\"30\" height=\"30\" viewBox=\"0 0 30 30\"><path d=\"M5 16 L12 23 L25 8\" fill=\"none\" stroke=\"#2ecc71\" stroke-width=\"5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div></div>";
     });
     return (lv ? "<div class=\"top3\" id=\"top3\">" + top3Text() + "</div><div class=\"news\" id=\"news\"></div>" + (S.chatOn && S.giftsOn ? "<div class=\"ticker\" id=\"ticker\"><span>🎁 " + GIFT_INFO[tickI % GIFT_INFO.length].join(" ") + "</span></div>" : "") + (S.chatOn && S.likeGoal ? "<div class=\"likes\" id=\"likes\">" + likesInner() + "</div>" : "") : "") +
@@ -2238,6 +2243,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     if (round.seen[k]) return; // une seule réponse par personne et par question
     round.seen[k] = 1;
     round.answers.push({ k: k, name: m.name || m.id, a: a });
+    addAnswerFace(a, k, m.name || m.id);
     if (round.answers.length === 1) { round.first = m.name || m.id; beep(1320, 0.08, 0.07); beep(1760, 0.1, 0.06, 0.08); }
     var st = $("#stat"); if (st) st.textContent = "💬 " + round.answers.length + " réponse" + (round.answers.length > 1 ? "s" : "") + " · ⚡ " + round.first + " en premier";
   }
@@ -2337,6 +2343,24 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     scores = fx.galaxyBackup; fx.galaxyBackup = null; saveScores(); renderScores(); renderTop3();
     this.hidden = true; msg("Classement d'avant la Galaxie rétabli.");
   };
+  var FACE_COLORS = ["#e74c3c", "#3498db", "#2ecc71", "#9b59b6", "#f39c12", "#1abc9c", "#e67e22", "#ff5c8a"];
+  function addAnswerFace(i, k, name) {
+    var box = document.getElementById("avs" + i); if (!box || !round) return;
+    round.faces = round.faces || {}; var n = round.faces[i] = (round.faces[i] || 0) + 1;
+    if (n > 5) { // au-delà de 5 photos : un compteur « +N »
+      var more = box.querySelector(".more"); if (!more) { more = document.createElement("div"); more.className = "more"; box.insertBefore(more, box.firstChild); }
+      more.textContent = "+" + (n - 5); return;
+    }
+    var pic = pics[k] || (scores[k] && scores[k].pic), el;
+    if (pic) { el = document.createElement("img"); el.src = pic; el.alt = ""; el.referrerPolicy = "no-referrer"; el.onerror = function () { this.replaceWith(initialFace(name, k)); }; }
+    else el = initialFace(name, k);
+    el.title = name; box.appendChild(el);
+  }
+  function initialFace(name, k) {
+    var d = document.createElement("div"), h = 0; for (var j = 0; j < k.length; j++) h = (h * 31 + k.charCodeAt(j)) | 0;
+    d.className = "ini"; d.textContent = (String(name).trim()[0] || "?").toUpperCase(); d.style.background = FACE_COLORS[Math.abs(h) % FACE_COLORS.length];
+    return d;
+  }
   function showDist() {
     if (!round || !round.answers.length) return;
     var n = round.choices.length, cnt = []; for (var i = 0; i < n; i++) cnt.push(0);
