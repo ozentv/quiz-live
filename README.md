@@ -56,6 +56,11 @@ Avec les points automatiques, chaque cadeau reçu en live déclenche un effet se
 | 🔫 Money Gun… | 500 et + | 👑 choisit le thème : 5 questions bonus ×2 |
 | 🌌 Galaxie | — | remet le classement à zéro (annulable avec **+ Point → Annuler la Galaxie**) |
 
+Pour que les spectateurs sachent ce que fait chaque cadeau :
+- une **ligne d'info** défile en haut de l'écran pendant les questions, avec un cadeau toutes les 4,5 secondes ;
+- un **écran récapitulatif** des cadeaux s'affiche tout seul toutes les 10 questions, avec un rappel à la voix ;
+- le bouton **🎁** de la barre du bas affiche ce récap quand tu veux (le bouton **🏆** affiche le classement).
+
 Les effets sont calculés selon la valeur en pièces envoyée par TikTok, donc ils marchent même si le nom d'un cadeau change. Les prix des cadeaux peuvent varier selon le pays. Les points des bonnes réponses restent la source principale : on peut gagner sans rien envoyer. Il n'y a ni hasard payant ni récompense réelle.
 
 ### Installation depuis ton téléphone (une seule fois, gratuit)

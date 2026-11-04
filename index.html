@@ -123,8 +123,8 @@ ol.steps li::marker { font-weight: 800; color: var(--accent); }
 .lb-pt { flex: none; font-size: 46px; font-weight: 800; }
 .lb-none { position: absolute; left: 80px; width: 920px; top: 640px; text-align: center; font-size: 54px; font-weight: 600; line-height: 1.3; opacity: .9; }
 .lb-f { position: absolute; left: 80px; width: 920px; top: 1620px; text-align: center; font-size: 40px; font-weight: 700; }
-#liveBar { position: absolute; right: max(10px, env(safe-area-inset-right, 0px)); bottom: max(10px, env(safe-area-inset-bottom, 0px)); display: flex; gap: 8px; z-index: 6; opacity: .8; }
-#liveBar button { border: 0; border-radius: 999px; padding: 0 14px; min-height: 42px; font: 700 14px var(--body); background: rgba(6, 12, 24, .78); color: #fff; }
+#liveBar { position: absolute; right: max(8px, env(safe-area-inset-right, 0px)); bottom: max(10px, env(safe-area-inset-bottom, 0px)); display: flex; gap: 5px; z-index: 6; opacity: .8; }
+#liveBar button { white-space: nowrap; border: 0; border-radius: 999px; padding: 0 11px; min-height: 42px; font: 700 14px var(--body); background: rgba(6, 12, 24, .78); color: #fff; }
 .overlay input { width: 100%; font: 16px var(--body); color: #fff; background: #12233a; border: 1px solid #2c4666; border-radius: 12px; padding: 12px; min-height: 48px; user-select: text; -webkit-user-select: text; }
 .nmrow { display: flex; flex-wrap: wrap; gap: 8px; }
 .nmchip { border: 0; background: #22364f; color: #fff; border-radius: 999px; padding: 0 14px; min-height: 40px; font-weight: 700; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
@@ -172,6 +172,16 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 #stage.pip-on .stat { top: 1640px; font-size: 36px; }
 #stage.pip-on .news { top: 1682px; font-size: 32px; left: 400px; right: 40px; }
 .pip-row { display: grid; gap: 8px; width: 100%; }
+.ticker { position: absolute; left: 60px; right: 60px; top: 2px; height: 40px; text-align: center; font-size: 30px; font-weight: 800; color: #ffd60a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: .95; }
+.ticker span { display: inline-block; animation: sin .4s ease-out both; }
+.gf-t { position: absolute; left: 0; right: 0; top: 170px; text-align: center; font-size: 112px; font-weight: 800; color: var(--sacc); }
+.gf-s { position: absolute; left: 60px; right: 60px; top: 310px; text-align: center; font-size: 44px; font-weight: 700; opacity: .92; }
+.gf-row { position: absolute; left: 60px; right: 60px; height: 118px; border-radius: 34px; background: rgba(255, 255, 255, .12); border: 3px solid rgba(255, 255, 255, .25); display: flex; align-items: center; gap: 22px; padding: 0 28px; }
+.gf-row .e { flex: none; width: 76px; font-size: 60px; text-align: center; }
+.gf-row .n { flex: 1; min-width: 0; font-size: 40px; font-weight: 800; line-height: 1.1; }
+.gf-row .n small { display: block; font-size: 30px; font-weight: 600; opacity: .75; }
+.gf-row .x { flex: none; max-width: 430px; text-align: right; font-size: 38px; font-weight: 800; color: #ffd60a; line-height: 1.1; }
+.gf-f { position: absolute; left: 80px; right: 80px; top: 1640px; text-align: center; font-size: 40px; font-weight: 700; }
 #giftToast { position: absolute; left: 60px; right: 60px; top: 150px; z-index: 4; display: none; padding: 26px 34px; border-radius: 40px; background: #0b0d1c; border: 4px solid #ffd60a; text-align: center; font-size: 50px; font-weight: 800; line-height: 1.2; box-shadow: 0 20px 50px rgba(0, 0, 0, .45); }
 #giftToast.on { display: block; animation: sin .25s ease-out both; }
 #giftToast small { display: block; font-size: 36px; font-weight: 700; color: #ffd60a; margin-top: 8px; }
@@ -292,7 +302,8 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   <div id="lbLayer" hidden><div id="lbIn"></div><button id="lbClose" type="button" aria-label="Fermer le classement">✕ Fermer</button></div>
   <div id="liveBar" hidden>
     <button id="bChat" type="button" hidden>Chat</button>
-    <button id="bBoard" type="button">Classement</button>
+    <button id="bGifts" type="button" hidden aria-label="Récap des cadeaux" title="Récap des cadeaux">🎁</button>
+    <button id="bBoard" type="button" aria-label="Classement" title="Classement">🏆</button>
     <button id="bAdd" type="button">+ Point</button>
     <button id="bStop" type="button">Arrêter</button>
   </div>
@@ -1727,7 +1738,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       cards += "<div class=\"card " + (i === q.a ? "good" : "dim") + "\" style=\"top:" + (940 + i * 148) + "px\"><div class=\"bd\">" + "ABCD"[i] + "</div><div class=\"lb\">" + esc(c) + "</div>" +
         "<div class=\"ck\"><svg width=\"30\" height=\"30\" viewBox=\"0 0 30 30\"><path d=\"M5 16 L12 23 L25 8\" fill=\"none\" stroke=\"#2ecc71\" stroke-width=\"5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div></div>";
     });
-    return (lv ? "<div class=\"top3\" id=\"top3\">" + top3Text() + "</div><div class=\"news\" id=\"news\"></div>" : "") +
+    return (lv ? "<div class=\"top3\" id=\"top3\">" + top3Text() + "</div><div class=\"news\" id=\"news\"></div>" + (S.chatOn && S.giftsOn ? "<div class=\"ticker\" id=\"ticker\"><span>🎁 " + GIFT_INFO[tickI % GIFT_INFO.length].join(" ") + "</span></div>" : "") : "") +
       "<div class=\"hd-pill\">" + esc(T.title) + "</div><div class=\"hd-count" + (bonus ? " bonus" : "") + "\">" + (bonus ? "⭐ BONUS ×2" : lv ? "Q" + (qi + 1) : (qi + 1) + "/" + n) + "</div><div class=\"bars\">" + bars + "</div>" +
       "<div class=\"ring\"><svg viewBox=\"0 0 280 280\"><circle cx=\"140\" cy=\"140\" r=\"98\" fill=\"none\" stroke=\"rgba(255,255,255,.22)\" stroke-width=\"20\"/>" +
       "<circle id=\"arc\" cx=\"140\" cy=\"140\" r=\"98\" fill=\"none\" stroke=\"var(--sacc)\" stroke-width=\"20\" stroke-linecap=\"round\" stroke-dasharray=\"" + C + "\" stroke-dashoffset=\"0\"/></svg><div class=\"num\" id=\"num\">" + (lv ? S.liveCount : S.count) + "</div></div>" +
@@ -1822,14 +1833,30 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     clearTimeout(lbT); $("#lbLayer").hidden = true;
     var d = boardDone; boardDone = null; if (d) d();
   }
-  function showBoard(ms) {
+  function showBoard(ms, html) {
     return new Promise(function (res) {
       closeBoard();
-      $("#lbIn").innerHTML = boardHTML(); $("#lbLayer").hidden = false;
+      $("#lbIn").innerHTML = html || boardHTML(); $("#lbLayer").hidden = false;
       boardDone = res;
       if (ms) lbT = setTimeout(closeBoard, ms);
     });
   }
+  var GIFT_INFO = [
+    ["🌹", "Rose, GG :", "+1 point par cadeau"], ["🫰", "Cœur avec les doigts :", "🛡️ bouclier 5 questions"],
+    ["🌹", "Rosa :", "⭐ prochaine réponse ×2"], ["🧴", "Parfum :", "💡 joker 50/50 pour tous"],
+    ["🍩", "Donut :", "❄️ gèle le joueur devant"], ["🫶", "Cœurs avec les mains, Confettis :", "💣 vole 3 points"],
+    ["🔫", "Money Gun :", "👑 choisis le thème"], ["🌌", "Galaxie :", "classement remis à zéro"]
+  ], tickI = 0;
+  setInterval(function () {
+    tickI++; var el = document.getElementById("ticker");
+    if (el) el.innerHTML = "<span>🎁 " + GIFT_INFO[tickI % GIFT_INFO.length].join(" ") + "</span>";
+  }, 4500);
+  function giftsHTML() {
+    var coins = ["1 pièce", "5 pièces", "10 pièces", "20 pièces", "30 pièces", "100 pièces", "500 pièces", "1 000 pièces"];
+    var rows = GIFT_INFO.map(function (g, i) { return "<div class=\"gf-row\" style=\"top:" + (420 + i * 140) + "px\"><div class=\"e\">" + g[0] + "</div><div class=\"n\">" + esc(g[1].replace(/ :$/, "")) + "<small>" + coins[i] + "</small></div><div class=\"x\">" + esc(g[2]) + "</div></div>"; }).join("");
+    return "<div class=\"gf-t\">🎁 LES CADEAUX</div><div class=\"gf-s\">Chaque cadeau donne un bonus dans le quiz</div>" + rows + "<div class=\"gf-f\">Pas de cadeau ? Tes bonnes réponses suffisent pour gagner 💪</div>";
+  }
+  var GIFT_VOICE = "Petit rappel des cadeaux : la Rose donne un point, le Cœur avec les doigts un bouclier, la Rosa double ta prochaine réponse, le Parfum enlève deux mauvaises réponses, le Donut gèle le joueur devant toi, les Cœurs avec les mains volent trois points, le Money Gun te fait choisir le thème, et la Galaxie remet le classement à zéro. Et sans cadeau, tes bonnes réponses suffisent pour gagner !";
   function boardVoice() {
     var top = ranking().slice(0, 3), lab = ["En tête", "Deuxième", "Troisième"];
     if (!top.length) return "Classement. Personne n'a encore marqué de point.";
@@ -1871,6 +1898,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     msg("Dernier point annulé."); renderRecent(); renderScores();
   };
   $("#bBoard").onclick = function () { showBoard(12000); };
+  $("#bGifts").onclick = function () { showBoard(14000, giftsHTML()); };
   $("#lbLayer").onclick = function () { if (!finaleOn) closeBoard(); };
   $("#lbClose").onclick = function (e) {
     e.stopPropagation(); try { if (synth) synth.cancel(); } catch (x) {}
@@ -2165,6 +2193,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     try {
       $("#endsheet").hidden = true; $("#addSheet").hidden = true; wrap.hidden = false; $("#liveBar").hidden = false;
       $("#bChat").hidden = !S.chatOn;
+      $("#bGifts").hidden = !(S.chatOn && S.giftsOn);
       if (S.chatOn && !chat.ws) chatConnect();
       var keys = selKeys(), queue = [], last = null, num = 0, lastBoard = Date.now(), used = {}, forced = null;
       streak = {}; vote = null; fx.shield = {}; fx.dbl = {}; fx.frozen = {}; fx.joker = false; fx.pick = null;
@@ -2178,6 +2207,10 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       }
       while (true) {
         if (!queue.length) refill();
+        if (S.chatOn && S.giftsOn && num > 0 && num % 10 === 5) {
+          await ok(Promise.all([say(GIFT_VOICE), showBoard(15000, giftsHTML())]));
+          await ok(sleep(300));
+        }
         if (Date.now() - lastBoard >= S.boardMin * 60000 && ranking().length) {
           await ok(Promise.all([say(boardVoice()), showBoard(11000)]));
           await ok(sleep(300)); lastBoard = Date.now();
