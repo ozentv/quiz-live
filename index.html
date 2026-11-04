@@ -240,7 +240,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 #stage.tv .scene .card { animation: cin .45s cubic-bezier(.2, 1.2, .4, 1) both; }
 @keyframes qin { from { transform: scale(.6); } to { transform: none; } }
 @keyframes cin { from { transform: translateX(1150px); } to { transform: none; } }
-.rl-t { position: absolute; left: 0; right: 0; top: 380px; text-align: center; font-size: 92px; font-weight: 800; letter-spacing: .02em; }
+.rl-t { position: absolute; left: 0; right: 0; top: 380px; text-align: center; font-size: 84px; font-weight: 800; letter-spacing: .02em; }
 .rl-spin { position: absolute; left: 440px; top: 560px; width: 200px; height: 200px; border-radius: 50%; border: 18px solid rgba(255, 255, 255, .18); border-top-color: var(--sacc); border-right-color: var(--sacc); animation: rlspin .8s linear infinite; }
 @keyframes rlspin { to { transform: rotate(360deg); } }
 .rl-box { position: absolute; left: 90px; right: 90px; top: 850px; height: 190px; border-radius: 48px; border: 6px solid var(--sacc); background: rgba(0, 0, 0, .35); display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 0 60px rgba(0, 0, 0, .35); }
@@ -2463,8 +2463,8 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   /* ---------- roulette « prochaine question » ---------- */
   async function themeRoulette(T, num, ok) {
     var others = shuffle(KEYS.filter(function (k) { return BANK[k] !== T; })).map(function (k) { return BANK[k]; });
-    setScene("<div class=\"top3\" id=\"top3\">" + top3Text() + "</div><div class=\"rl-t\">QUESTION " + num + "</div><div class=\"rl-spin\"></div>" +
-      "<div class=\"rl-box\" id=\"rlBox\"><div class=\"rl-name\" id=\"rlName\">…</div></div><div class=\"rl-s\" id=\"rlS\"><span class=\"rl-dots\">Recherche du thème</span></div>");
+    setScene("<div class=\"top3\" id=\"top3\">" + top3Text() + "</div><div class=\"rl-t\">PROCHAINE QUESTION</div><div class=\"rl-spin\"></div>" +
+      "<div class=\"rl-box\" id=\"rlBox\"><div class=\"rl-name\" id=\"rlName\">…</div></div><div class=\"rl-s\" id=\"rlS\">Question " + num + " · <span class=\"rl-dots\">Recherche du thème</span></div>");
     if (S.tvOn) whoosh(0);
     var wait = 55, i = 0;
     while (wait < 330) {
@@ -2478,7 +2478,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     setPalette(T.pal);
     if (nm) { nm.textContent = T.title; nm.classList.remove("roll"); }
     if (box) box.classList.add("done");
-    if (sub) sub.textContent = "Thème trouvé ! C'est parti 🚀";
+    if (sub) sub.textContent = "Question " + num + " · Thème trouvé ! C'est parti 🚀";
     flash(); ding();
     await ok(sleep(1300));
   }
