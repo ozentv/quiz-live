@@ -25,6 +25,8 @@ Le quiz tient dans un seul fichier, `index.html`, sans rien à installer. Le rel
 
 - **🎮 Gameplay parkour en petit** (activé par défaut) : une animation de parkour en blocs vue à la première personne (sauts de bloc en bloc au-dessus du vide), dessinée directement dans le quiz, tourne en boucle dans une petite fenêtre en bas à gauche. Elle est 100 % originale. Tu peux la remplacer par ta propre vidéo de jeu, sans le son.
 
+- **🎵 Musique d'ambiance** (activée par défaut) : une musique de jeu télé composée en direct par le quiz (grosse caisse, claps, basse rebondissante, cuivres et clochette, à 118 battements par minute), donc sans droits d'auteur. Trois volumes : Très bas, Bas, Moyen. Elle baisse toute seule quand la voix parle. Bouton « Écouter » dans les réglages pour l'essayer.
+
 ### En live
 - **Top 3 en direct** en haut de l'écran pendant les questions.
 - **Bienvenue** affichée et annoncée quand un joueur marque son premier point, et **séries** 🔥 à 3, 5 et 10 bonnes réponses d'affilée.
