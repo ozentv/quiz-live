@@ -163,15 +163,14 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 .pod-nm { position: absolute; width: 330px; text-align: center; font-size: 46px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pod-f { position: absolute; left: 80px; right: 80px; top: 1600px; text-align: center; font-size: 44px; font-weight: 700; }
 .pip { position: absolute; z-index: 3; overflow: hidden; background: #000; display: none; }
-.pip video { width: 100%; height: 100%; object-fit: cover; display: block; }
-.pip-cam { left: 845px; top: 1712px; width: 200px; height: 200px; border-radius: 50%; border: 6px solid var(--sacc); box-shadow: 0 10px 30px rgba(0, 0, 0, .45); }
-.pip-cam video { transform: scaleX(-1); }
+.pip video, .pip canvas { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pip video[hidden], .pip canvas[hidden] { display: none; }
 .pip-game { left: 35px; top: 1712px; width: 347px; height: 195px; border-radius: 26px; border: 5px solid rgba(255, 255, 255, .55); box-shadow: 0 10px 30px rgba(0, 0, 0, .45); }
 .pip.on { display: block; }
 #stage.pip-on .cta { top: 1530px; font-size: 36px; }
 #stage.pip-on .win { top: 1528px; height: 100px; font-size: 46px; }
 #stage.pip-on .stat { top: 1640px; font-size: 36px; }
-#stage.pip-on .news { top: 1682px; font-size: 32px; left: 400px; right: 250px; }
+#stage.pip-on .news { top: 1682px; font-size: 32px; left: 400px; right: 40px; }
 .pip-row { display: grid; gap: 8px; width: 100%; }
 #giftToast { position: absolute; left: 60px; right: 60px; top: 150px; z-index: 4; display: none; padding: 26px 34px; border-radius: 40px; background: #0b0d1c; border: 4px solid #ffd60a; text-align: center; font-size: 50px; font-weight: 800; line-height: 1.2; box-shadow: 0 20px 50px rgba(0, 0, 0, .45); }
 #giftToast.on { display: block; animation: sin .25s ease-out both; }
@@ -247,12 +246,13 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     </div>
     <div class="row">
       <div class="pip-row">
-        <label class="switch"><input type="checkbox" id="camOn"> 📷 Ma caméra dans une bulle</label>
-        <span class="chat-st" id="camState"></span>
-        <label class="switch"><input type="checkbox" id="gameOn"> 🎮 Vidéo de jeu en petit</label>
-        <input class="field" type="file" id="gameFile" accept="video/*" aria-label="Choisir la vidéo de jeu">
-        <span class="chat-st" id="gameState"></span>
-        <p class="note" style="margin:0">La bulle s'affiche en bas à droite, la vidéo de jeu en bas à gauche. Pour le jeu : enregistre un extrait sur ta PlayStation (bouton Créer), envoie-le sur ton téléphone, puis choisis-le ici. Il tourne en boucle, sans le son. À rechoisir après avoir rechargé la page.</p>
+        <label class="switch"><input type="checkbox" id="gameOn"> 🎮 Gameplay parkour en petit (en bas à gauche)</label>
+        <div id="gameOpts" class="pip-row">
+          <p class="note" style="margin:0">Une animation de parkour en blocs tourne en boucle. Tu peux la remplacer par ta propre vidéo de jeu (sans le son) :</p>
+          <input class="field" type="file" id="gameFile" accept="video/*" aria-label="Choisir ta vidéo de jeu">
+          <span class="chat-st" id="gameState"></span>
+          <div><button class="btn ghost small" id="gameReset" type="button" hidden>Revenir au parkour</button></div>
+        </div>
       </div>
     </div>
     <p class="warn" id="voiceWarn" hidden>Aucune voix française trouvée sur ce téléphone. Sur iPhone : Réglages, Accessibilité, Contenu énoncé, Voix, puis Français. Sans voix, le quiz se joue avec le texte seul.</p>
@@ -288,7 +288,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 <div class="dock"><button class="btn" id="go" type="button">Lancer le quiz</button></div>
 
 <div id="stageWrap" hidden>
-  <div id="stage"><div id="deco"></div><div id="scene"></div><div id="giftToast"></div><div class="pip pip-game" id="pipGame"><video id="gameVid" muted loop playsinline></video></div><div class="pip pip-cam" id="pipCam"><video id="camVid" muted autoplay playsinline></video></div></div>
+  <div id="stage"><div id="deco"></div><div id="scene"></div><div id="giftToast"></div><div class="pip pip-game" id="pipGame"><canvas id="gameCv" width="694" height="390"></canvas><video id="gameVid" muted loop playsinline hidden></video></div></div>
   <div id="lbLayer" hidden><div id="lbIn"></div><button id="lbClose" type="button" aria-label="Fermer le classement">✕ Fermer</button></div>
   <div id="liveBar" hidden>
     <button id="bChat" type="button" hidden>Chat</button>
@@ -1402,7 +1402,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   };
   var KEYS = Object.keys(BANK);
   var RATES = [["Lente", 0.9], ["Normale", 1.05], ["Rapide", 1.2]];
-  var S = { theme: "random", n: 4, count: 3, voiceOn: true, voiceName: "", rate: 1.05, mode: "video", liveCount: 15, boardMin: 5, chatOn: false, ttUser: "", relay: "", lag: 6, giftsOn: true, camOn: false, gameOn: false, themes: null, diff: "normal", bonusEvery: 5, voteEvery: 0 };
+  var S = { theme: "random", n: 4, count: 3, voiceOn: true, voiceName: "", rate: 1.05, mode: "video", liveCount: 15, boardMin: 5, chatOn: false, ttUser: "", relay: "", lag: 6, giftsOn: true, gameOn: true, themes: null, diff: "normal", bonusEvery: 5, voteEvery: 0 };
   try { Object.assign(S, JSON.parse(localStorage.getItem("sq-set") || "{}")); } catch (e) {}
   if (!Array.isArray(S.themes)) S.themes = S.theme && S.theme !== "random" && BANK[S.theme] ? [S.theme] : [];
   S.themes = S.themes.filter(function (k) { return BANK[k]; });
@@ -1559,37 +1559,90 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   }
   window.addEventListener("resize", fitStage);
 
-  /* ---------- incrustations : caméra et vidéo de jeu ---------- */
-  var camStream = null, gameUrl = null;
+  /* ---------- incrustation : gameplay parkour en blocs (dessiné en direct) ---------- */
+  var gameUrl = null, parkour = (function () {
+    var cv = $("#gameCv"), g = cv.getContext("2d"), W = cv.width, H = cv.height, B = 26, raf = 0, last = 0;
+    var cols = [], off = 0, speed = 120, clouds = [], tex = {};
+    function mkTex(base, spots, top) { // petite texture de bloc 13x13 pixels
+      var c = document.createElement("canvas"); c.width = c.height = 13; var x = c.getContext("2d");
+      x.fillStyle = base; x.fillRect(0, 0, 13, 13);
+      for (var i = 0; i < 26; i++) { x.fillStyle = spots[i % spots.length]; x.fillRect((Math.random() * 13) | 0, (Math.random() * 13) | 0, 1 + (Math.random() * 2 | 0), 1); }
+      if (top) { x.fillStyle = top[0]; x.fillRect(0, 0, 13, 4); for (var j = 0; j < 13; j++) { x.fillStyle = top[1 + (j % 2)]; x.fillRect(j, 4, 1, (Math.random() * 3 | 0)); } }
+      return c;
+    }
+    tex.grass = mkTex("#8b5a2b", ["#7a4e24", "#9c6a38", "#6e4520"], ["#5fbf3a", "#4fa82f", "#6fcf45"]);
+    tex.dirt = mkTex("#8b5a2b", ["#7a4e24", "#9c6a38", "#6e4520"]);
+    tex.stone = mkTex("#8a8a8a", ["#7a7a7a", "#9a9a9a", "#6d6d6d"]);
+    var h = 5;
+    function newCol() {
+      if (cols.length > 3 && Math.random() < 0.14 && cols[cols.length - 1] > 0 && cols[cols.length - 2] > 0) return 0; // trou
+      h = Math.max(3, Math.min(7, h + (Math.random() < 0.35 ? (Math.random() < 0.5 ? -1 : 1) : 0)));
+      return h;
+    }
+    for (var i = 0; i < Math.ceil(W / B) + 4; i++) cols.push(i < 6 ? 5 : newCol());
+    for (var c = 0; c < 4; c++) clouds.push({ x: Math.random() * W, y: 20 + Math.random() * 90, w: 3 + (Math.random() * 3 | 0) });
+    var p = { x: W * 0.3, y: 0, vy: 0, t: 0 };
+    function groundAt(px) { var i = Math.floor((px + off) / B); var hh = cols[i] || 0; return hh ? H - hh * B : H + 200; }
+    p.y = groundAt(p.x);
+    function step(dt) {
+      off += speed * dt;
+      while (off >= B) { off -= B; cols.shift(); cols.push(newCol()); }
+      clouds.forEach(function (k) { k.x -= speed * 0.15 * dt; if (k.x < -k.w * 14) { k.x = W + 20; k.y = 20 + Math.random() * 90; } });
+      var gnd = groundAt(p.x), ahead = Math.min(groundAt(p.x + B), groundAt(p.x + B * 1.6));
+      var onGround = p.y >= gnd - 0.5 && p.vy >= 0;
+      if (onGround) { p.y = gnd; p.vy = 0; if (ahead < gnd - 1 || groundAt(p.x + B * 1.2) > H) p.vy = -330; }
+      p.vy += 900 * dt; p.y += p.vy * dt;
+      var g2 = groundAt(p.x); if (p.y > g2 && p.y - p.vy * dt <= g2 + 2) { p.y = g2; p.vy = 0; }
+      if (p.y > H + 60) { p.y = 40; p.vy = 0; } // tombé : réapparaît en haut
+      p.t += dt;
+    }
+    function draw() {
+      var sky = g.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, "#6fb6ff"); sky.addColorStop(1, "#bfe3ff");
+      g.fillStyle = sky; g.fillRect(0, 0, W, H);
+      g.fillStyle = "#fff6a8"; g.fillRect(W - 90, 26, 44, 44);
+      g.fillStyle = "rgba(255,255,255,.95)"; clouds.forEach(function (k) { for (var i = 0; i < k.w; i++) g.fillRect(k.x + i * 14, k.y, 14, 14); g.fillRect(k.x + 14, k.y - 10, (k.w - 2) * 14, 10); });
+      g.imageSmoothingEnabled = false;
+      for (var i = 0; i < cols.length; i++) {
+        var x = i * B - off, hh = cols[i]; if (!hh) continue;
+        for (var j = 0; j < hh; j++) { var y = H - (j + 1) * B, t = j === hh - 1 ? tex.grass : j >= hh - 3 ? tex.dirt : tex.stone; g.drawImage(t, x, y, B, B); }
+      }
+      // personnage en blocs
+      var x0 = p.x - 9, y0 = p.y, leg = Math.sin(p.t * 14) * 5, air = p.vy !== 0;
+      g.fillStyle = "#2b3a8f"; g.fillRect(x0 + 2, y0 - 16 + (air ? 0 : leg * 0.3), 6, 16); g.fillRect(x0 + 10, y0 - 16 - (air ? 0 : leg * 0.3), 6, 16);
+      g.fillStyle = "#1fb5c9"; g.fillRect(x0, y0 - 34, 18, 18);
+      g.fillStyle = "#d9a066"; g.fillRect(x0 + 1, y0 - 52, 16, 16);
+      g.fillStyle = "#4a2f16"; g.fillRect(x0 + 1, y0 - 52, 16, 5);
+      g.fillStyle = "#1e2a6b"; g.fillRect(x0 + 11, y0 - 45, 3, 3);
+    }
+    function loop(ts) { var dt = Math.min(0.05, (ts - (last || ts)) / 1000); last = ts; step(dt); draw(); raf = requestAnimationFrame(loop); }
+    return {
+      start: function () { if (!raf) { last = 0; raf = requestAnimationFrame(loop); } },
+      stop: function () { if (raf) cancelAnimationFrame(raf); raf = 0; },
+      frame: function () { step(0); draw(); }
+    };
+  })();
   function pipLayout() {
-    var cam = !!(S.camOn && camStream), game = !!(S.gameOn && gameUrl);
-    $("#pipCam").classList.toggle("on", cam);
-    $("#pipGame").classList.toggle("on", game);
-    stage.classList.toggle("pip-on", cam || game);
-    if (game) { var v = $("#gameVid"); v.play().catch(function () {}); }
+    var on = !!S.gameOn, v = $("#gameVid"), useVid = on && !!gameUrl;
+    $("#pipGame").classList.toggle("on", on);
+    stage.classList.toggle("pip-on", on);
+    $("#gameCv").hidden = useVid; v.hidden = !useVid;
+    if (useVid) { parkour.stop(); v.play().catch(function () {}); } else { v.pause(); }
+    if (on && !useVid && !wrap.hidden) parkour.start(); else parkour.stop();
   }
-  function camStart() {
-    if (camStream) { pipLayout(); return Promise.resolve(); }
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { $("#camState").textContent = "Caméra non disponible sur ce navigateur."; return Promise.resolve(); }
-    $("#camState").textContent = "Autorise la caméra…";
-    return navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: { ideal: 480 }, height: { ideal: 480 } }, audio: false }).then(function (st) {
-      camStream = st; var v = $("#camVid"); v.srcObject = st; v.play().catch(function () {});
-      $("#camState").textContent = "✓ Caméra prête"; pipLayout();
-    }, function () { $("#camState").textContent = "Caméra refusée : autorise-la dans les réglages du navigateur."; S.camOn = false; save(); $("#camOn").checked = false; pipLayout(); });
-  }
-  function camStop() { if (camStream) { camStream.getTracks().forEach(function (t) { t.stop(); }); camStream = null; } $("#camVid").srcObject = null; $("#camState").textContent = ""; pipLayout(); }
-  $("#camOn").checked = !!S.camOn;
-  $("#camOn").onchange = function () { S.camOn = this.checked; save(); if (S.camOn) camStart(); else camStop(); };
   $("#gameOn").checked = !!S.gameOn;
-  $("#gameFile").hidden = !S.gameOn;
-  $("#gameOn").onchange = function () { S.gameOn = this.checked; save(); $("#gameFile").hidden = !S.gameOn; if (S.gameOn && !gameUrl) $("#gameState").textContent = "Choisis une vidéo de jeu."; pipLayout(); };
-  if (S.gameOn) $("#gameState").textContent = "Choisis une vidéo de jeu.";
+  $("#gameOpts").hidden = !S.gameOn;
+  $("#gameOn").onchange = function () { S.gameOn = this.checked; save(); $("#gameOpts").hidden = !S.gameOn; pipLayout(); };
   $("#gameFile").onchange = function () {
     var f = this.files && this.files[0]; if (!f) return;
     if (gameUrl) URL.revokeObjectURL(gameUrl);
     gameUrl = URL.createObjectURL(f); var v = $("#gameVid"); v.src = gameUrl; v.muted = true;
-    $("#gameState").textContent = "✓ " + f.name; pipLayout();
+    $("#gameState").textContent = "✓ " + f.name + " (à la place du parkour)"; $("#gameReset").hidden = false; pipLayout();
   };
+  $("#gameReset").onclick = function () {
+    if (gameUrl) URL.revokeObjectURL(gameUrl); gameUrl = null; $("#gameVid").removeAttribute("src");
+    $("#gameFile").value = ""; $("#gameState").textContent = ""; this.hidden = true; pipLayout();
+  };
+  pipLayout();
   function setPalette(p) {
     wrap.style.setProperty("--s1", p[0]); wrap.style.setProperty("--s2", p[1]); wrap.style.setProperty("--sacc", p[2]);
     $("#deco").innerHTML =
@@ -1672,7 +1725,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   function stopAll() {
     runId++; clearTimeout(curTimer);
     try { if (synth) synth.cancel(); } catch (e) {}
-    $("#preroll").hidden = true; $("#endsheet").hidden = true; wrap.hidden = true;
+    $("#preroll").hidden = true; $("#endsheet").hidden = true; wrap.hidden = true; parkour.stop();
     $("#liveBar").hidden = true; $("#addSheet").hidden = true; finaleOn = false; closeBoard(); curQ = false; round = null; vote = null; chatClose();
     renderScores();
     try { if (wake) { wake.release(); wake = null; } } catch (e) {}
@@ -2194,7 +2247,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     } catch (e) { if (e !== 0) { console.error(e); stopAll(); } }
   }
 
-  $("#go").onclick = function () { if (S.camOn && !camStream) camStart(); pipLayout(); if (S.mode === "live") live(); else play(); };
+  $("#go").onclick = function () { if (S.mode === "live") live(); else play(); setTimeout(pipLayout, 0); };
   $("#again").onclick = play;
   $("#back").onclick = stopAll;
   $("#cancel").onclick = stopAll;

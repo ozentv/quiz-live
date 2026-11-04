@@ -23,8 +23,7 @@ Le quiz tient dans un seul fichier, `index.html`, sans rien à installer. Le rel
 - **Plusieurs thèmes à la fois** : touche plusieurs thèmes pour les mélanger. « Au hasard » utilise tous les thèmes.
 - **Difficulté** : *Facile* (2 choix), *Normal* (4 choix) ou *Expert* (les choix n'apparaissent qu'à la moitié du temps : il faut connaître la réponse).
 
-- **📷 Bulle caméra** : ta caméra frontale s'affiche dans un rond en bas à droite, en miroir. Avec le partage d'écran, ton visage apparaît dans le live ou la vidéo, ce qui aide à rester éligible au fil « Pour toi ».
-- **🎮 Vidéo de jeu en petit** : une vidéo de ta partie (par exemple un extrait enregistré sur PlayStation avec le bouton Créer) tourne en boucle et sans le son, en bas à gauche. Utilise ta propre partie : une vidéo prise à quelqu'un d'autre serait du contenu non original.
+- **🎮 Gameplay parkour en petit** (activé par défaut) : une animation de parkour en blocs, dessinée directement dans le quiz, tourne en boucle dans une petite fenêtre en bas à gauche. Elle est 100 % originale. Tu peux la remplacer par ta propre vidéo de jeu, sans le son.
 
 ### En live
 - **Top 3 en direct** en haut de l'écran pendant les questions.
