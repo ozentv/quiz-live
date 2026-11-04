@@ -9,12 +9,16 @@
 //   PORT           port d'écoute (fourni automatiquement par l'hébergeur)
 //   EULER_API_KEY  clé gratuite https://www.eulerstream.com, si les connexions sans clé sont limitées
 //   ALLOWED_USERS  liste de pseudos autorisés, séparés par des virgules (ex. "monpseudo,autrepseudo")
+//   UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN, ADMIN_KEY : classement public du mois (voir leaderboard.js)
 //
 // Pseudo spécial "demo" : simule des commentaires, pour tester sans être en live.
 
 import http from "node:http";
 import { WebSocketServer } from "ws";
 import { TikTokLiveConnection, WebcastEvent, ControlEvent, SignatureRateLimitError } from "tiktok-live-connector";
+import * as lb from "./leaderboard.js";
+
+const liveNow = new Map(); // pseudo -> nombre de connexions actives au live
 
 const PORT = Number(process.env.PORT) || 10000;
 const API_KEY = process.env.EULER_API_KEY || undefined;
@@ -63,7 +67,18 @@ function explain(err) {
   return { wait: 30000, message: "Connexion au live impossible : " + msg.slice(0, 160) };
 }
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
+  const u = new URL(req.url || "/", "http://relais");
+  if (u.pathname === "/classement") {
+    const ch = cleanUser(u.searchParams.get("user"));
+    res.setHeader("access-control-allow-origin", "*");
+    res.setHeader("content-type", "application/json; charset=utf-8");
+    if (!lb.enabled) { res.writeHead(503); res.end(JSON.stringify({ error: "Classement public non configuré sur le relais (Upstash)." })); return; }
+    if (!ch) { res.writeHead(400); res.end(JSON.stringify({ error: "Pseudo manquant." })); return; }
+    try { res.writeHead(200); res.end(JSON.stringify(await lb.board(ch, (liveNow.get(ch) || 0) > 0))); }
+    catch (e) { console.error("classement", e && e.message); res.writeHead(500); res.end(JSON.stringify({ error: "Classement indisponible pour le moment." })); }
+    return;
+  }
   res.writeHead(200, { "content-type": "text/plain; charset=utf-8", "access-control-allow-origin": "*" });
   res.end("Relais Studio Quiz : OK\n");
 });
@@ -80,10 +95,17 @@ wss.on("connection", (ws, req) => {
     send({ type: "status", state: "error", message: "Ce pseudo n'est pas autorisé sur ce relais." }); ws.close(); return;
   }
 
-  let closed = false, tt = null, retryT = null, demoT = null;
+  let closed = false, tt = null, retryT = null, demoT = null, countedLive = false;
   ws.isAlive = true;
   ws.on("pong", () => { ws.isAlive = true; });
-  ws.on("message", () => {}); // la page n'envoie rien d'utile, on ignore
+  // Le quiz envoie les points gagnés pour le classement public (protégé par ADMIN_KEY).
+  const writeOK = lb.canWrite(url.searchParams.get("key") || "");
+  if (lb.enabled) setTimeout(() => send({ type: "board", state: writeOK ? "ok" : "readonly", message: writeOK ? "Classement public : enregistrement actif." : "Classement public : clé absente ou incorrecte, les points ne sont pas enregistrés." }), 50);
+  ws.on("message", (raw) => {
+    if (!writeOK || user === "demo") return;
+    let m; try { m = JSON.parse(String(raw)); } catch (e) { return; }
+    if (m && m.type === "score") lb.record(user, m).catch((e) => console.error("enregistrement", e && e.message));
+  });
 
   function cleanup() {
     if (demoT) { clearInterval(demoT); demoT = null; }
@@ -107,6 +129,7 @@ wss.on("connection", (ws, req) => {
     const gifts = [["Rose", 1], ["Finger Heart", 5], ["Rosa", 10], ["Perfume", 20], ["Doughnut", 30], ["Hand Hearts", 100], ["Money Gun", 500], ["Galaxy", 1000]];
     let demoLikes = 0;
     demoT = setInterval(() => {
+      if (Math.random() < 0.03) { const n1 = names[Math.floor(Math.random() * names.length)]; send({ type: Math.random() < 0.6 ? "follow" : "share", id: n1.toLowerCase().replace(/[^a-z0-9_]/g, ""), name: n1, t: Date.now() }); }
       if (Math.random() < 0.5) { const c = 1 + Math.floor(Math.random() * 30); demoLikes += c; send({ type: "like", total: demoLikes, count: c, t: Date.now() }); }
       if (Math.random() < 0.06) {
         const g = gifts[Math.floor(Math.random() * (Math.random() < 0.9 ? 6 : gifts.length))], n0 = names[Math.floor(Math.random() * names.length)];
@@ -153,6 +176,14 @@ wss.on("connection", (ws, req) => {
       if (!id && !name) return;
       send({ type: "gift", id: id || name, name: name || id, gift, coins, count, pic: picOf(u), t: Date.now() });
     });
+    // Abonnements et partages, pour les remerciements à l'écran.
+    const social = (kind) => (d) => {
+      const u = (d && d.user) || {}, handle = String(u.uniqueId || u.displayId || "").trim();
+      const name = String(u.nickname || handle || "").trim(); if (!name) return;
+      send({ type: kind, id: handle || name, name, pic: picOf(u), t: Date.now() });
+    };
+    conn.on(WebcastEvent.FOLLOW, social("follow"));
+    conn.on(WebcastEvent.SHARE, social("share"));
     // Likes : total du live (totalLikeCount) et nombre envoyé dans ce paquet.
     conn.on(WebcastEvent.LIKE, (d) => {
       const total = Number((d && d.totalLikeCount) || 0), count = Number((d && d.likeCount) || 0);
@@ -173,6 +204,7 @@ wss.on("connection", (ws, req) => {
       if (closed || tt !== conn) { conn.disconnect().catch(() => {}); return; }
       console.log("[" + user + "] connecté");
       send({ type: "status", state: "connected", message: "Connecté au live de @" + user + "." });
+      if (!countedLive) { countedLive = true; liveNow.set(user, (liveNow.get(user) || 0) + 1); }
     } catch (e) {
       if (closed || tt !== conn) return;
       console.error("[" + user + "] échec", e && e.message ? e.message : e);
@@ -182,7 +214,10 @@ wss.on("connection", (ws, req) => {
     }
   }
 
-  ws.on("close", () => { closed = true; clearTimeout(retryT); cleanup(); });
+  ws.on("close", () => {
+    closed = true; clearTimeout(retryT); cleanup();
+    if (countedLive) { const n = (liveNow.get(user) || 1) - 1; if (n > 0) liveNow.set(user, n); else liveNow.delete(user); }
+  });
   start();
 });
 

@@ -95,6 +95,25 @@ Les effets sont calculés selon la valeur en pièces envoyée par TikTok, donc i
 - Le bouton **Chat** en bas de l'écran indique l'état : ✓ connecté, … en cours de connexion, ✕ erreur. Touche-le pour reconnecter.
 - Sur l'offre gratuite de Render, le relais s'endort après 15 minutes sans utilisation. Le premier réveil prend environ une minute : touche **Tester la connexion** un peu avant de commencer.
 
+### 🏆 Classement public du mois
+Une page publique, **https://ozentv.github.io/quiz-live/classement.html**, montre le classement de la saison (un mois) à tes spectateurs :
+- les points du mois, avec la photo et les ▲▼ depuis hier ;
+- un top 3, un top 10, un top 50 et une recherche de pseudo ;
+- les donateurs du mois et le badge « En direct maintenant » ;
+- un compte à rebours jusqu'à la remise à zéro du 1er du mois.
+
+**Badges** (sur la page et dans le quiz) : 👑 champion de la semaine dernière, 🎁 meilleur donateur du mois, 🔥 série de 5 bonnes réponses ou plus.
+
+**Remerciements** : en live, un bandeau remercie les nouveaux abonnés (💙) et ceux qui partagent le live (🔁), en les regroupant s'ils sont nombreux.
+
+**Installation (une seule fois, gratuit) :**
+1. Crée un compte sur [upstash.com](https://upstash.com), puis **Create Database** : type **Redis**, offre **Free**, une région en Europe.
+2. Dans la base, partie **REST API**, copie **UPSTASH_REDIS_REST_URL** et **UPSTASH_REDIS_REST_TOKEN**.
+3. Sur Render, service `studio-quiz-relais`, onglet **Environment**, ajoute ces 2 variables, plus **ADMIN_KEY** avec un mot de passe de ton choix. Enregistre, puis **Manual Deploy**.
+4. Dans le quiz, sous les points automatiques, écris ce mot de passe dans **« Clé du classement »**. « Tester la connexion » doit afficher « Classement public : enregistrement actif ».
+
+Les points sont enregistrés seulement avec la bonne clé : personne d'autre ne peut modifier ton classement. La Galaxie remet à zéro le classement du live, pas celui du mois.
+
 ### Options du relais (facultatif)
 Dans Render, onglet **Environment** du service :
 - `ALLOWED_USERS` : ton pseudo TikTok, pour que personne d'autre n'utilise ton relais.
