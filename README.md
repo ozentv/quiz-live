@@ -154,3 +154,5 @@ Dans `index.html`, l'objet `BANK` contient tous les thèmes. Chaque question a c
 ["La question ?", ["Réponse A", "Réponse B", "Réponse C", "Réponse D"], indexBonneRéponse, "Le saviez-vous ?"]
 ```
 (`indexBonneRéponse` commence à 0.)
+
+Après un merge, le site se met à jour en une à deux minutes. Si l’ancienne version s’affiche, recharge la page.
