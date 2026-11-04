@@ -214,6 +214,32 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 .rc-none { position: absolute; left: 70px; right: 70px; top: 420px; text-align: center; font-size: 56px; font-weight: 700; line-height: 1.3; }
 .rc-more { position: absolute; left: 0; right: 0; text-align: center; font-size: 36px; font-weight: 700; opacity: .85; }
 .rc-h { position: absolute; left: 0; right: 0; top: 1040px; text-align: center; font-size: 66px; font-weight: 800; color: var(--sacc); }
+/* ---- plateau télé ---- */
+#studio { position: absolute; inset: 0; overflow: hidden; pointer-events: none; display: none; }
+#stage.tv #studio { display: block; }
+.beam { position: absolute; top: -200px; width: 460px; height: 2300px; transform-origin: 50% 0; background: linear-gradient(180deg, rgba(255, 255, 255, .5), rgba(255, 255, 255, 0) 75%); clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%); opacity: .1; mix-blend-mode: screen; }
+.beam.b1 { left: -160px; animation: beamL 7s ease-in-out infinite alternate; }
+.beam.b2 { left: 310px; animation: beamC 9s ease-in-out infinite alternate; opacity: .07; }
+.beam.b3 { left: 780px; animation: beamR 8s ease-in-out infinite alternate; }
+@keyframes beamL { from { transform: rotate(-28deg); } to { transform: rotate(6deg); } }
+@keyframes beamC { from { transform: rotate(-12deg); } to { transform: rotate(12deg); } }
+@keyframes beamR { from { transform: rotate(28deg); } to { transform: rotate(-6deg); } }
+.leds { position: absolute; left: 0; right: 0; height: 16px; display: flex; justify-content: space-around; }
+.leds.top { top: 0; } .leds.bot { bottom: 4px; }
+.leds i { width: 14px; height: 14px; border-radius: 50%; background: var(--sacc); box-shadow: 0 0 14px var(--sacc); opacity: .25; animation: led 1.017s steps(1) infinite; }
+.leds i:nth-child(2n) { animation-delay: .508s; }
+@keyframes led { 0% { opacity: .95; } 50% { opacity: .2; } }
+.floor { position: absolute; left: 0; right: 0; bottom: 0; height: 300px; background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, .07)), repeating-linear-gradient(90deg, rgba(255, 255, 255, .05) 0 2px, transparent 2px 120px); }
+#flash { position: absolute; inset: 0; background: var(--sacc); opacity: 0; }
+#flash.on { animation: flash .7s ease-out; }
+@keyframes flash { 0% { opacity: .45; } 100% { opacity: 0; } }
+#pulse { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+#pulse.on { animation: pulse .5s ease-in-out infinite alternate; }
+@keyframes pulse { from { box-shadow: inset 0 0 0 0 rgba(255, 40, 40, 0); } to { box-shadow: inset 0 0 160px 40px rgba(255, 40, 40, .55); } }
+#stage.tv .scene .qbox { animation: qin .5s cubic-bezier(.2, 1.4, .4, 1) both; }
+#stage.tv .scene .card { animation: cin .45s cubic-bezier(.2, 1.2, .4, 1) both; }
+@keyframes qin { from { transform: scale(.6); } to { transform: none; } }
+@keyframes cin { from { transform: translateX(1150px); } to { transform: none; } }
 #giftToast { position: absolute; left: 60px; right: 60px; top: 150px; z-index: 4; display: none; padding: 26px 34px; border-radius: 40px; background: #0b0d1c; border: 4px solid #ffd60a; text-align: center; font-size: 50px; font-weight: 800; line-height: 1.2; box-shadow: 0 20px 50px rgba(0, 0, 0, .45); }
 #giftToast.on { display: block; animation: sin .25s ease-out both; }
 #giftToast small { display: block; font-size: 36px; font-weight: 700; color: #ffd60a; margin-top: 8px; }
@@ -286,6 +312,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         <select id="voiceSel" aria-label="Voix"></select>
         <div class="seg" id="segR" role="group" aria-label="Vitesse de la voix"></div>
         <div><button class="btn ghost" id="hear" type="button">Écouter la voix</button></div>
+        <label class="switch"><input type="checkbox" id="tvOn"> 🎬 Effets de plateau télé (décor animé, jingles, ding et buzzer)</label>
         <label class="switch"><input type="checkbox" id="musicOn"> 🎵 Musique d'ambiance (composée par le quiz, sans droits d'auteur)</label>
         <div class="chat-test" id="musicOpts"><div class="seg" id="segMV" role="group" aria-label="Volume de la musique"></div><button class="btn ghost small" id="musicTry" type="button">Écouter</button></div>
       </div>
@@ -334,7 +361,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 <div class="dock"><button class="btn" id="go" type="button">Lancer le quiz</button></div>
 
 <div id="stageWrap" hidden>
-  <div id="stage"><div id="deco"></div><div id="scene"></div><div id="giftToast"></div><div class="pip pip-game" id="pipGame"><canvas id="gameCv" width="694" height="390"></canvas><video id="gameVid" muted loop playsinline hidden></video></div></div>
+  <div id="stage"><div id="studio"><div class="beam b1"></div><div class="beam b2"></div><div class="beam b3"></div><div class="floor"></div><div class="leds top"></div><div class="leds bot"></div><div id="flash"></div></div><div id="deco"></div><div id="scene"></div><div id="giftToast"></div><div id="pulse"></div><div class="pip pip-game" id="pipGame"><canvas id="gameCv" width="694" height="390"></canvas><video id="gameVid" muted loop playsinline hidden></video></div></div>
   <div id="lbLayer" hidden><div id="lbIn"></div><button id="lbClose" type="button" aria-label="Fermer le classement">✕ Fermer</button></div>
   <div id="liveBar" hidden>
     <button id="bChat" type="button" hidden>Chat</button>
@@ -1449,7 +1476,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   };
   var KEYS = Object.keys(BANK);
   var RATES = [["Lente", 0.9], ["Normale", 1.05], ["Rapide", 1.2]];
-  var S = { theme: "random", n: 4, count: 3, voiceOn: true, voiceName: "", rate: 1.05, mode: "video", liveCount: 15, boardMin: 5, chatOn: false, ttUser: "", relay: "", lag: 6, recapSec: 7, likeGoal: 1000, giftsOn: true, gameOn: true, musicOn: true, musicVol: 1, themes: null, diff: "normal", bonusEvery: 5, voteEvery: 0 };
+  var S = { theme: "random", n: 4, count: 3, voiceOn: true, voiceName: "", rate: 1.05, mode: "video", liveCount: 15, boardMin: 5, chatOn: false, ttUser: "", relay: "", lag: 6, recapSec: 7, likeGoal: 1000, giftsOn: true, gameOn: true, musicOn: true, musicVol: 1, tvOn: true, themes: null, diff: "normal", bonusEvery: 5, voteEvery: 0 };
   try { Object.assign(S, JSON.parse(localStorage.getItem("sq-set") || "{}")); } catch (e) {}
   if (!Array.isArray(S.themes)) S.themes = S.theme && S.theme !== "random" && BANK[S.theme] ? [S.theme] : [];
   S.themes = S.themes.filter(function (k) { return BANK[k]; });
@@ -1503,6 +1530,8 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   seg($("#segRC"), [["Non", 0], ["5 s", 5], ["7 s", 7], ["10 s", 10]], function () { return S.recapSec; }, function (v) { S.recapSec = v; });
   seg($("#segBonus"), [["Jamais", 0], ["1 sur 5", 5], ["1 sur 10", 10]], function () { return S.bonusEvery; }, function (v) { S.bonusEvery = v; });
   var musicTrying = false;
+  $("#tvOn").checked = S.tvOn !== false;
+  $("#tvOn").onchange = function () { S.tvOn = this.checked; save(); tvLayout(); };
   $("#musicOn").checked = !!S.musicOn;
   $("#musicOpts").hidden = !S.musicOn;
   $("#musicOn").onchange = function () { S.musicOn = this.checked; save(); $("#musicOpts").hidden = !S.musicOn; if (!S.musicOn) { music.stop(); musicTrying = false; $("#musicTry").textContent = "Écouter"; } };
@@ -1663,6 +1692,42 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     } catch (e) {}
   }
   function tick(last) { beep(last ? 1500 : 1000, 0.09, 0.12); }
+  /* ---------- plateau télé : jingles, ding, buzzer, glissements ---------- */
+  function note(type, f, at, d, v, dest) {
+    if (!ac) return; try {
+      var t = ac.currentTime + (at || 0), o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+      o.connect(g); g.connect(dest || ac.destination); o.start(t); o.stop(t + d + 0.05);
+    } catch (e) {}
+  }
+  function brass(freqs, at, d, v) { // accord de cuivres (dents de scie filtrées)
+    if (!ac) return; try { var f = ac.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 2600; f.connect(ac.destination); freqs.forEach(function (fr, i) { note("sawtooth", fr, at, d, v, f); note("sawtooth", fr * 1.004, at, d, v * 0.7, f); }); } catch (e) {}
+  }
+  function whoosh(at) { if (!ac) return; try { var t = ac.currentTime + (at || 0), src = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain(); src.buffer = noiseBuf(); f.type = "bandpass"; f.Q.value = 1.5; f.frequency.setValueAtTime(400, t); f.frequency.exponentialRampToValueAtTime(3800, t + 0.28); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.09, t + 0.1); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.32); src.connect(f); f.connect(g); g.connect(ac.destination); src.start(t); src.stop(t + 0.4); } catch (e) {} }
+  function boom(at, v) { if (!ac) return; try { var t = ac.currentTime + (at || 0), o = ac.createOscillator(), g = ac.createGain(); o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(40, t + 0.3); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v || 0.3, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.5); o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + 0.6); } catch (e) {} }
+  function hz2(n) { return 440 * Math.pow(2, (n - 69) / 12); }
+  function jingle(kind) {
+    if (!S.tvOn || !ac) return 0;
+    if (kind === "intro") { // fanfare de générique
+      [[60, 64, 67], [62, 65, 69], [64, 67, 71]].forEach(function (c, i) { brass(c.map(hz2), i * 0.28, 0.26, 0.035); });
+      brass([60, 64, 67, 72].map(hz2), 0.9, 1.3, 0.04); boom(0.9, 0.35); nhit && setTimeout(function () { applause(1.2); }, 900);
+      [72, 76, 79, 84].forEach(function (n, i) { note("square", hz2(n), 0.9 + i * 0.09, 0.3, 0.025); });
+      return 2300;
+    }
+    if (kind === "next") { whoosh(0); brass([67, 71, 74].map(hz2), 0.22, 0.3, 0.03); boom(0.22, 0.18); return 650; }
+    if (kind === "bonus") { [72, 76, 79, 84, 88, 91].forEach(function (n, i) { note("triangle", hz2(n), i * 0.07, 0.35, 0.06); }); brass([72, 76, 79].map(hz2), 0.45, 0.6, 0.035); return 1100; }
+    if (kind === "vote") { for (var i = 0; i < 6; i++) boom(i * 0.09, 0.08 + i * 0.03); brass([65, 69, 72].map(hz2), 0.55, 0.7, 0.035); return 1200; }
+    if (kind === "podium") { [[60, 64, 67], [65, 69, 72], [67, 71, 74]].forEach(function (c, i) { brass(c.map(hz2), i * 0.35, 0.32, 0.04); boom(i * 0.35, 0.2); }); brass([72, 76, 79, 84].map(hz2), 1.05, 1.8, 0.045); boom(1.05, 0.4); return 2800; }
+    return 0;
+  }
+  function ding() { if (!S.tvOn) { chime(); return; } note("sine", 1568, 0, 1.1, 0.16); note("sine", 2093, 0.16, 1.2, 0.14); note("sine", 3136, 0.16, 0.6, 0.04); }
+  function buzzer() { note("square", 110, 0, 0.75, 0.07); note("square", 116.5, 0, 0.75, 0.06); note("sawtooth", 55, 0, 0.75, 0.05); }
+  function flash() { var f = $("#flash"); if (!f) return; f.classList.remove("on"); void f.offsetWidth; f.classList.add("on"); }
+  function cardsIn(scene) { // les réponses glissent une à une, avec un son
+    if (!S.tvOn) return;
+    var cards = scene.querySelectorAll(".card");
+    Array.prototype.forEach.call(cards, function (c, i) { c.style.animationDelay = (0.45 + i * 0.26) + "s"; whoosh(0.45 + i * 0.26); });
+  }
   function chime() { beep(880, 0.8, 0.12); beep(1318.5, 0.7, 0.1, 0.09); beep(1760, 0.6, 0.08, 0.18); }
   function sweep() { beep(300, 0.5, 0.08); beep(500, 0.5, 0.07, 0.15); beep(800, 0.6, 0.07, 0.3); }
 
@@ -1793,6 +1858,11 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     $("#gameFile").value = ""; $("#gameState").textContent = ""; this.hidden = true; pipLayout();
   };
   pipLayout();
+  function tvLayout() {
+    stage.classList.toggle("tv", !!S.tvOn);
+    var html = ""; for (var i = 0; i < 22; i++) html += "<i></i>";
+    Array.prototype.forEach.call(document.querySelectorAll(".leds"), function (l) { if (!l.children.length) l.innerHTML = html; });
+  }
   function setPalette(p) {
     wrap.style.setProperty("--s1", p[0]); wrap.style.setProperty("--s2", p[1]); wrap.style.setProperty("--sacc", p[2]);
     $("#deco").innerHTML =
@@ -1867,8 +1937,8 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         if (my !== runId || !arc) return res();
         var rem = Math.max(0, sec - (performance.now() - t0) / 1000), d = Math.max(1, Math.ceil(rem - 1e-9));
         arc.style.strokeDashoffset = String(C * (1 - rem / sec));
-        if (d !== last) { last = d; num.textContent = d; arc.style.stroke = d <= 2 ? "#ff5c5c" : "var(--sacc)"; tick(d === 1); if (d <= 5 && sec > 5) heartbeat(); }
-        if (rem <= 0) return res();
+        if (d !== last) { last = d; num.textContent = d; arc.style.stroke = d <= 2 ? "#ff5c5c" : "var(--sacc)"; tick(d === 1); if (d <= 5 && sec > 5) heartbeat(); var pu = $("#pulse"); if (pu) pu.classList.toggle("on", S.tvOn && d <= 3 && rem > 0); }
+        if (rem <= 0) { var pu2 = $("#pulse"); if (pu2) pu2.classList.remove("on"); return res(); }
         requestAnimationFrame(f);
       }
       requestAnimationFrame(f);
@@ -2032,7 +2102,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     try { if (synth) synth.cancel(); } catch (e) {}
     $("#liveBar").hidden = true; $("#addSheet").hidden = true;
     closeBoard(); finaleOn = true;
-    $("#lbIn").innerHTML = podiumHTML(); $("#lbLayer").hidden = false; sweep(); setTimeout(chime, 500);
+    $("#lbIn").innerHTML = podiumHTML(); $("#lbLayer").hidden = false; if (S.tvOn) jingle("podium"); else { sweep(); setTimeout(chime, 500); }
     setTimeout(function () { confetti($("#lbIn"), 140); applause(2.4); }, 400);
     var v = "Fin du live ! Le grand vainqueur est " + r[0].n + ", avec " + pts(r[0].p) + " !";
     if (r[1]) v += " Bravo aussi à " + r[1].n + (r[2] ? " et à " + r[2].n : "") + ".";
@@ -2385,7 +2455,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     var cards = cand.map(function (k, i) { return "<div class=\"vcard\" id=\"vcard" + i + "\" style=\"top:" + (720 + i * 190) + "px\"><div class=\"bd\">" + (i + 1) + "</div><div class=\"lb\">" + esc(BANK[k].title) + "</div><div class=\"vc\" id=\"vc" + i + "\">0</div></div>"; }).join("");
     setScene("<div class=\"top3\" id=\"top3\">" + top3Text() + "</div><div class=\"vote-t\">VOTE !</div><div class=\"vote-s\">" + (only ? "👑 " + esc(only.name) + ", écris " : "Écris ") + cand.map(function (_, i) { return i + 1; }).join(", ").replace(/, (\d)$/, " ou $1") + " pour choisir le prochain thème</div>" + cards + "<div class=\"vote-n\" id=\"voteN\">" + dur + "</div>");
     vote = { open: true, keys: cand, counts: cand.map(function () { return 0; }), seen: {}, only: only ? only.k : null };
-    sweep();
+    if (S.tvOn) jingle("vote"); else sweep();
     await ok(say((only ? only.name + ", choisis le prochain thème ! " : "Votez pour le prochain thème ! ") + cand.map(function (k, i) { return (i + 1) + " : " + BANK[k].title + "."; }).join(" ")));
     var end = Date.now() + dur * 1000;
     while (Date.now() < end) {
@@ -2419,9 +2489,11 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       if (S.chatOn && !chat.ws) chatConnect();
       var keys = selKeys(), queue = [], last = null, num = 0, lastBoard = Date.now(), used = {}, forced = null;
       streak = {}; vote = null; likes = { base: null, session: 0, next: S.likeGoal || 0 }; fx.likeBonus = false; fx.shield = {}; fx.dbl = {}; fx.frozen = {}; fx.joker = false; fx.pick = null;
-      var T0 = BANK[keys[0]]; setPalette(T0.pal); fitStage(); setScene("");
+      var T0 = BANK[keys[0]]; setPalette(T0.pal); fitStage(); tvLayout();
+      setScene("<div class=\"intro\"><div class=\"big\">QUIZ</div><div class=\"ttl\">EN DIRECT</div><div class=\"sub\">Réponds A, B, C ou D dans le chat</div><div class=\"bigpill\">🔴 C'est parti !</div></div>");
       try { await ok(document.fonts.ready); } catch (e) { if (my !== runId) return; }
       try { if (navigator.wakeLock) navigator.wakeLock.request("screen").then(function (w) { wake = w; }, function () {}); } catch (e) {}
+      if (S.tvOn) { flash(); await ok(sleep(jingle("intro"))); }
       function refill() {
         var a = []; keys.forEach(function (k) { BANK[k].q.forEach(function (_, i) { a.push([k, i]); }); });
         shuffle(a); if (last && a.length > 1 && a[0][0] === last[0] && a[0][1] === last[1]) a.push(a.shift());
@@ -2462,19 +2534,22 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         var likeQ = fx.likeBonus; fx.likeBonus = false;
         curWinner = null; curQ = true; curBonus = bonus; qManual = []; var before = rankKeys();
         setPalette(T.pal);
-        var scene = setScene(qScene(T, num - 1, 0, q, true, bonus));
+        if (S.tvOn) { jingle("next"); flash(); }
+        var scene = setScene(qScene(T, num - 1, 0, q, true, bonus)); cardsIn(scene);
         fitQ(scene, q);
         round = S.chatOn ? { open: true, choices: q.choices, answers: [], seen: {} } : null;
         if (fx.joker) applyJoker();
         await ok(sleep(400));
-        if (bonus) { sweep(); await ok(say(likeQ ? "Question bonus grâce à vos likes ! Points triplés !" : "Question bonus ! Points doublés !")); }
+        if (bonus) { if (S.tvOn) jingle("bonus"); else sweep(); await ok(say(likeQ ? "Question bonus grâce à vos likes ! Points triplés !" : "Question bonus ! Points doublés !")); }
         await ok(Promise.all([say(askText(q)), sleep(1500)]));
         await ok(sleep(250));
         armHide(scene, q, S.liveCount);
         await ok(countdown(S.liveCount, my));
         var tEnd = Date.now();
         drumroll(800); await ok(sleep(900));
-        scene.classList.add("rev"); chime(); showDist();
+        scene.classList.add("rev"); showDist(); flash();
+        var cnt = round ? round.answers.length : 0, okN = round ? round.answers.filter(function (x) { return x.a === q.a; }).length : 0;
+        if (S.tvOn && cnt >= 3 && okN * 2 < cnt) buzzer(); else ding();
         await ok(sleep(450));
         await ok(Promise.all([say("ABCD"[q.a] + ", " + speakable(q.choices[q.a]) + ". " + speakable(q.f)), sleep(2500)]));
         // Le live TikTok a plusieurs secondes de retard : les réponses arrivées pendant ce délai comptent encore.
@@ -2513,7 +2588,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       var ks = selKeys(), key = ks[Math.floor(Math.random() * ks.length)];
       var T = BANK[key], qs = pick(key, S.n), n = qs.length;
       $("#endsheet").hidden = true; wrap.hidden = false;
-      setPalette(T.pal); fitStage();
+      setPalette(T.pal); fitStage(); tvLayout();
       try { await ok(document.fonts.ready); } catch (e) { if (my !== runId) return; }
       try { if (navigator.wakeLock) navigator.wakeLock.request("screen").then(function (w) { wake = w; }, function () {}); } catch (e) {}
 
@@ -2521,12 +2596,13 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       fit($("#ttl"), 125, 110, 60);
       await ok(preroll(my));
 
-      sweep();
+      if (S.tvOn) { flash(); await ok(sleep(jingle("intro") - 600)); } else sweep();
       await ok(Promise.all([say(speakable("Quiz " + T.title + ". " + n + " questions. Tu fais combien sur " + n + " ?")), sleep(2600)]));
       await ok(sleep(400));
 
       for (var i = 0; i < n; i++) {
-        var q = qs[i], scene = setScene(qScene(T, i, n, q));
+        if (S.tvOn) jingle("next");
+        var q = qs[i], scene = setScene(qScene(T, i, n, q)); cardsIn(scene);
         fitQ(scene, q);
         await ok(sleep(400));
         await ok(Promise.all([say(askText(q)), sleep(1500)]));
@@ -2534,7 +2610,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         armHide(scene, q, S.count);
         await ok(countdown(S.count, my));
         drumroll(600); await ok(sleep(700));
-        scene.classList.add("rev"); chime();
+        scene.classList.add("rev"); flash(); ding();
         await ok(sleep(450));
         await ok(Promise.all([say("ABCD"[q.a] + ", " + speakable(q.choices[q.a]) + ". " + speakable(q.f)), sleep(2500)]));
         await ok(sleep(350));
