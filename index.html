@@ -64,6 +64,10 @@ ol.steps li::marker { font-weight: 800; color: var(--accent); }
 @keyframes sin { from { opacity: 0; } to { opacity: 1; } }
 .hd-pill { position: absolute; left: 80px; top: 140px; height: 74px; line-height: 74px; padding: 0 32px; border-radius: 37px; background: var(--sacc); color: #0f0f19; font-size: 38px; font-weight: 800; text-transform: uppercase; white-space: nowrap; }
 .hd-count { position: absolute; right: 80px; top: 140px; line-height: 74px; font-size: 48px; font-weight: 800; }
+.hd-pill.two { white-space: normal; height: auto; line-height: 1.05; padding: 10px 26px; border-radius: 28px; width: max-content; max-width: 340px; }
+.hd-logo { position: absolute; left: 540px; top: 137px; transform: translateX(-50%) rotate(-4deg); text-align: center; pointer-events: none; white-space: nowrap; }
+.hd-logo .l1 { display: inline-block; font-size: 26px; font-weight: 800; letter-spacing: 9px; padding: 3px 8px 2px 17px; border-radius: 10px; background: #0f0f19; color: #fff; border: 3px solid var(--sacc); box-shadow: 0 4px 0 rgba(0, 0, 0, .45); position: relative; z-index: 1; }
+.hd-logo .l2 { display: block; margin-top: -6px; font-size: 54px; font-weight: 800; line-height: 1; letter-spacing: 1px; font-style: italic; padding: 0 8px; background: linear-gradient(180deg, #fffbe0 0%, #ffe27a 42%, #ffb020 58%, #ff8a00 100%); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 4px 0 #0f0f19) drop-shadow(0 0 3px #0f0f19) drop-shadow(0 0 16px rgba(255, 196, 61, .55)); }
 .bars { position: absolute; left: 80px; top: 244px; width: 920px; height: 12px; display: flex; gap: 14px; }
 .bars span { flex: 1; border-radius: 6px; background: rgba(255, 255, 255, .28); }
 .bars span.done { background: #fff; }
@@ -2605,14 +2609,24 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         "<div class=\"ck\"><svg width=\"30\" height=\"30\" viewBox=\"0 0 30 30\"><path d=\"M5 16 L12 23 L25 8\" fill=\"none\" stroke=\"#2ecc71\" stroke-width=\"5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div></div>";
     });
     return (lv ? "<div class=\"top3\" id=\"top3\">" + top3Text() + "</div><div class=\"news\" id=\"news\"></div>" + (S.chatOn && S.giftsOn ? "<div class=\"ticker\" id=\"ticker\"><span>🎁 " + GIFT_INFO[tickI % GIFT_INFO.length].join(" ") + "</span></div>" : "") + (S.chatOn && S.likeGoal ? "<div class=\"likes\" id=\"likes\">" + likesInner() + "</div>" : "") : "") +
-      "<div class=\"hd-pill\">" + esc(T.title) + "</div><div class=\"hd-count" + (bonus ? " bonus" : "") + "\">" + (bonus === 3 ? "❤️ BONUS ×3" : bonus ? "⭐ BONUS ×2" : lv ? "Q" + (qi + 1) : (qi + 1) + "/" + n) + "</div><div class=\"bars\">" + bars + "</div>" +
+      "<div class=\"hd-pill\">" + esc(T.title) + "</div><div class=\"hd-logo\"><span class=\"l1\">REF</span><span class=\"l2\">QUIZZ</span></div><div class=\"hd-count" + (bonus ? " bonus" : "") + "\">" + (bonus === 3 ? "❤️ BONUS ×3" : bonus ? "⭐ BONUS ×2" : lv ? "Q" + (qi + 1) : (qi + 1) + "/" + n) + "</div><div class=\"bars\">" + bars + "</div>" +
       "<div class=\"ring\"><svg viewBox=\"0 0 280 280\"><circle cx=\"140\" cy=\"140\" r=\"98\" fill=\"none\" stroke=\"rgba(255,255,255,.22)\" stroke-width=\"20\"/>" +
       "<circle id=\"arc\" cx=\"140\" cy=\"140\" r=\"98\" fill=\"none\" stroke=\"var(--sacc)\" stroke-width=\"20\" stroke-linecap=\"round\" stroke-dasharray=\"" + C + "\" stroke-dashoffset=\"0\"/></svg><div class=\"num\" id=\"num\">" + (lv ? S.liveCount : S.count) + "</div></div>" +
       "<div class=\"fact\"><b>LE SAVIEZ-VOUS ?</b><div class=\"ft\" id=\"ft\">" + esc(q.f) + "</div></div>" +
       "<div class=\"qbox\"><div class=\"qt\" id=\"qt\">" + esc(q.q) + "</div></div>" + cards +
       (lv ? "<div class=\"cta\">Écris " + (q.choices.length === 2 ? "A ou B" : "A, B, C ou D") + " en commentaire !" + (S.chatOn ? " 1 seule réponse compte" : "") + "</div><div class=\"win\" id=\"win\" hidden></div>" + (S.chatOn ? "<div class=\"stat\" id=\"stat\">💬 0 réponse</div>" : "") : "");
   }
+  function fitPill() { // le nom du thème ne doit pas toucher le logo au centre
+    var p = sceneBox.querySelector(".hd-pill"); if (!p) return;
+    var f = 38; p.className = "hd-pill"; p.style.fontSize = f + "px"; p.style.top = "";
+    while (p.offsetWidth > 340 && f > 28) { f -= 2; p.style.fontSize = f + "px"; }
+    if (p.offsetWidth <= 340) return;
+    p.className = "hd-pill two"; f = 30; p.style.fontSize = f + "px";
+    while (p.offsetHeight > 100 && f > 22) { f -= 2; p.style.fontSize = f + "px"; }
+    p.style.top = Math.round(177 - p.offsetHeight / 2) + "px";
+  }
   function fitQ(scene, q) {
+    fitPill();
     if (q && q.hide) scene.classList.add("hide-ch");
     fit($("#qt"), 330, 74, 50);
     Array.prototype.forEach.call(sceneBox.querySelectorAll(".lb"), function (l) { fit(l, 104, 48, 30); });
