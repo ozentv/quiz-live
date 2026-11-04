@@ -1985,10 +1985,12 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     });
   }
   var curBonus = false;
+  var qManual = []; // points donnés à la main pendant la question en cours
   function give(p) {
     if (curQ && curBonus > 1) p *= curBonus;
     var r = addPoints($("#nm").value, p);
     if (!r) { msg("Tape d'abord un pseudo."); return; }
+    if (curQ) qManual.push({ k: r.k, name: r.n, gain: p, mult: curBonus || 1, manual: true });
     var first = curQ && !curWinner;
     if (first) setWinner(r.n);
     msg("✓ " + r.n + " +" + p + " (total " + r.p + ")" + (first ? " — WINNER de cette question" : ""));
@@ -2438,7 +2440,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         var T = BANK[it[0]], q = prep(T.q[it[1]]); num++;
         var bonus = fx.likeBonus ? 3 : (forcedBonus || !!(S.bonusEvery && num % S.bonusEvery === 0)) ? 2 : 0;
         var likeQ = fx.likeBonus; fx.likeBonus = false;
-        curWinner = null; curQ = true; curBonus = bonus;
+        curWinner = null; curQ = true; curBonus = bonus; qManual = []; var before = rankKeys();
         setPalette(T.pal);
         var scene = setScene(qScene(T, num - 1, 0, q, true, bonus));
         fitQ(scene, q);
@@ -2457,7 +2459,6 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         await ok(Promise.all([say("ABCD"[q.a] + ", " + speakable(q.choices[q.a]) + ". " + speakable(q.f)), sleep(2500)]));
         // Le live TikTok a plusieurs secondes de retard : les réponses arrivées pendant ce délai comptent encore.
         if (round) await ok(sleep(Math.max(0, (S.lag || 0) * 1000 - (Date.now() - tEnd))));
-        var before = rankKeys();
         var okList = scoreRound(q.a, bonus || 1);
         showDist();
         if (!curWinner && okList.length) setWinner(okList[0].name);
@@ -2468,7 +2469,11 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         else if (extra) await ok(say(extra));
         renderTop3();
         await ok(sleep(1600));
-        if (S.recapSec && S.chatOn && (okList.length || ranking().length)) await ok(showBoard(S.recapSec * 1000, recapHTML(okList, q, num, before)));
+        if (S.recapSec) {
+          var recapList = okList.slice();
+          qManual.forEach(function (m) { var same = recapList.filter(function (x) { return x.k === m.k; })[0]; if (same) same.gain += m.gain; else recapList.push(m); });
+          await ok(showBoard(S.recapSec * 1000, recapHTML(recapList, q, num, before)));
+        }
         else await ok(sleep(600));
         curQ = false; curBonus = 0; round = null;
       }
