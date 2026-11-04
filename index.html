@@ -3408,7 +3408,12 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   $("#relayUrl").oninput = function () { S.relay = this.value.trim(); save(); };
   $("#chatTest").onclick = chatConnect;
   $("#lbKey").value = S.lbKey || "";
-  $("#lbKey").oninput = function () { S.lbKey = this.value.trim(); save(); };
+  var lbKeyT = null;
+  $("#lbKey").oninput = function () {
+    S.lbKey = this.value.trim(); save();
+    // la clé est renvoyée au relais tout de suite, pas besoin de se reconnecter
+    clearTimeout(lbKeyT); lbKeyT = setTimeout(function () { if (chat.ws && chat.ws.readyState === 1) { try { chat.ws.send(JSON.stringify({ type: "auth", key: S.lbKey })); } catch (e) {} } }, 700);
+  };
   $("#ttUser").addEventListener("input", updateLbLink); $("#relayUrl").addEventListener("input", updateLbLink); updateLbLink();
   seg($("#segLag"), [["3 s", 3], ["6 s", 6], ["10 s", 10]], function () { return S.lag; }, function (v) { S.lag = v; });
   $("#bChat").onclick = chatConnect;

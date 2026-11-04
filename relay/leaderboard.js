@@ -9,9 +9,10 @@
 
 const URL_ = (process.env.UPSTASH_REDIS_REST_URL || "").replace(/\/+$/, "");
 const TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || "";
-const ADMIN = process.env.ADMIN_KEY || "";
+const ADMIN = (process.env.ADMIN_KEY || "").trim();
 export const enabled = !!(URL_ && TOKEN);
-export function canWrite(key) { return enabled && !!ADMIN && key === ADMIN; }
+export function canWrite(key) { return enabled && !!ADMIN && String(key || "").trim() === ADMIN; }
+export const hasKey = !!ADMIN;
 
 const KEEP = 70 * 24 * 3600; // on garde ~2 mois d'historique
 
