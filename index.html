@@ -162,6 +162,16 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 .pod-col .pt { font-size: 44px; margin-top: 10px; }
 .pod-nm { position: absolute; width: 330px; text-align: center; font-size: 46px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pod-f { position: absolute; left: 80px; right: 80px; top: 1600px; text-align: center; font-size: 44px; font-weight: 700; }
+.pip { position: absolute; z-index: 3; overflow: hidden; background: #000; display: none; }
+.pip video, .pip canvas { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pip video[hidden], .pip canvas[hidden] { display: none; }
+.pip-game { left: 35px; top: 1712px; width: 347px; height: 195px; border-radius: 26px; border: 5px solid rgba(255, 255, 255, .55); box-shadow: 0 10px 30px rgba(0, 0, 0, .45); }
+.pip.on { display: block; }
+#stage.pip-on .cta { top: 1530px; font-size: 36px; }
+#stage.pip-on .win { top: 1528px; height: 100px; font-size: 46px; }
+#stage.pip-on .stat { top: 1640px; font-size: 36px; }
+#stage.pip-on .news { top: 1682px; font-size: 32px; left: 400px; right: 40px; }
+.pip-row { display: grid; gap: 8px; width: 100%; }
 #giftToast { position: absolute; left: 60px; right: 60px; top: 150px; z-index: 4; display: none; padding: 26px 34px; border-radius: 40px; background: #0b0d1c; border: 4px solid #ffd60a; text-align: center; font-size: 50px; font-weight: 800; line-height: 1.2; box-shadow: 0 20px 50px rgba(0, 0, 0, .45); }
 #giftToast.on { display: block; animation: sin .25s ease-out both; }
 #giftToast small { display: block; font-size: 36px; font-weight: 700; color: #ffd60a; margin-top: 8px; }
@@ -234,6 +244,17 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         <div><button class="btn ghost" id="hear" type="button">Écouter la voix</button></div>
       </div>
     </div>
+    <div class="row">
+      <div class="pip-row">
+        <label class="switch"><input type="checkbox" id="gameOn"> 🎮 Gameplay parkour en petit (en bas à gauche)</label>
+        <div id="gameOpts" class="pip-row">
+          <p class="note" style="margin:0">Une animation de parkour en blocs tourne en boucle. Tu peux la remplacer par ta propre vidéo de jeu (sans le son) :</p>
+          <input class="field" type="file" id="gameFile" accept="video/*" aria-label="Choisir ta vidéo de jeu">
+          <span class="chat-st" id="gameState"></span>
+          <div><button class="btn ghost small" id="gameReset" type="button" hidden>Revenir au parkour</button></div>
+        </div>
+      </div>
+    </div>
     <p class="warn" id="voiceWarn" hidden>Aucune voix française trouvée sur ce téléphone. Sur iPhone : Réglages, Accessibilité, Contenu énoncé, Voix, puis Français. Sans voix, le quiz se joue avec le texte seul.</p>
   </section>
 
@@ -267,7 +288,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 <div class="dock"><button class="btn" id="go" type="button">Lancer le quiz</button></div>
 
 <div id="stageWrap" hidden>
-  <div id="stage"><div id="deco"></div><div id="scene"></div><div id="giftToast"></div></div>
+  <div id="stage"><div id="deco"></div><div id="scene"></div><div id="giftToast"></div><div class="pip pip-game" id="pipGame"><canvas id="gameCv" width="694" height="390"></canvas><video id="gameVid" muted loop playsinline hidden></video></div></div>
   <div id="lbLayer" hidden><div id="lbIn"></div><button id="lbClose" type="button" aria-label="Fermer le classement">✕ Fermer</button></div>
   <div id="liveBar" hidden>
     <button id="bChat" type="button" hidden>Chat</button>
@@ -1381,7 +1402,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   };
   var KEYS = Object.keys(BANK);
   var RATES = [["Lente", 0.9], ["Normale", 1.05], ["Rapide", 1.2]];
-  var S = { theme: "random", n: 4, count: 3, voiceOn: true, voiceName: "", rate: 1.05, mode: "video", liveCount: 15, boardMin: 5, chatOn: false, ttUser: "", relay: "", lag: 6, giftsOn: true, themes: null, diff: "normal", bonusEvery: 5, voteEvery: 0 };
+  var S = { theme: "random", n: 4, count: 3, voiceOn: true, voiceName: "", rate: 1.05, mode: "video", liveCount: 15, boardMin: 5, chatOn: false, ttUser: "", relay: "", lag: 6, giftsOn: true, gameOn: true, themes: null, diff: "normal", bonusEvery: 5, voteEvery: 0 };
   try { Object.assign(S, JSON.parse(localStorage.getItem("sq-set") || "{}")); } catch (e) {}
   if (!Array.isArray(S.themes)) S.themes = S.theme && S.theme !== "random" && BANK[S.theme] ? [S.theme] : [];
   S.themes = S.themes.filter(function (k) { return BANK[k]; });
@@ -1537,6 +1558,124 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     stage.style.transform = tr; $("#lbIn").style.transform = tr;
   }
   window.addEventListener("resize", fitStage);
+
+  /* ---------- incrustation : parkour en blocs, vue à la première personne (dessiné en direct) ---------- */
+  var gameUrl = null, parkour = (function () {
+    var cv = $("#gameCv"), g = cv.getContext("2d"), W = cv.width, H = cv.height, raf = 0, last = 0;
+    var F = (W / 2) / Math.tan(37 * Math.PI / 180), SKY = [191, 227, 255];
+    function hex(h) { return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]; }
+    var PAL = {
+      grass: { top: ["#5fbf3a", "#55b232", "#6acb44", "#4fa82f"], side: ["#8b5a2b", "#7a4e24", "#9c6a38", "#6e4520"], edge: ["#5fbf3a", "#4fa82f"] },
+      stone: { top: ["#8a8a8a", "#7a7a7a", "#9a9a9a", "#6d6d6d"] },
+      plank: { top: ["#b8894f", "#a97a44", "#c4955a", "#9c6f3c"] },
+      ice: { top: ["#9fd3ff", "#8cc6f7", "#b3ddff", "#80bdf0"] },
+      gold: { top: ["#f5d142", "#e8c034", "#ffe066", "#d9ad22"] },
+      emerald: { top: ["#2ecc71", "#27ae60", "#3ee58a", "#1f9e57"] }
+    };
+    function pick(a) { return a[(Math.random() * a.length) | 0]; }
+    var TYPES = ["grass", "grass", "grass", "stone", "plank", "ice", "gold", "emerald", "stone"];
+    function mkBlock(x, y, z) {
+      var t = pick(TYPES), P = PAL[t], top = [], side = [];
+      for (var i = 0; i < 16; i++) {
+        top.push(hex(pick(P.top)));
+        side.push(hex(pick(t === "grass" ? (i < 4 ? P.edge : P.side) : P.top)));
+      }
+      return { x: x, y: y, z: z, top: top, side: side };
+    }
+    var path = [], blocks = [], k = 0, s = 0, yaw = 0, clouds = [];
+    function addPlatform() {
+      var p = path.length ? path[path.length - 1] : { x: 0, y: 0, z: 0 };
+      var q = path.length ? { x: p.x + pick([-1, 0, 0, 0, 1]), y: Math.max(-2, Math.min(2, p.y + pick([-1, 0, 0, 1]))), z: p.z + pick([2, 3, 3, 4]) } : p;
+      if (q.y > p.y && q.z - p.z > 3) q.z = p.z + 3;                     // saut montant : un peu plus court
+      path.push(q); blocks.push(mkBlock(q.x, q.y, q.z));
+      if (Math.random() < 0.25) blocks.push(mkBlock(q.x + pick([-3, -2, 2, 3]), q.y + pick([-2, -1, 1]), q.z + pick([0, 1]))); // blocs décoratifs
+    }
+    for (var i = 0; i < 16; i++) addPlatform();
+    for (var c = 0; c < 6; c++) clouds.push({ a: Math.random() * Math.PI * 2, y: 0.08 + Math.random() * 0.22, w: 50 + Math.random() * 70 });
+    var cam = { x: 0.5, y: 1.62, z: 0.5 }, pitch = 0.36;
+    function camPos() {
+      var p = path[k], q = path[k + 1], e = s;
+      var y0 = p.y + 1, y1 = q.y + 1, hop = 1.05 + Math.max(0, q.y - p.y);
+      cam.x = p.x + 0.5 + (q.x - p.x) * e;
+      cam.z = p.z + 0.5 + (q.z - p.z) * e;
+      cam.y = y0 + (y1 - y0) * e + hop * 4 * e * (1 - e) + 1.62;
+      var t = path[k + 2] || q, tyaw = Math.atan2(t.x + 0.5 - cam.x, t.z + 0.5 - cam.z);
+      yaw += (tyaw - yaw) * 0.08;
+    }
+    function proj(X, Y, Z) {
+      var dx = X - cam.x, dy = Y - cam.y, dz = Z - cam.z, cy = Math.cos(yaw), sy = Math.sin(yaw);
+      var x1 = dx * cy - dz * sy, z1 = dx * sy + dz * cy;
+      var cp = Math.cos(pitch), sp = Math.sin(pitch), y2 = dy * cp + z1 * sp, z2 = -dy * sp + z1 * cp;
+      if (z2 < 0.06) return null;
+      return [W / 2 + x1 / z2 * F, H / 2 - y2 / z2 * F, z2];
+    }
+    function face(O, U, V, grid, shade, fog) {
+      var pts = [];
+      for (var j = 0; j <= 4; j++) for (var i = 0; i <= 4; i++) pts.push(proj(O[0] + (U[0] * i + V[0] * j) / 4, O[1] + (U[1] * i + V[1] * j) / 4, O[2] + (U[2] * i + V[2] * j) / 4));
+      for (var j2 = 0; j2 < 4; j2++) for (var i2 = 0; i2 < 4; i2++) {
+        var a = pts[j2 * 5 + i2], b = pts[j2 * 5 + i2 + 1], c = pts[(j2 + 1) * 5 + i2 + 1], d = pts[(j2 + 1) * 5 + i2];
+        if (!a || !b || !c || !d) continue;
+        var col = grid[j2 * 4 + i2], r = col[0] * shade, gg = col[1] * shade, bb = col[2] * shade;
+        r += (SKY[0] - r) * fog; gg += (SKY[1] - gg) * fog; bb += (SKY[2] - bb) * fog;
+        g.fillStyle = "rgb(" + (r | 0) + "," + (gg | 0) + "," + (bb | 0) + ")";
+        g.beginPath(); g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]); g.lineTo(c[0], c[1]); g.lineTo(d[0], d[1]); g.closePath(); g.fill();
+        g.strokeStyle = g.fillStyle; g.lineWidth = 0.8; g.stroke();
+      }
+    }
+    function drawBlock(b) {
+      var x = b.x, y = b.y, z = b.z, dist = Math.hypot(x + 0.5 - cam.x, z + 0.5 - cam.z), fog = Math.max(0, Math.min(0.85, (dist - 5) / 22));
+      if (cam.y > y + 1) face([x, y + 1, z], [1, 0, 0], [0, 0, 1], b.top, 1, fog);
+      if (cam.z < z) face([x, y + 1, z], [1, 0, 0], [0, -1, 0], b.side, 0.8, fog);
+      if (cam.z > z + 1) face([x + 1, y + 1, z + 1], [-1, 0, 0], [0, -1, 0], b.side, 0.66, fog);
+      if (cam.x < x) face([x, y + 1, z + 1], [0, 0, -1], [0, -1, 0], b.side, 0.7, fog);
+      if (cam.x > x + 1) face([x + 1, y + 1, z], [0, 0, 1], [0, -1, 0], b.side, 0.7, fog);
+    }
+    function draw() {
+      var sky = g.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, "#5aa8ff"); sky.addColorStop(0.55, "#a9d6ff"); sky.addColorStop(1, "#dff1ff");
+      g.fillStyle = sky; g.fillRect(0, 0, W, H);
+      g.fillStyle = "#fff6a8"; var sx = ((0.6 - yaw / (2 * Math.PI)) % 1 + 1) % 1 * W * 1.6 - W * 0.3; g.fillRect(sx, 30, 46, 46);
+      g.fillStyle = "rgba(255,255,255,.92)";
+      clouds.forEach(function (c) { var x = (((c.a - yaw) / (2 * Math.PI)) % 1 + 1) % 1 * W * 2 - W * 0.5; g.fillRect(x, c.y * H, c.w, 16); g.fillRect(x + 16, c.y * H - 12, c.w - 32, 12); });
+      var vis = blocks.filter(function (b) { return b.z + 1 > cam.z - 2 && b.z < cam.z + 34; });
+      vis.sort(function (a, b) { return Math.hypot(b.x + 0.5 - cam.x, b.y + 0.5 - cam.y, b.z + 0.5 - cam.z) - Math.hypot(a.x + 0.5 - cam.x, a.y + 0.5 - cam.y, a.z + 0.5 - cam.z); });
+      vis.forEach(drawBlock);
+      g.fillStyle = "rgba(255,255,255,.85)"; g.fillRect(W / 2 - 1, H / 2 - 7, 2, 14); g.fillRect(W / 2 - 7, H / 2 - 1, 14, 2); // viseur
+    }
+    function step(dt) {
+      s += dt / 0.58;
+      while (s >= 1) { s -= 1; k++; if (path.length - k < 14) addPlatform(); if (k > 4) { var cut = path[k - 4].z - 1; blocks = blocks.filter(function (b) { return b.z >= cut; }); } }
+      camPos();
+    }
+    camPos(); yaw = Math.atan2(path[2].x - path[0].x, path[2].z - path[0].z);
+    function loop(ts) { var dt = Math.min(0.05, (ts - (last || ts)) / 1000); last = ts; step(dt); draw(); raf = requestAnimationFrame(loop); }
+    return {
+      start: function () { if (!raf) { last = 0; raf = requestAnimationFrame(loop); } },
+      stop: function () { if (raf) cancelAnimationFrame(raf); raf = 0; },
+      frame: function () { step(0); draw(); }
+    };
+  })();
+  function pipLayout() {
+    var on = !!S.gameOn, v = $("#gameVid"), useVid = on && !!gameUrl;
+    $("#pipGame").classList.toggle("on", on);
+    stage.classList.toggle("pip-on", on);
+    $("#gameCv").hidden = useVid; v.hidden = !useVid;
+    if (useVid) { parkour.stop(); v.play().catch(function () {}); } else { v.pause(); }
+    if (on && !useVid && !wrap.hidden) parkour.start(); else parkour.stop();
+  }
+  $("#gameOn").checked = !!S.gameOn;
+  $("#gameOpts").hidden = !S.gameOn;
+  $("#gameOn").onchange = function () { S.gameOn = this.checked; save(); $("#gameOpts").hidden = !S.gameOn; pipLayout(); };
+  $("#gameFile").onchange = function () {
+    var f = this.files && this.files[0]; if (!f) return;
+    if (gameUrl) URL.revokeObjectURL(gameUrl);
+    gameUrl = URL.createObjectURL(f); var v = $("#gameVid"); v.src = gameUrl; v.muted = true;
+    $("#gameState").textContent = "✓ " + f.name + " (à la place du parkour)"; $("#gameReset").hidden = false; pipLayout();
+  };
+  $("#gameReset").onclick = function () {
+    if (gameUrl) URL.revokeObjectURL(gameUrl); gameUrl = null; $("#gameVid").removeAttribute("src");
+    $("#gameFile").value = ""; $("#gameState").textContent = ""; this.hidden = true; pipLayout();
+  };
+  pipLayout();
   function setPalette(p) {
     wrap.style.setProperty("--s1", p[0]); wrap.style.setProperty("--s2", p[1]); wrap.style.setProperty("--sacc", p[2]);
     $("#deco").innerHTML =
@@ -1619,7 +1758,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   function stopAll() {
     runId++; clearTimeout(curTimer);
     try { if (synth) synth.cancel(); } catch (e) {}
-    $("#preroll").hidden = true; $("#endsheet").hidden = true; wrap.hidden = true;
+    $("#preroll").hidden = true; $("#endsheet").hidden = true; wrap.hidden = true; parkour.stop();
     $("#liveBar").hidden = true; $("#addSheet").hidden = true; finaleOn = false; closeBoard(); curQ = false; round = null; vote = null; chatClose();
     renderScores();
     try { if (wake) { wake.release(); wake = null; } } catch (e) {}
@@ -2141,7 +2280,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     } catch (e) { if (e !== 0) { console.error(e); stopAll(); } }
   }
 
-  $("#go").onclick = function () { if (S.mode === "live") live(); else play(); };
+  $("#go").onclick = function () { if (S.mode === "live") live(); else play(); setTimeout(pipLayout, 0); };
   $("#again").onclick = play;
   $("#back").onclick = stopAll;
   $("#cancel").onclick = stopAll;

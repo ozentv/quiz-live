@@ -23,6 +23,8 @@ Le quiz tient dans un seul fichier, `index.html`, sans rien à installer. Le rel
 - **Plusieurs thèmes à la fois** : touche plusieurs thèmes pour les mélanger. « Au hasard » utilise tous les thèmes.
 - **Difficulté** : *Facile* (2 choix), *Normal* (4 choix) ou *Expert* (les choix n'apparaissent qu'à la moitié du temps : il faut connaître la réponse).
 
+- **🎮 Gameplay parkour en petit** (activé par défaut) : une animation de parkour en blocs vue à la première personne (sauts de bloc en bloc au-dessus du vide), dessinée directement dans le quiz, tourne en boucle dans une petite fenêtre en bas à gauche. Elle est 100 % originale. Tu peux la remplacer par ta propre vidéo de jeu, sans le son.
+
 ### En live
 - **Top 3 en direct** en haut de l'écran pendant les questions.
 - **Bienvenue** affichée et annoncée quand un joueur marque son premier point, et **séries** 🔥 à 3, 5 et 10 bonnes réponses d'affilée.
