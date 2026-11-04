@@ -443,7 +443,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         <div class="row"><span class="lab">Style de l'écran</span><div class="seg" id="segSkin" role="group" aria-label="Style de l'écran"></div></div>
         <label class="switch"><input type="checkbox" id="tvOn"> 🎬 Effets de plateau télé (décor animé, jingles, ding et buzzer)</label>
         <label class="switch"><input type="checkbox" id="musicOn"> 🎵 Musique d'ambiance (composée par le quiz, sans droits d'auteur)</label>
-        <div class="chat-test" id="musicOpts"><div class="seg" id="segMV" role="group" aria-label="Volume de la musique"></div><button class="btn ghost small" id="musicTry" type="button">Écouter</button></div>
+        <div class="chat-test" id="musicOpts"><div class="seg" id="segMT" role="group" aria-label="Musique"></div><div class="seg" id="segMV" role="group" aria-label="Volume de la musique"></div><button class="btn ghost small" id="musicTry" type="button">Écouter</button></div>
       </div>
     </div>
     <div class="row">
@@ -2330,6 +2330,8 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   $("#musicOn").checked = !!S.musicOn;
   $("#musicOpts").hidden = !S.musicOn;
   $("#musicOn").onchange = function () { S.musicOn = this.checked; save(); $("#musicOpts").hidden = !S.musicOn; if (!S.musicOn) { music.stop(); musicTrying = false; $("#musicTry").textContent = "Écouter"; } };
+  if (!S.musicTrack) S.musicTrack = "neon";
+  seg($("#segMT"), [["Néon", "neon"], ["Chill", "chill"], ["Jeu télé", "tv"]], function () { return S.musicTrack; }, function (v) { S.musicTrack = v; if (music.playing()) { music.stop(); setTimeout(function () { music.start(); }, 350); } });
   seg($("#segMV"), [["Très bas", 0], ["Bas", 1], ["Moyen", 2]], function () { return S.musicVol; }, function (v) { S.musicVol = v; music.volume(); });
   $("#musicTry").onclick = function () {
     if (musicTrying) { music.stop(); musicTrying = false; this.textContent = "Écouter"; return; }
@@ -2445,8 +2447,8 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   }
   /* ---------- musique d'ambiance « jeu télé » générée en direct (originale, sans droits) ---------- */
   var music = (function () {
-    var master = null, timer = null, next = 0, step = 0, ducked = false, noise = null, stabF = null, bassF = null;
-    var BPM = 118, EIGHTH = 60 / BPM / 2;
+    var master = null, timer = null, next = 0, step = 0, ducked = false, noise = null, stabF = null, bassF = null, padF = null, dly = null, track = "neon";
+    var BPMS = { tv: 118, neon: 104, chill: 78 }, EIGHTH = 60 / 118 / 2;
     // Do – La mineur – Fa – Sol (I – vi – IV – V), une mesure (8 croches) par accord
     var CH = [[60, 64, 67], [57, 60, 64], [53, 57, 60], [55, 59, 62]];
     var BELL = [[0, 2, 1, 2, 0, 2, 1, 0], [2, 1, 0, 1, 2, 1, 0, 2]];
@@ -2461,15 +2463,43 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       if (!noise) { noise = ac.createBuffer(1, ac.sampleRate * 0.3, ac.sampleRate); var dd = noise.getChannelData(0); for (var i = 0; i < dd.length; i++) dd[i] = Math.random() * 2 - 1; }
       var src = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
       src.buffer = noise; f.type = type; f.frequency.value = freq; env(g, t, 0.002, peak, d);
+      if (d > 0.25) src.loop = true;
       src.connect(f); f.connect(g); g.connect(master); src.start(t); src.stop(t + d + 0.05);
     }
-    function kick(t) {
+    function kick(t, peak) {
       var o = ac.createOscillator(), g = ac.createGain(); o.type = "sine";
       o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(48, t + 0.12);
-      env(g, t, 0.003, 0.3, 0.2); o.connect(g); g.connect(master); o.start(t); o.stop(t + 0.3);
+      env(g, t, 0.003, peak || 0.3, 0.2); o.connect(g); g.connect(master); o.start(t); o.stop(t + 0.3);
+    }
+    // « Néon » : électro synthwave, La mineur – Fa – Do – Sol, nappe, basse pulsée et arpège avec écho
+    var NE = [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]], ARP = [0, 1, 2, 1, 0, 2, 1, 2];
+    function stepNeon(t, bar, pos, ph) {
+      var ch = NE[bar];
+      if (pos % 2 === 0) kick(t, 0.24);
+      if (pos === 2 || pos === 6) noiseHit(t, "bandpass", 1300, 0.08, 0.22);
+      noiseHit(t, "highpass", 9000, pos % 2 ? 0.03 : 0.015, 0.03);
+      tone("sawtooth", hz(ch[0] - 24), t, 0.004, 0.065, 0.12, bassF);
+      tone("triangle", hz(ch[ARP[pos]] + (ph ? 24 : 12)), t, 0.004, 0.035, 0.2, dly);
+      if (pos === 0) ch.forEach(function (n, i) { tone("sawtooth", hz(n), t, 0.35, 0.014, 1.6, padF, i * 7 - 7); tone("sawtooth", hz(n), t, 0.35, 0.01, 1.6, padF, 9 - i * 5); });
+    }
+    // « Chill » : lo-fi douce, accords de septième, piano électrique, balancement léger
+    var CL = [[53, 57, 60, 64], [52, 55, 59, 62], [50, 53, 57, 60], [48, 52, 55, 59]], MEL = [76, 74, 72, 71, 72, 69, 67, 69];
+    function stepChill(t, bar, pos, ph) {
+      var ch = CL[bar], sw = pos % 2 ? EIGHTH * 0.18 : 0; t += sw;
+      if (pos === 0 || pos === 5) kick(t, 0.2);
+      if (pos === 2 || pos === 6) noiseHit(t, "lowpass", 2400, 0.06, 0.14);
+      noiseHit(t, "highpass", 7000, pos % 2 ? 0.012 : 0.02, 0.03);
+      if (pos === 0 || pos === 3) ch.forEach(function (n, i) { tone("triangle", hz(n), t + i * 0.012, 0.01, 0.028, pos === 0 ? 1.3 : 0.8, padF); tone("sine", hz(n + 12), t + i * 0.012, 0.005, 0.008, 0.5, padF); });
+      if (pos === 0 || pos === 3 || pos === 6) tone("sine", hz(ch[0] - 24), t, 0.01, 0.12, 0.45, bassF);
+      if (ph && (pos === 1 || pos === 4 || pos === 7)) tone("sine", hz(MEL[(bar * 2 + (pos > 3 ? 1 : 0)) % MEL.length]), t, 0.01, 0.022, 0.6, dly);
     }
     function schedule() {
       while (next < ac.currentTime + 0.4) {
+        if (track !== "tv") {
+          var b2 = Math.floor(step / 8) % 4, p2 = step % 8, ph2 = Math.floor(step / 32) % 2;
+          if (track === "chill") stepChill(next, b2, p2, ph2); else stepNeon(next, b2, p2, ph2);
+          next += EIGHTH; step++; continue;
+        }
         var bar = Math.floor(step / 8) % CH.length, pos = step % 8, ch = CH[bar], t = next, phrase = Math.floor(step / 32) % 2;
         if (pos % 2 === 0) kick(t);                                              // grosse caisse sur chaque temps
         if (pos === 2 || pos === 6) noiseHit(t, "bandpass", 1600, 0.12, 0.13);    // clap sur 2 et 4
@@ -2488,8 +2518,14 @@ ol.sc b { font-variant-numeric: tabular-nums; }
           if (ac.state === "suspended") ac.resume();
           master = ac.createGain(); master.gain.value = 0.0001; master.connect(ac.destination);
           master.gain.setTargetAtTime(ducked ? level() * 0.4 : level(), ac.currentTime, 0.6);
+          track = BPMS[S.musicTrack] ? S.musicTrack : "neon"; EIGHTH = 60 / BPMS[track] / 2;
           stabF = ac.createBiquadFilter(); stabF.type = "lowpass"; stabF.frequency.value = 2200; stabF.connect(master);
-          bassF = ac.createBiquadFilter(); bassF.type = "lowpass"; bassF.frequency.value = 650; bassF.connect(master);
+          bassF = ac.createBiquadFilter(); bassF.type = "lowpass"; bassF.frequency.value = track === "chill" ? 400 : 650; bassF.connect(master);
+          padF = ac.createBiquadFilter(); padF.type = "lowpass"; padF.frequency.value = track === "chill" ? 1800 : 1400; padF.connect(master);
+          dly = ac.createGain(); dly.connect(master);
+          var dl = ac.createDelay(1), fb = ac.createGain(), wet = ac.createGain();
+          dl.delayTime.value = EIGHTH * 3; fb.gain.value = 0.32; wet.gain.value = 0.45;
+          dly.connect(dl); dl.connect(fb); fb.connect(dl); dl.connect(wet); wet.connect(master);
           next = ac.currentTime + 0.1; step = 0; schedule(); timer = setInterval(schedule, 100);
         } catch (e) {}
       },
