@@ -441,6 +441,8 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         <div class="seg" id="segR" role="group" aria-label="Vitesse de la voix"></div>
         <div><button class="btn ghost" id="hear" type="button">Écouter la voix</button></div>
         <div class="row"><span class="lab">Style de l'écran</span><div class="seg" id="segSkin" role="group" aria-label="Style de l'écran"></div></div>
+        <div class="row"><span class="lab">Nom sur le logo</span><div class="seg" id="segBrand" role="group" aria-label="Nom sur le logo"></div></div>
+        <input class="field" id="brandTxt" maxlength="12" placeholder="Ton pseudo (12 lettres max)" autocomplete="off" aria-label="Pseudo sur le logo" hidden>
         <label class="switch"><input type="checkbox" id="tvOn"> 🎬 Effets de plateau télé (décor animé, jingles, ding et buzzer)</label>
         <label class="switch"><input type="checkbox" id="musicOn"> 🎵 Musique d'ambiance (composée par le quiz, sans droits d'auteur)</label>
         <div class="chat-test" id="musicOpts"><div class="seg" id="segMT" role="group" aria-label="Musique"></div><div class="seg" id="segMV" role="group" aria-label="Volume de la musique"></div><button class="btn ghost small" id="musicTry" type="button">Écouter</button></div>
@@ -2325,6 +2327,11 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   var musicTrying = false;
   if (S.skin !== "classic") S.skin = "neon";
   seg($("#segSkin"), [["Néon", "neon"], ["Classique", "classic"]], function () { return S.skin; }, function (v) { S.skin = v; tvLayout(); });
+  if (!S.brand) S.brand = "REF";
+  function brandName() { return (S.brand === "custom" ? (S.brandTxt || "").trim() || "REF" : S.brand).toUpperCase(); }
+  seg($("#segBrand"), [["REF QUIZZ", "REF"], ["BENJYY QUIZZ", "BENJYY"], ["Autre", "custom"]], function () { return S.brand; }, function (v) { S.brand = v; $("#brandTxt").hidden = v !== "custom"; if (v === "custom") $("#brandTxt").focus(); });
+  $("#brandTxt").value = S.brandTxt || ""; $("#brandTxt").hidden = S.brand !== "custom";
+  $("#brandTxt").oninput = function () { S.brandTxt = this.value.slice(0, 12); save(); };
   $("#tvOn").checked = S.tvOn !== false;
   $("#tvOn").onchange = function () { S.tvOn = this.checked; save(); tvLayout(); };
   $("#musicOn").checked = !!S.musicOn;
@@ -2799,7 +2806,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         "<div class=\"ck\"><svg width=\"30\" height=\"30\" viewBox=\"0 0 30 30\"><path d=\"M5 16 L12 23 L25 8\" fill=\"none\" stroke=\"#2ecc71\" stroke-width=\"5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div></div>";
     });
     return (lv ? "<div class=\"top3\" id=\"top3\">" + top3Text() + "</div><div class=\"news\" id=\"news\"></div>" + (S.chatOn && S.giftsOn ? "<div class=\"ticker\" id=\"ticker\"><span>🎁 " + GIFT_INFO[tickI % GIFT_INFO.length].join(" ") + "</span></div>" : "") + (S.chatOn && S.likeGoal ? "<div class=\"likes\" id=\"likes\">" + likesInner() + "</div>" : "") : "") +
-      "<div class=\"hd-pill\">" + esc(T.title) + "</div><div class=\"hd-logo\"><span class=\"l1\">REF</span><span class=\"l2\">QUIZZ</span></div><div class=\"hd-count" + (bonus ? " bonus" : "") + "\">" + (bonus === 3 ? "❤️ BONUS ×3" : bonus ? "⭐ BONUS ×2" : lv ? "Q" + (qi + 1) : (qi + 1) + "/" + n) + "</div><div class=\"bars\">" + bars + "</div>" +
+      "<div class=\"hd-pill\">" + esc(T.title) + "</div><div class=\"hd-logo\"><span class=\"l1\"" + (brandName().length > 7 ? " style=\"letter-spacing:3px;font-size:22px;padding-left:11px\"" : "") + ">" + esc(brandName()) + "</span><span class=\"l2\">QUIZZ</span></div><div class=\"hd-count" + (bonus ? " bonus" : "") + "\">" + (bonus === 3 ? "❤️ BONUS ×3" : bonus ? "⭐ BONUS ×2" : lv ? "Q" + (qi + 1) : (qi + 1) + "/" + n) + "</div><div class=\"bars\">" + bars + "</div>" +
       "<div class=\"ring\"><svg viewBox=\"0 0 280 280\"><circle cx=\"140\" cy=\"140\" r=\"98\" fill=\"none\" stroke=\"rgba(255,255,255,.22)\" stroke-width=\"20\"/>" +
       "<circle id=\"arc\" cx=\"140\" cy=\"140\" r=\"98\" fill=\"none\" stroke=\"var(--sacc)\" stroke-width=\"20\" stroke-linecap=\"round\" stroke-dasharray=\"" + C + "\" stroke-dashoffset=\"0\"/></svg><div class=\"num\" id=\"num\">" + (lv ? S.liveCount : S.count) + "</div></div>" +
       "<div class=\"fact\"><b>LE SAVIEZ-VOUS ?</b><div class=\"ft\" id=\"ft\">" + esc(q.f) + "</div></div>" +
