@@ -252,6 +252,8 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         <select id="voiceSel" aria-label="Voix"></select>
         <div class="seg" id="segR" role="group" aria-label="Vitesse de la voix"></div>
         <div><button class="btn ghost" id="hear" type="button">Écouter la voix</button></div>
+        <label class="switch"><input type="checkbox" id="musicOn"> 🎵 Musique d'ambiance (composée par le quiz, sans droits d'auteur)</label>
+        <div class="chat-test" id="musicOpts"><div class="seg" id="segMV" role="group" aria-label="Volume de la musique"></div><button class="btn ghost small" id="musicTry" type="button">Écouter</button></div>
       </div>
     </div>
     <div class="row">
@@ -1413,7 +1415,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   };
   var KEYS = Object.keys(BANK);
   var RATES = [["Lente", 0.9], ["Normale", 1.05], ["Rapide", 1.2]];
-  var S = { theme: "random", n: 4, count: 3, voiceOn: true, voiceName: "", rate: 1.05, mode: "video", liveCount: 15, boardMin: 5, chatOn: false, ttUser: "", relay: "", lag: 6, giftsOn: true, gameOn: true, themes: null, diff: "normal", bonusEvery: 5, voteEvery: 0 };
+  var S = { theme: "random", n: 4, count: 3, voiceOn: true, voiceName: "", rate: 1.05, mode: "video", liveCount: 15, boardMin: 5, chatOn: false, ttUser: "", relay: "", lag: 6, giftsOn: true, gameOn: true, musicOn: true, musicVol: 1, themes: null, diff: "normal", bonusEvery: 5, voteEvery: 0 };
   try { Object.assign(S, JSON.parse(localStorage.getItem("sq-set") || "{}")); } catch (e) {}
   if (!Array.isArray(S.themes)) S.themes = S.theme && S.theme !== "random" && BANK[S.theme] ? [S.theme] : [];
   S.themes = S.themes.filter(function (k) { return BANK[k]; });
@@ -1465,6 +1467,15 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   seg($("#segD"), [["Facile", "facile"], ["Normal", "normal"], ["Expert", "expert"]], function () { return S.diff; }, function (v) { S.diff = v; $("#diffNote").textContent = DIFF_NOTE[v]; });
   $("#diffNote").textContent = DIFF_NOTE[S.diff] || "";
   seg($("#segBonus"), [["Jamais", 0], ["1 sur 5", 5], ["1 sur 10", 10]], function () { return S.bonusEvery; }, function (v) { S.bonusEvery = v; });
+  var musicTrying = false;
+  $("#musicOn").checked = !!S.musicOn;
+  $("#musicOpts").hidden = !S.musicOn;
+  $("#musicOn").onchange = function () { S.musicOn = this.checked; save(); $("#musicOpts").hidden = !S.musicOn; if (!S.musicOn) { music.stop(); musicTrying = false; $("#musicTry").textContent = "Écouter"; } };
+  seg($("#segMV"), [["Très bas", 0], ["Bas", 1], ["Moyen", 2]], function () { return S.musicVol; }, function (v) { S.musicVol = v; music.volume(); });
+  $("#musicTry").onclick = function () {
+    if (musicTrying) { music.stop(); musicTrying = false; this.textContent = "Écouter"; return; }
+    unlockAudio(); music.start(); musicTrying = music.playing(); this.textContent = musicTrying ? "Arrêter" : "Écouter";
+  };
   seg($("#segR"), RATES, function () { return S.rate; }, function (v) { S.rate = v; });
   buildThemes();
   applyMode();
@@ -1527,8 +1538,8 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       u.lang = "fr-FR"; u.rate = rate;
       var v = frVoices.filter(function (x) { return x.name === S.voiceName; })[0] || frVoices[0];
       if (v) { u.voice = v; u.lang = v.lang; }
-      function fin() { if (!done) { done = true; clearTimeout(curTimer); res(); } }
-      u.onend = fin; u.onerror = fin;
+      function fin() { if (!done) { done = true; clearTimeout(curTimer); music.duck(false); res(); } }
+      u.onend = fin; u.onerror = fin; music.duck(true);
       curTimer = setTimeout(fin, est * 2 + 3000);
       try { synth.cancel(); synth.speak(u); } catch (e) { fin(); }
     });
@@ -1548,6 +1559,59 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       if (synth && S.voiceOn) { var u = new SpeechSynthesisUtterance(" "); u.volume = 0; synth.speak(u); }
     } catch (e) {}
   }
+  /* ---------- musique d'ambiance générée en direct (originale, sans droits) ---------- */
+  var music = (function () {
+    var master = null, timer = null, next = 0, step = 0, ducked = false, noise = null;
+    var BPM = 84, EIGHTH = 60 / BPM / 2;
+    // Am – F – C – G, une mesure (8 croches) par accord
+    var CH = [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]];
+    var ARP = [0, 1, 2, 1, 2, 0, 1, 2];
+    function hz(n) { return 440 * Math.pow(2, (n - 69) / 12); }
+    function level() { return [0.3, 0.55, 0.9][S.musicVol] || 0.55; }
+    function env(node, t, a, peak, d) { node.gain.setValueAtTime(0.0001, t); node.gain.exponentialRampToValueAtTime(peak, t + a); node.gain.exponentialRampToValueAtTime(0.0001, t + a + d); }
+    function tone(type, f, t, a, peak, d, dest, detune) {
+      var o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.value = f; if (detune) o.detune.value = detune;
+      env(g, t, a, peak, d); o.connect(g); g.connect(dest); o.start(t); o.stop(t + a + d + 0.05);
+    }
+    function hat(t) {
+      if (!noise) { noise = ac.createBuffer(1, ac.sampleRate * 0.05, ac.sampleRate); var dd = noise.getChannelData(0); for (var i = 0; i < dd.length; i++) dd[i] = Math.random() * 2 - 1; }
+      var src = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
+      src.buffer = noise; f.type = "highpass"; f.frequency.value = 7000; env(g, t, 0.003, 0.05, 0.04);
+      src.connect(f); f.connect(g); g.connect(master); src.start(t);
+    }
+    var pad = null;
+    function schedule() {
+      while (next < ac.currentTime + 0.4) {
+        var bar = Math.floor(step / 8) % CH.length, pos = step % 8, ch = CH[bar], t = next;
+        if (pos === 0) { ch.forEach(function (n, i) { tone("triangle", hz(n), t, 0.5, 0.05, EIGHTH * 8, pad, i * 4 - 4); }); }
+        if (pos === 0 || pos === 4) tone("sine", hz(ch[0] - 12), t, 0.02, 0.12, 0.55, master);
+        tone("sine", hz(ch[ARP[pos]] + 12), t, 0.01, pos % 2 ? 0.028 : 0.04, 0.32, master);
+        if (pos % 2 === 1) hat(t);
+        next += EIGHTH; step++;
+      }
+    }
+    return {
+      start: function () {
+        if (!S.musicOn || timer) return;
+        try {
+          if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+          if (ac.state === "suspended") ac.resume();
+          master = ac.createGain(); master.gain.value = 0.0001; master.connect(ac.destination);
+          master.gain.setTargetAtTime(ducked ? level() * 0.4 : level(), ac.currentTime, 0.8);
+          pad = ac.createBiquadFilter(); pad.type = "lowpass"; pad.frequency.value = 900; pad.connect(master);
+          next = ac.currentTime + 0.1; step = 0; schedule(); timer = setInterval(schedule, 100);
+        } catch (e) {}
+      },
+      stop: function () {
+        if (!timer) return; clearInterval(timer); timer = null;
+        var m = master; try { m.gain.setTargetAtTime(0.0001, ac.currentTime, 0.3); setTimeout(function () { try { m.disconnect(); } catch (e) {} }, 1500); } catch (e) {}
+        master = null;
+      },
+      duck: function (on) { ducked = on; if (master) master.gain.setTargetAtTime(on ? level() * 0.4 : level(), ac.currentTime, 0.25); },
+      volume: function () { if (master) master.gain.setTargetAtTime(ducked ? level() * 0.4 : level(), ac.currentTime, 0.2); },
+      playing: function () { return !!timer; }
+    };
+  })();
   function beep(f, d, v, at) {
     if (!ac) return;
     try {
@@ -1769,7 +1833,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   function stopAll() {
     runId++; clearTimeout(curTimer);
     try { if (synth) synth.cancel(); } catch (e) {}
-    $("#preroll").hidden = true; $("#endsheet").hidden = true; wrap.hidden = true; parkour.stop();
+    $("#preroll").hidden = true; $("#endsheet").hidden = true; wrap.hidden = true; parkour.stop(); music.stop(); musicTrying = false;
     $("#liveBar").hidden = true; $("#addSheet").hidden = true; finaleOn = false; closeBoard(); curQ = false; round = null; vote = null; chatClose();
     renderScores();
     try { if (wake) { wake.release(); wake = null; } } catch (e) {}
@@ -2313,8 +2377,8 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     } catch (e) { if (e !== 0) { console.error(e); stopAll(); } }
   }
 
-  $("#go").onclick = function () { if (S.mode === "live") live(); else play(); setTimeout(pipLayout, 0); };
-  $("#again").onclick = play;
+  $("#go").onclick = function () { unlockAudio(); music.stop(); musicTrying = false; music.start(); if (S.mode === "live") live(); else play(); setTimeout(pipLayout, 0); };
+  $("#again").onclick = function () { music.start(); play(); };
   $("#back").onclick = stopAll;
   $("#cancel").onclick = stopAll;
   $("#skip").onclick = function () { if (skipFn) skipFn(); };
