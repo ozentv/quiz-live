@@ -240,6 +240,18 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 #stage.tv .scene .card { animation: cin .45s cubic-bezier(.2, 1.2, .4, 1) both; }
 @keyframes qin { from { transform: scale(.6); } to { transform: none; } }
 @keyframes cin { from { transform: translateX(1150px); } to { transform: none; } }
+.rl-t { position: absolute; left: 0; right: 0; top: 380px; text-align: center; font-size: 92px; font-weight: 800; letter-spacing: .02em; }
+.rl-spin { position: absolute; left: 440px; top: 560px; width: 200px; height: 200px; border-radius: 50%; border: 18px solid rgba(255, 255, 255, .18); border-top-color: var(--sacc); border-right-color: var(--sacc); animation: rlspin .8s linear infinite; }
+@keyframes rlspin { to { transform: rotate(360deg); } }
+.rl-box { position: absolute; left: 90px; right: 90px; top: 850px; height: 190px; border-radius: 48px; border: 6px solid var(--sacc); background: rgba(0, 0, 0, .35); display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 0 60px rgba(0, 0, 0, .35); }
+.rl-name { font-size: 86px; font-weight: 800; white-space: nowrap; color: var(--sacc); }
+.rl-name.roll { animation: rlroll .12s ease-out; }
+@keyframes rlroll { from { transform: translateY(-60%); opacity: .2; } to { transform: none; opacity: 1; } }
+.rl-box.done { background: var(--sacc); } .rl-box.done .rl-name { color: #0f0f19; animation: rlpop .4s cubic-bezier(.2, 1.6, .4, 1); }
+@keyframes rlpop { from { transform: scale(.7); } to { transform: none; } }
+.rl-s { position: absolute; left: 0; right: 0; top: 1110px; text-align: center; font-size: 50px; font-weight: 700; opacity: .9; }
+.rl-dots::after { content: ""; animation: rldots 1s steps(4) infinite; }
+@keyframes rldots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
 #giftToast { position: absolute; left: 60px; right: 60px; top: 150px; z-index: 4; display: none; padding: 26px 34px; border-radius: 40px; background: #0b0d1c; border: 4px solid #ffd60a; text-align: center; font-size: 50px; font-weight: 800; line-height: 1.2; box-shadow: 0 20px 50px rgba(0, 0, 0, .45); }
 #giftToast.on { display: block; animation: sin .25s ease-out both; }
 #giftToast small { display: block; font-size: 36px; font-weight: 700; color: #ffd60a; margin-top: 8px; }
@@ -2448,6 +2460,29 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   seg($("#segLike"), [["Non", 0], ["500", 500], ["1 000", 1000], ["2 000", 2000]], function () { return S.likeGoal; }, function (v) { S.likeGoal = v; likes.next = likes.session - (likes.session % (v || 1)) + v; renderLikes(); });
   seg($("#segVote"), [["Non", 0], ["Toutes les 5", 5], ["Toutes les 10", 10]], function () { return S.voteEvery; }, function (v) { S.voteEvery = v; });
 
+  /* ---------- roulette « prochaine question » ---------- */
+  async function themeRoulette(T, num, ok) {
+    var others = shuffle(KEYS.filter(function (k) { return BANK[k] !== T; })).map(function (k) { return BANK[k]; });
+    setScene("<div class=\"top3\" id=\"top3\">" + top3Text() + "</div><div class=\"rl-t\">QUESTION " + num + "</div><div class=\"rl-spin\"></div>" +
+      "<div class=\"rl-box\" id=\"rlBox\"><div class=\"rl-name\" id=\"rlName\">…</div></div><div class=\"rl-s\" id=\"rlS\"><span class=\"rl-dots\">Recherche du thème</span></div>");
+    if (S.tvOn) whoosh(0);
+    var wait = 55, i = 0;
+    while (wait < 330) {
+      var th = others[i++ % others.length], el = $("#rlName");
+      if (!el) break;
+      el.textContent = th.title; el.classList.remove("roll"); void el.offsetWidth; el.classList.add("roll");
+      setPalette(th.pal); beep(700 + (i % 5) * 90, 0.035, 0.05);
+      await ok(sleep(wait)); wait *= 1.13;
+    }
+    var box = $("#rlBox"), nm = $("#rlName"), sub = $("#rlS");
+    setPalette(T.pal);
+    if (nm) { nm.textContent = T.title; nm.classList.remove("roll"); }
+    if (box) box.classList.add("done");
+    if (sub) sub.textContent = "Thème trouvé ! C'est parti 🚀";
+    flash(); ding();
+    await ok(sleep(1300));
+  }
+
   /* ---------- vote du chat ---------- */
   async function runVote(keys, my, ok, only) {
     var cand = shuffle((keys.length > 1 ? keys : KEYS).slice()).slice(0, 3), dur = 15;
@@ -2532,6 +2567,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         var T = BANK[it[0]], q = prep(T.q[it[1]]); num++;
         var bonus = fx.likeBonus ? 3 : (forcedBonus || !!(S.bonusEvery && num % S.bonusEvery === 0)) ? 2 : 0;
         var likeQ = fx.likeBonus; fx.likeBonus = false;
+        await ok(themeRoulette(T, num, ok));
         curWinner = null; curQ = true; curBonus = bonus; qManual = []; var before = rankKeys();
         setPalette(T.pal);
         if (S.tvOn) { jingle("next"); flash(); }
