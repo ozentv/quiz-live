@@ -27,6 +27,13 @@ Le quiz tient dans un seul fichier, `index.html`, sans rien à installer. Le rel
 
 - **🎵 Musique d'ambiance** (activée par défaut) : une musique de jeu télé composée en direct par le quiz (grosse caisse, claps, basse rebondissante, cuivres et clochette, à 118 battements par minute), donc sans droits d'auteur. Trois volumes : Très bas, Bas, Moyen. Elle baisse toute seule quand la voix parle. Bouton « Écouter » dans les réglages pour l'essayer.
 
+- **🎬 Effets de plateau télé** (activés par défaut) :
+  - décor de studio animé : projecteurs qui balaient l'écran, rangées de LED qui clignotent au rythme de la musique, sol brillant, flash de couleur à la révélation ;
+  - question qui apparaît en zoom, puis réponses qui glissent une à une avec un son ;
+  - l'écran pulse en rouge pendant les 3 dernières secondes ;
+  - jingles composés par le quiz : générique au début, transition avant chaque question, bonus, vote et podium ;
+  - « ding » pour la bonne réponse, buzzer quand la majorité du chat s'est trompée.
+
 ### En live
 - **Top 3 en direct** en haut de l'écran pendant les questions.
 - **Bienvenue** affichée et annoncée quand un joueur marque son premier point, et **séries** 🔥 à 3, 5 et 10 bonnes réponses d'affilée.
