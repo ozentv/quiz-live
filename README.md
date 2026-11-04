@@ -32,6 +32,11 @@ Le quiz tient dans un seul fichier, `index.html`, sans rien à installer. Le rel
 - **Bienvenue** affichée et annoncée quand un joueur marque son premier point, et **séries** 🔥 à 3, 5 et 10 bonnes réponses d'affilée.
 - **Question bonus ×2** : 1 question sur 5 ou sur 10 rapporte deux fois plus de points (aussi avec + Point).
 - **Vote du chat pour le thème** : au début, puis toutes les 5 ou 10 questions, le chat écrit 1, 2 ou 3 pour choisir le thème suivant parmi les thèmes sélectionnés (avec les points automatiques).
+- **Répartition des réponses** : à la révélation, chaque choix affiche le pourcentage du chat, avec une barre.
+- **⚡ Premier à répondre** : le pseudo du plus rapide s'affiche pendant la question, sans dévoiler sa réponse.
+- **Effets de jeu télé** : battements de cœur pendant les 5 dernières secondes, roulement de tambour avant la réponse, confettis et applaudissements pour le WINNER, « ouuuh » quand personne n'a trouvé, tremblement de l'écran lors d'un gel ou d'un vol.
+- **❤️ Jauge de likes** : tous les 500, 1 000 ou 2 000 likes (réglable), la question suivante vaut ×3.
+- **Photos de profil TikTok** dans le top 3, le classement et le podium.
 - **Podium final** : en touchant **Arrêter** deux fois, le top 3 s'affiche sur un podium et le vainqueur est annoncé. **✕ Fermer** termine le live.
 
 ## 🤖 Points automatiques avec le chat TikTok (mode live)
