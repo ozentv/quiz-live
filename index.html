@@ -1559,61 +1559,94 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   }
   window.addEventListener("resize", fitStage);
 
-  /* ---------- incrustation : gameplay parkour en blocs (dessiné en direct) ---------- */
+  /* ---------- incrustation : parkour en blocs, vue à la première personne (dessiné en direct) ---------- */
   var gameUrl = null, parkour = (function () {
-    var cv = $("#gameCv"), g = cv.getContext("2d"), W = cv.width, H = cv.height, B = 26, raf = 0, last = 0;
-    var cols = [], off = 0, speed = 120, clouds = [], tex = {};
-    function mkTex(base, spots, top) { // petite texture de bloc 13x13 pixels
-      var c = document.createElement("canvas"); c.width = c.height = 13; var x = c.getContext("2d");
-      x.fillStyle = base; x.fillRect(0, 0, 13, 13);
-      for (var i = 0; i < 26; i++) { x.fillStyle = spots[i % spots.length]; x.fillRect((Math.random() * 13) | 0, (Math.random() * 13) | 0, 1 + (Math.random() * 2 | 0), 1); }
-      if (top) { x.fillStyle = top[0]; x.fillRect(0, 0, 13, 4); for (var j = 0; j < 13; j++) { x.fillStyle = top[1 + (j % 2)]; x.fillRect(j, 4, 1, (Math.random() * 3 | 0)); } }
-      return c;
+    var cv = $("#gameCv"), g = cv.getContext("2d"), W = cv.width, H = cv.height, raf = 0, last = 0;
+    var F = (W / 2) / Math.tan(37 * Math.PI / 180), SKY = [191, 227, 255];
+    function hex(h) { return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]; }
+    var PAL = {
+      grass: { top: ["#5fbf3a", "#55b232", "#6acb44", "#4fa82f"], side: ["#8b5a2b", "#7a4e24", "#9c6a38", "#6e4520"], edge: ["#5fbf3a", "#4fa82f"] },
+      stone: { top: ["#8a8a8a", "#7a7a7a", "#9a9a9a", "#6d6d6d"] },
+      plank: { top: ["#b8894f", "#a97a44", "#c4955a", "#9c6f3c"] },
+      ice: { top: ["#9fd3ff", "#8cc6f7", "#b3ddff", "#80bdf0"] },
+      gold: { top: ["#f5d142", "#e8c034", "#ffe066", "#d9ad22"] },
+      emerald: { top: ["#2ecc71", "#27ae60", "#3ee58a", "#1f9e57"] }
+    };
+    function pick(a) { return a[(Math.random() * a.length) | 0]; }
+    var TYPES = ["grass", "grass", "grass", "stone", "plank", "ice", "gold", "emerald", "stone"];
+    function mkBlock(x, y, z) {
+      var t = pick(TYPES), P = PAL[t], top = [], side = [];
+      for (var i = 0; i < 16; i++) {
+        top.push(hex(pick(P.top)));
+        side.push(hex(pick(t === "grass" ? (i < 4 ? P.edge : P.side) : P.top)));
+      }
+      return { x: x, y: y, z: z, top: top, side: side };
     }
-    tex.grass = mkTex("#8b5a2b", ["#7a4e24", "#9c6a38", "#6e4520"], ["#5fbf3a", "#4fa82f", "#6fcf45"]);
-    tex.dirt = mkTex("#8b5a2b", ["#7a4e24", "#9c6a38", "#6e4520"]);
-    tex.stone = mkTex("#8a8a8a", ["#7a7a7a", "#9a9a9a", "#6d6d6d"]);
-    var h = 5;
-    function newCol() {
-      if (cols.length > 3 && Math.random() < 0.14 && cols[cols.length - 1] > 0 && cols[cols.length - 2] > 0) return 0; // trou
-      h = Math.max(3, Math.min(7, h + (Math.random() < 0.35 ? (Math.random() < 0.5 ? -1 : 1) : 0)));
-      return h;
+    var path = [], blocks = [], k = 0, s = 0, yaw = 0, clouds = [];
+    function addPlatform() {
+      var p = path.length ? path[path.length - 1] : { x: 0, y: 0, z: 0 };
+      var q = path.length ? { x: p.x + pick([-1, 0, 0, 0, 1]), y: Math.max(-2, Math.min(2, p.y + pick([-1, 0, 0, 1]))), z: p.z + pick([2, 3, 3, 4]) } : p;
+      if (q.y > p.y && q.z - p.z > 3) q.z = p.z + 3;                     // saut montant : un peu plus court
+      path.push(q); blocks.push(mkBlock(q.x, q.y, q.z));
+      if (Math.random() < 0.25) blocks.push(mkBlock(q.x + pick([-3, -2, 2, 3]), q.y + pick([-2, -1, 1]), q.z + pick([0, 1]))); // blocs décoratifs
     }
-    for (var i = 0; i < Math.ceil(W / B) + 4; i++) cols.push(i < 6 ? 5 : newCol());
-    for (var c = 0; c < 4; c++) clouds.push({ x: Math.random() * W, y: 20 + Math.random() * 90, w: 3 + (Math.random() * 3 | 0) });
-    var p = { x: W * 0.3, y: 0, vy: 0, t: 0 };
-    function groundAt(px) { var i = Math.floor((px + off) / B); var hh = cols[i] || 0; return hh ? H - hh * B : H + 200; }
-    p.y = groundAt(p.x);
-    function step(dt) {
-      off += speed * dt;
-      while (off >= B) { off -= B; cols.shift(); cols.push(newCol()); }
-      clouds.forEach(function (k) { k.x -= speed * 0.15 * dt; if (k.x < -k.w * 14) { k.x = W + 20; k.y = 20 + Math.random() * 90; } });
-      var gnd = groundAt(p.x), ahead = Math.min(groundAt(p.x + B), groundAt(p.x + B * 1.6));
-      var onGround = p.y >= gnd - 0.5 && p.vy >= 0;
-      if (onGround) { p.y = gnd; p.vy = 0; if (ahead < gnd - 1 || groundAt(p.x + B * 1.2) > H) p.vy = -330; }
-      p.vy += 900 * dt; p.y += p.vy * dt;
-      var g2 = groundAt(p.x); if (p.y > g2 && p.y - p.vy * dt <= g2 + 2) { p.y = g2; p.vy = 0; }
-      if (p.y > H + 60) { p.y = 40; p.vy = 0; } // tombé : réapparaît en haut
-      p.t += dt;
+    for (var i = 0; i < 16; i++) addPlatform();
+    for (var c = 0; c < 6; c++) clouds.push({ a: Math.random() * Math.PI * 2, y: 0.08 + Math.random() * 0.22, w: 50 + Math.random() * 70 });
+    var cam = { x: 0.5, y: 1.62, z: 0.5 }, pitch = 0.36;
+    function camPos() {
+      var p = path[k], q = path[k + 1], e = s;
+      var y0 = p.y + 1, y1 = q.y + 1, hop = 1.05 + Math.max(0, q.y - p.y);
+      cam.x = p.x + 0.5 + (q.x - p.x) * e;
+      cam.z = p.z + 0.5 + (q.z - p.z) * e;
+      cam.y = y0 + (y1 - y0) * e + hop * 4 * e * (1 - e) + 1.62;
+      var t = path[k + 2] || q, tyaw = Math.atan2(t.x + 0.5 - cam.x, t.z + 0.5 - cam.z);
+      yaw += (tyaw - yaw) * 0.08;
+    }
+    function proj(X, Y, Z) {
+      var dx = X - cam.x, dy = Y - cam.y, dz = Z - cam.z, cy = Math.cos(yaw), sy = Math.sin(yaw);
+      var x1 = dx * cy - dz * sy, z1 = dx * sy + dz * cy;
+      var cp = Math.cos(pitch), sp = Math.sin(pitch), y2 = dy * cp + z1 * sp, z2 = -dy * sp + z1 * cp;
+      if (z2 < 0.06) return null;
+      return [W / 2 + x1 / z2 * F, H / 2 - y2 / z2 * F, z2];
+    }
+    function face(O, U, V, grid, shade, fog) {
+      var pts = [];
+      for (var j = 0; j <= 4; j++) for (var i = 0; i <= 4; i++) pts.push(proj(O[0] + (U[0] * i + V[0] * j) / 4, O[1] + (U[1] * i + V[1] * j) / 4, O[2] + (U[2] * i + V[2] * j) / 4));
+      for (var j2 = 0; j2 < 4; j2++) for (var i2 = 0; i2 < 4; i2++) {
+        var a = pts[j2 * 5 + i2], b = pts[j2 * 5 + i2 + 1], c = pts[(j2 + 1) * 5 + i2 + 1], d = pts[(j2 + 1) * 5 + i2];
+        if (!a || !b || !c || !d) continue;
+        var col = grid[j2 * 4 + i2], r = col[0] * shade, gg = col[1] * shade, bb = col[2] * shade;
+        r += (SKY[0] - r) * fog; gg += (SKY[1] - gg) * fog; bb += (SKY[2] - bb) * fog;
+        g.fillStyle = "rgb(" + (r | 0) + "," + (gg | 0) + "," + (bb | 0) + ")";
+        g.beginPath(); g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]); g.lineTo(c[0], c[1]); g.lineTo(d[0], d[1]); g.closePath(); g.fill();
+        g.strokeStyle = g.fillStyle; g.lineWidth = 0.8; g.stroke();
+      }
+    }
+    function drawBlock(b) {
+      var x = b.x, y = b.y, z = b.z, dist = Math.hypot(x + 0.5 - cam.x, z + 0.5 - cam.z), fog = Math.max(0, Math.min(0.85, (dist - 5) / 22));
+      if (cam.y > y + 1) face([x, y + 1, z], [1, 0, 0], [0, 0, 1], b.top, 1, fog);
+      if (cam.z < z) face([x, y + 1, z], [1, 0, 0], [0, -1, 0], b.side, 0.8, fog);
+      if (cam.z > z + 1) face([x + 1, y + 1, z + 1], [-1, 0, 0], [0, -1, 0], b.side, 0.66, fog);
+      if (cam.x < x) face([x, y + 1, z + 1], [0, 0, -1], [0, -1, 0], b.side, 0.7, fog);
+      if (cam.x > x + 1) face([x + 1, y + 1, z], [0, 0, 1], [0, -1, 0], b.side, 0.7, fog);
     }
     function draw() {
-      var sky = g.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, "#6fb6ff"); sky.addColorStop(1, "#bfe3ff");
+      var sky = g.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, "#5aa8ff"); sky.addColorStop(0.55, "#a9d6ff"); sky.addColorStop(1, "#dff1ff");
       g.fillStyle = sky; g.fillRect(0, 0, W, H);
-      g.fillStyle = "#fff6a8"; g.fillRect(W - 90, 26, 44, 44);
-      g.fillStyle = "rgba(255,255,255,.95)"; clouds.forEach(function (k) { for (var i = 0; i < k.w; i++) g.fillRect(k.x + i * 14, k.y, 14, 14); g.fillRect(k.x + 14, k.y - 10, (k.w - 2) * 14, 10); });
-      g.imageSmoothingEnabled = false;
-      for (var i = 0; i < cols.length; i++) {
-        var x = i * B - off, hh = cols[i]; if (!hh) continue;
-        for (var j = 0; j < hh; j++) { var y = H - (j + 1) * B, t = j === hh - 1 ? tex.grass : j >= hh - 3 ? tex.dirt : tex.stone; g.drawImage(t, x, y, B, B); }
-      }
-      // personnage en blocs
-      var x0 = p.x - 9, y0 = p.y, leg = Math.sin(p.t * 14) * 5, air = p.vy !== 0;
-      g.fillStyle = "#2b3a8f"; g.fillRect(x0 + 2, y0 - 16 + (air ? 0 : leg * 0.3), 6, 16); g.fillRect(x0 + 10, y0 - 16 - (air ? 0 : leg * 0.3), 6, 16);
-      g.fillStyle = "#1fb5c9"; g.fillRect(x0, y0 - 34, 18, 18);
-      g.fillStyle = "#d9a066"; g.fillRect(x0 + 1, y0 - 52, 16, 16);
-      g.fillStyle = "#4a2f16"; g.fillRect(x0 + 1, y0 - 52, 16, 5);
-      g.fillStyle = "#1e2a6b"; g.fillRect(x0 + 11, y0 - 45, 3, 3);
+      g.fillStyle = "#fff6a8"; var sx = ((0.6 - yaw / (2 * Math.PI)) % 1 + 1) % 1 * W * 1.6 - W * 0.3; g.fillRect(sx, 30, 46, 46);
+      g.fillStyle = "rgba(255,255,255,.92)";
+      clouds.forEach(function (c) { var x = (((c.a - yaw) / (2 * Math.PI)) % 1 + 1) % 1 * W * 2 - W * 0.5; g.fillRect(x, c.y * H, c.w, 16); g.fillRect(x + 16, c.y * H - 12, c.w - 32, 12); });
+      var vis = blocks.filter(function (b) { return b.z + 1 > cam.z - 2 && b.z < cam.z + 34; });
+      vis.sort(function (a, b) { return Math.hypot(b.x + 0.5 - cam.x, b.y + 0.5 - cam.y, b.z + 0.5 - cam.z) - Math.hypot(a.x + 0.5 - cam.x, a.y + 0.5 - cam.y, a.z + 0.5 - cam.z); });
+      vis.forEach(drawBlock);
+      g.fillStyle = "rgba(255,255,255,.85)"; g.fillRect(W / 2 - 1, H / 2 - 7, 2, 14); g.fillRect(W / 2 - 7, H / 2 - 1, 14, 2); // viseur
     }
+    function step(dt) {
+      s += dt / 0.58;
+      while (s >= 1) { s -= 1; k++; if (path.length - k < 14) addPlatform(); if (k > 4) { var cut = path[k - 4].z - 1; blocks = blocks.filter(function (b) { return b.z >= cut; }); } }
+      camPos();
+    }
+    camPos(); yaw = Math.atan2(path[2].x - path[0].x, path[2].z - path[0].z);
     function loop(ts) { var dt = Math.min(0.05, (ts - (last || ts)) / 1000); last = ts; step(dt); draw(); raf = requestAnimationFrame(loop); }
     return {
       start: function () { if (!raf) { last = 0; raf = requestAnimationFrame(loop); } },
