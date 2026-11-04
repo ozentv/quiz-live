@@ -271,6 +271,69 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 .gift-tbl { width: 100%; border-collapse: collapse; font-size: .9rem; }
 .gift-tbl td { padding: 4px 6px; border-top: 1px solid var(--line); vertical-align: top; }
 .gift-tbl td:first-child { white-space: nowrap; font-weight: 700; }
+/* ---------- style « Néon » (plateau de jeu) ---------- */
+#stage.neon { --glow: 0 0 18px var(--sacc), 0 0 2px var(--sacc); }
+#stage.neon .hd-pill, #stage.neon .hd-count, #stage.neon .bars, #stage.neon .top3, #stage.neon .ticker, #stage.neon .cta, #stage.neon .stat { display: none; }
+#stage.neon .hd-logo { top: 112px; transform: translateX(-50%) rotate(-4deg) scale(1.22); }
+#stage.neon .hd-logo::before { content: ""; position: absolute; left: 50%; top: 54%; width: 320px; height: 118px; transform: translate(-50%, -50%); border: 4px solid var(--sacc); border-radius: 50%; box-shadow: var(--glow), inset 0 0 22px var(--sacc); background: rgba(0, 0, 0, .35); z-index: -1; }
+.nb, .nq, #stage.neon .card { --cut: 38px; clip-path: polygon(var(--cut) 0, calc(100% - var(--cut)) 0, 100% 50%, calc(100% - var(--cut)) 100%, var(--cut) 100%, 0 50%); background: var(--sacc); }
+.nb::before, .nq::before, #stage.neon .card::before { content: ""; position: absolute; inset: 5px; clip-path: polygon(var(--cut) 0, calc(100% - var(--cut)) 0, 100% 50%, calc(100% - var(--cut)) 100%, var(--cut) 100%, 0 50%); background: linear-gradient(180deg, rgba(10, 22, 30, .92), rgba(4, 10, 16, .96)); z-index: 0; }
+.nb { position: absolute; top: 150px; width: 250px; height: 104px; --cut: 30px; text-align: center; }
+.nb.l { left: 50px; } .nb.r { right: 50px; }
+.nb > * { position: relative; z-index: 1; display: block; }
+.nb b { font-size: 52px; font-weight: 800; line-height: 1; padding-top: 14px; }
+.nb small { font-size: 21px; font-weight: 800; letter-spacing: 5px; color: var(--sacc); margin-top: 4px; }
+#stage.neon .news { left: 50%; right: auto; top: 276px; transform: translateX(-50%); width: max-content; max-width: 800px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 8px 28px; border-radius: 40px; border: 3px solid var(--sacc); background: rgba(0, 0, 0, .55); font-size: 28px; line-height: 1.25; color: #fff; }
+#stage.neon .news:empty { display: none; }
+.nq { position: absolute; left: 50px; width: 980px; top: 338px; height: 262px; --cut: 70px; }
+.nqs { position: absolute; left: 140px; right: 140px; top: 30px; z-index: 1; text-align: center; font-size: 25px; font-weight: 800; letter-spacing: 4px; color: var(--sacc); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#stage.neon .qbox { left: 120px; width: 840px; top: 398px; height: 184px; z-index: 1; }
+#stage.neon .qt { font-size: 56px; line-height: 1.15; }
+#stage.neon .ring { left: 878px; top: 290px; width: 176px; height: 176px; z-index: 2; border-radius: 50%; background: #071015; box-shadow: 0 0 0 5px var(--sacc), var(--glow); }
+#stage.neon .ring svg { width: 176px; height: 176px; }
+#stage.neon .ring .num { font-size: 74px; }
+.nins { position: absolute; left: 50px; right: 50px; top: 628px; display: flex; align-items: center; gap: 22px; font-size: 30px; font-weight: 800; white-space: nowrap; }
+.nins::before, .nins::after { content: ""; flex: 1; height: 3px; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .55)); }
+.nins::after { transform: scaleX(-1); }
+.nins b { color: var(--sacc); }
+#stage.neon .card { left: 50px; width: 980px; height: 108px; border: 0; border-radius: 0; gap: 20px; padding: 0 64px 0 58px; --cut: 44px; }
+#stage.neon .card > * { position: relative; z-index: 1; }
+#stage.neon .card > .pb { position: absolute; z-index: 1; background: rgba(255, 255, 255, .12); }
+#stage.neon .card .bd { display: block; width: auto; height: auto; background: none; color: #fff; font-size: 46px; white-space: nowrap; }
+#stage.neon .card .bd::after { content: ":"; }
+#stage.neon .card .lb { font-size: 44px; }
+#stage.neon .card .avs > * { width: 54px; height: 54px; }
+#stage.neon .card .cnt { display: block; flex: none; min-width: 50px; text-align: right; font-size: 42px; font-weight: 800; }
+.card .cnt { display: none; }
+#stage.neon .rev .card .cnt { display: none; }
+#stage.neon .rev .card.good { background: #2ecc71; }
+#stage.neon .rev .card.good::before { background: linear-gradient(180deg, rgba(20, 110, 60, .95), rgba(8, 60, 30, .97)); }
+#stage.neon .rev .card.good .bd { background: none; color: #fff; }
+#stage.neon .rev .card.dim { opacity: .45; background: rgba(255, 255, 255, .35); }
+.nleg { position: absolute; left: 50px; right: 50px; top: 1240px; display: flex; justify-content: center; gap: 40px; font-size: 32px; font-weight: 800; white-space: nowrap; overflow: hidden; }
+.nleg span { overflow: hidden; text-overflow: ellipsis; }
+.nleg i { font-style: normal; color: var(--sacc); }
+#stage.neon .rev .nins, #stage.neon .rev .nleg { display: none; }
+#stage.neon .win { top: 618px; height: 84px; font-size: 40px; border-radius: 42px; box-shadow: 0 0 24px rgba(255, 214, 10, .6); }
+#stage.neon .fact { left: 50px; width: 980px; top: 1218px; height: 108px; padding: 10px 40px; border-width: 3px; border-radius: 30px; background: rgba(0, 0, 0, .55); box-shadow: var(--glow); display: none; }
+#stage.neon .rev .fact { display: flex; flex-direction: column; justify-content: center; }
+#stage.neon .fact b { font-size: 22px; margin-bottom: 4px; }
+#stage.neon .fact .ft { font-size: 32px; }
+.np { position: absolute; left: 50px; width: 980px; top: 1346px; height: 318px; border-radius: 30px; border: 4px solid var(--sacc); box-shadow: var(--glow); background: rgba(4, 10, 16, .82); overflow: hidden; }
+.np-h { display: flex; justify-content: space-between; padding: 0 30px; height: 56px; align-items: center; font-size: 25px; font-weight: 800; letter-spacing: 3px; border-bottom: 2px solid rgba(255, 255, 255, .18); }
+.np-h span:last-child { color: var(--sacc); }
+.np-r { display: flex; align-items: center; gap: 16px; padding: 0 30px; height: 52px; font-size: 31px; font-weight: 800; border-bottom: 1px solid rgba(255, 255, 255, .1); }
+.np-r:last-child { border-bottom: 0; }
+.np-r .rk { flex: none; width: 56px; } .np-r .nm { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .np-r .pt { flex: none; }
+.np-r .av { width: 38px; height: 38px; margin: 0; }
+.np-none { padding: 70px 40px; text-align: center; font-size: 34px; font-weight: 700; opacity: .85; }
+.seat { position: absolute; left: 390px; top: 1728px; width: 640px; height: 180px; }
+.seat-t { font-size: 22px; font-weight: 800; letter-spacing: 4px; color: var(--sacc); }
+.seat-b { display: flex; align-items: center; gap: 20px; margin-top: 12px; }
+.seat-av { width: 116px; height: 116px; border-radius: 50%; object-fit: cover; border: 5px solid var(--sacc); box-shadow: var(--glow); background: #0c1a22; display: grid; place-items: center; font-size: 52px; font-weight: 800; flex: none; }
+.seat-n { min-width: 0; font-size: 36px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.seat-n small { display: block; font-size: 28px; color: var(--sacc); }
+#stage.neon .likes { left: 390px; right: 50px; top: 1678px; }
 .stat { position: absolute; left: 80px; width: 920px; top: 1700px; text-align: center; font-size: 40px; font-weight: 800; opacity: .92; }
 @media (prefers-reduced-motion: reduce) { .scene, .rev .fact { animation: none; } }
 </style>
@@ -340,6 +403,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         <select id="voiceSel" aria-label="Voix"></select>
         <div class="seg" id="segR" role="group" aria-label="Vitesse de la voix"></div>
         <div><button class="btn ghost" id="hear" type="button">Écouter la voix</button></div>
+        <div class="row"><span class="lab">Style de l'écran</span><div class="seg" id="segSkin" role="group" aria-label="Style de l'écran"></div></div>
         <label class="switch"><input type="checkbox" id="tvOn"> 🎬 Effets de plateau télé (décor animé, jingles, ding et buzzer)</label>
         <label class="switch"><input type="checkbox" id="musicOn"> 🎵 Musique d'ambiance (composée par le quiz, sans droits d'auteur)</label>
         <div class="chat-test" id="musicOpts"><div class="seg" id="segMV" role="group" aria-label="Volume de la musique"></div><button class="btn ghost small" id="musicTry" type="button">Écouter</button></div>
@@ -2222,6 +2286,8 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   seg($("#segRC"), [["Non", 0], ["5 s", 5], ["7 s", 7], ["10 s", 10]], function () { return S.recapSec; }, function (v) { S.recapSec = v; });
   seg($("#segBonus"), [["Jamais", 0], ["1 sur 5", 5], ["1 sur 10", 10]], function () { return S.bonusEvery; }, function (v) { S.bonusEvery = v; });
   var musicTrying = false;
+  if (S.skin !== "classic") S.skin = "neon";
+  seg($("#segSkin"), [["Néon", "neon"], ["Classique", "classic"]], function () { return S.skin; }, function (v) { S.skin = v; tvLayout(); });
   $("#tvOn").checked = S.tvOn !== false;
   $("#tvOn").onchange = function () { S.tvOn = this.checked; save(); tvLayout(); };
   $("#musicOn").checked = !!S.musicOn;
@@ -2576,7 +2642,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   };
   pipLayout();
   function tvLayout() {
-    stage.classList.toggle("tv", !!S.tvOn);
+    stage.classList.toggle("tv", !!S.tvOn); stage.classList.toggle("neon", S.skin === "neon");
     var html = ""; for (var i = 0; i < 22; i++) html += "<i></i>";
     Array.prototype.forEach.call(document.querySelectorAll(".leds"), function (l) { if (!l.children.length) l.innerHTML = html; });
   }
@@ -2625,12 +2691,38 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     var r = ranking().slice(0, 3), med = ["🥇", "🥈", "🥉"];
     return r.map(function (x, i) { return med[i] + avImg(x, "av") + esc(x.n) + badgeOf(x.k) + " " + x.p; }).join("   ");
   }
-  function renderTop3() { var el = $("#top3"); if (el) el.innerHTML = top3Text(); }
+  function neonParts(T, qi, n, q, lv, bonus) {
+    var abcd = q.choices.length === 2 ? "A ou B" : "A, B, C ou D";
+    var right = bonus ? "<b>×" + bonus + "</b><small>BONUS</small>" : lv && S.chatOn ? "<b id=\"nAns\">0</b><small>RÉPONSES</small>" : "<b>×1</b><small>POINTS</small>";
+    return "<div class=\"nb l\"><b>" + (qi + 1) + (n ? "/" + n : "") + "</b><small>QUESTION</small></div><div class=\"nb r\">" + right + "</div>" +
+      "<div class=\"nq\"><div class=\"nqs\">" + esc(T.title) + " · Question " + (qi + 1) + (bonus ? " · Bonus ×" + bonus : "") + "</div></div>" +
+      "<div class=\"nins\"><span>" + (lv ? "💬 Réponds uniquement par <b>" + abcd + "</b>" : "⏱️ Trouve la bonne réponse : <b>" + abcd + "</b>") + "</span></div>" +
+      (lv && S.chatOn && S.giftsOn ? "<div class=\"nleg\" id=\"nleg\">" + legHTML() + "</div>" : "") +
+      (lv ? "<div class=\"np\" id=\"np\">" + panelHTML() + "</div><div class=\"seat\" id=\"seat\">" + seatHTML() + "</div>" : "");
+  }
+  function legHTML() {
+    var g = GIFT_INFO[tickI % GIFT_INFO.length];
+    return "<span>🎁 " + g[0] + " <i>" + esc(g[1].replace(/ :$/, "")) + "</i> · " + esc(g[2]) + "</span>";
+  }
+  function panelHTML() {
+    var r = ranking().filter(function (x) { return x.p > 0; }), med = ["🥇", "🥈", "🥉"];
+    var head = "<div class=\"np-h\"><span>👑 TOP JOUEURS (SESSION)</span><span>" + (r.length ? r.length + " joueur" + (r.length > 1 ? "s" : "") : "") + "</span></div>";
+    if (!r.length) return head + "<div class=\"np-none\">Réponds juste pour entrer dans le top 5 !</div>";
+    return head + r.slice(0, 5).map(function (x, i) {
+      return "<div class=\"np-r\"><span class=\"rk\">" + (med[i] || "#" + (i + 1)) + "</span>" + avImg(x, "av") + "<span class=\"nm\">" + esc(x.n) + badgeOf(x.k) + "</span><span class=\"pt\">" + x.p + "</span></div>";
+    }).join("");
+  }
+  function seatHTML() {
+    var x = ranking().filter(function (y) { return y.p > 0; })[0];
+    var av = x && x.pic ? "<img class=\"seat-av\" src=\"" + esc(x.pic) + "\" alt=\"\" referrerpolicy=\"no-referrer\" onerror=\"this.style.visibility='hidden'\">" : "<div class=\"seat-av\">" + (x ? esc((String(x.n).trim()[0] || "?").toUpperCase()) : "?") + "</div>";
+    return "<div class=\"seat-t\">👑 LE FAUTEUIL · LEADER</div><div class=\"seat-b\">" + av + "<div class=\"seat-n\">" + (x ? esc(x.n) + "<small>" + x.p + " pts</small>" : "Place libre<small>Prends la tête !</small>") + "</div></div>";
+  }
+  function renderTop3() { var el = $("#top3"); if (el) el.innerHTML = top3Text(); var np = $("#np"); if (np) np.innerHTML = panelHTML(); var se = $("#seat"); if (se) se.innerHTML = seatHTML(); }
   function qScene(T, qi, n, q, lv, bonus) {
     var bars = ""; for (var i = 0; i < n; i++) bars += "<span class=\"" + (i < qi ? "done" : i === qi ? "cur" : "") + "\"></span>";
-    var C = 2 * Math.PI * 98, cards = "";
+    var C = 2 * Math.PI * 98, cards = "", neon = S.skin === "neon";
     q.choices.forEach(function (c, i) {
-      cards += "<div class=\"card " + (i === q.a ? "good" : "dim") + "\" style=\"top:" + (940 + i * 148) + "px\">" + (lv && S.chatOn ? "<div class=\"pb\"></div>" : "") + "<div class=\"bd\">" + "ABCD"[i] + "</div><div class=\"lb\">" + esc(c) + "</div>" + (lv && S.chatOn ? "<div class=\"avs\" id=\"avs" + i + "\"></div><div class=\"pc\"></div>" : "") +
+      cards += "<div class=\"card " + (i === q.a ? "good" : "dim") + "\" style=\"top:" + (neon ? (q.choices.length === 2 ? 760 : 712) + i * 128 : 940 + i * 148) + "px\">" + (lv && S.chatOn ? "<div class=\"pb\"></div>" : "") + "<div class=\"bd\">" + "ABCD"[i] + "</div><div class=\"lb\">" + esc(c) + "</div>" + (lv && S.chatOn ? "<div class=\"avs\" id=\"avs" + i + "\"></div><div class=\"pc\"></div><div class=\"cnt\" id=\"cnt" + i + "\">0</div>" : "") +
         "<div class=\"ck\"><svg width=\"30\" height=\"30\" viewBox=\"0 0 30 30\"><path d=\"M5 16 L12 23 L25 8\" fill=\"none\" stroke=\"#2ecc71\" stroke-width=\"5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div></div>";
     });
     return (lv ? "<div class=\"top3\" id=\"top3\">" + top3Text() + "</div><div class=\"news\" id=\"news\"></div>" + (S.chatOn && S.giftsOn ? "<div class=\"ticker\" id=\"ticker\"><span>🎁 " + GIFT_INFO[tickI % GIFT_INFO.length].join(" ") + "</span></div>" : "") + (S.chatOn && S.likeGoal ? "<div class=\"likes\" id=\"likes\">" + likesInner() + "</div>" : "") : "") +
@@ -2638,11 +2730,11 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       "<div class=\"ring\"><svg viewBox=\"0 0 280 280\"><circle cx=\"140\" cy=\"140\" r=\"98\" fill=\"none\" stroke=\"rgba(255,255,255,.22)\" stroke-width=\"20\"/>" +
       "<circle id=\"arc\" cx=\"140\" cy=\"140\" r=\"98\" fill=\"none\" stroke=\"var(--sacc)\" stroke-width=\"20\" stroke-linecap=\"round\" stroke-dasharray=\"" + C + "\" stroke-dashoffset=\"0\"/></svg><div class=\"num\" id=\"num\">" + (lv ? S.liveCount : S.count) + "</div></div>" +
       "<div class=\"fact\"><b>LE SAVIEZ-VOUS ?</b><div class=\"ft\" id=\"ft\">" + esc(q.f) + "</div></div>" +
-      "<div class=\"qbox\"><div class=\"qt\" id=\"qt\">" + esc(q.q) + "</div></div>" + cards +
+      (neon ? neonParts(T, qi, n, q, lv, bonus) : "") + "<div class=\"qbox\"><div class=\"qt\" id=\"qt\">" + esc(q.q) + "</div></div>" + cards +
       (lv ? "<div class=\"cta\">Écris " + (q.choices.length === 2 ? "A ou B" : "A, B, C ou D") + " en commentaire !" + (S.chatOn ? " 1 seule réponse compte" : "") + "</div><div class=\"win\" id=\"win\" hidden></div>" + (S.chatOn ? "<div class=\"stat\" id=\"stat\">💬 0 réponse</div>" : "") : "");
   }
   function fitPill() { // le nom du thème ne doit pas toucher le logo au centre
-    var p = sceneBox.querySelector(".hd-pill"); if (!p) return;
+    var p = sceneBox.querySelector(".hd-pill"); if (!p || S.skin === "neon") return;
     var f = 38; p.className = "hd-pill"; p.style.fontSize = f + "px"; p.style.top = "";
     while (p.offsetWidth > 340 && f > 28) { f -= 2; p.style.fontSize = f + "px"; }
     if (p.offsetWidth <= 340) return;
@@ -2653,9 +2745,10 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   function fitQ(scene, q) {
     fitPill();
     if (q && q.hide) scene.classList.add("hide-ch");
-    fit($("#qt"), 330, 74, 50);
-    Array.prototype.forEach.call(sceneBox.querySelectorAll(".lb"), function (l) { fit(l, 104, 48, 30); });
-    scene.classList.add("rev"); fit($("#ft"), 150, 46, 32); scene.classList.remove("rev");
+    var ne = S.skin === "neon";
+    fit($("#qt"), ne ? 182 : 330, ne ? 56 : 74, ne ? 32 : 50);
+    Array.prototype.forEach.call(sceneBox.querySelectorAll(".lb"), function (l) { fit(l, ne ? 96 : 104, ne ? 44 : 48, 28); });
+    scene.classList.add("rev"); fit($("#ft"), ne ? 70 : 150, ne ? 32 : 46, ne ? 22 : 32); scene.classList.remove("rev");
   }
   function countdown(sec, my) {
     return new Promise(function (res) {
@@ -2756,6 +2849,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   setInterval(function () {
     tickI++; var el = document.getElementById("ticker");
     if (el) el.innerHTML = "<span>🎁 " + GIFT_INFO[tickI % GIFT_INFO.length].join(" ") + "</span>";
+    var lg = document.getElementById("nleg"); if (lg) lg.innerHTML = legHTML();
   }, 4500);
   function giftsHTML() {
     var coins = ["1 pièce", "5 pièces", "10 pièces", "20 pièces", "30 pièces", "100 pièces", "500 pièces", "1 000 pièces"];
@@ -2957,6 +3051,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     round.seen[k] = 1;
     round.answers.push({ k: k, name: m.name || m.id, a: a });
     addAnswerFace(a, k, m.name || m.id);
+    var cn = $("#cnt" + a); if (cn) cn.textContent = (round.faces && round.faces[a]) || 0; var na = $("#nAns"); if (na) na.textContent = round.answers.length;
     if (round.answers.length === 1) { round.first = m.name || m.id; beep(1320, 0.08, 0.07); beep(1760, 0.1, 0.06, 0.08); }
     var st = $("#stat"); if (st) st.textContent = "💬 " + round.answers.length + " réponse" + (round.answers.length > 1 ? "s" : "") + " · ⚡ " + round.first + " en premier";
   }
