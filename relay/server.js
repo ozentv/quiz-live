@@ -99,12 +99,26 @@ wss.on("connection", (ws, req) => {
   ws.isAlive = true;
   ws.on("pong", () => { ws.isAlive = true; });
   // Le quiz envoie les points gagnés pour le classement public (protégé par ADMIN_KEY).
-  const writeOK = lb.canWrite(url.searchParams.get("key") || "");
-  if (lb.enabled) setTimeout(() => send({ type: "board", state: writeOK ? "ok" : "readonly", message: writeOK ? "Classement public : enregistrement actif." : "Classement public : clé absente ou incorrecte, les points ne sont pas enregistrés." }), 50);
+  let writeOK = false, authTries = 0;
+  function auth(key) {
+    key = String(key || "").trim();
+    writeOK = lb.canWrite(key);
+    if (!lb.enabled) return;
+    let message;
+    if (writeOK) message = "Classement public : enregistrement actif ✅";
+    else if (!lb.hasKey) message = "Classement public : ADMIN_KEY n'est pas réglée sur Render, les points ne sont pas enregistrés.";
+    else if (!key) message = "Classement public : aucune clé dans le quiz. Colle la valeur d'ADMIN_KEY (Render, onglet Environment) dans « Clé du classement ».";
+    else message = "Classement public : la clé ne correspond pas à ADMIN_KEY sur Render. Recopie-la exactement.";
+    send({ type: "board", state: writeOK ? "ok" : "readonly", message });
+  }
+  setTimeout(() => auth(url.searchParams.get("key")), 50);
   ws.on("message", (raw) => {
-    if (!writeOK || user === "demo") return;
     let m; try { m = JSON.parse(String(raw)); } catch (e) { return; }
-    if (m && m.type === "score") lb.record(user, m).catch((e) => console.error("enregistrement", e && e.message));
+    if (!m) return;
+    // Le quiz renvoie la clé dès qu'elle change, sans avoir à se reconnecter (5 essais maximum par connexion).
+    if (m.type === "auth") { if (++authTries <= 5) auth(m.key); return; }
+    if (!writeOK || user === "demo") return;
+    if (m.type === "score") lb.record(user, m).catch((e) => console.error("enregistrement", e && e.message));
   });
 
   function cleanup() {
