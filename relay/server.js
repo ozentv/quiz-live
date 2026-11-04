@@ -57,6 +57,7 @@ function explain(err) {
         : "Limite gratuite du service de connexion TikTok atteinte. Ajoute une clé gratuite EULER_API_KEY sur Render (voir le README). Nouvelle tentative dans " + mins + " min.",
     };
   }
+  if (/Premium/i.test(name) || /Business plan|requires a .*plan|do not have permission from the signature provider/i.test(msg)) return { wait: 120000, message: "Euler Stream demande un abonnement payant pour une fonction utilisée par le relais. Mets le relais à jour (Manual Deploy sur Render) ; si ça continue, envoie ce message à l'assistant." };
   if (/offline/i.test(name) || /offline|isn.t online|not.*live|isn.t live/i.test(msg)) return { wait: 20000, message: "Le live n'est pas lancé sur ce compte. Lance ton live : la connexion se fera toute seule." };
   if (/not.*found|404|doesn.t exist|does not exist/i.test(msg)) return { wait: 60000, message: "Compte TikTok introuvable. Vérifie le pseudo." };
   return { wait: 30000, message: "Connexion au live impossible : " + msg.slice(0, 160) };
@@ -122,7 +123,7 @@ wss.on("connection", (ws, req) => {
     if (closed) return;
     if (user === "demo") { startDemo(); return; }
     send({ type: "status", state: "waiting", message: "Connexion au live de @" + user + "…" });
-    const conn = new TikTokLiveConnection(user, { signApiKey: API_KEY, processInitialData: false, enableExtendedGiftInfo: true });
+    const conn = new TikTokLiveConnection(user, { signApiKey: API_KEY, processInitialData: false, enableExtendedGiftInfo: false }); // la liste des cadeaux demande un abonnement payant chez Euler Stream : chaque cadeau contient déjà son prix
     tt = conn;
     conn.on(WebcastEvent.CHAT, (d) => {
       // Selon les versions de TikTok, le texte est dans « content » ou « comment »,
