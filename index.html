@@ -178,6 +178,9 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 .mascot { position: absolute; left: 24px; top: 1540px; width: 340px; height: 372px; z-index: 3; pointer-events: none; display: flex; flex-direction: column; align-items: center; }
 .mascot[hidden] { display: none; }
 .mascot canvas { width: 222px; height: 326px; }
+.mascot img, .mascot video { width: 222px; height: 296px; object-fit: cover; border-radius: 26px; border: 5px solid var(--sacc); box-shadow: 0 10px 30px rgba(0, 0, 0, .45); background: #000; margin-bottom: 14px; }
+.mascot img[hidden], .mascot video[hidden], .mascot canvas[hidden] { display: none; }
+#stage.neon .mascot img, #stage.neon .mascot video { width: 320px; height: 460px; }
 .masc-l { margin-top: -6px; padding: 6px 26px; border-radius: 30px; background: rgba(0, 0, 0, .6); border: 3px solid var(--sacc); color: #fff; font-size: 26px; font-weight: 800; letter-spacing: 6px; white-space: nowrap; }
 #stage.neon .mascot { top: 1342px; height: 570px; }
 #stage.neon .mascot canvas { width: 340px; height: 500px; }
@@ -472,7 +475,10 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         <div class="row"><span class="lab">Style de l'écran</span><div class="seg" id="segSkin" role="group" aria-label="Style de l'écran"></div></div>
         <div class="row"><span class="lab">Nom sur le logo</span><div class="seg" id="segBrand" role="group" aria-label="Nom sur le logo"></div></div>
         <input class="field" id="brandTxt" maxlength="12" placeholder="Ton pseudo (12 lettres max)" autocomplete="off" aria-label="Pseudo sur le logo" hidden>
-        <label class="switch"><input type="checkbox" id="mascOn"> 🎤 Mascotte « Animateur » en bas à gauche (live)</label>
+        <label class="switch"><input type="checkbox" id="mascOn"> 🎤 Animateur en bas à gauche (live)</label>
+        <div class="chat-test" id="mascOpts"><span class="lab">Animateur</span><div class="seg" id="segMasc" role="group" aria-label="Style de l'animateur"></div></div>
+        <div class="chat-test" id="mascSkinRow"><span class="lab">Teint du présentateur</span><div class="seg" id="segSkin2" role="group" aria-label="Teint du présentateur"></div></div>
+        <div class="pip-row" id="mascFileRow"><span class="lab">Ta photo ou ta vidéo d'animateur (personne qui a donné son accord)</span><input class="field" id="mascFile" type="file" accept="image/*,video/*"></div>
         <label class="switch"><input type="checkbox" id="tvOn"> 🎬 Effets de plateau télé (décor animé, jingles, ding et buzzer)</label>
         <label class="switch"><input type="checkbox" id="musicOn"> 🎵 Musique d'ambiance (composée par le quiz, sans droits d'auteur)</label>
         <div class="chat-test" id="musicOpts"><div class="seg" id="segMT" role="group" aria-label="Musique"></div><div class="seg" id="segMV" role="group" aria-label="Volume de la musique"></div><button class="btn ghost small" id="musicTry" type="button">Écouter</button></div>
@@ -522,7 +528,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 <div class="dock"><button class="btn" id="go" type="button">Lancer le quiz</button></div>
 
 <div id="stageWrap" hidden>
-  <div id="stage"><div id="studio"><div class="beam b1"></div><div class="beam b2"></div><div class="beam b3"></div><div class="floor"></div><div class="leds top"></div><div class="leds bot"></div><div id="flash"></div></div><div id="deco"></div><div id="scene"></div><div id="giftToast"></div><div id="pulse"></div><div class="mascot" id="mascot" hidden><canvas id="mascCv" width="340" height="500"></canvas><div class="masc-l">ANIMATEUR</div></div><div class="pip pip-game" id="pipGame"><canvas id="gameCv" width="694" height="390"></canvas><video id="gameVid" muted loop playsinline hidden></video></div></div>
+  <div id="stage"><div id="studio"><div class="beam b1"></div><div class="beam b2"></div><div class="beam b3"></div><div class="floor"></div><div class="leds top"></div><div class="leds bot"></div><div id="flash"></div></div><div id="deco"></div><div id="scene"></div><div id="giftToast"></div><div id="pulse"></div><div class="mascot" id="mascot" hidden><canvas id="mascCv" width="340" height="500"></canvas><img id="mascImg" alt="" hidden><video id="mascVid" muted loop playsinline hidden></video><div class="masc-l">ANIMATEUR</div></div><div class="pip pip-game" id="pipGame"><canvas id="gameCv" width="694" height="390"></canvas><video id="gameVid" muted loop playsinline hidden></video></div></div>
   <div id="lbLayer" hidden><div id="lbIn"></div><button id="lbClose" type="button" aria-label="Fermer le classement">✕ Fermer</button></div>
   <div id="liveBar" hidden>
     <button id="bChat" type="button" hidden>Chat</button>
@@ -2738,6 +2744,88 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     function mix(hex, f) { var m = /^#?([0-9a-f]{6})$/i.exec(hex) || /^rgb\((\d+),\s*(\d+),\s*(\d+)/.exec(hex); var r, gg, b;
       if (!m) return hex; if (m.length === 2) { var n = parseInt(m[1], 16); r = n >> 16; gg = (n >> 8) & 255; b = n & 255; } else { r = +m[1]; gg = +m[2]; b = +m[3]; }
       function c(v) { return Math.max(0, Math.min(255, Math.round(f > 1 ? v + (255 - v) * (f - 1) : v * f))); } return "rgb(" + c(r) + "," + c(gg) + "," + c(b) + ")"; }
+    var SKINS = { clair: ["#f3d2b8", "#d9a98a"], moyen: ["#dcaa83", "#b97f5a"], mat: ["#b07a52", "#8a5634"], fonce: ["#7a4c2e", "#55321c"] };
+    function host(now) { // présentateur humain dessiné (buste)
+      var t = (now - t0) / 1000, col = acc(), md = now < moodEnd ? moodName : "", sk = SKINS[S.hostSkin] || SKINS.moyen, skin = sk[0], sh = sk[1];
+      g.clearRect(0, 0, 340, 500);
+      var bob = Math.sin(t * 2.1) * 3, tilt = Math.sin(t * 1.3) * .03 + (md === "sad" ? .08 : 0), hx = 170, hy = 150 + bob;
+      // veste et chemise
+      var jk = "#1d2436", jg = g.createLinearGradient(0, 270, 0, 500); jg.addColorStop(0, "#2b3550"); jg.addColorStop(1, jk);
+      g.fillStyle = jg; g.beginPath(); g.moveTo(22, 500); g.quadraticCurveTo(18, 318, 70, 292 + bob); g.quadraticCurveTo(170, 262 + bob, 270, 292 + bob); g.quadraticCurveTo(322, 318, 318, 500); g.closePath(); g.fill();
+      g.fillStyle = "#f4f5f8"; g.beginPath(); g.moveTo(132, 280 + bob); g.lineTo(208, 280 + bob); g.lineTo(170, 400 + bob); g.closePath(); g.fill();
+      var tg = g.createLinearGradient(150, 0, 190, 0); tg.addColorStop(0, mix(col, .7)); tg.addColorStop(.5, col); tg.addColorStop(1, mix(col, .7));
+      g.fillStyle = tg; g.beginPath(); g.moveTo(160, 290 + bob); g.lineTo(180, 290 + bob); g.lineTo(186, 380 + bob); g.lineTo(170, 404 + bob); g.lineTo(154, 380 + bob); g.closePath(); g.fill();
+      g.beginPath(); g.moveTo(156, 278 + bob); g.lineTo(184, 278 + bob); g.lineTo(178, 296 + bob); g.lineTo(162, 296 + bob); g.closePath(); g.fill();
+      g.fillStyle = "#151b2a"; g.beginPath(); g.moveTo(126, 282 + bob); g.lineTo(170, 404 + bob); g.lineTo(112, 340 + bob); g.closePath(); g.fill(); g.beginPath(); g.moveTo(214, 282 + bob); g.lineTo(170, 404 + bob); g.lineTo(228, 340 + bob); g.closePath(); g.fill();
+      g.fillStyle = "#fff"; g.beginPath(); g.moveTo(96, 352 + bob); g.lineTo(114, 346 + bob); g.lineTo(108, 360 + bob); g.fill();
+      // cou
+      var ng = g.createLinearGradient(140, 0, 200, 0); ng.addColorStop(0, sh); ng.addColorStop(.5, skin); ng.addColorStop(1, sh);
+      g.fillStyle = ng; g.fillRect(146, 210 + bob, 48, 78);
+      g.fillStyle = "rgba(0,0,0,.18)"; g.beginPath(); g.ellipse(170, 230 + bob, 26, 10, 0, 0, Math.PI * 2); g.fill();
+      // bras gauche : salue (joie) ou main sur le front (tristesse)
+      if (md === "happy" || md === "sad") {
+        var wave = Math.sin(t * 10) * .25, hdx = md === "happy" ? 62 + Math.sin(t * 10) * 10 : 120, hdy = md === "happy" ? 92 : 104 + bob;
+        g.strokeStyle = jk; g.lineWidth = 46; g.lineCap = "round"; g.beginPath(); g.moveTo(64, 320 + bob); g.quadraticCurveTo(34, 230, hdx, hdy + 40); g.stroke();
+        g.save(); g.translate(hdx, hdy); g.rotate(md === "happy" ? wave : 1.2); g.fillStyle = skin; g.beginPath(); g.ellipse(0, 0, 26, 32, 0, 0, Math.PI * 2); g.fill();
+        g.fillStyle = sh; for (var f = -2; f <= 1; f++) { g.beginPath(); g.ellipse(f * 12 + 6, -30, 6, 16, 0, 0, Math.PI * 2); g.fill(); } g.beginPath(); g.ellipse(-26, -4, 7, 14, -.6, 0, Math.PI * 2); g.fill(); g.restore();
+      }
+      // tête
+      g.save(); g.translate(hx, hy); g.rotate(tilt);
+      g.fillStyle = sh; g.beginPath(); g.ellipse(-70, 6, 14, 22, 0, 0, Math.PI * 2); g.ellipse(70, 6, 14, 22, 0, 0, Math.PI * 2); g.fill();
+      var fg = g.createRadialGradient(-14, -14, 10, 0, 0, 96); fg.addColorStop(0, mix(skin, 1.08)); fg.addColorStop(.7, skin); fg.addColorStop(1, sh);
+      g.fillStyle = fg; g.beginPath(); g.moveTo(-66, -30); g.quadraticCurveTo(-70, 50, -36, 78); g.quadraticCurveTo(0, 100, 36, 78); g.quadraticCurveTo(70, 50, 66, -30); g.quadraticCurveTo(64, -92, 0, -94); g.quadraticCurveTo(-64, -92, -66, -30); g.fill();
+      // cheveux
+      g.fillStyle = "#2a1c14"; g.beginPath(); g.moveTo(-70, -16); g.quadraticCurveTo(-78, -96, -10, -108); g.quadraticCurveTo(64, -116, 74, -40); g.quadraticCurveTo(76, -8, 68, -6); g.quadraticCurveTo(62, -58, 22, -66); g.quadraticCurveTo(-30, -70, -56, -50); g.quadraticCurveTo(-62, -30, -62, -8); g.closePath(); g.fill();
+      g.fillStyle = "rgba(255,255,255,.12)"; g.beginPath(); g.ellipse(-8, -94, 34, 9, -.2, 0, Math.PI * 2); g.fill();
+      // sourcils
+      var br = talking ? Math.sin(t * 5) * 3 : 0, up = md === "happy" ? 8 : 0;
+      g.strokeStyle = "#2a1c14"; g.lineWidth = 7; g.lineCap = "round";
+      [-1, 1].forEach(function (sd) { g.beginPath(); if (md === "sad") { g.moveTo(sd * 44, -34); g.lineTo(sd * 14, -42); } else { g.moveTo(sd * 46, -36 - up - br); g.quadraticCurveTo(sd * 30, -46 - up - br, sd * 14, -40 - up - br); } g.stroke(); });
+      // yeux
+      if (now > blinkAt + 200 && Math.random() < .007) blinkAt = now;
+      var closed = now - blinkAt < 130, look = Math.sin(t * .7) * 3;
+      [-1, 1].forEach(function (sd) {
+        var ex = sd * 30, ey = -16;
+        g.fillStyle = "#fff"; g.beginPath(); g.ellipse(ex, ey, 15, closed ? 1.5 : 9, 0, 0, Math.PI * 2); g.fill();
+        if (!closed) {
+          g.save(); g.beginPath(); g.ellipse(ex, ey, 15, 9, 0, 0, Math.PI * 2); g.clip();
+          g.fillStyle = "#5b3a24"; g.beginPath(); g.arc(ex + look, ey + 1, 8, 0, Math.PI * 2); g.fill();
+          g.fillStyle = "#111"; g.beginPath(); g.arc(ex + look, ey + 1, 3.6, 0, Math.PI * 2); g.fill();
+          g.fillStyle = "#fff"; g.beginPath(); g.arc(ex + look + 3, ey - 2, 2, 0, Math.PI * 2); g.fill(); g.restore();
+        }
+        g.strokeStyle = "#2a1c14"; g.lineWidth = 3; g.beginPath(); g.ellipse(ex, ey - (closed ? 0 : 1), 16, closed ? 2 : 10, 0, Math.PI, 0); g.stroke();
+        g.strokeStyle = "rgba(0,0,0,.12)"; g.lineWidth = 2; g.beginPath(); g.arc(ex, ey + 12, 10, .3, Math.PI - .3); g.stroke();
+      });
+      // nez
+      g.strokeStyle = sh; g.lineWidth = 4; g.beginPath(); g.moveTo(-2, -8); g.quadraticCurveTo(-8, 22, 0, 26); g.stroke();
+      g.fillStyle = "rgba(0,0,0,.16)"; g.beginPath(); g.ellipse(-8, 26, 5, 3, 0, 0, Math.PI * 2); g.ellipse(8, 26, 5, 3, 0, 0, Math.PI * 2); g.fill();
+      g.fillStyle = "rgba(220,90,80,.12)"; g.beginPath(); g.ellipse(-40, 18, 14, 9, 0, 0, Math.PI * 2); g.ellipse(40, 18, 14, 9, 0, 0, Math.PI * 2); g.fill();
+      // bouche (synchronisée avec la voix)
+      var lip = mix(sh, .8);
+      if (talking) {
+        var o = 6 + Math.abs(Math.sin(t * 16)) * 14 + Math.abs(Math.sin(t * 6.7)) * 5;
+        g.fillStyle = "#4a1418"; g.beginPath(); g.ellipse(0, 50, 20, o / 2 + 2, 0, 0, Math.PI * 2); g.fill();
+        g.fillStyle = "#f6f2ea"; g.fillRect(-14, 50 - o / 2 - 1, 28, Math.min(6, o / 3));
+        g.strokeStyle = lip; g.lineWidth = 4; g.beginPath(); g.ellipse(0, 50, 21, o / 2 + 3, 0, 0, Math.PI * 2); g.stroke();
+      } else if (md === "sad") {
+        g.strokeStyle = lip; g.lineWidth = 5; g.beginPath(); g.arc(0, 66, 18, Math.PI + .6, -.6); g.stroke();
+      } else {
+        var big = md === "happy";
+        g.fillStyle = big ? "#4a1418" : lip; g.beginPath(); g.moveTo(-22, 46); g.quadraticCurveTo(0, big ? 74 : 60, 22, 46); g.quadraticCurveTo(0, big ? 54 : 52, -22, 46); g.fill();
+        if (big) { g.fillStyle = "#f6f2ea"; g.beginPath(); g.moveTo(-18, 48); g.quadraticCurveTo(0, 56, 18, 48); g.lineTo(16, 54); g.quadraticCurveTo(0, 60, -16, 54); g.fill(); }
+      }
+      g.restore();
+      // bras droit avec le micro (monte vers la bouche quand il parle)
+      var tx = talking ? 214 : 236, ty = talking ? 214 + bob : 330 + bob;
+      g.strokeStyle = jk; g.lineWidth = 46; g.lineCap = "round"; g.beginPath(); g.moveTo(276, 320 + bob); g.quadraticCurveTo(318, 420, tx + 26, ty + 54); g.stroke();
+      g.fillStyle = "#e9ecf2"; g.fillRect(tx + 6, ty + 44, 40, 14);
+      g.save(); g.translate(tx, ty); g.rotate(talking ? -.35 : -.15);
+      g.fillStyle = "#23252c"; g.fillRect(-8, -6, 16, 60); g.fillStyle = col; g.fillRect(-9, 14, 18, 8);
+      var mg = g.createRadialGradient(-5, -22, 2, 0, -16, 20); mg.addColorStop(0, "#d7dae1"); mg.addColorStop(1, "#6b707c"); g.fillStyle = mg; g.beginPath(); g.arc(0, -18, 18, 0, Math.PI * 2); g.fill(); g.restore();
+      g.fillStyle = skin; g.beginPath(); g.ellipse(tx + 20, ty + 30, 24, 20, -.4, 0, Math.PI * 2); g.fill();
+      g.fillStyle = sh; g.beginPath(); g.ellipse(tx + 6, ty + 24, 8, 12, -.4, 0, Math.PI * 2); g.fill();
+      raf = requestAnimationFrame(host);
+    }
     function draw(now) {
       var t = (now - t0) / 1000, W = 340, H = 500, col = acc(), md = now < moodEnd ? moodName : "";
       g.clearRect(0, 0, W, H);
@@ -2794,12 +2882,33 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         var el = $("#mascot"); on = on && S.mascOn !== false && S.mode === "live";
         el.hidden = !on; stage.classList.toggle("masc-on", on);
         cancelAnimationFrame(raf); raf = 0;
-        if (on) { cv = $("#mascCv"); g = cv.getContext("2d"); raf = requestAnimationFrame(draw); }
+        var st = S.mascStyle || "host", img = $("#mascImg"), vid = $("#mascVid"), media = st === "media" && (mascMedia.img || mascMedia.vid);
+        $("#mascCv").hidden = !!media; img.hidden = !(media && mascMedia.img); vid.hidden = !(media && mascMedia.vid);
+        if (!on || !media) vid.pause();
+        if (on && media) { if (mascMedia.img) img.src = mascMedia.img; if (mascMedia.vid) { if (vid.src !== mascMedia.vid) vid.src = mascMedia.vid; vid.play().catch(function () {}); } }
+        else if (on) { cv = $("#mascCv"); g = cv.getContext("2d"); raf = requestAnimationFrame(st === "blob" ? draw : host); }
       },
       talk: function (on) { talking = !!on; },
       mood: function (m, ms) { moodName = m; moodEnd = performance.now() + (ms || 1800); }
     };
   })();
+  var mascMedia = { img: "", vid: "" };
+  try { mascMedia.img = localStorage.getItem("sq-masc-img") || ""; } catch (e) {}
+  if (!S.mascStyle) S.mascStyle = "host"; if (!S.hostSkin) S.hostSkin = "moyen";
+  function mascRows() { $("#mascSkinRow").hidden = S.mascStyle !== "host"; $("#mascFileRow").hidden = S.mascStyle !== "media"; }
+  seg($("#segMasc"), [["Présentateur", "host"], ["Mascotte ronde", "blob"], ["Ma photo ou vidéo", "media"]], function () { return S.mascStyle; }, function (v) { S.mascStyle = v; mascRows(); if (!wrap.hidden) mascot.show(true); });
+  seg($("#segSkin2"), [["Clair", "clair"], ["Moyen", "moyen"], ["Mat", "mat"], ["Foncé", "fonce"]], function () { return S.hostSkin; }, function (v) { S.hostSkin = v; });
+  mascRows();
+  $("#mascFile").onchange = function () {
+    var f = this.files && this.files[0]; if (!f) return;
+    if (/^video\//.test(f.type)) { mascMedia.vid = URL.createObjectURL(f); mascMedia.img = ""; try { localStorage.removeItem("sq-masc-img"); } catch (e) {} return; }
+    var im = new Image(); im.onload = function () {
+      var c = document.createElement("canvas"), w = 480, h = 690, r = Math.max(w / im.width, h / im.height); c.width = w; c.height = h;
+      c.getContext("2d").drawImage(im, (w - im.width * r) / 2, (h - im.height * r) / 2, im.width * r, im.height * r);
+      mascMedia.img = c.toDataURL("image/jpeg", .85); mascMedia.vid = ""; try { localStorage.setItem("sq-masc-img", mascMedia.img); } catch (e) {}
+      URL.revokeObjectURL(im.src);
+    }; im.src = URL.createObjectURL(f);
+  };
   $("#mascOn").checked = S.mascOn !== false;
   $("#mascOn").onchange = function () { S.mascOn = this.checked; save(); if (!wrap.hidden) mascot.show(true); };
   function pipLayout() {
