@@ -331,8 +331,8 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 #stage.neon .news { left: 50%; right: auto; top: 276px; transform: translateX(-50%); width: max-content; max-width: 800px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 8px 28px; border-radius: 40px; border: 3px solid var(--sacc); background: rgba(0, 0, 0, .55); font-size: 28px; line-height: 1.25; color: #fff; }
 #stage.neon .news:empty { display: none; }
 .nq { position: absolute; left: 50px; width: 980px; top: 338px; height: 262px; --cut: 70px; }
-.nqs { position: absolute; left: 140px; right: 140px; top: 30px; z-index: 1; text-align: center; font-size: 25px; font-weight: 800; letter-spacing: 4px; color: var(--sacc); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#stage.neon .qbox { left: 120px; width: 840px; top: 398px; height: 184px; z-index: 1; }
+.nqs { position: absolute; left: 140px; right: 230px; top: 30px; z-index: 1; text-align: center; font-size: 25px; font-weight: 800; letter-spacing: 4px; color: var(--sacc); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#stage.neon .qbox { left: 110px; width: 750px; top: 398px; height: 184px; z-index: 1; }
 #stage.neon .qt { font-size: 56px; line-height: 1.15; }
 #stage.neon .ring { left: 878px; top: 290px; width: 176px; height: 176px; z-index: 2; border-radius: 50%; background: #071015; box-shadow: 0 0 0 5px var(--sacc), var(--glow); }
 #stage.neon .ring svg { width: 176px; height: 176px; }
@@ -347,6 +347,12 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 #stage.neon .card .bd { display: block; width: auto; height: auto; background: none; color: #fff; font-size: 46px; white-space: nowrap; }
 #stage.neon .card .bd::after { content: ":"; }
 #stage.neon .card .lb { font-size: 44px; }
+#stage.neon .card.big { height: 140px; --cut: 52px; padding: 0 72px 0 66px; }
+#stage.neon .card.big .bd { font-size: 54px; }
+#stage.neon .card.big .lb { font-size: 52px; }
+#stage.neon .fact.low { top: 1440px; height: 150px; }
+#stage.neon .fact.low .ft { font-size: 38px; }
+.nsub { position: absolute; left: 50%; top: 1640px; transform: translateX(-50%); width: max-content; max-width: 960px; padding: 14px 34px; border-radius: 44px; border: 3px solid var(--sacc); background: rgba(0, 0, 0, .55); box-shadow: var(--glow); font-size: 34px; font-weight: 800; white-space: nowrap; }
 #stage.neon .card .avs > * { width: 54px; height: 54px; }
 #stage.neon .card .cnt { display: block; flex: none; min-width: 50px; text-align: right; font-size: 42px; font-weight: 800; }
 .card .cnt { display: none; }
@@ -2787,7 +2793,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       "<div class=\"nq\"><div class=\"nqs\">" + esc(T.title) + " · Question " + (qi + 1) + (bonus ? " · Bonus ×" + bonus : "") + "</div></div>" +
       "<div class=\"nins\"><span>" + (lv ? "💬 Réponds uniquement par <b>" + abcd + "</b>" : "⏱️ Trouve la bonne réponse : <b>" + abcd + "</b>") + "</span></div>" +
       (lv && S.chatOn && S.giftsOn ? "<div class=\"nleg\" id=\"nleg\">" + legHTML() + "</div>" : "") +
-      (lv ? "<div class=\"np\" id=\"np\">" + panelHTML() + "</div><div class=\"seat\" id=\"seat\">" + seatHTML() + "</div>" : "");
+      (lv ? "<div class=\"np\" id=\"np\">" + panelHTML() + "</div><div class=\"seat\" id=\"seat\">" + seatHTML() + "</div>" : "<div class=\"nsub\">💬 Dis ta réponse en commentaire · 🔔 Abonne-toi</div>");
   }
   function legHTML() {
     var g = GIFT_INFO[tickI % GIFT_INFO.length];
@@ -2811,14 +2817,14 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     var bars = ""; for (var i = 0; i < n; i++) bars += "<span class=\"" + (i < qi ? "done" : i === qi ? "cur" : "") + "\"></span>";
     var C = 2 * Math.PI * 98, cards = "", neon = S.skin === "neon";
     q.choices.forEach(function (c, i) {
-      cards += "<div class=\"card " + (i === q.a ? "good" : "dim") + "\" style=\"top:" + (neon ? (q.choices.length === 2 ? 760 : 712) + i * 128 : 940 + i * 148) + "px\">" + (lv && S.chatOn ? "<div class=\"pb\"></div>" : "") + "<div class=\"bd\">" + "ABCD"[i] + "</div><div class=\"lb\">" + esc(c) + "</div>" + (lv && S.chatOn ? "<div class=\"avs\" id=\"avs" + i + "\"></div><div class=\"pc\"></div><div class=\"cnt\" id=\"cnt" + i + "\">0</div>" : "") +
+      cards += "<div class=\"card " + (i === q.a ? "good" : "dim") + (neon && !lv ? " big" : "") + "\" style=\"top:" + (neon ? (lv ? (q.choices.length === 2 ? 760 : 712) + i * 128 : (q.choices.length === 2 ? 840 : 730) + i * 172) : 940 + i * 148) + "px\">" + (lv && S.chatOn ? "<div class=\"pb\"></div>" : "") + "<div class=\"bd\">" + "ABCD"[i] + "</div><div class=\"lb\">" + esc(c) + "</div>" + (lv && S.chatOn ? "<div class=\"avs\" id=\"avs" + i + "\"></div><div class=\"pc\"></div><div class=\"cnt\" id=\"cnt" + i + "\">0</div>" : "") +
         "<div class=\"ck\"><svg width=\"30\" height=\"30\" viewBox=\"0 0 30 30\"><path d=\"M5 16 L12 23 L25 8\" fill=\"none\" stroke=\"#2ecc71\" stroke-width=\"5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div></div>";
     });
     return (lv ? "<div class=\"top3\" id=\"top3\">" + top3Text() + "</div><div class=\"news\" id=\"news\"></div>" + (S.chatOn && S.giftsOn ? "<div class=\"ticker\" id=\"ticker\"><span>🎁 " + GIFT_INFO[tickI % GIFT_INFO.length].join(" ") + "</span></div>" : "") + (S.chatOn && S.likeGoal ? "<div class=\"likes\" id=\"likes\">" + likesInner() + "</div>" : "") : "") +
       "<div class=\"hd-pill\">" + esc(T.title) + "</div><div class=\"hd-logo\"><span class=\"l1\"" + (brandName().length > 7 ? " style=\"letter-spacing:3px;font-size:22px;padding-left:11px\"" : "") + ">" + esc(brandName()) + "</span><span class=\"l2\">QUIZZ</span></div><div class=\"hd-count" + (bonus ? " bonus" : "") + "\">" + (bonus === 3 ? "❤️ BONUS ×3" : bonus === 2 ? "⭐ BONUS ×2" : bonus ? "🎁 BONUS ×" + bonus : lv ? "Q" + (qi + 1) : (qi + 1) + "/" + n) + "</div><div class=\"bars\">" + bars + "</div>" +
       "<div class=\"ring\"><svg viewBox=\"0 0 280 280\"><circle cx=\"140\" cy=\"140\" r=\"98\" fill=\"none\" stroke=\"rgba(255,255,255,.22)\" stroke-width=\"20\"/>" +
       "<circle id=\"arc\" cx=\"140\" cy=\"140\" r=\"98\" fill=\"none\" stroke=\"var(--sacc)\" stroke-width=\"20\" stroke-linecap=\"round\" stroke-dasharray=\"" + C + "\" stroke-dashoffset=\"0\"/></svg><div class=\"num\" id=\"num\">" + (lv ? S.liveCount : S.count) + "</div></div>" +
-      "<div class=\"fact\"><b>LE SAVIEZ-VOUS ?</b><div class=\"ft\" id=\"ft\">" + esc(q.f) + "</div></div>" +
+      "<div class=\"fact" + (neon && !lv ? " low" : "") + "\"><b>LE SAVIEZ-VOUS ?</b><div class=\"ft\" id=\"ft\">" + esc(q.f) + "</div></div>" +
       (neon ? neonParts(T, qi, n, q, lv, bonus) : "") + "<div class=\"qbox\"><div class=\"qt\" id=\"qt\">" + esc(q.q) + "</div></div>" + cards +
       (lv ? "<div class=\"cta\">Écris " + (q.choices.length === 2 ? "A ou B" : "A, B, C ou D") + " en commentaire !" + (S.chatOn ? " 1 seule réponse compte" : "") + "</div><div class=\"win\" id=\"win\" hidden></div>" + (S.chatOn ? "<div class=\"stat\" id=\"stat\">💬 0 réponse</div>" : "") : "");
   }
@@ -2836,8 +2842,8 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     if (q && q.hide) scene.classList.add("hide-ch");
     var ne = S.skin === "neon";
     fit($("#qt"), ne ? 182 : 330, ne ? 56 : 74, ne ? 32 : 50);
-    Array.prototype.forEach.call(sceneBox.querySelectorAll(".lb"), function (l) { fit(l, ne ? 96 : 104, ne ? 44 : 48, 28); });
-    scene.classList.add("rev"); fit($("#ft"), ne ? 70 : 150, ne ? 32 : 46, ne ? 22 : 32); scene.classList.remove("rev");
+    Array.prototype.forEach.call(sceneBox.querySelectorAll(".lb"), function (l) { var big = l.parentNode.classList.contains("big"); fit(l, ne ? (big ? 126 : 96) : 104, ne ? (big ? 52 : 44) : 48, 28); });
+    var low = scene.querySelector(".fact.low"); scene.classList.add("rev"); fit($("#ft"), ne ? (low ? 104 : 70) : 150, ne ? (low ? 38 : 32) : 46, ne ? 22 : 32); scene.classList.remove("rev");
   }
   function countdown(sec, my) {
     return new Promise(function (res) {
