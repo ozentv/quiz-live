@@ -131,6 +131,15 @@ Dans Render, onglet **Environment** du service :
 
 > ⚠️ La lecture du chat passe par une bibliothèque non officielle ([TikTok-Live-Connector](https://github.com/zerodytrash/TikTok-Live-Connector)). TikTok peut la casser lors d'une mise à jour, et ce type d'usage n'est pas prévu par ses conditions d'utilisation. En cas de panne, le bouton **+ Point** manuel fonctionne toujours.
 
+## 🆚 Générateur VS (vidéos « Team contre Team »)
+Page : https://ozentv.github.io/quiz-live/vs.html
+- Deux cartes de profil (nom, emoji, @pseudo, suivis, followers, j'aime, photo, boutons Suivre / Message en option) et un grand texte au milieu (« VS » par défaut).
+- Choisis une vidéo ou une photo de fond depuis ta galerie, puis télécharge :
+  - **la vidéo finie** avec le son (MP4 quand le navigateur le permet, sinon WEBM), en 720p ou 1080p, jusqu'à 60 secondes ;
+  - **l'image transparente** des cartes, à poser au-dessus de n'importe quelle vidéo dans CapCut ;
+  - **l'image avec le fond**.
+- Les réglages restent enregistrés sur le téléphone. « Échanger les équipes » inverse les deux cartes.
+
 ## Thèmes (33 thèmes, 1676 questions)
 - **57 questions** : Géographie, Animaux, Sciences, Histoire, Culture générale, Sport, Gastronomie, Corps humain, Mythologie, Langue française, Pays et capitales, Technologie, Cinéma, Musique, Jeux vidéo, Espace, Dessins animés, Football, Drapeaux, Séries, Marques et logos, France.
 - **85 questions** : Calcul mental.

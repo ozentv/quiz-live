@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Générateur VS</title>
+<meta name="description" content="Crée des vidéos « Team contre Team » avec deux cartes de profil et un grand VS, à télécharger en image ou en vidéo.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&family=Figtree:wght@400;600;700&display=swap">
+<style>
+:root { --bg: #0b0d14; --card: #151925; --line: #262c3d; --fg: #f2f4fa; --muted: #9aa3b8; --acc: #fe2c55; --ok: #25f4ee; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.4 Figtree, system-ui, sans-serif; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 16px max(16px, env(safe-area-inset-left)) 40px; display: grid; gap: 18px; }
+@media (min-width: 900px) { .wrap { grid-template-columns: 380px 1fr; align-items: start; } .prev { position: sticky; top: 16px; } }
+@media (max-width: 899px) { .prev { order: -1; } .prev canvas#view { width: min(62vw, 340px); } }
+h1 { margin: 0; font: 800 26px Outfit, sans-serif; letter-spacing: .01em; }
+h1 span { color: var(--acc); }
+p.sub { margin: 4px 0 0; color: var(--muted); }
+.box { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: grid; gap: 10px; }
+.box h2 { margin: 0; font: 800 17px Outfit, sans-serif; display: flex; align-items: center; justify-content: space-between; }
+label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+input[type=text], input[type=file], select { width: 100%; min-height: 44px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: #0f121b; color: var(--fg); font: 16px Figtree, sans-serif; }
+input[type=file] { padding: 8px; font-size: 14px; }
+.row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.chk { display: flex; align-items: center; gap: 8px; color: var(--fg); font-size: 14px; min-height: 36px; }
+.chk input { width: 20px; height: 20px; accent-color: var(--acc); }
+button { min-height: 46px; border: 0; border-radius: 12px; padding: 0 16px; font: 700 15px Figtree, sans-serif; cursor: pointer; background: #262c3d; color: var(--fg); }
+button.main { background: var(--acc); color: #fff; }
+button.cy { background: var(--ok); color: #0b0d14; }
+button:disabled { opacity: .5; cursor: default; }
+.acts { display: grid; gap: 8px; }
+.mini { min-height: 34px; padding: 0 12px; font-size: 13px; }
+.prev { display: grid; gap: 10px; justify-items: center; }
+canvas#view { width: min(100%, 420px); aspect-ratio: 9 / 16; border-radius: 18px; border: 1px solid var(--line); background: repeating-conic-gradient(#1a1e2a 0 25%, #12151e 0 50%) 0 0 / 32px 32px; }
+.bar { width: min(100%, 420px); height: 10px; border-radius: 5px; background: #262c3d; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--acc); transition: width .2s; }
+.msg { width: min(100%, 420px); min-height: 20px; color: var(--muted); font-size: 14px; text-align: center; }
+.note { color: var(--muted); font-size: 13px; margin: 0; }
+a { color: var(--ok); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div style="display:grid;gap:14px">
+    <div><h1>Générateur <span>VS</span></h1><p class="sub">Deux cartes de profil, un grand VS, ta vidéo en fond. Tes réglages restent enregistrés.</p></div>
+
+    <div class="box" id="team0"></div>
+    <div class="box" id="team1"></div>
+
+    <div class="box">
+      <h2>Fond et texte</h2>
+      <label>Vidéo ou photo de fond (depuis ta galerie)<input type="file" id="bgFile" accept="video/*,image/*"></label>
+      <div class="row2">
+        <label>Texte du milieu<input type="text" id="mid" maxlength="12"></label>
+        <label>Qualité de la vidéo<select id="q"><option value="720">720p (rapide)</option><option value="1080">1080p</option></select></label>
+      </div>
+      <label class="chk"><input type="checkbox" id="dim"> Assombrir un peu le fond</label>
+      <div class="row2"><button class="mini" id="swap" type="button">⇅ Échanger les équipes</button><button class="mini" id="reset" type="button">Réinitialiser</button></div>
+    </div>
+
+    <div class="box acts">
+      <h2>Télécharger</h2>
+      <button class="main" id="dlVideo" type="button">🎬 Vidéo finie (avec le son)</button>
+      <button class="cy" id="dlPng" type="button">🖼️ Image transparente (à poser sur une vidéo)</button>
+      <button id="dlImg" type="button">📷 Image avec le fond</button>
+      <p class="note">La vidéo se crée en temps réel : compte la durée de ta vidéo de fond (60 secondes au maximum). Garde la page ouverte pendant ce temps.</p>
+    </div>
+  </div>
+
+  <div class="prev">
+    <canvas id="view" width="1080" height="1920" aria-label="Aperçu"></canvas>
+    <div class="bar" hidden id="bar"><i id="barI"></i></div>
+    <div class="msg" id="msg" role="status"></div>
+  </div>
+</div>
+<script>
+(function () {
+  "use strict";
+  var W = 1080, H = 1920, $ = function (s) { return document.querySelector(s); };
+  var DEF = {
+    mid: "VS", dim: false, q: "720",
+    t: [
+      { name: "Team Boys", emoji: "🥶", user: "team_boys", a: "15", b: "56", c: "0", btn: false, plus: true, col: "#1f6feb", pic: "" },
+      { name: "Team Girls", emoji: "", user: "team.girls", a: "954", b: "7 277", c: "11 K", btn: true, plus: false, col: "#fe2c55", pic: "" }
+    ]
+  };
+  var S;
+  try { S = JSON.parse(localStorage.getItem("vs-set") || "null"); } catch (e) { S = null; }
+  if (!S || !S.t || S.t.length !== 2) S = JSON.parse(JSON.stringify(DEF));
+  function save() { try { localStorage.setItem("vs-set", JSON.stringify(S)); } catch (e) { try { var c = JSON.parse(JSON.stringify(S)); c.t.forEach(function (t) { t.pic = ""; }); localStorage.setItem("vs-set", JSON.stringify(c)); } catch (e2) {} } }
+  var pics = [null, null], bgVid = null, bgImg = null, busy = false;
+
+  /* ---------- formulaire ---------- */
+  function teamForm(i) {
+    var box = $("#team" + i);
+    box.innerHTML = "<h2>Carte " + (i + 1) + (i ? " (en bas)" : " (en haut)") + "</h2>" +
+      "<div class=\"row2\"><label>Nom<input type=\"text\" data-k=\"name\" maxlength=\"22\"></label><label>Emoji (facultatif)<input type=\"text\" data-k=\"emoji\" maxlength=\"4\"></label></div>" +
+      "<label>@pseudo<input type=\"text\" data-k=\"user\" maxlength=\"26\" autocapitalize=\"off\"></label>" +
+      "<div class=\"row\"><label>Suivis<input type=\"text\" data-k=\"a\" maxlength=\"8\"></label><label>Followers<input type=\"text\" data-k=\"b\" maxlength=\"8\"></label><label>J'aime<input type=\"text\" data-k=\"c\" maxlength=\"8\"></label></div>" +
+      "<label>Photo de profil<input type=\"file\" accept=\"image/*\" data-pic></label>" +
+      "<div class=\"row2\"><label class=\"chk\"><input type=\"checkbox\" data-k=\"btn\"> Boutons Suivre / Message</label><label class=\"chk\"><input type=\"checkbox\" data-k=\"plus\"> Petit « + » sur la photo</label></div>" +
+      "<label>Couleur du rond (sans photo)<input type=\"text\" data-k=\"col\" maxlength=\"9\" placeholder=\"#fe2c55\"></label>" +
+      "<button class=\"mini\" type=\"button\" data-clear>Retirer la photo</button>";
+    Array.prototype.forEach.call(box.querySelectorAll("[data-k]"), function (el) {
+      var k = el.getAttribute("data-k");
+      if (el.type === "checkbox") { el.checked = !!S.t[i][k]; el.onchange = function () { S.t[i][k] = el.checked; save(); }; }
+      else { el.value = S.t[i][k] || ""; el.oninput = function () { S.t[i][k] = el.value; save(); }; }
+    });
+    box.querySelector("[data-pic]").onchange = function () {
+      var f = this.files && this.files[0]; if (!f) return;
+      var img = new Image(); img.onload = function () {
+        var c = document.createElement("canvas"), s = 320, r = Math.max(s / img.width, s / img.height);
+        c.width = c.height = s; c.getContext("2d").drawImage(img, (s - img.width * r) / 2, (s - img.height * r) / 2, img.width * r, img.height * r);
+        S.t[i].pic = c.toDataURL("image/jpeg", 0.88); save(); loadPic(i); URL.revokeObjectURL(img.src);
+      }; img.src = URL.createObjectURL(f);
+    };
+    box.querySelector("[data-clear]").onclick = function () { S.t[i].pic = ""; pics[i] = null; save(); };
+  }
+  function loadPic(i) { if (!S.t[i].pic) { pics[i] = null; return; } var im = new Image(); im.onload = function () { pics[i] = im; }; im.src = S.t[i].pic; }
+  function fill() {
+    teamForm(0); teamForm(1); loadPic(0); loadPic(1);
+    $("#mid").value = S.mid; $("#mid").oninput = function () { S.mid = this.value; save(); };
+    $("#dim").checked = !!S.dim; $("#dim").onchange = function () { S.dim = this.checked; save(); };
+    $("#q").value = S.q; $("#q").onchange = function () { S.q = this.value; save(); };
+  }
+  $("#swap").onclick = function () { S.t.reverse(); var b = S.t[0].btn; S.t[0].btn = S.t[1].btn; S.t[1].btn = b; var p = S.t[0].plus; S.t[0].plus = S.t[1].plus; S.t[1].plus = p; save(); fill(); };
+  $("#reset").onclick = function () { if (!confirm("Remettre les réglages de départ ?")) return; S = JSON.parse(JSON.stringify(DEF)); save(); fill(); };
+  $("#bgFile").onchange = function () {
+    var f = this.files && this.files[0]; if (!f) return;
+    if (bgVid) { bgVid.pause(); bgVid.removeAttribute("src"); bgVid.load(); }
+    bgVid = null; bgImg = null; audioSrc = null;
+    var url = URL.createObjectURL(f);
+    if (/^video\//.test(f.type)) {
+      var v = document.createElement("video"); v.src = url; v.muted = true; v.loop = true; v.playsInline = true; v.preload = "auto";
+      v.oncanplay = function () { v.oncanplay = null; bgVid = v; v.play().catch(function () {}); msg("Vidéo chargée : " + Math.round(v.duration || 0) + " s."); };
+      v.onerror = function () { msg("Cette vidéo ne peut pas être lue par le navigateur."); };
+    } else {
+      var im = new Image(); im.onload = function () { bgImg = im; msg("Photo chargée."); }; im.src = url;
+    }
+  };
+
+  /* ---------- dessin ---------- */
+  function rr(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+  function cover(g, src, sw, sh) { var r = Math.max(W / sw, H / sh); g.drawImage(src, (W - sw * r) / 2, (H - sh * r) / 2, sw * r, sh * r); }
+  function fitText(g, txt, font, size, max) { do { g.font = font.replace("{s}", size); size -= 2; } while (g.measureText(txt).width > max && size > 20); }
+  function card(g, x, y, t) {
+    var w = 960, h = t.btn ? 452 : 340;
+    g.save(); g.shadowColor = "rgba(0,0,0,.35)"; g.shadowBlur = 30; g.fillStyle = "#000"; rr(g, x, y, w, h, 8); g.fill(); g.restore();
+    var name = (t.name || "") + (t.emoji ? " " + t.emoji : "");
+    g.fillStyle = "#fff"; g.textBaseline = "alphabetic"; g.textAlign = "left";
+    fitText(g, name, "800 {s}px Outfit, Figtree, sans-serif", 78, 640); g.fillText(name, x + 44, y + 108);
+    g.fillStyle = "#a6a6a6"; g.font = "600 34px Figtree, sans-serif"; g.fillText(t.user ? "@" + String(t.user).replace(/^@/, "") : "", x + 44, y + 162);
+    [[t.a, "Suivis"], [t.b, "Followers"], [t.c, "J'aime"]].reduce(function (cx, s) {
+      g.fillStyle = "#fff"; g.font = "800 46px Outfit, Figtree, sans-serif"; g.fillText(s[0] || "0", cx, y + 246);
+      var nw = g.measureText(s[0] || "0").width; g.fillStyle = "#a6a6a6"; g.font = "600 30px Figtree, sans-serif"; g.fillText(s[1], cx, y + 288);
+      return cx + Math.max(nw, g.measureText(s[1]).width) + 58;
+    }, x + 44);
+    var ax = x + w - 160, ay = y + 158, R = 110, im = pics[S.t.indexOf(t)];
+    g.save(); g.beginPath(); g.arc(ax, ay, R, 0, Math.PI * 2); g.closePath();
+    if (im) { g.clip(); g.drawImage(im, ax - R, ay - R, R * 2, R * 2); } else { g.fillStyle = /^#[0-9a-f]{3,8}$/i.test(t.col || "") ? t.col : "#fe2c55"; g.fill(); }
+    g.restore();
+    if (t.plus) {
+      g.fillStyle = "#25d6e8"; g.beginPath(); g.arc(ax + 78, ay + 82, 32, 0, Math.PI * 2); g.fill();
+      g.lineWidth = 5; g.strokeStyle = "#000"; g.stroke();
+      g.fillStyle = "#fff"; g.fillRect(ax + 64, ay + 79, 28, 6); g.fillRect(ax + 75, ay + 68, 6, 28);
+    }
+    if (t.btn) {
+      var by = y + 336, bh = 86;
+      g.fillStyle = "#fe2c55"; rr(g, x + 44, by, 330, bh, 43); g.fill();
+      g.fillStyle = "#2f2f33"; rr(g, x + 392, by, 330, bh, 43); g.fill();
+      g.beginPath(); g.arc(x + 790, by + bh / 2, bh / 2, 0, Math.PI * 2); g.fill();
+      g.fillStyle = "#fff"; g.textAlign = "center"; g.textBaseline = "middle"; g.font = "700 36px Figtree, sans-serif";
+      g.fillText("Suivre", x + 209, by + bh / 2 + 2); g.fillText("Message", x + 557, by + bh / 2 + 2);
+      var px = x + 782, py = by + bh / 2; // icône « ajouter un ami »
+      g.beginPath(); g.arc(px - 4, py - 10, 11, 0, Math.PI * 2); g.fill();
+      g.beginPath(); g.ellipse(px - 4, py + 14, 19, 11, 0, Math.PI, 0); g.fill();
+      g.fillRect(px + 16, py - 3, 18, 5); g.fillRect(px + 22.5, py - 9.5, 5, 18);
+      g.textAlign = "left"; g.textBaseline = "alphabetic";
+    }
+    return h;
+  }
+  function draw(g, withBg) {
+    g.clearRect(0, 0, W, H);
+    if (withBg) {
+      if (bgVid && bgVid.videoWidth) cover(g, bgVid, bgVid.videoWidth, bgVid.videoHeight);
+      else if (bgImg) cover(g, bgImg, bgImg.width, bgImg.height);
+      else { var gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, "#5b8fd6"); gr.addColorStop(1, "#9aa8b8"); g.fillStyle = gr; g.fillRect(0, 0, W, H); }
+      if (S.dim) { g.fillStyle = "rgba(0,0,0,.25)"; g.fillRect(0, 0, W, H); }
+    }
+    card(g, 60, 70, S.t[0]);
+    var y2 = 860; card(g, 60, y2, S.t[1]);
+    var mid = S.mid || ""; if (mid) {
+      g.textAlign = "center"; g.textBaseline = "middle"; fitText(g, mid, "900 {s}px Outfit, Figtree, sans-serif", 270, 920);
+      g.lineJoin = "round"; g.lineWidth = 26; g.strokeStyle = "#000"; g.strokeText(mid, W / 2, 640);
+      g.lineWidth = 10; g.strokeStyle = "#fff"; g.strokeText(mid, W / 2, 640);
+      g.fillStyle = "#000"; g.fillText(mid, W / 2, 640);
+      g.textAlign = "left"; g.textBaseline = "alphabetic";
+    }
+  }
+  var view = $("#view"), vg = view.getContext("2d");
+  (function loop() { if (!busy) draw(vg, true); requestAnimationFrame(loop); })();
+
+  /* ---------- téléchargements ---------- */
+  function msg(t) { $("#msg").textContent = t; }
+  function download(blob, name) {
+    var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+  }
+  function stamp() { var d = new Date(); return d.getFullYear() + "" + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0") + "-" + String(d.getHours()).padStart(2, "0") + String(d.getMinutes()).padStart(2, "0") + String(d.getSeconds()).padStart(2, "0"); }
+  function png(withBg) {
+    var c = document.createElement("canvas"); c.width = W; c.height = H; draw(c.getContext("2d"), withBg);
+    c.toBlob(function (b) { download(b, (withBg ? "vs-image-" : "vs-calque-") + stamp() + ".png"); msg(withBg ? "Image téléchargée." : "Calque transparent téléchargé : pose-le au-dessus de ta vidéo dans CapCut."); }, "image/png");
+  }
+  $("#dlPng").onclick = function () { png(false); };
+  $("#dlImg").onclick = function () { png(true); };
+
+  var audioCtx = null, audioSrc = null, audioDest = null;
+  $("#dlVideo").onclick = function () {
+    if (busy) return;
+    if (!bgVid) { msg("Choisis d'abord une vidéo de fond (rubrique « Fond et texte »)."); return; }
+    if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) { msg("Ce navigateur ne sait pas créer de vidéo. Utilise Chrome, ou l'image transparente dans CapCut."); return; }
+    var types = ["video/mp4;codecs=avc1.42E01E,mp4a.40.2", "video/mp4;codecs=avc1,mp4a.40.2", "video/mp4;codecs=avc1", "video/mp4;codecs=h264", "video/mp4", "video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm"];
+    var mime = types.filter(function (t) { return MediaRecorder.isTypeSupported(t); })[0] || "";
+    var hq = S.q === "1080", cw = hq ? 1080 : 720, ch = hq ? 1920 : 1280;
+    var c = document.createElement("canvas"); c.width = cw; c.height = ch; var g = c.getContext("2d");
+    var tmp = document.createElement("canvas"); tmp.width = W; tmp.height = H; var tg = tmp.getContext("2d");
+    var stream = c.captureStream(30);
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+      if (!audioSrc) { audioSrc = audioCtx.createMediaElementSource(bgVid); audioDest = audioCtx.createMediaStreamDestination(); audioSrc.connect(audioDest); }
+      bgVid.muted = false;
+      audioDest.stream.getAudioTracks().forEach(function (tr) { stream.addTrack(tr); });
+    } catch (e) { /* pas de son : la vidéo sera muette */ }
+    var rec, chunks = [];
+    try { rec = new MediaRecorder(stream, mime ? { mimeType: mime, videoBitsPerSecond: hq ? 10e6 : 6e6 } : {}); } catch (e) { msg("Impossible de démarrer l'enregistrement."); return; }
+    rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
+    var dur = Math.min(60, bgVid.duration || 15);
+    busy = true; ["#dlVideo", "#dlPng", "#dlImg", "#bgFile"].forEach(function (s) { $(s).disabled = true; });
+    $("#bar").hidden = false; $("#barI").style.width = "0";
+    msg("Création de la vidéo… garde la page ouverte.");
+    bgVid.loop = false; bgVid.pause();
+    var started = false, t0 = 0;
+    function frame() {
+      if (!busy) return;
+      draw(tg, true); g.drawImage(tmp, 0, 0, cw, ch); vg.drawImage(tmp, 0, 0, W, H);
+      var p = Math.min(1, bgVid.currentTime / dur); $("#barI").style.width = Math.round(p * 100) + "%";
+      if (started && (bgVid.ended || bgVid.currentTime >= dur - 0.02 || performance.now() - t0 > (dur + 5) * 1000)) { finish(); return; }
+      requestAnimationFrame(frame);
+    }
+    function finish() {
+      if (!busy) return; busy = false; bgVid.pause();
+      rec.onstop = function () {
+        var ext = /mp4/.test(rec.mimeType || mime) ? "mp4" : "webm";
+        download(new Blob(chunks, { type: rec.mimeType || mime || "video/webm" }), "vs-video-" + stamp() + "." + ext);
+        msg(ext === "mp4" ? "Vidéo téléchargée ✅ Tu la trouves dans tes téléchargements." : "Vidéo téléchargée ✅ (format WEBM) : si ta galerie ne la voit pas, ouvre-la dans CapCut et réexporte-la.");
+        $("#bar").hidden = true; bgVid.muted = true; bgVid.loop = true; bgVid.play().catch(function () {});
+        ["#dlVideo", "#dlPng", "#dlImg", "#bgFile"].forEach(function (s) { $(s).disabled = false; });
+      };
+      try { rec.stop(); } catch (e) { rec.onstop(); }
+    }
+    bgVid.onseeked = function () {
+      bgVid.onseeked = null; rec.start(500);
+      bgVid.play().then(function () { started = true; t0 = performance.now(); requestAnimationFrame(frame); }, function () { msg("La vidéo refuse de démarrer : touche à nouveau le bouton."); busy = false; ["#dlVideo", "#dlPng", "#dlImg", "#bgFile"].forEach(function (s) { $(s).disabled = false; }); $("#bar").hidden = true; });
+    };
+    bgVid.currentTime = 0;
+  };
+
+  fill();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () {});
+})();
+</script>
+</body>
+</html>
