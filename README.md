@@ -135,9 +135,10 @@ Dans Render, onglet **Environment** du service :
 Page : https://ozentv.github.io/quiz-live/vs.html
 - Deux cartes de profil (nom, emoji, @pseudo, suivis, followers, j'aime, photo, boutons Suivre / Message en option) et un grand texte au milieu (« VS » par défaut).
 - **🕺 Danseurs animés** (fond par défaut) : deux danseurs dessinés en direct par la page.
-  - 14 danses : Groove, Shuffle, Bras en l'air, Hip-hop, Robot, Saut, Floss, Dab, Disco, Tape dans les mains, Running man, Cavalier, Tecktonik, Coucou, plus un Mélange qui les enchaîne.
-  - 10 tenues par danseur (sweat et cagoule, tout en noir, rose, streetwear casquette, maillot de foot, doudoune, néon, kaki, veste et jean, survêt à bandes), avec les couleurs du haut, du bas et de l'accessoire modifiables.
+  - 22 danses : Groove, Shuffle, Bras en l'air, Hip-hop, Robot, Saut, Floss, Dab, Disco, Tape dans les mains, Running man, Cavalier, Tecktonik, Coucou, Glisse, Twist, Marche, Salsa, Grands coups de pied, Champion, Pogo, Vague, plus un Mélange qui les enchaîne.
+  - 20 tenues par danseur (sweats et cagoules, streetwear, maillots de foot unis ou rayés, doudounes, costume, survêts à bandes, bandeau, coiffure afro, couronne…), avec les couleurs du haut, du bas et de l'accessoire modifiables.
   - 3 vitesses, 4 décors, ensemble, en miroir ou décalés, vidéo de 10 à 60 secondes, beat électro en option.
+- **⚽ Écussons de club** : sur chaque carte, le bouton « Écusson de club » propose les 96 clubs des 5 grands championnats (Premier League, Liga, Serie A, Bundesliga, Ligue 1) sous forme d'écussons aux couleurs du club avec ses initiales (ce ne sont pas les logos officiels, qui sont des marques protégées ; un vrai logo peut être importé depuis la galerie). Le nom du club peut remplir la carte, et « Écusson perso » crée un écusson avec tes lettres et tes couleurs.
 - **Textes** : ajoute autant de textes que tu veux (taille, couleur, style contour, ombre ou bandeau) et fais-les glisser avec le doigt sur l'aperçu. Le « VS » se déplace de la même façon.
 - Ou choisis ta propre vidéo ou photo de fond depuis ta galerie, puis télécharge :
   - **la vidéo finie** avec le son (MP4 quand le navigateur le permet, sinon WEBM), en 720p ou 1080p, jusqu'à 60 secondes ;
