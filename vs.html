@@ -19,6 +19,7 @@ p.sub { margin: 4px 0 0; color: var(--muted); }
 .box { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: grid; gap: 10px; }
 .box h2 { margin: 0; font: 800 17px Outfit, sans-serif; display: flex; align-items: center; justify-content: space-between; }
 label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+input[type=color] { width: 100%; height: 44px; padding: 2px; border-radius: 10px; border: 1px solid var(--line); background: #0f121b; }
 input[type=text], input[type=file], select { width: 100%; min-height: 44px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: #0f121b; color: var(--fg); font: 16px Figtree, sans-serif; }
 input[type=file] { padding: 8px; font-size: 14px; }
 .row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
@@ -50,7 +51,25 @@ a { color: var(--ok); }
 
     <div class="box">
       <h2>Fond et texte</h2>
-      <label>Vidéo ou photo de fond (depuis ta galerie)<input type="file" id="bgFile" accept="video/*,image/*"></label>
+      <label>Type de fond<select id="fond"><option value="dance">🕺 Danseurs animés (créés par le site)</option><option value="media">📁 Ma vidéo ou ma photo</option></select></label>
+      <div id="mediaOpts"><label>Vidéo ou photo de fond (depuis ta galerie)<input type="file" id="bgFile" accept="video/*,image/*"></label></div>
+      <div id="danceOpts" style="display:grid;gap:10px">
+        <div class="row2">
+          <label>Danse<select id="dStyle"><option value="groove">Groove</option><option value="shuffle">Shuffle</option><option value="wave">Bras en l'air</option><option value="hiphop">Hip-hop</option><option value="robot">Robot</option><option value="jump">Saut</option><option value="mix">Mélange</option></select></label>
+          <label>Vitesse<select id="dBpm"><option value="92">Lente</option><option value="110">Normale</option><option value="128">Rapide</option></select></label>
+        </div>
+        <div class="row2">
+          <label>Décor<select id="dScene"><option value="ciel">Ciel et parking</option><option value="ville">Ville au coucher du soleil</option><option value="neon">Néon</option><option value="studio">Studio et projecteurs</option></select></label>
+          <label>Les deux danseurs<select id="dDuo"><option value="same">Ensemble</option><option value="mirror">En miroir</option><option value="offset">Décalés</option></select></label>
+        </div>
+        <div class="row2">
+          <label>Durée de la vidéo<select id="dDur"><option value="10">10 s</option><option value="15">15 s</option><option value="30">30 s</option><option value="60">60 s</option></select></label>
+          <label class="chk"><input type="checkbox" id="dBeat"> Ajouter un beat</label>
+        </div>
+        <div class="row"><label>Sweat 1<input type="color" id="c0a"></label><label>Pantalon 1<input type="color" id="c0b"></label><label>Lunettes 1<input type="color" id="c0c"></label></div>
+        <div class="row"><label>Sweat 2<input type="color" id="c1a"></label><label>Pantalon 2<input type="color" id="c1b"></label><label>Lunettes 2<input type="color" id="c1c"></label></div>
+        <p class="note">Sans beat, ajoute un son TikTok à la publication.</p>
+      </div>
       <div class="row2">
         <label>Texte du milieu<input type="text" id="mid" maxlength="12"></label>
         <label>Qualité de la vidéo<select id="q"><option value="720">720p (rapide)</option><option value="1080">1080p</option></select></label>
@@ -79,7 +98,7 @@ a { color: var(--ok); }
   "use strict";
   var W = 1080, H = 1920, $ = function (s) { return document.querySelector(s); };
   var DEF = {
-    mid: "VS", dim: false, q: "720",
+    mid: "VS", dim: false, q: "720", fond: "dance", d: { style: "groove", bpm: "110", scene: "ciel", duo: "same", dur: "15", beat: true, c: [["#c9ccd2", "#c3c6cc", "#3fd1c9"], ["#bfc3ca", "#b7bbc2", "#5aa7ff"]] },
     t: [
       { name: "Team Boys", emoji: "🥶", user: "team_boys", a: "15", b: "56", c: "0", btn: false, plus: true, col: "#1f6feb", pic: "" },
       { name: "Team Girls", emoji: "", user: "team.girls", a: "954", b: "7 277", c: "11 K", btn: true, plus: false, col: "#fe2c55", pic: "" }
@@ -88,6 +107,7 @@ a { color: var(--ok); }
   var S;
   try { S = JSON.parse(localStorage.getItem("vs-set") || "null"); } catch (e) { S = null; }
   if (!S || !S.t || S.t.length !== 2) S = JSON.parse(JSON.stringify(DEF));
+  if (!S.d || !S.d.c) { S.d = JSON.parse(JSON.stringify(DEF.d)); S.fond = "dance"; }
   function save() { try { localStorage.setItem("vs-set", JSON.stringify(S)); } catch (e) { try { var c = JSON.parse(JSON.stringify(S)); c.t.forEach(function (t) { t.pic = ""; }); localStorage.setItem("vs-set", JSON.stringify(c)); } catch (e2) {} } }
   var pics = [null, null], bgVid = null, bgImg = null, busy = false;
 
@@ -123,10 +143,16 @@ a { color: var(--ok); }
     $("#mid").value = S.mid; $("#mid").oninput = function () { S.mid = this.value; save(); };
     $("#dim").checked = !!S.dim; $("#dim").onchange = function () { S.dim = this.checked; save(); };
     $("#q").value = S.q; $("#q").onchange = function () { S.q = this.value; save(); };
+    $("#fond").value = S.fond; $("#fond").onchange = function () { S.fond = this.value; save(); showFond(); }; showFond();
+    [["#dStyle", "style"], ["#dBpm", "bpm"], ["#dScene", "scene"], ["#dDuo", "duo"], ["#dDur", "dur"]].forEach(function (p) { var el = $(p[0]); el.value = S.d[p[1]]; el.onchange = function () { S.d[p[1]] = el.value; save(); }; });
+    $("#dBeat").checked = !!S.d.beat; $("#dBeat").onchange = function () { S.d.beat = this.checked; save(); };
+    [0, 1].forEach(function (i) { ["a", "b", "c"].forEach(function (k, j) { var el = $("#c" + i + k); el.value = S.d.c[i][j]; el.oninput = function () { S.d.c[i][j] = el.value; save(); }; }); });
   }
   $("#swap").onclick = function () { S.t.reverse(); var b = S.t[0].btn; S.t[0].btn = S.t[1].btn; S.t[1].btn = b; var p = S.t[0].plus; S.t[0].plus = S.t[1].plus; S.t[1].plus = p; save(); fill(); };
   $("#reset").onclick = function () { if (!confirm("Remettre les réglages de départ ?")) return; S = JSON.parse(JSON.stringify(DEF)); save(); fill(); };
+  function showFond() { $("#mediaOpts").hidden = S.fond !== "media"; $("#danceOpts").style.display = S.fond === "dance" ? "grid" : "none"; }
   $("#bgFile").onchange = function () {
+    S.fond = "media"; $("#fond").value = "media"; save(); showFond();
     var f = this.files && this.files[0]; if (!f) return;
     if (bgVid) { bgVid.pause(); bgVid.removeAttribute("src"); bgVid.load(); }
     bgVid = null; bgImg = null; audioSrc = null;
@@ -180,9 +206,155 @@ a { color: var(--ok); }
     }
     return h;
   }
-  function draw(g, withBg) {
+
+  /* ---------- danseurs animés (dessinés en direct, aucun fichier externe) ---------- */
+  var GROUND = 1880, L1 = 340, L2 = 330, TORSO = 420, UA = 225, FA = 210;
+  function ss(x) { return x * x * (3 - 2 * x); }
+  function snap(a, b, f, k) { var p = Math.min(1, f / k); return a + (b - a) * ss(p); }
+  var ROBOT = [
+    { aR: [90, -90], aL: [20, 0] }, { aR: [20, 0], aL: [90, -90] }, { aR: [90, 0], aL: [90, 0] }, { aR: [160, 0], aL: [20, 0] },
+    { aR: [20, 0], aL: [160, 0] }, { aR: [90, 90], aL: [90, 90] }, { aR: [45, -90], aL: [45, -90] }, { aR: [20, 0], aL: [20, 0] }
+  ];
+  function pose(style, beat) {
+    var P = { b: 0, x: 0, lean: 0, head: 0, aR: [20, -10], aL: [20, -10], fR: [0, 0], fL: [0, 0], j: 0 };
+    var s1 = Math.sin(Math.PI * beat), s2 = Math.sin(2 * Math.PI * beat), bob = (1 - Math.cos(2 * Math.PI * beat)) / 2;
+    if (style === "mix") style = ["groove", "shuffle", "wave", "hiphop", "jump"][Math.floor(beat / 8) % 5];
+    if (style === "groove") {
+      P.b = 42 * bob; P.x = 22 * s1; P.head = 6 * s1; P.lean = 4 * s1;
+      P.aR = [28 + 18 * s1, -55 + 35 * s2]; P.aL = [28 - 18 * s1, -55 - 35 * s2];
+    } else if (style === "shuffle") {
+      var kR = Math.max(0, s1), kL = Math.max(0, -s1);
+      P.b = 30 * bob; P.fR = [95 * kR, -55 * kR]; P.fL = [95 * kL, -55 * kL]; P.x = 12 * s1;
+      P.aR = [38 + 22 * s2, -110]; P.aL = [38 - 22 * s2, -110]; P.head = 4 * s2;
+    } else if (style === "wave") {
+      var h = Math.sin(Math.PI * beat / 2);
+      P.b = 22 * bob; P.x = 34 * h; P.lean = 7 * h; P.head = 8 * h;
+      P.aR = [105 + 65 * h, -15 + 20 * s2]; P.aL = [105 - 65 * h, -15 - 20 * s2];
+    } else if (style === "hiphop") {
+      var st = Math.sin(Math.PI * beat / 2), cross = Math.abs(s1);
+      P.b = 36 * bob; P.x = 70 * st; P.lean = -9 * st; P.head = -6 * st;
+      P.fR = [st > 0 ? 50 * st : 0, 0]; P.fL = [st < 0 ? -50 * st : 0, 0];
+      P.aR = [25 + 55 * cross, -95 + 40 * cross]; P.aL = [25 + 55 * (1 - cross), -95 + 40 * (1 - cross)];
+    } else if (style === "robot") {
+      var k = Math.floor(beat) % 8, f = beat - Math.floor(beat), A = ROBOT[(k + 7) % 8], B = ROBOT[k];
+      P.aR = [snap(A.aR[0], B.aR[0], f, .18), snap(A.aR[1], B.aR[1], f, .18)]; P.aL = [snap(A.aL[0], B.aL[0], f, .18), snap(A.aL[1], B.aL[1], f, .18)];
+      P.b = f < .18 ? 18 : 0; P.head = [0, 12, 0, -12, 0, 0, 8, 0][k];
+    } else if (style === "jump") {
+      var p = beat % 4;
+      P.b = p < 3 ? 40 * bob : 0; P.aR = [30 + 15 * s1, -60]; P.aL = [30 - 15 * s1, -60];
+      if (p >= 3) { var q = Math.sin(Math.PI * (p - 3)); P.j = 190 * q; P.aR = [30 + 140 * q, -10]; P.aL = [30 + 140 * q, -10]; P.fR = [25 * q, 0]; P.fL = [25 * q, 0]; }
+      else if (p > 2.6) { P.b = 40 + 60 * ss((p - 2.6) / 0.4); }
+    }
+    return P;
+  }
+  function mirrorPose(P) { return { b: P.b, x: -P.x, lean: -P.lean, head: -P.head, aR: P.aL, aL: P.aR, fR: P.fL, fL: P.fR, j: P.j }; }
+  function knee(hx, hy, fx, fy, side) {
+    var dx = fx - hx, dy = fy - hy, d = Math.min(Math.hypot(dx, dy), L1 + L2 - 1), a = (L1 * L1 - L2 * L2 + d * d) / (2 * d), h = Math.sqrt(Math.max(0, L1 * L1 - a * a));
+    var ux = dx / d, uy = dy / d, px = hx + ux * a, py = hy + uy * a, k1 = [px - uy * h, py + ux * h], k2 = [px + uy * h, py - ux * h];
+    return (k1[0] - hx) * side > (k2[0] - hx) * side ? k1 : k2;
+  }
+  function limb(g, pts, w, col) { g.strokeStyle = col; g.lineWidth = w; g.lineCap = "round"; g.lineJoin = "round"; g.beginPath(); g.moveTo(pts[0][0], pts[0][1]); for (var i = 1; i < pts.length; i++) g.lineTo(pts[i][0], pts[i][1]); g.stroke(); }
+  function shade(hex, f) { var n = parseInt(hex.slice(1), 16), r = n >> 16, gg = (n >> 8) & 255, b = n & 255; function c(v) { return Math.max(0, Math.min(255, Math.round(v * f))); } return "rgb(" + c(r) + "," + c(gg) + "," + c(b) + ")"; }
+  function dancer(g, cx, P, col) {
+    var sweat = col[0], pant = col[1], gog = col[2], up = P.j;
+    var hx = cx + P.x, hy = GROUND - 26 - (L1 + L2) * 0.97 + P.b - up;
+    var lean = P.lean * Math.PI / 180, nx = hx + Math.sin(lean) * TORSO, ny = hy - Math.cos(lean) * TORSO;
+    // ombre
+    g.fillStyle = "rgba(0,0,0," + (0.28 - Math.min(.18, up / 900)) + ")"; g.beginPath(); g.ellipse(cx + P.x * .5, GROUND + 8, 190 - up * .2, 30, 0, 0, Math.PI * 2); g.fill();
+    // jambes (les pieds restent au sol, les genoux plient tout seuls)
+    [[-1, P.fL], [1, P.fR]].forEach(function (sd) {
+      var s = sd[0], f = sd[1], fx = cx + s * (92 + f[0]), fy = GROUND - 26 + f[1] - up, hipx = hx + s * 62;
+      var k = knee(hipx, hy, fx, fy, s);
+      limb(g, [[hipx, hy], k, [fx, fy]], 104, pant);
+      limb(g, [[hipx + s * 18, hy + 10], [k[0] + s * 14, k[1]], [fx + s * 10, fy - 30]], 18, shade(pant, .86));
+      g.fillStyle = "#f4f4f6"; g.beginPath(); g.ellipse(fx + s * 22, fy + 12, 72, 34, 0, 0, Math.PI * 2); g.fill();
+      g.fillStyle = "#d8d8de"; g.fillRect(fx + s * 22 - 70, fy + 22, 140, 12);
+    });
+    // buste (sweat)
+    g.save(); g.translate(hx, hy); g.rotate(lean);
+    g.fillStyle = sweat; g.beginPath(); g.moveTo(-118, 0); g.lineTo(-138, -TORSO + 60); g.quadraticCurveTo(-135, -TORSO - 8, -60, -TORSO); g.lineTo(60, -TORSO); g.quadraticCurveTo(135, -TORSO - 8, 138, -TORSO + 60); g.lineTo(118, 0); g.quadraticCurveTo(0, 26, -118, 0); g.fill();
+    g.fillStyle = shade(sweat, .88); g.fillRect(-118, -34, 236, 34); g.beginPath(); g.ellipse(0, -TORSO * .42, 78, 46, 0, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = shade(sweat, .7); g.lineWidth = 5; g.beginPath(); g.moveTo(-26, -TORSO + 30); g.lineTo(-30, -TORSO + 140); g.moveTo(26, -TORSO + 30); g.lineTo(30, -TORSO + 140); g.stroke();
+    g.restore();
+    // bras
+    [[-1, P.aL], [1, P.aR]].forEach(function (sd) {
+      var s = sd[0], a1 = sd[1][0] * Math.PI / 180, a2 = (sd[1][0] + sd[1][1]) * Math.PI / 180;
+      var sx = nx + Math.cos(lean) * s * 122, sy = ny + Math.sin(lean) * s * 122 + 46;
+      var ex = sx + Math.sin(a1) * s * UA, ey = sy + Math.cos(a1) * UA, wx = ex + Math.sin(a2) * s * FA, wy = ey + Math.cos(a2) * FA;
+      limb(g, [[sx, sy], [ex, ey], [wx, wy]], 86, sweat);
+      limb(g, [[wx - Math.sin(a2) * s * 14, wy - Math.cos(a2) * 14], [wx, wy]], 92, shade(sweat, .85));
+      g.fillStyle = "#1c1d22"; g.beginPath(); g.arc(wx + Math.sin(a2) * s * 34, wy + Math.cos(a2) * 34, 34, 0, Math.PI * 2); g.fill();
+    });
+    // tête : capuche, cagoule, lunettes de ski
+    var ha = lean + P.head * Math.PI / 180, hdx = nx + Math.sin(ha) * 118, hdy = ny - Math.cos(ha) * 118;
+    g.save(); g.translate(hdx, hdy); g.rotate(ha);
+    g.fillStyle = shade(sweat, .92); g.beginPath(); g.ellipse(0, 4, 128, 140, 0, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#101114"; g.beginPath(); g.ellipse(0, 18, 92, 108, 0, 0, Math.PI * 2); g.fill();
+    var gr = g.createLinearGradient(0, -40, 0, 30); gr.addColorStop(0, shade(gog, 1.25)); gr.addColorStop(.5, gog); gr.addColorStop(1, shade(gog, .55));
+    g.fillStyle = "#2a2b30"; rr(g, -104, -42, 208, 84, 38); g.fill();
+    g.fillStyle = gr; rr(g, -94, -34, 188, 68, 32); g.fill();
+    g.fillStyle = "rgba(255,255,255,.55)"; g.beginPath(); g.ellipse(-44, -16, 30, 9, -.2, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = shade(sweat, .75); g.lineWidth = 6; g.beginPath(); g.ellipse(0, 4, 122, 134, 0, Math.PI * 1.05, Math.PI * 1.95); g.stroke();
+    g.restore();
+  }
+  function scene(g, t) {
+    var sc = S.d.scene, k;
+    if (sc === "ville") {
+      var gv = g.createLinearGradient(0, 0, 0, H); gv.addColorStop(0, "#2b1b55"); gv.addColorStop(.55, "#e76f51"); gv.addColorStop(.75, "#f4a261"); g.fillStyle = gv; g.fillRect(0, 0, W, H);
+      g.fillStyle = "rgba(255,230,180,.9)"; g.beginPath(); g.arc(540, 1240, 150, 0, Math.PI * 2); g.fill();
+      for (k = 0; k < 12; k++) { var bw = 110 + (k * 37) % 70, bh = 380 + (k * 131) % 420, bx = k * 95 - 40; g.fillStyle = k % 2 ? "#1d1533" : "#251a40"; g.fillRect(bx, 1560 - bh, bw, bh + 40);
+        g.fillStyle = "rgba(255,210,120,.65)"; for (var wy = 1560 - bh + 30; wy < 1540; wy += 56) for (var wx = bx + 16; wx < bx + bw - 20; wx += 34) if ((wx * 7 + wy * 3 + k) % 5 < 2) g.fillRect(wx, wy, 16, 24); }
+      g.fillStyle = "#3a3a44"; g.fillRect(0, 1600, W, H - 1600);
+    } else if (sc === "neon") {
+      var gn = g.createLinearGradient(0, 0, 0, 1400); gn.addColorStop(0, "#090014"); gn.addColorStop(1, "#3c0b5c"); g.fillStyle = gn; g.fillRect(0, 0, W, H);
+      var sun = g.createLinearGradient(0, 900, 0, 1420); sun.addColorStop(0, "#ffd319"); sun.addColorStop(1, "#ff2975"); g.fillStyle = sun; g.beginPath(); g.arc(540, 1420, 330, Math.PI, 0); g.fill();
+      g.fillStyle = "#1a0230"; g.fillRect(0, 1420, W, H - 1420);
+      g.strokeStyle = "#ff2fd5"; g.lineWidth = 4; g.shadowColor = "#ff2fd5"; g.shadowBlur = 16;
+      var off = (t * 0.12) % 1; for (k = 0; k < 14; k++) { var y = 1420 + Math.pow((k + off) / 14, 2) * 520; g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); }
+      for (k = -10; k <= 10; k++) { g.beginPath(); g.moveTo(540 + k * 40, 1420); g.lineTo(540 + k * 260, H); g.stroke(); }
+      g.shadowBlur = 0;
+    } else if (sc === "studio") {
+      g.fillStyle = "#0b0b12"; g.fillRect(0, 0, W, H);
+      ["#ff3b6b", "#3bc9ff", "#ffe14d"].forEach(function (c, i) {
+        var a = Math.sin(t * 0.6 + i * 2) * 0.35, ox = 180 + i * 360;
+        g.save(); g.translate(ox, -40); g.rotate(a); var gl = g.createLinearGradient(0, 0, 0, 1900); gl.addColorStop(0, c); gl.addColorStop(1, "rgba(0,0,0,0)");
+        g.globalAlpha = .28; g.fillStyle = gl; g.beginPath(); g.moveTo(-30, 0); g.lineTo(30, 0); g.lineTo(330, 1950); g.lineTo(-330, 1950); g.fill(); g.restore();
+      });
+      g.globalAlpha = 1; var fl = g.createLinearGradient(0, 1500, 0, H); fl.addColorStop(0, "#1b1b26"); fl.addColorStop(1, "#30303e"); g.fillStyle = fl; g.fillRect(0, 1500, W, H - 1500);
+    } else {
+      var gs = g.createLinearGradient(0, 0, 0, 1500); gs.addColorStop(0, "#3d6fb8"); gs.addColorStop(1, "#a9c4dd"); g.fillStyle = gs; g.fillRect(0, 0, W, H);
+      g.fillStyle = "rgba(255,255,255,.75)";
+      for (k = 0; k < 6; k++) { var cx2 = ((k * 260 + t * 18) % 1500) - 200, cy2 = 140 + (k * 173) % 700; g.beginPath(); g.ellipse(cx2, cy2, 150, 46, 0, 0, Math.PI * 2); g.ellipse(cx2 + 70, cy2 - 30, 90, 50, 0, 0, Math.PI * 2); g.fill(); }
+      g.fillStyle = "#59616c"; g.fillRect(0, 1480, W, 40); var as = g.createLinearGradient(0, 1500, 0, H); as.addColorStop(0, "#6d737b"); as.addColorStop(1, "#4a4f56"); g.fillStyle = as; g.fillRect(0, 1500, W, H - 1500);
+      g.fillStyle = "rgba(255,255,255,.75)"; g.fillRect(40, 1660, 380, 12); g.fillRect(660, 1660, 380, 12);
+    }
+  }
+  function dancers(g, t) {
+    var bpm = +S.d.bpm || 110, beat = t * bpm / 60, duo = S.d.duo;
+    scene(g, t);
+    var p1 = pose(S.d.style, beat), p2 = duo === "offset" ? pose(S.d.style, beat + 1) : duo === "mirror" ? mirrorPose(p1) : p1;
+    dancer(g, 300, p1, S.d.c[0]); dancer(g, 780, p2, S.d.c[1]);
+  }
+  function beatTrack(ac, dest, bpm, dur, t0) { // petit beat électro calé sur la danse
+    var spb = 60 / bpm, n = Math.ceil(dur / spb), buf = ac.createBuffer(1, ac.sampleRate * 0.3, ac.sampleRate), d = buf.getChannelData(0), i;
+    for (i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    var out = ac.createGain(); out.gain.value = 0.8; out.connect(dest);
+    function env(gn, t, a, p, dd) { gn.gain.setValueAtTime(0.0001, t); gn.gain.exponentialRampToValueAtTime(p, t + a); gn.gain.exponentialRampToValueAtTime(0.0001, t + a + dd); }
+    function noise(t, type, f, p, dd) { var s = ac.createBufferSource(), fl = ac.createBiquadFilter(), gn = ac.createGain(); s.buffer = buf; fl.type = type; fl.frequency.value = f; env(gn, t, .002, p, dd); s.connect(fl); fl.connect(gn); gn.connect(out); s.start(t); s.stop(t + dd + .05); }
+    var NOTES = [45, 45, 41, 43];
+    for (i = 0; i < n; i++) {
+      var t = t0 + i * spb, o = ac.createOscillator(), g = ac.createGain();
+      o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(45, t + .12); env(g, t, .003, .9, .22); o.connect(g); g.connect(out); o.start(t); o.stop(t + .3);
+      if (i % 2) noise(t, "bandpass", 1500, .35, .16);
+      noise(t + spb / 2, "highpass", 8000, .12, .04); noise(t, "highpass", 8000, .06, .03);
+      var b = ac.createOscillator(), bg = ac.createGain(), lp = ac.createBiquadFilter(); b.type = "sawtooth"; b.frequency.value = 440 * Math.pow(2, (NOTES[Math.floor(i / 4) % 4] - 69) / 12);
+      lp.type = "lowpass"; lp.frequency.value = 500; env(bg, t + spb / 2, .005, .25, spb * .4); b.connect(lp); lp.connect(bg); bg.connect(out); b.start(t + spb / 2); b.stop(t + spb);
+    }
+  }
+  function draw(g, withBg, t) {
     g.clearRect(0, 0, W, H);
-    if (withBg) {
+    if (withBg && S.fond === "dance") dancers(g, t == null ? performance.now() / 1000 : t);
+    else if (withBg) {
       if (bgVid && bgVid.videoWidth) cover(g, bgVid, bgVid.videoWidth, bgVid.videoHeight);
       else if (bgImg) cover(g, bgImg, bgImg.width, bgImg.height);
       else { var gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, "#5b8fd6"); gr.addColorStop(1, "#9aa8b8"); g.fillStyle = gr; g.fillRect(0, 0, W, H); }
@@ -216,8 +388,50 @@ a { color: var(--ok); }
   $("#dlImg").onclick = function () { png(true); };
 
   var audioCtx = null, audioSrc = null, audioDest = null;
+  function pickMime() {
+    var types = ["video/mp4;codecs=avc1.42E01E,mp4a.40.2", "video/mp4;codecs=avc1,mp4a.40.2", "video/mp4;codecs=avc1", "video/mp4;codecs=h264", "video/mp4", "video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm"];
+    return types.filter(function (t) { return MediaRecorder.isTypeSupported(t); })[0] || "";
+  }
+  function lock(on) { ["#dlVideo", "#dlPng", "#dlImg", "#bgFile", "#fond"].forEach(function (s) { $(s).disabled = on; }); $("#bar").hidden = !on; if (on) $("#barI").style.width = "0"; }
+  function danceVideo() {
+    if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) { msg("Ce navigateur ne sait pas créer de vidéo. Utilise Chrome."); return; }
+    var mime = pickMime(), hq = S.q === "1080", cw = hq ? 1080 : 720, ch = hq ? 1920 : 1280, dur = +S.d.dur || 15, bpm = +S.d.bpm || 110;
+    var c = document.createElement("canvas"); c.width = cw; c.height = ch; var g = c.getContext("2d");
+    var tmp = document.createElement("canvas"); tmp.width = W; tmp.height = H; var tg = tmp.getContext("2d");
+    var stream = c.captureStream(30), lead = 0.25;
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+      if (S.d.beat) { var dest = audioCtx.createMediaStreamDestination(); beatTrack(audioCtx, dest, bpm, dur, audioCtx.currentTime + lead); dest.stream.getAudioTracks().forEach(function (tr) { stream.addTrack(tr); }); }
+    } catch (e) {}
+    var rec, chunks = [];
+    try { rec = new MediaRecorder(stream, mime ? { mimeType: mime, videoBitsPerSecond: hq ? 10e6 : 6e6 } : {}); } catch (e) { msg("Impossible de démarrer l'enregistrement."); return; }
+    rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
+    busy = true; lock(true); msg("Création de la vidéo… garde la page ouverte.");
+    var t0 = performance.now() + lead * 1000;
+    rec.start(500);
+    function frame() {
+      var t = Math.max(0, (performance.now() - t0) / 1000);
+      draw(tg, true, t); g.drawImage(tmp, 0, 0, cw, ch); vg.drawImage(tmp, 0, 0, W, H);
+      $("#barI").style.width = Math.round(Math.min(1, t / dur) * 100) + "%";
+      if (t >= dur) {
+        busy = false;
+        rec.onstop = function () {
+          var ext = /mp4/.test(rec.mimeType || mime) ? "mp4" : "webm";
+          download(new Blob(chunks, { type: rec.mimeType || mime || "video/webm" }), "vs-danse-" + stamp() + "." + ext);
+          msg(ext === "mp4" ? "Vidéo téléchargée ✅ Tu la trouves dans tes téléchargements." : "Vidéo téléchargée ✅ (format WEBM) : si ta galerie ne la voit pas, ouvre-la dans CapCut et réexporte-la.");
+          lock(false);
+        };
+        try { rec.stop(); } catch (e) { rec.onstop(); }
+        return;
+      }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
   $("#dlVideo").onclick = function () {
     if (busy) return;
+    if (S.fond === "dance") { danceVideo(); return; }
     if (!bgVid) { msg("Choisis d'abord une vidéo de fond (rubrique « Fond et texte »)."); return; }
     if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) { msg("Ce navigateur ne sait pas créer de vidéo. Utilise Chrome, ou l'image transparente dans CapCut."); return; }
     var types = ["video/mp4;codecs=avc1.42E01E,mp4a.40.2", "video/mp4;codecs=avc1,mp4a.40.2", "video/mp4;codecs=avc1", "video/mp4;codecs=h264", "video/mp4", "video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm"];
@@ -237,8 +451,7 @@ a { color: var(--ok); }
     try { rec = new MediaRecorder(stream, mime ? { mimeType: mime, videoBitsPerSecond: hq ? 10e6 : 6e6 } : {}); } catch (e) { msg("Impossible de démarrer l'enregistrement."); return; }
     rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
     var dur = Math.min(60, bgVid.duration || 15);
-    busy = true; ["#dlVideo", "#dlPng", "#dlImg", "#bgFile"].forEach(function (s) { $(s).disabled = true; });
-    $("#bar").hidden = false; $("#barI").style.width = "0";
+    busy = true; lock(true);
     msg("Création de la vidéo… garde la page ouverte.");
     bgVid.loop = false; bgVid.pause();
     var started = false, t0 = 0;
