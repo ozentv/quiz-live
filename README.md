@@ -134,7 +134,11 @@ Dans Render, onglet **Environment** du service :
 ## 🆚 Générateur VS (vidéos « Team contre Team »)
 Page : https://ozentv.github.io/quiz-live/vs.html
 - Deux cartes de profil (nom, emoji, @pseudo, suivis, followers, j'aime, photo, boutons Suivre / Message en option) et un grand texte au milieu (« VS » par défaut).
-- **🕺 Danseurs animés** (fond par défaut) : deux danseurs en sweat à capuche, cagoule et lunettes de ski, dessinés en direct par la page. 6 danses (Groove, Shuffle, Bras en l'air, Hip-hop, Robot, Saut) et un mélange, 3 vitesses, 4 décors (ciel et parking, ville, néon, studio), ensemble, en miroir ou décalés, couleurs du sweat, du pantalon et des lunettes au choix, vidéo de 10 à 60 secondes, beat électro en option.
+- **🕺 Danseurs animés** (fond par défaut) : deux danseurs dessinés en direct par la page.
+  - 14 danses : Groove, Shuffle, Bras en l'air, Hip-hop, Robot, Saut, Floss, Dab, Disco, Tape dans les mains, Running man, Cavalier, Tecktonik, Coucou, plus un Mélange qui les enchaîne.
+  - 10 tenues par danseur (sweat et cagoule, tout en noir, rose, streetwear casquette, maillot de foot, doudoune, néon, kaki, veste et jean, survêt à bandes), avec les couleurs du haut, du bas et de l'accessoire modifiables.
+  - 3 vitesses, 4 décors, ensemble, en miroir ou décalés, vidéo de 10 à 60 secondes, beat électro en option.
+- **Textes** : ajoute autant de textes que tu veux (taille, couleur, style contour, ombre ou bandeau) et fais-les glisser avec le doigt sur l'aperçu. Le « VS » se déplace de la même façon.
 - Ou choisis ta propre vidéo ou photo de fond depuis ta galerie, puis télécharge :
   - **la vidéo finie** avec le son (MP4 quand le navigateur le permet, sinon WEBM), en 720p ou 1080p, jusqu'à 60 secondes ;
   - **l'image transparente** des cartes, à poser au-dessus de n'importe quelle vidéo dans CapCut ;
