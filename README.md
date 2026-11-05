@@ -131,6 +131,16 @@ Dans Render, onglet **Environment** du service :
 
 > ⚠️ La lecture du chat passe par une bibliothèque non officielle ([TikTok-Live-Connector](https://github.com/zerodytrash/TikTok-Live-Connector)). TikTok peut la casser lors d'une mise à jour, et ce type d'usage n'est pas prévu par ses conditions d'utilisation. En cas de panne, le bouton **+ Point** manuel fonctionne toujours.
 
+## 🆚 Générateur VS (vidéos « Team contre Team »)
+Page : https://ozentv.github.io/quiz-live/vs.html
+- Deux cartes de profil (nom, emoji, @pseudo, suivis, followers, j'aime, photo, boutons Suivre / Message en option) et un grand texte au milieu (« VS » par défaut).
+- **🕺 Danseurs animés** (fond par défaut) : deux danseurs en sweat à capuche, cagoule et lunettes de ski, dessinés en direct par la page. 6 danses (Groove, Shuffle, Bras en l'air, Hip-hop, Robot, Saut) et un mélange, 3 vitesses, 4 décors (ciel et parking, ville, néon, studio), ensemble, en miroir ou décalés, couleurs du sweat, du pantalon et des lunettes au choix, vidéo de 10 à 60 secondes, beat électro en option.
+- Ou choisis ta propre vidéo ou photo de fond depuis ta galerie, puis télécharge :
+  - **la vidéo finie** avec le son (MP4 quand le navigateur le permet, sinon WEBM), en 720p ou 1080p, jusqu'à 60 secondes ;
+  - **l'image transparente** des cartes, à poser au-dessus de n'importe quelle vidéo dans CapCut ;
+  - **l'image avec le fond**.
+- Les réglages restent enregistrés sur le téléphone. « Échanger les équipes » inverse les deux cartes.
+
 ## Thèmes (33 thèmes, 1676 questions)
 - **57 questions** : Géographie, Animaux, Sciences, Histoire, Culture générale, Sport, Gastronomie, Corps humain, Mythologie, Langue française, Pays et capitales, Technologie, Cinéma, Musique, Jeux vidéo, Espace, Dessins animés, Football, Drapeaux, Séries, Marques et logos, France.
 - **85 questions** : Calcul mental.
