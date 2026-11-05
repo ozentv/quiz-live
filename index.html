@@ -175,6 +175,20 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 .pod-nm { position: absolute; width: 330px; text-align: center; font-size: 46px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pod-f { position: absolute; left: 80px; right: 80px; top: 1600px; text-align: center; font-size: 44px; font-weight: 700; }
 .pip { position: absolute; z-index: 3; overflow: hidden; background: #000; display: none; }
+.mascot { position: absolute; left: 24px; top: 1540px; width: 340px; height: 372px; z-index: 3; pointer-events: none; display: flex; flex-direction: column; align-items: center; }
+.mascot[hidden] { display: none; }
+.mascot canvas { width: 222px; height: 326px; }
+.masc-l { margin-top: -6px; padding: 6px 26px; border-radius: 30px; background: rgba(0, 0, 0, .6); border: 3px solid var(--sacc); color: #fff; font-size: 26px; font-weight: 800; letter-spacing: 6px; white-space: nowrap; }
+#stage.neon .mascot { top: 1342px; height: 570px; }
+#stage.neon .mascot canvas { width: 340px; height: 500px; }
+#stage.neon .masc-l { --cut: 22px; border: 0; border-radius: 0; clip-path: polygon(var(--cut) 0, calc(100% - var(--cut)) 0, 100% 50%, calc(100% - var(--cut)) 100%, var(--cut) 100%, 0 50%); background: var(--sacc); color: #071015; padding: 8px 40px; }
+#stage.masc-on.neon .np { left: 390px; width: 640px; }
+#stage.masc-on.pip-on .pip-game { left: auto; right: 35px; }
+#stage.masc-on.pip-on.neon .seat { width: 290px; }
+#stage.masc-on:not(.neon) .cta, #stage.masc-on:not(.neon) .stat, #stage.masc-on:not(.neon) .win { left: 380px; width: auto; right: 40px; }
+#stage.masc-on:not(.neon) .cta, #stage.masc-on:not(.neon) .stat { font-size: 32px; }
+#stage.masc-on:not(.neon) .news { left: 380px; right: 40px; }
+#stage.masc-on.pip-on:not(.neon) .news, #stage.masc-on.pip-on:not(.neon) .stat { right: 400px; }
 .pip video, .pip canvas { width: 100%; height: 100%; object-fit: cover; display: block; }
 .pip video[hidden], .pip canvas[hidden] { display: none; }
 .pip-game { left: 35px; top: 1712px; width: 347px; height: 195px; border-radius: 26px; border: 5px solid rgba(255, 255, 255, .55); box-shadow: 0 10px 30px rgba(0, 0, 0, .45); }
@@ -458,6 +472,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         <div class="row"><span class="lab">Style de l'écran</span><div class="seg" id="segSkin" role="group" aria-label="Style de l'écran"></div></div>
         <div class="row"><span class="lab">Nom sur le logo</span><div class="seg" id="segBrand" role="group" aria-label="Nom sur le logo"></div></div>
         <input class="field" id="brandTxt" maxlength="12" placeholder="Ton pseudo (12 lettres max)" autocomplete="off" aria-label="Pseudo sur le logo" hidden>
+        <label class="switch"><input type="checkbox" id="mascOn"> 🎤 Mascotte « Animateur » en bas à gauche (live)</label>
         <label class="switch"><input type="checkbox" id="tvOn"> 🎬 Effets de plateau télé (décor animé, jingles, ding et buzzer)</label>
         <label class="switch"><input type="checkbox" id="musicOn"> 🎵 Musique d'ambiance (composée par le quiz, sans droits d'auteur)</label>
         <div class="chat-test" id="musicOpts"><div class="seg" id="segMT" role="group" aria-label="Musique"></div><div class="seg" id="segMV" role="group" aria-label="Volume de la musique"></div><button class="btn ghost small" id="musicTry" type="button">Écouter</button></div>
@@ -507,7 +522,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 <div class="dock"><button class="btn" id="go" type="button">Lancer le quiz</button></div>
 
 <div id="stageWrap" hidden>
-  <div id="stage"><div id="studio"><div class="beam b1"></div><div class="beam b2"></div><div class="beam b3"></div><div class="floor"></div><div class="leds top"></div><div class="leds bot"></div><div id="flash"></div></div><div id="deco"></div><div id="scene"></div><div id="giftToast"></div><div id="pulse"></div><div class="pip pip-game" id="pipGame"><canvas id="gameCv" width="694" height="390"></canvas><video id="gameVid" muted loop playsinline hidden></video></div></div>
+  <div id="stage"><div id="studio"><div class="beam b1"></div><div class="beam b2"></div><div class="beam b3"></div><div class="floor"></div><div class="leds top"></div><div class="leds bot"></div><div id="flash"></div></div><div id="deco"></div><div id="scene"></div><div id="giftToast"></div><div id="pulse"></div><div class="mascot" id="mascot" hidden><canvas id="mascCv" width="340" height="500"></canvas><div class="masc-l">ANIMATEUR</div></div><div class="pip pip-game" id="pipGame"><canvas id="gameCv" width="694" height="390"></canvas><video id="gameVid" muted loop playsinline hidden></video></div></div>
   <div id="lbLayer" hidden><div id="lbIn"></div><button id="lbClose" type="button" aria-label="Fermer le classement">✕ Fermer</button></div>
   <div id="liveBar" hidden>
     <button id="bChat" type="button" hidden>Chat</button>
@@ -2429,11 +2444,12 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     return new Promise(function (res) {
       var rate = S.rate, words = String(text).split(/\s+/).length;
       function est(n) { return (n * 0.36 / rate + 0.5) * 1000; }
-      if (!S.voiceOn || !synth || !frVoices.length) { setTimeout(res, est(words) + 700); return; }
+      mascot.talk(true);
+      if (!S.voiceOn || !synth || !frVoices.length) { setTimeout(function () { mascot.talk(false); res(); }, est(words) + 700); return; }
       var my = ++sayId, parts = sayChunks(text), left = parts.length, done = false, tm = null;
       var v = frVoices.filter(function (x) { return x.name === S.voiceName; })[0] || frVoices[0];
       function fin() {
-        if (done) return; done = true; clearTimeout(tm);
+        if (done) return; done = true; clearTimeout(tm); if (my === sayId) mascot.talk(false);
         if (my === sayId) { clearTimeout(unduckT); unduckT = setTimeout(function () { if (my === sayId) music.duck(false); }, 450); }
         res();
       }
@@ -2714,6 +2730,78 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       frame: function () { step(0); draw(); }
     };
   })();
+
+  /* ---------- mascotte « Animateur » (dessinée en direct, personnage original) ---------- */
+  var mascot = (function () {
+    var cv = null, g = null, raf = 0, talking = false, moodName = "", moodEnd = 0, blinkAt = 0, t0 = performance.now();
+    function acc() { return (getComputedStyle(wrap).getPropertyValue("--sacc") || "#2ec4b6").trim() || "#2ec4b6"; }
+    function mix(hex, f) { var m = /^#?([0-9a-f]{6})$/i.exec(hex) || /^rgb\((\d+),\s*(\d+),\s*(\d+)/.exec(hex); var r, gg, b;
+      if (!m) return hex; if (m.length === 2) { var n = parseInt(m[1], 16); r = n >> 16; gg = (n >> 8) & 255; b = n & 255; } else { r = +m[1]; gg = +m[2]; b = +m[3]; }
+      function c(v) { return Math.max(0, Math.min(255, Math.round(f > 1 ? v + (255 - v) * (f - 1) : v * f))); } return "rgb(" + c(r) + "," + c(gg) + "," + c(b) + ")"; }
+    function draw(now) {
+      var t = (now - t0) / 1000, W = 340, H = 500, col = acc(), md = now < moodEnd ? moodName : "";
+      g.clearRect(0, 0, W, H);
+      var jump = md === "happy" ? Math.abs(Math.sin(t * 9)) * 46 : 0, bob = Math.sin(t * 3.2) * 6, sq = md === "happy" ? 0 : Math.sin(t * 6.4) * .015;
+      var cx = 170, cy = 300 - jump + bob, R = 118;
+      // ombre
+      g.fillStyle = "rgba(0,0,0," + (0.35 - jump / 400) + ")"; g.beginPath(); g.ellipse(cx, 470, 92 - jump / 3, 16, 0, 0, Math.PI * 2); g.fill();
+      // pieds
+      g.fillStyle = mix(col, .55); [-46, 46].forEach(function (dx) { g.beginPath(); g.ellipse(cx + dx, cy + R - 6 + (md === "happy" ? 0 : 0), 34, 20, 0, 0, Math.PI * 2); g.fill(); });
+      // bras (le droit tient le micro)
+      var armUp = md === "happy" ? -1.1 + Math.sin(t * 12) * .25 : md === "sad" ? .9 : .25 + Math.sin(t * 2.4) * .12;
+      g.strokeStyle = mix(col, .7); g.lineWidth = 22; g.lineCap = "round";
+      g.beginPath(); g.moveTo(cx - R + 14, cy + 10); g.quadraticCurveTo(cx - R - 40, cy + 30 + armUp * 40, cx - R - 30, cy + 60 + armUp * 70); g.stroke();
+      var hx = cx + R + 26, hy = cy + 20 - (talking ? 30 : 0);
+      g.beginPath(); g.moveTo(cx + R - 14, cy + 10); g.quadraticCurveTo(cx + R + 30, cy + 30, hx, hy); g.stroke();
+      g.fillStyle = "#2a2b33"; g.save(); g.translate(hx, hy); g.rotate(-.5); g.fillRect(-9, -8, 18, 58); g.fillStyle = "#9aa0ad"; g.beginPath(); g.arc(0, -18, 22, 0, Math.PI * 2); g.fill(); g.restore();
+      // corps tout rond
+      g.save(); g.translate(cx, cy); g.scale(1 + sq, 1 - sq);
+      var gr = g.createRadialGradient(-40, -50, 20, 0, 0, R + 10); gr.addColorStop(0, mix(col, 1.45)); gr.addColorStop(.6, col); gr.addColorStop(1, mix(col, .65));
+      g.fillStyle = gr; g.beginPath(); g.arc(0, 0, R, 0, Math.PI * 2); g.fill();
+      g.lineWidth = 6; g.strokeStyle = mix(col, .5); g.stroke();
+      // ventre et nœud papillon
+      g.fillStyle = "rgba(255,255,255,.22)"; g.beginPath(); g.ellipse(0, 52, 66, 50, 0, 0, Math.PI * 2); g.fill();
+      g.fillStyle = "#14151a"; g.beginPath(); g.moveTo(0, 22); g.lineTo(-34, 6); g.lineTo(-34, 38); g.closePath(); g.moveTo(0, 22); g.lineTo(34, 6); g.lineTo(34, 38); g.closePath(); g.fill();
+      g.beginPath(); g.arc(0, 22, 9, 0, Math.PI * 2); g.fill();
+      // yeux (clignent)
+      if (now > blinkAt + 160 && Math.random() < .006) blinkAt = now;
+      var closed = now - blinkAt < 140, ey = -34;
+      [-40, 40].forEach(function (dx) {
+        g.fillStyle = "#fff"; g.beginPath(); g.ellipse(dx, ey, 28, closed ? 4 : md === "sad" ? 20 : 32, 0, 0, Math.PI * 2); g.fill();
+        if (!closed) { var px = Math.sin(t * .8) * 8, py = md === "sad" ? 8 : 4; g.fillStyle = "#14151a"; g.beginPath(); g.arc(dx + px, ey + py, 13, 0, Math.PI * 2); g.fill(); g.fillStyle = "#fff"; g.beginPath(); g.arc(dx + px + 5, ey + py - 5, 4, 0, Math.PI * 2); g.fill(); }
+        g.strokeStyle = "#14151a"; g.lineWidth = 6; g.beginPath();
+        if (md === "sad") { g.moveTo(dx - 22, ey - 40 + (dx < 0 ? 10 : -2)); g.lineTo(dx + 22, ey - 40 + (dx < 0 ? -2 : 10)); } else { g.moveTo(dx - 22, ey - 46 - (md === "happy" ? 8 : 0)); g.quadraticCurveTo(dx, ey - 56 - (md === "happy" ? 8 : 0), dx + 22, ey - 46 - (md === "happy" ? 8 : 0)); }
+        g.stroke();
+      });
+      // bouche : bouge quand la voix parle
+      g.fillStyle = "#3b0d16";
+      if (talking) { var o = 10 + Math.abs(Math.sin(t * 17)) * 22 + Math.abs(Math.sin(t * 7.3)) * 8; g.beginPath(); g.ellipse(0, 10 - 8, 26, o / 2, 0, 0, Math.PI * 2); g.fill(); }
+      else if (md === "sad") { g.strokeStyle = "#3b0d16"; g.lineWidth = 7; g.beginPath(); g.arc(0, 18, 22, Math.PI + .5, -0.5); g.stroke(); }
+      else { g.beginPath(); g.moveTo(-30, -4); g.quadraticCurveTo(0, md === "happy" ? 40 : 26, 30, -4); g.closePath(); g.fill(); }
+      g.restore();
+      // casque micro et antenne « ? »
+      g.strokeStyle = "#20212a"; g.lineWidth = 14; g.beginPath(); g.arc(cx, cy, R + 4, Math.PI * 1.12, Math.PI * 1.88); g.stroke();
+      g.fillStyle = "#20212a"; [-1, 1].forEach(function (sd) { g.beginPath(); g.ellipse(cx + sd * (R - 2), cy - 22, 18, 30, 0, 0, Math.PI * 2); g.fill(); });
+      g.strokeStyle = "#20212a"; g.lineWidth = 6; g.beginPath(); g.moveTo(cx - R + 4, cy - 8); g.quadraticCurveTo(cx - R + 10, cy + 40, cx - 46, cy + 30); g.stroke();
+      g.fillStyle = "#20212a"; g.beginPath(); g.arc(cx - 44, cy + 30, 10, 0, Math.PI * 2); g.fill();
+      var sw = Math.sin(t * 2.6) * .25; g.strokeStyle = mix(col, .55); g.lineWidth = 7; g.beginPath(); g.moveTo(cx, cy - R); g.quadraticCurveTo(cx + 10, cy - R - 34, cx + Math.sin(sw) * 40, cy - R - 62); g.stroke();
+      g.fillStyle = "#ffd60a"; g.beginPath(); g.arc(cx + Math.sin(sw) * 40, cy - R - 82, 26, 0, Math.PI * 2); g.fill();
+      g.fillStyle = "#14151a"; g.font = "900 34px Outfit, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("?", cx + Math.sin(sw) * 40, cy - R - 80);
+      raf = requestAnimationFrame(draw);
+    }
+    return {
+      show: function (on) {
+        var el = $("#mascot"); on = on && S.mascOn !== false && S.mode === "live";
+        el.hidden = !on; stage.classList.toggle("masc-on", on);
+        cancelAnimationFrame(raf); raf = 0;
+        if (on) { cv = $("#mascCv"); g = cv.getContext("2d"); raf = requestAnimationFrame(draw); }
+      },
+      talk: function (on) { talking = !!on; },
+      mood: function (m, ms) { moodName = m; moodEnd = performance.now() + (ms || 1800); }
+    };
+  })();
+  $("#mascOn").checked = S.mascOn !== false;
+  $("#mascOn").onchange = function () { S.mascOn = this.checked; save(); if (!wrap.hidden) mascot.show(true); };
   function pipLayout() {
     var on = !!S.gameOn, v = $("#gameVid"), useVid = on && !!gameUrl;
     $("#pipGame").classList.toggle("on", on);
@@ -2860,6 +2948,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     });
   }
   function stopAll() {
+    mascot.show(false);
     runId++; clearTimeout(curTimer);
     try { if (synth) synth.cancel(); } catch (e) {}
     $("#preroll").hidden = true; $("#endsheet").hidden = true; wrap.hidden = true; parkour.stop(); music.stop(); musicTrying = false;
@@ -3643,6 +3732,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       $("#bChat").hidden = !S.chatOn;
       $("#bGifts").hidden = !(S.chatOn && S.giftsOn);
       if (S.chatOn && !chat.ws) chatConnect();
+      mascot.show(true);
       var keys = selKeys(), queue = [], last = null, num = 0, lastBoard = Date.now(), used = {}, forced = null;
       streak = {}; vote = null; likes = { base: null, session: 0, next: S.likeGoal || 0 }; fx.likeBonus = false; fx.shield = {}; fx.dbl = {}; fx.frozen = {}; fx.joker = false; fx.pick = null; fx.chestNext = 0; fx.chestMulti = null; fx.timeAdd = 0; fx.timeSet = 0; fx.hideNext = false; fx.wrongPen = 0; fx.extraGood = 0; fx.onlyFirst = false; var lastChest = 0;
       var T0 = BANK[keys[0]]; setPalette(T0.pal); fitStage(); tvLayout();
@@ -3723,8 +3813,9 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         fx.wrongPen = 0; fx.extraGood = 0; fx.onlyFirst = false;
         showDist();
         if (!curWinner && okList.length) setWinner(okList[0].name);
-        if (curWinner) { confetti(); applause(1.6); }
-        else if (round && round.answers.length) sadTrombone();
+        if (curWinner) { confetti(); applause(1.6); mascot.mood("happy"); }
+        else if (round && round.answers.length) { sadTrombone(); mascot.mood("sad"); }
+        else mascot.mood("happy", 900);
         var extra = newsLine(okList);
         if (!S.recapSec) {
           if (curWinner) await ok(say("Winner : " + curWinner + " !" + (okList.length > 1 ? " " + okList.length + " bonnes réponses." : "") + (extra ? " " + extra : "")));
