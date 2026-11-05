@@ -40,6 +40,11 @@ Le quiz tient dans un seul fichier, `index.html`, sans rien à installer. Le rel
 - **Question bonus ×2** : 1 question sur 5 ou sur 10 rapporte deux fois plus de points (aussi avec + Point).
 - **Vote du chat pour le thème** : au début, puis toutes les 5 ou 10 questions, le chat écrit 1, 2 ou 3 pour choisir le thème suivant parmi les thèmes sélectionnés (avec les points automatiques).
 - **Récap après chaque question** (5, 7 ou 10 secondes, ou désactivé) : la liste des bonnes réponses avec la photo, le pseudo et les points gagnés (+3, +2, +1, ⭐ ×2, ❤️ ×3, ❄️ gelé), puis le top 5 du classement avec les places gagnées ou perdues (▲▼, NEW). La voix résume : combien ont répondu et trouvé, le plus rapide et ses points, les suivants, qui est en tête, ou « personne n'a trouvé » avec la bonne réponse.
+- **⚡ Votes surprise bonus ou malus** (Rare, Normal ou Souvent, ou désactivé) : après une question, un vote peut tomber au hasard (jamais deux à moins de 3 questions d'écart). Trois formes alternent, et la voix off explique la règle à chaque fois :
+  - **🪙 Pile ou face** : le bonus et le malus sont affichés, le chat écrit « pile » ou « face », puis la pièce est lancée. Si la majorité a deviné juste, bonus pour tout le monde, sinon malus pour tout le monde.
+  - **⚖️ Le dilemme** : deux choix avec chacun un avantage et un défaut (par exemple +2 points pour tous ou prochaine question ×5 mais −3 en cas d'erreur), le chat écrit 1 ou 2.
+  - **🎯 La cible** : un malus (−3, −5, −8 points ou gel) tombe sur un joueur du top 3, et le chat écrit 1, 2 ou 3 pour choisir qui le prend.
+  Le 🛡️ bouclier protège des malus. Sans vote, le hasard choisit. Ces points ne comptent que pour le classement de la session (pas pour le classement public).
 - **« Prochaine question »** : après le récap, une roulette fait défiler les thèmes de plus en plus lentement, puis s'arrête sur celui de la question suivante.
 - **Photos des joueurs sur les réponses** : pendant la question, la photo de profil de chaque personne qui répond apparaît sur la réponse qu'elle a choisie (5 photos maximum par réponse, puis un compteur « +N », et l'initiale du pseudo quand il n'y a pas de photo).
 - **Répartition des réponses** : à la révélation, chaque choix affiche le pourcentage du chat, avec une barre.
