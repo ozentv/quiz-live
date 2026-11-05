@@ -45,7 +45,11 @@ Le quiz tient dans un seul fichier, `index.html`, sans rien à installer. Le rel
   - **⚖️ Le dilemme** : deux choix avec chacun un avantage et un défaut (par exemple +2 points pour tous ou prochaine question ×5 mais −3 en cas d'erreur), le chat écrit 1 ou 2.
   - **🎯 La cible** : un malus (−3, −5, −8 points ou gel) tombe sur un joueur du top 3, et le chat écrit 1, 2 ou 3 pour choisir qui le prend.
   Le 🛡️ bouclier protège des malus. Sans vote, le hasard choisit. Ces points ne comptent que pour le classement de la session (pas pour le classement public).
-- **🎤 Mascotte « Animateur »** (activée par défaut, réglage dans les effets) : en bas à gauche du live, un petit personnage original aux couleurs du thème, avec casque-micro et antenne « ? ». Il cligne des yeux, bouge la bouche quand la voix off parle, saute de joie quand quelqu'un trouve et fait la tête quand personne ne trouve. Si l'incrustation du jeu est activée, elle passe en bas à droite.
+- **🎤 Animateur** (activé par défaut, réglage dans les effets) : en bas à gauche du live, avec le bandeau « ANIMATEUR ». Trois choix :
+  - **Présentateur** (par défaut) : un présentateur humain dessiné en costume, cravate aux couleurs du thème, 4 teints de peau. Il cligne des yeux, parle avec la bouche synchronisée sur la voix off en levant son micro, fait coucou quand quelqu'un trouve et se prend la tête quand personne ne trouve.
+  - **Mascotte ronde** : le petit personnage avec casque-micro et antenne « ? ».
+  - **Ma photo ou vidéo** : ta propre photo (gardée en mémoire) ou une vidéo en boucle, d'une personne qui a donné son accord.
+  Si l'incrustation du jeu est activée, elle passe en bas à droite.
 - **« Prochaine question »** : après le récap, une roulette fait défiler les thèmes de plus en plus lentement, puis s'arrête sur celui de la question suivante.
 - **Photos des joueurs sur les réponses** : pendant la question, la photo de profil de chaque personne qui répond apparaît sur la réponse qu'elle a choisie (5 photos maximum par réponse, puis un compteur « +N », et l'initiale du pseudo quand il n'y a pas de photo).
 - **Répartition des réponses** : à la révélation, chaque choix affiche le pourcentage du chat, avec une barre.
