@@ -43,6 +43,8 @@ canvas#view { touch-action: none; cursor: grab; width: min(100%, 420px); aspect-
 .club { min-height: 98px; padding: 6px 4px; align-content: start; display: grid; justify-items: center; gap: 4px; background: #0f121b; border: 1px solid var(--line); font-size: 11px; font-weight: 600; line-height: 1.15; }
 .club img { width: 52px; height: 52px; border-radius: 50%; }
 textarea#cap { width: 100%; min-height: 104px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: #0f121b; color: var(--fg); font: 15px/1.4 Figtree, sans-serif; resize: vertical; }
+.saved { display: grid; grid-template-columns: 1fr auto auto; gap: 6px; align-items: center; padding: 6px 8px; border: 1px solid var(--line); border-radius: 10px; }
+.saved b { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .txt { border: 1px solid var(--line); border-radius: 12px; padding: 10px; display: grid; gap: 8px; }
 input[type=range] { width: 100%; accent-color: var(--acc); }
 a { color: var(--ok); }
@@ -66,22 +68,27 @@ a { color: var(--ok); }
           <label>Vitesse<select id="dBpm"><option value="92">Lente</option><option value="110">Normale</option><option value="128">Rapide</option></select></label>
         </div>
         <div class="row2">
-          <label>Décor<select id="dScene"><option value="ciel">Ciel et parking</option><option value="ville">Ville au coucher du soleil</option><option value="neon">Néon</option><option value="studio">Studio et projecteurs</option></select></label>
+          <label>Décor<select id="dScene"><option value="ciel">Ciel et parking</option><option value="ville">Ville au coucher du soleil</option><option value="neon">Néon</option><option value="studio">Studio et projecteurs</option><option value="stade">⚽ Stade de foot</option></select></label>
           <label>Les deux danseurs<select id="dDuo"><option value="same">Ensemble</option><option value="mirror">En miroir</option><option value="offset">Décalés</option></select></label>
         </div>
         <div class="row2">
           <label>Durée de la vidéo<select id="dDur"><option value="10">10 s</option><option value="15">15 s</option><option value="30">30 s</option><option value="60">60 s</option></select></label>
-          <label class="chk"><input type="checkbox" id="dBeat"> Ajouter un beat</label>
+          <label>Musique<select id="dMusic"><option value="none">Aucune</option><option value="electro">Beat électro</option><option value="trap">Beat trap</option><option value="drill">Beat drill</option><option value="afro">Beat afro</option></select></label>
         </div>
         <div class="row2"><label>Tenue du danseur 1<select id="o0"></select></label><label>Tenue du danseur 2<select id="o1"></select></label></div>
         <div class="row"><label>Haut 1<input type="color" id="c0a"></label><label>Bas 1<input type="color" id="c0b"></label><label>Accessoire 1<input type="color" id="c0c"></label></div>
         <div class="row"><label>Haut 2<input type="color" id="c1a"></label><label>Bas 2<input type="color" id="c1b"></label><label>Accessoire 2<input type="color" id="c1c"></label></div>
-        <p class="note">Sans beat, ajoute un son TikTok à la publication.</p>
+        <p class="note">Sans musique, ajoute un son TikTok à la publication.</p>
       </div>
       <div class="row2">
         <label>Texte du milieu<input type="text" id="mid" maxlength="12"></label>
         <label>Qualité de la vidéo<select id="q"><option value="720">720p (rapide)</option><option value="1080">1080p</option></select></label>
       </div>
+      <div class="row2">
+        <label>Effet autour du VS<select id="fx"><option value="none">Aucun</option><option value="flames">🔥 Flammes</option><option value="bolts">⚡ Éclairs</option><option value="sparks">✨ Étincelles</option></select></label>
+        <label class="chk"><input type="checkbox" id="intro"> Animation d'entrée</label>
+      </div>
+      <button class="mini" id="replay" type="button">▶ Revoir l'animation d'entrée</button>
       <label class="chk"><input type="checkbox" id="dim"> Assombrir un peu le fond</label>
       <div class="row2"><button class="mini" id="swap" type="button">⇅ Échanger les équipes</button><button class="mini" id="reset" type="button">Réinitialiser</button></div>
     </div>
@@ -91,6 +98,12 @@ a { color: var(--ok); }
       <p class="note">Fais glisser un texte, le « VS » ou un cadre entier avec le doigt sur l'aperçu pour le déplacer.</p>
       <button class="mini" id="resetPos" type="button">↺ Remettre les cadres et le VS à leur place</button>
       <div id="txtList" style="display:grid;gap:12px"></div>
+    </div>
+
+    <div class="box">
+      <h2>Mes VS enregistrés</h2>
+      <div class="row2" style="align-items:end"><label>Nom<input type="text" id="saveName" maxlength="30" placeholder="ex. PSG – OM"></label><button class="mini main" id="saveVs" type="button">💾 Enregistrer ce VS</button></div>
+      <div id="savedList" style="display:grid;gap:6px"></div>
     </div>
 
     <div class="box">
@@ -214,7 +227,11 @@ a { color: var(--ok); }
     txtForm();
     $("#fond").value = S.fond; $("#fond").onchange = function () { S.fond = this.value; save(); showFond(); }; showFond();
     [["#dStyle", "style"], ["#dBpm", "bpm"], ["#dScene", "scene"], ["#dDuo", "duo"], ["#dDur", "dur"]].forEach(function (p) { var el = $(p[0]); el.value = S.d[p[1]]; el.onchange = function () { S.d[p[1]] = el.value; save(); }; });
-    $("#dBeat").checked = !!S.d.beat; $("#dBeat").onchange = function () { S.d.beat = this.checked; save(); };
+    if (!S.d.music) S.d.music = S.d.beat === false ? "none" : "electro";
+    $("#dMusic").value = S.d.music; $("#dMusic").onchange = function () { S.d.music = this.value; S.d.beat = this.value !== "none"; save(); };
+    if (!S.fx) S.fx = "none"; if (S.intro == null) S.intro = true;
+    $("#fx").value = S.fx; $("#fx").onchange = function () { S.fx = this.value; save(); };
+    $("#intro").checked = !!S.intro; $("#intro").onchange = function () { S.intro = this.checked; save(); if (S.intro) introStart = performance.now(); };
     if (!S.d.o) S.d.o = [0, 0];
     [0, 1].forEach(function (i) {
       var sel = $("#o" + i); sel.innerHTML = OUTFITS.map(function (o, j) { return "<option value=\"" + j + "\">" + o.n + "</option>"; }).join(""); sel.value = S.d.o[i];
@@ -556,6 +573,34 @@ a { color: var(--ok); }
       var off = (t * 0.12) % 1; for (k = 0; k < 14; k++) { var y = 1420 + Math.pow((k + off) / 14, 2) * 520; g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); }
       for (k = -10; k <= 10; k++) { g.beginPath(); g.moveTo(540 + k * 40, 1420); g.lineTo(540 + k * 260, H); g.stroke(); }
       g.shadowBlur = 0;
+    } else if (sc === "stade") {
+      var sky = g.createLinearGradient(0, 0, 0, 900); sky.addColorStop(0, "#050914"); sky.addColorStop(1, "#16233f"); g.fillStyle = sky; g.fillRect(0, 0, W, H);
+      var ca = teamColor(0), cb = teamColor(1);
+      // tribunes avec le public aux couleurs des deux équipes
+      for (var row = 0; row < 15; row++) {
+        var ry = 560 + row * 52, sh2 = .55 + row * .025;
+        g.fillStyle = "rgb(" + Math.round(26 * sh2 * 1.6) + "," + Math.round(30 * sh2 * 1.6) + "," + Math.round(44 * sh2 * 1.6) + ")"; g.fillRect(0, ry, W, 52);
+        for (var sx = (row % 2) * 18; sx < W; sx += 36) {
+          var side = sx < W / 2 ? ca : cb, wig = Math.sin(t * 6 + sx * .05 + row) * 3;
+          g.fillStyle = (Math.floor(sx / 36) + row) % 5 === 0 ? "#e8e1d4" : side; g.beginPath(); g.arc(sx + 12, ry + 18 + wig, 11, 0, Math.PI * 2); g.fill();
+          g.fillRect(sx + 3, ry + 26 + wig, 18, 24);
+        }
+      }
+      g.fillStyle = "#0d1426"; g.fillRect(0, 540, W, 26); g.fillStyle = ca; g.fillRect(0, 1338, W / 2, 14); g.fillStyle = cb; g.fillRect(W / 2, 1338, W / 2, 14);
+      // flashs des photos
+      for (k = 0; k < 6; k++) { var fx2 = (Math.sin(k * 91.7 + Math.floor(t * 3 + k) * 13.1) * .5 + .5) * W, fy2 = 580 + (Math.sin(k * 37.3 + Math.floor(t * 3 + k) * 7.7) * .5 + .5) * 720, on = ((t * 3 + k * .37) % 1) < .12;
+        if (on) { var fl2 = g.createRadialGradient(fx2, fy2, 0, fx2, fy2, 40); fl2.addColorStop(0, "rgba(255,255,255,.95)"); fl2.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = fl2; g.beginPath(); g.arc(fx2, fy2, 40, 0, Math.PI * 2); g.fill(); } }
+      // projecteurs
+      [150, 930].forEach(function (px) {
+        g.fillStyle = "#1c2233"; g.fillRect(px - 6, 120, 12, 420);
+        g.fillStyle = "#f8fbff"; for (var lx = -2; lx <= 2; lx++) for (var ly = 0; ly < 2; ly++) { g.beginPath(); g.arc(px + lx * 26, 100 + ly * 26, 10, 0, Math.PI * 2); g.fill(); }
+        var gl2 = g.createRadialGradient(px, 112, 10, px, 112, 260); gl2.addColorStop(0, "rgba(255,255,240,.55)"); gl2.addColorStop(1, "rgba(255,255,240,0)"); g.fillStyle = gl2; g.beginPath(); g.arc(px, 112, 260, 0, Math.PI * 2); g.fill();
+        g.save(); g.globalAlpha = .1; g.fillStyle = "#ffffff"; g.beginPath(); g.moveTo(px - 30, 112); g.lineTo(px + 30, 112); g.lineTo(540 + (px - 540) * .2 + 260, 1500); g.lineTo(540 + (px - 540) * .2 - 260, 1500); g.fill(); g.restore();
+      });
+      // pelouse rayée avec les lignes
+      for (k = 0; k < 9; k++) { var y0 = 1352 + Math.pow(k / 9, 1.4) * 568, y1 = 1352 + Math.pow((k + 1) / 9, 1.4) * 568; g.fillStyle = k % 2 ? "#2f8f3a" : "#38a145"; g.fillRect(0, y0, W, y1 - y0 + 1); }
+      g.strokeStyle = "rgba(255,255,255,.85)"; g.lineWidth = 6; g.beginPath(); g.moveTo(0, 1372); g.lineTo(W, 1372); g.moveTo(540, 1372); g.lineTo(540, H); g.stroke();
+      g.beginPath(); g.ellipse(540, 1560, 300, 90, 0, 0, Math.PI * 2); g.stroke(); g.fillStyle = "#fff"; g.beginPath(); g.ellipse(540, 1560, 10, 4, 0, 0, Math.PI * 2); g.fill();
     } else if (sc === "studio") {
       g.fillStyle = "#0b0b12"; g.fillRect(0, 0, W, H);
       ["#ff3b6b", "#3bc9ff", "#ffe14d"].forEach(function (c, i) {
@@ -572,13 +617,18 @@ a { color: var(--ok); }
       g.fillStyle = "rgba(255,255,255,.75)"; g.fillRect(40, 1660, 380, 12); g.fillRect(660, 1660, 380, 12);
     }
   }
+  function teamColor(i) { var c = typeof findClub === "function" ? findClub(S.t[i].name) : null;
+    if (c) { for (var lg in CLUBS) for (var j = 0; j < CLUBS[lg].length; j++) if (CLUBS[lg][j][0] === c.name) { var a = CLUBS[lg][j][2], b = CLUBS[lg][j][3]; return lumHex(a) > .9 ? b : a; } }
+    return S.d.c[i][0]; }
+  function lumHex(h) { var n = parseInt(String(h).slice(1), 16); return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255; }
   function dancers(g, t) {
     var bpm = +S.d.bpm || 110, beat = t * bpm / 60, duo = S.d.duo;
     scene(g, t);
     var p1 = pose(S.d.style, beat), p2 = duo === "offset" ? pose(S.d.style, beat + 1) : duo === "mirror" ? mirrorPose(p1) : p1;
     var o = S.d.o || [0, 0]; dancer(g, 300, p1, S.d.c[0], OUTFITS[o[0]]); dancer(g, 780, p2, S.d.c[1], OUTFITS[o[1]]);
   }
-  function beatTrack(ac, dest, bpm, dur, t0) { // petit beat électro calé sur la danse
+  function beatTrack(ac, dest, bpm, dur, t0, style) { // beats calés sur la danse : électro, trap, drill, afro
+    if (style && style !== "electro") return beatStyle(ac, dest, bpm, dur, t0, style);
     var spb = 60 / bpm, n = Math.ceil(dur / spb), buf = ac.createBuffer(1, ac.sampleRate * 0.3, ac.sampleRate), d = buf.getChannelData(0), i;
     for (i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
     var out = ac.createGain(); out.gain.value = 0.8; out.connect(dest);
@@ -594,7 +644,75 @@ a { color: var(--ok); }
       lp.type = "lowpass"; lp.frequency.value = 500; env(bg, t + spb / 2, .005, .25, spb * .4); b.connect(lp); lp.connect(bg); bg.connect(out); b.start(t + spb / 2); b.stop(t + spb);
     }
   }
-  function draw(g, withBg, t) {
+  function beatStyle(ac, dest, bpm, dur, t0, style) {
+    var spb = 60 / bpm, s16 = spb / 4, n16 = Math.ceil(dur / s16), buf = ac.createBuffer(1, ac.sampleRate * 0.4, ac.sampleRate), d = buf.getChannelData(0), i;
+    for (i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    var out = ac.createGain(); out.gain.value = .75; out.connect(dest);
+    function env(gn, t, a, p, dd) { gn.gain.setValueAtTime(0.0001, t); gn.gain.exponentialRampToValueAtTime(p, t + a); gn.gain.exponentialRampToValueAtTime(0.0001, t + a + dd); }
+    function noise(t, type, f, p, dd, q) { var sN = ac.createBufferSource(), fl = ac.createBiquadFilter(), gn = ac.createGain(); sN.buffer = buf; fl.type = type; fl.frequency.value = f; if (q) fl.Q.value = q; env(gn, t, .002, p, dd); sN.connect(fl); fl.connect(gn); gn.connect(out); sN.start(t); sN.stop(t + dd + .05); }
+    function kick(t, p) { var o = ac.createOscillator(), gn = ac.createGain(); o.frequency.setValueAtTime(160, t); o.frequency.exponentialRampToValueAtTime(42, t + .14); env(gn, t, .003, p || .9, .26); o.connect(gn); gn.connect(out); o.start(t); o.stop(t + .35); }
+    function sub(t, midi, len, glideTo) { var o = ac.createOscillator(), gn = ac.createGain(), f = 440 * Math.pow(2, (midi - 69) / 12); o.type = "sine"; o.frequency.setValueAtTime(f, t); if (glideTo) o.frequency.exponentialRampToValueAtTime(440 * Math.pow(2, (glideTo - 69) / 12), t + len * .6); env(gn, t, .01, .7, len); o.connect(gn); gn.connect(out); o.start(t); o.stop(t + len + .1); }
+    function tone(t, midi, len, type, p, f) { var o = ac.createOscillator(), gn = ac.createGain(), lp = ac.createBiquadFilter(); o.type = type; o.frequency.value = 440 * Math.pow(2, (midi - 69) / 12); lp.type = "lowpass"; lp.frequency.value = f || 1800; env(gn, t, .005, p, len); o.connect(lp); lp.connect(gn); gn.connect(out); o.start(t); o.stop(t + len + .1); }
+    for (i = 0; i < n16; i++) {
+      var t = t0 + i * s16, st = i % 32, bar = Math.floor(i / 32) % 4;
+      if (style === "trap") { // demi-temps, charleston en rafales, 808 longues
+        if (st === 0 || st === 10 || st === 22) kick(t);
+        if (st === 16) { noise(t, "bandpass", 1800, .55, .2, .8); noise(t, "highpass", 3000, .3, .12); }
+        if (i % 2 === 0 || (st >= 28 && st < 32)) noise(t, "highpass", 8500, st >= 28 ? .1 : .07, .03);
+        if (st >= 28) noise(t + s16 / 2, "highpass", 8500, .08, .02);
+        if (st === 0) sub(t, [33, 33, 36, 31][bar], spb * 3.4); if (st === 22) sub(t, [33, 33, 36, 31][bar] + 7, spb * 1.2);
+        if (st === 0 || st === 8) tone(t, [69, 69, 72, 67][bar] + (st === 8 ? 3 : 0), spb * 1.6, "triangle", .1, 2200);
+      } else if (style === "drill") { // charleston en triolets, 808 qui glissent
+        if (st === 0 || st === 14 || st === 19) kick(t, .8);
+        if (st === 12 || st === 28) { noise(t, "bandpass", 2000, .55, .18, .9); }
+        if ([0, 3, 6, 8, 11, 14, 16, 19, 22, 24, 27, 30].indexOf(st) >= 0) noise(t, "highpass", 9000, .09, .03);
+        if (st === 0) sub(t, [34, 34, 37, 32][bar], spb * 1.6, [34, 34, 37, 32][bar] - 2); if (st === 19) sub(t, [34, 34, 37, 32][bar] + 5, spb * 1.4, [34, 34, 37, 32][bar]);
+        if (st % 8 === 4) tone(t, [70, 73, 70, 68][(st / 8 | 0) % 4], spb * .6, "sine", .07, 3000);
+      } else { // afro : grosse caisse sur les temps, shaker, clave, log drum
+        if (st % 8 === 0) kick(t, .75);
+        noise(t, "highpass", 6000, i % 2 ? .05 : .09, .045);
+        if ([0, 6, 12, 20, 24].indexOf(st) >= 0) noise(t, "bandpass", 2600, .35, .05, 6);
+        if (st === 8 || st === 24) noise(t, "bandpass", 1400, .3, .12, 1.2);
+        if ([0, 3, 10, 14, 19, 26].indexOf(st) >= 0) { var o = ac.createOscillator(), gn = ac.createGain(), m = [45, 48, 52, 50, 48, 43][[0, 3, 10, 14, 19, 26].indexOf(st)] - 12; o.type = "sine"; o.frequency.setValueAtTime(440 * Math.pow(2, (m + 12 - 69) / 12), t); o.frequency.exponentialRampToValueAtTime(440 * Math.pow(2, (m - 69) / 12), t + .08); env(gn, t, .004, .55, .3); o.connect(gn); gn.connect(out); o.start(t); o.stop(t + .4); }
+        if (st === 4 || st === 20) tone(t, [69, 72, 74, 71][bar], spb * .5, "square", .05, 1600);
+      }
+    }
+  }
+  /* ---------- animation d'entrée et effets du VS ---------- */
+  var introStart = performance.now();
+  function easeOut(x) { x = Math.max(0, Math.min(1, x)); return 1 - Math.pow(1 - x, 3); }
+  function easeBack(x) { x = Math.max(0, Math.min(1, x)); var c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); }
+  function rnd(a) { var x = Math.sin(a * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); }
+  function vsFx(g, t, mx, my) {
+    if (S.fx === "flames") {
+      g.save(); g.globalCompositeOperation = "lighter";
+      for (var k = 0; k < 15; k++) {
+        var bx = mx - 300 + k * 43, h = 170 + 90 * Math.sin(t * 7 + k * 1.7) + 50 * Math.sin(t * 11.3 + k), w = 46 + 10 * Math.sin(t * 5 + k);
+        var gr = g.createLinearGradient(0, my + 120, 0, my + 120 - h); gr.addColorStop(0, "rgba(255,80,0,.75)"); gr.addColorStop(.5, "rgba(255,170,0,.55)"); gr.addColorStop(1, "rgba(255,240,120,0)");
+        g.fillStyle = gr; g.beginPath(); g.moveTo(bx - w, my + 120); g.quadraticCurveTo(bx - w * .8 + 10 * Math.sin(t * 9 + k), my + 120 - h * .5, bx + 14 * Math.sin(t * 6 + k * 2), my + 120 - h); g.quadraticCurveTo(bx + w * .8, my + 120 - h * .5, bx + w, my + 120); g.fill();
+      }
+      g.restore();
+    } else if (S.fx === "bolts") {
+      var seed = Math.floor(t * 8);
+      g.save(); g.lineCap = "round"; g.lineJoin = "round";
+      for (var b = 0; b < 4; b++) {
+        if (rnd(seed * 7 + b) < .35) continue;
+        var ang = rnd(seed * 3 + b) * Math.PI * 2, r0 = 150, r1 = 340 + rnd(seed + b * 5) * 120, x = mx + Math.cos(ang) * r0, y = my + Math.sin(ang) * r0 * .7;
+        var pts = [[x, y]]; for (var s2 = 1; s2 <= 6; s2++) { var rr2 = r0 + (r1 - r0) * s2 / 6, aa = ang + (rnd(seed * 13 + b * 7 + s2) - .5) * .5; pts.push([mx + Math.cos(aa) * rr2, my + Math.sin(aa) * rr2 * .7]); }
+        [[22, "rgba(90,170,255,.35)"], [9, "rgba(170,215,255,.9)"], [3, "#ffffff"]].forEach(function (L) { g.lineWidth = L[0]; g.strokeStyle = L[1]; g.beginPath(); g.moveTo(pts[0][0], pts[0][1]); for (var q = 1; q < pts.length; q++) g.lineTo(pts[q][0], pts[q][1]); g.stroke(); });
+      }
+      g.restore();
+    } else if (S.fx === "sparks") {
+      g.save(); g.globalCompositeOperation = "lighter";
+      for (var p = 0; p < 26; p++) {
+        var a2 = p / 26 * Math.PI * 2 + t * (p % 2 ? .9 : -.7), rr3 = 260 + 70 * Math.sin(t * 2 + p), sx = mx + Math.cos(a2) * rr3, sy = my + Math.sin(a2) * rr3 * .55, sz = 8 + 10 * (0.5 + 0.5 * Math.sin(t * 6 + p * 1.3));
+        g.fillStyle = p % 3 ? "rgba(255,225,120,.95)" : "rgba(120,230,255,.95)";
+        g.beginPath(); for (var q2 = 0; q2 < 8; q2++) { var ra = q2 % 2 ? sz * .35 : sz, an = q2 * Math.PI / 4 + t * 2; g.lineTo(sx + Math.cos(an) * ra, sy + Math.sin(an) * ra); } g.closePath(); g.fill();
+      }
+      g.restore();
+    }
+  }
+  function draw(g, withBg, t, et) {
     g.clearRect(0, 0, W, H);
     if (withBg && S.fond === "dance") dancers(g, t == null ? performance.now() / 1000 : t);
     else if (withBg) {
@@ -603,17 +721,28 @@ a { color: var(--ok); }
       else { var gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, "#5b8fd6"); gr.addColorStop(1, "#9aa8b8"); g.fillStyle = gr; g.fillRect(0, 0, W, H); }
       if (S.dim) { g.fillStyle = "rgba(0,0,0,.25)"; g.fillRect(0, 0, W, H); }
     }
-    card(g, S.cardPos[0][0], S.cardPos[0][1], S.t[0]);
-    card(g, S.cardPos[1][0], S.cardPos[1][1], S.t[1]);
-    var mid = S.mid || ""; if (mid) {
+    if (et == null) et = S.intro ? (performance.now() - introStart) / 1000 : 99;
+    if (!S.intro) et = 99;
+    var now = t == null ? performance.now() / 1000 : t;
+    var o0 = (1 - easeOut((et - .1) / .55)) * -1150, o1 = (1 - easeOut((et - .3) / .55)) * 1150;
+    if (o0 > -1149) { g.save(); g.translate(o0, 0); card(g, S.cardPos[0][0], S.cardPos[0][1], S.t[0]); g.restore(); }
+    if (o1 < 1149) { g.save(); g.translate(o1, 0); card(g, S.cardPos[1][0], S.cardPos[1][1], S.t[1]); g.restore(); }
+    var mid = S.mid || ""; if (mid && et > .75) {
+      var mx = S.midPos[0], my = S.midPos[1], sc = et < 1.15 ? 2.6 - 1.6 * easeBack((et - .75) / .4) : 1;
+      vsFx(g, now, mx, my);
+      g.save(); g.translate(mx, my); g.scale(sc, sc); g.globalAlpha = Math.min(1, (et - .75) / .15);
       g.textAlign = "center"; g.textBaseline = "middle"; fitText(g, mid, "900 {s}px Outfit, Figtree, sans-serif", 270, 920);
-      var mx = S.midPos[0], my = S.midPos[1];
-      g.lineJoin = "round"; g.lineWidth = 26; g.strokeStyle = "#000"; g.strokeText(mid, mx, my);
-      g.lineWidth = 10; g.strokeStyle = "#fff"; g.strokeText(mid, mx, my);
-      g.fillStyle = "#000"; g.fillText(mid, mx, my);
-      g.textAlign = "left"; g.textBaseline = "alphabetic";
+      g.lineJoin = "round"; g.lineWidth = 26; g.strokeStyle = "#000"; g.strokeText(mid, 0, 0);
+      g.lineWidth = 10; g.strokeStyle = "#fff"; g.strokeText(mid, 0, 0);
+      g.fillStyle = "#000"; g.fillText(mid, 0, 0);
+      g.restore(); g.textAlign = "left"; g.textBaseline = "alphabetic";
     }
-    S.texts.forEach(function (t) { drawText(g, t); });
+    if (et > 1.1) { g.save(); g.globalAlpha = Math.min(1, (et - 1.1) / .4); S.texts.forEach(function (tt) { drawText(g, tt); }); g.restore(); }
+    if (et > .95 && et < 1.6) { // flash blanc et éclair au moment où le VS tombe
+      var fa = et < 1.05 ? (et - .95) / .1 : 1 - (et - 1.05) / .55; g.fillStyle = "rgba(255,255,255," + (.75 * Math.max(0, fa)) + ")"; g.fillRect(0, 0, W, H);
+      if (et < 1.35) { var mxx = S.midPos[0], myy = S.midPos[1]; g.save(); g.lineCap = "round"; g.lineJoin = "round";
+        [[30, "rgba(255,230,90,.45)"], [12, "#fff27a"], [4, "#ffffff"]].forEach(function (L) { g.lineWidth = L[0]; g.strokeStyle = L[1]; g.beginPath(); g.moveTo(mxx + 60, 0); g.lineTo(mxx - 40, myy * .35); g.lineTo(mxx + 50, myy * .5); g.lineTo(mxx - 30, myy * .78); g.lineTo(mxx + 10, myy - 60); g.stroke(); }); g.restore(); }
+    }
     if (drag && g === vg) { var bx = drag.box(); g.save(); g.setLineDash([16, 10]); g.lineWidth = 4; g.strokeStyle = "#25f4ee"; g.strokeRect(bx.x, bx.y, bx.w, bx.h); g.restore(); }
   }
   var view = $("#view"), vg = view.getContext("2d"), drag = null;
@@ -648,7 +777,7 @@ a { color: var(--ok); }
   }
   function stamp() { var d = new Date(); return d.getFullYear() + "" + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0") + "-" + String(d.getHours()).padStart(2, "0") + String(d.getMinutes()).padStart(2, "0") + String(d.getSeconds()).padStart(2, "0"); }
   function png(withBg) {
-    var c = document.createElement("canvas"); c.width = W; c.height = H; draw(c.getContext("2d"), withBg);
+    var c = document.createElement("canvas"); c.width = W; c.height = H; draw(c.getContext("2d"), withBg, null, 99);
     c.toBlob(function (b) { download(b, (withBg ? "vs-image-" : "vs-calque-") + stamp() + ".png"); msg(withBg ? "Image téléchargée." : "Calque transparent téléchargé : pose-le au-dessus de ta vidéo dans CapCut."); }, "image/png");
   }
   $("#dlPng").onclick = function () { png(false); };
@@ -669,7 +798,7 @@ a { color: var(--ok); }
     try {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === "suspended") audioCtx.resume();
-      if (S.d.beat) { var dest = audioCtx.createMediaStreamDestination(); beatTrack(audioCtx, dest, bpm, dur, audioCtx.currentTime + lead); dest.stream.getAudioTracks().forEach(function (tr) { stream.addTrack(tr); }); }
+      if (S.d.music && S.d.music !== "none") { var dest = audioCtx.createMediaStreamDestination(); beatTrack(audioCtx, dest, bpm, dur, audioCtx.currentTime + lead, S.d.music); dest.stream.getAudioTracks().forEach(function (tr) { stream.addTrack(tr); }); }
     } catch (e) {}
     var rec, chunks = [];
     try { rec = new MediaRecorder(stream, mime ? { mimeType: mime, videoBitsPerSecond: hq ? 10e6 : 6e6 } : {}); } catch (e) { msg("Impossible de démarrer l'enregistrement."); return; }
@@ -679,7 +808,7 @@ a { color: var(--ok); }
     rec.start(500);
     function frame() {
       var t = Math.max(0, (performance.now() - t0) / 1000);
-      draw(tg, true, t); g.drawImage(tmp, 0, 0, cw, ch); vg.drawImage(tmp, 0, 0, W, H);
+      draw(tg, true, t, t); g.drawImage(tmp, 0, 0, cw, ch); vg.drawImage(tmp, 0, 0, W, H);
       $("#barI").style.width = Math.round(Math.min(1, t / dur) * 100) + "%";
       if (t >= dur) {
         busy = false;
@@ -724,7 +853,7 @@ a { color: var(--ok); }
     var started = false, t0 = 0;
     function frame() {
       if (!busy) return;
-      draw(tg, true); g.drawImage(tmp, 0, 0, cw, ch); vg.drawImage(tmp, 0, 0, W, H);
+      draw(tg, true, null, bgVid.currentTime); g.drawImage(tmp, 0, 0, cw, ch); vg.drawImage(tmp, 0, 0, W, H);
       var p = Math.min(1, bgVid.currentTime / dur); $("#barI").style.width = Math.round(p * 100) + "%";
       if (started && (bgVid.ended || bgVid.currentTime >= dur - 0.02 || performance.now() - t0 > (dur + 5) * 1000)) { finish(); return; }
       requestAnimationFrame(frame);
@@ -793,8 +922,32 @@ a { color: var(--ok); }
   document.addEventListener("click", function (e) { if (e.target.closest && e.target.closest(".club, [data-cmake], #swap, #reset")) setTimeout(function () { capEdited = false; refreshCaption(); }, 50); });
   $("#fond").addEventListener("change", function () { capEdited = false; refreshCaption(); });
 
+  /* ---------- mes VS enregistrés ---------- */
+  function savedGet() { try { return JSON.parse(localStorage.getItem("vs-saved") || "[]"); } catch (e) { return []; } }
+  function savedPut(l) { try { localStorage.setItem("vs-saved", JSON.stringify(l)); return true; } catch (e) { msg("Plus de place pour enregistrer : supprime un ancien VS."); return false; } }
+  function savedRender() {
+    var l = savedGet(), box = $("#savedList");
+    if (!l.length) { box.innerHTML = "<p class=\"note\">Aucun VS enregistré pour l'instant.</p>"; return; }
+    box.innerHTML = l.map(function (x, i) { return "<div class=\"saved\"><b>" + esc(x.name) + "</b><button class=\"mini\" type=\"button\" data-open=\"" + i + "\">Ouvrir</button><button class=\"mini\" type=\"button\" data-del=\"" + i + "\" aria-label=\"Supprimer\">🗑️</button></div>"; }).join("");
+    Array.prototype.forEach.call(box.querySelectorAll("[data-open]"), function (b) { b.onclick = function () {
+      var x = savedGet()[+b.getAttribute("data-open")]; if (!x) return;
+      S = JSON.parse(JSON.stringify(x.s)); save(); fill(); capEdited = false; refreshCaption(); introStart = performance.now(); msg("VS « " + x.name + " » ouvert.");
+    }; });
+    Array.prototype.forEach.call(box.querySelectorAll("[data-del]"), function (b) { b.onclick = function () {
+      var l2 = savedGet(), i = +b.getAttribute("data-del"); if (!confirm("Supprimer « " + l2[i].name + " » ?")) return; l2.splice(i, 1); savedPut(l2); savedRender();
+    }; });
+  }
+  function esc(x) { return String(x).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]; }); }
+  $("#saveVs").onclick = function () {
+    var name = ($("#saveName").value || "").trim() || (S.t[0].name + " – " + S.t[1].name), l = savedGet().filter(function (x) { return x.name !== name; });
+    l.unshift({ name: name, s: JSON.parse(JSON.stringify(S)) }); if (l.length > 20) l.length = 20;
+    if (savedPut(l)) { savedRender(); $("#saveName").value = ""; msg("VS « " + name + " » enregistré."); }
+  };
+  $("#replay").onclick = function () { introStart = performance.now(); };
+
   fill();
   refreshCaption();
+  savedRender();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () {});
 })();
 </script>
