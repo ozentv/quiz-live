@@ -42,6 +42,7 @@ canvas#view { touch-action: none; cursor: grab; width: min(100%, 420px); aspect-
 .clubs { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); grid-auto-rows: max-content; gap: 6px; max-height: 330px; overflow-y: auto; padding: 2px; }
 .club { min-height: 98px; padding: 6px 4px; align-content: start; display: grid; justify-items: center; gap: 4px; background: #0f121b; border: 1px solid var(--line); font-size: 11px; font-weight: 600; line-height: 1.15; }
 .club img { width: 52px; height: 52px; border-radius: 50%; }
+textarea#cap { width: 100%; min-height: 104px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: #0f121b; color: var(--fg); font: 15px/1.4 Figtree, sans-serif; resize: vertical; }
 .txt { border: 1px solid var(--line); border-radius: 12px; padding: 10px; display: grid; gap: 8px; }
 input[type=range] { width: 100%; accent-color: var(--acc); }
 a { color: var(--ok); }
@@ -90,6 +91,13 @@ a { color: var(--ok); }
       <p class="note">Fais glisser un texte, le « VS » ou un cadre entier avec le doigt sur l'aperçu pour le déplacer.</p>
       <button class="mini" id="resetPos" type="button">↺ Remettre les cadres et le VS à leur place</button>
       <div id="txtList" style="display:grid;gap:12px"></div>
+    </div>
+
+    <div class="box">
+      <h2>Légende TikTok</h2>
+      <textarea id="cap" rows="4" aria-label="Légende TikTok"></textarea>
+      <div class="row2"><button class="mini" id="capNew" type="button">🎲 Autre idée</button><button class="mini main" id="capCopy" type="button">📋 Copier la légende</button></div>
+      <p class="note">Elle se crée avec les noms de tes équipes. Tu peux la modifier avant de la copier.</p>
     </div>
 
     <div class="box acts">
@@ -739,7 +747,54 @@ a { color: var(--ok); }
     bgVid.currentTime = 0;
   };
 
+  /* ---------- légende TikTok ---------- */
+  var LEAGUE_TAG = { "Premier League": "premierleague", "Liga": "laliga", "Serie A": "seriea", "Bundesliga": "bundesliga", "Ligue 1": "ligue1" };
+  var DERBIES = [["PSG", "OM", "leclassique"], ["RMA", "FCB", "elclasico"], ["MUN", "MCI", "derbymancunien"], ["LIV", "EVE", "merseysidederby"], ["ARS", "TOT", "northlondonderby"], ["INT", "MIL", "derbydellamadonnina"], ["ROM", "LAZ", "derbydellacapitale"], ["BVB", "FCB", "derklassiker"], ["OL", "ASSE", "derby"], ["RMA", "ATM", "derbymadrileno"]];
+  function plainTxt(x) { return String(x || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, ""); }
+  function findClub(name) {
+    var p = plainTxt(name); if (!p) return null;
+    for (var lg in CLUBS) for (var i = 0; i < CLUBS[lg].length; i++) { var c = CLUBS[lg][i]; if (plainTxt(c[0]) === p || plainTxt(c[1]) === p) return { name: c[0], abbr: c[1], league: lg }; }
+    return null;
+  }
+  var capIdea = 0;
+  function makeCaption() {
+    var a = S.t[0].name || "Team 1", b = S.t[1].name || "Team 2", ca = findClub(a), cb = findClub(b), tags = [], q;
+    var low = (a + " " + b).toLowerCase(), boysGirls = /boy|garcon|garçon|mec/.test(low) && /girl|fille|meuf/.test(low);
+    function add(t) { t = plainTxt(t); if (t && tags.indexOf(t) < 0) tags.push(t); }
+    if (ca && cb) {
+      var A = ca.abbr.toUpperCase(), B = cb.abbr.toUpperCase();
+      var Q = ["{a} 🆚 {b} : qui gagne ? Écris ton équipe en commentaire ⚽👇", "Tu es plutôt {a} ou {b} ? ⚽ Réponds en commentaire 👇", "{a} ou {b} : tu choisis qui ? 🔥⚽ Le perdant paie sa tournée 😅👇"];
+      q = Q[capIdea % Q.length];
+      DERBIES.forEach(function (d) { if ((d[0] === A && d[1] === B) || (d[0] === B && d[1] === A)) add(d[2]); });
+      add(A + B); add(LEAGUE_TAG[ca.league]); if (cb.league !== ca.league) add(LEAGUE_TAG[cb.league]); add("foot");
+    } else if (boysGirls) {
+      var Q2 = ["{a} 🆚 {b} : vous êtes de quelle team ? 👇", "Garçons ou filles : qui gagne ce VS ? 👀👇", "{a} ou {b} ? Écris ta team en commentaire 🔥👇"];
+      q = Q2[capIdea % Q2.length]; add("teamboys"); add("teamgirls"); add("garconsvsfilles");
+    } else {
+      var Q3 = ["{a} 🆚 {b} : tu choisis qui ? 👇", "{a} ou {b} ? Écris ton choix en commentaire 🔥👇", "Qui gagne ce VS : {a} ou {b} ? 👀👇"];
+      q = Q3[capIdea % Q3.length]; add(a); add(b); add("vs");
+    }
+    if (S.fond === "dance") { if (tags.length < 4) add("dancechallenge"); add("danse"); }
+    add("quigagne");
+    tags = tags.slice(0, 4); ["fyp", "pourtoi"].forEach(add);
+    return q.replace("{a}", a).replace("{b}", b) + " " + tags.map(function (t) { return "#" + t; }).join(" ");
+  }
+  var capEdited = false;
+  function refreshCaption() { if (!capEdited) $("#cap").value = makeCaption(); }
+  $("#cap").oninput = function () { capEdited = true; };
+  $("#capNew").onclick = function () { capIdea++; capEdited = false; refreshCaption(); };
+  $("#capCopy").onclick = function () {
+    var ta = $("#cap"), btn = this;
+    function ok() { btn.textContent = "✅ Copiée !"; setTimeout(function () { btn.textContent = "📋 Copier la légende"; }, 1800); }
+    function fb() { ta.focus(); ta.select(); try { document.execCommand("copy"); ok(); } catch (e) { msg("Sélectionne le texte et copie-le."); } }
+    try { navigator.clipboard.writeText(ta.value).then(ok, fb); } catch (e) { fb(); }
+  };
+  document.addEventListener("input", function (e) { if (e.target.closest && e.target.closest("#team0, #team1")) { capEdited = false; refreshCaption(); } });
+  document.addEventListener("click", function (e) { if (e.target.closest && e.target.closest(".club, [data-cmake], #swap, #reset")) setTimeout(function () { capEdited = false; refreshCaption(); }, 50); });
+  $("#fond").addEventListener("change", function () { capEdited = false; refreshCaption(); });
+
   fill();
+  refreshCaption();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () {});
 })();
 </script>
