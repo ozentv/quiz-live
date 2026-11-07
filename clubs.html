@@ -30,7 +30,8 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
 #wrap { position: fixed; inset: 0; z-index: 50; background: #04050a; overflow: hidden; }
 #wrap[hidden] { display: none; }
 #stage { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 0 0; font-family: Outfit, sans-serif; color: #fff; overflow: hidden; background: #05060c; }
-#bgc, #fx { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; pointer-events: none; }
+#bgc, #bgc2 { transition: opacity 1.6s; }
+#bgc, #bgc2, #fx { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; pointer-events: none; }
 #vign { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 42%, rgba(0,0,0,0) 38%, rgba(0,0,0,.6) 100%); }
 .osw { font-family: Oswald, Outfit, sans-serif; }
 /* tableau d'affichage */
@@ -140,13 +141,22 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
 #stage.talk #sub:not(.evt) { opacity: 0; }
 #sub { transition: opacity .25s; }
 /* but ! */
-#goal { position: absolute; left: 0; right: 0; top: 760px; height: 330px; display: grid; place-content: center; text-align: center; z-index: 8; pointer-events: none;
+#goal { position: absolute; left: 0; right: 0; top: 600px; height: 640px; display: grid; place-content: center; text-align: center; z-index: 8; pointer-events: none;
   background: linear-gradient(90deg, rgba(0,0,0,0), rgba(4,6,12,.88) 16%, rgba(4,6,12,.88) 84%, rgba(0,0,0,0)); border-top: 4px solid var(--acc); border-bottom: 4px solid var(--acc); }
 #goal[hidden] { display: none; }
 #goal.on { animation: goalIn 2.4s ease-in-out forwards; }
 #goal .g1 { font: italic 700 170px/1 Oswald, Outfit, sans-serif; letter-spacing: 6px; color: var(--acc); text-shadow: 0 0 40px rgba(255,200,40,.75), 0 6px 0 #6b4c00; }
 #goal .g2 { margin-top: 10px; font: 600 40px Oswald, Outfit, sans-serif; letter-spacing: 3px; text-transform: uppercase; }
-#goal .ball { position: absolute; top: 120px; font-size: 90px; animation: ball 2.4s linear forwards; }
+#goal > * { position: relative; }
+#goal .tifo { position: absolute; inset: 0; overflow: hidden; z-index: 0; }
+#goal .tifo .tf { position: absolute; inset: 0; }
+#goal .tifo img { position: absolute; left: 50%; top: 50%; width: 520px; height: 520px; object-fit: contain; transform: translate(-50%, -50%); opacity: .55; filter: drop-shadow(0 0 30px rgba(0,0,0,.6)); }
+#goal .tifo .cells { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(12, 1fr); grid-template-rows: repeat(8, 1fr); }
+#goal .tifo .cells i { background: #e9edf3; border: 1px solid rgba(0,0,0,.15); transform-origin: 50% 0; animation: card .32s ease-in forwards; }
+@keyframes card { to { transform: scaleY(0); opacity: 0; } }
+#goal .tifo::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 50%, rgba(0,0,0,.55) 0%, rgba(0,0,0,.15) 55%, rgba(0,0,0,.35) 100%); }
+#goal .g2 { display: inline-block; background: rgba(4,6,12,.75); padding: 4px 22px; border-radius: 10px; }
+#goal .ball { position: absolute; top: 260px; font-size: 90px; animation: ball 2.4s linear forwards; }
 @keyframes goalIn { 0% { opacity: 0; transform: scaleY(.1); } 10% { opacity: 1; transform: none; } 85% { opacity: 1; transform: none; } 100% { opacity: 0; transform: scale(1.06); } }
 @keyframes ball { from { left: -120px; transform: rotate(0); } to { left: 1180px; transform: rotate(1080deg); } }
 /* fin de match */
@@ -216,6 +226,8 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
       <p class="note" id="gemNote">Sur Render, ajoute <b>GEMINI_API_KEY</b> (clé gratuite sur aistudio.google.com/apikey). Si Gemini ne répond pas, la voix du téléphone prend le relais.</p>
     </div>
     <label class="chk"><input type="checkbox" id="sound"> 🏟️ Sons de stade (foule, sifflet, ovation)</label>
+    <label class="chk"><input type="checkbox" id="chants"> 📣 Chants de supporters quand un club est en feu (et l'ovation grandit avec l'écart)</label>
+    <label class="chk"><input type="checkbox" id="recap"> 🎬 Récap vidéo de chaque match, prêt pour TikTok (sur ordinateur, Chrome ou Edge)</label>
     <label>Volume des sons de stade<select id="sfx"><option value="faible">Faible (conseillé)</option><option value="moyen">Moyen</option><option value="fort">Fort</option></select></label>
     <label class="chk"><input type="checkbox" id="events"> ⚡ Événements surprises (points doublés, remontada, club en vedette)</label>
     <label>Animateur en bas à gauche<select id="hostSel"><option value="clair">Peau claire</option><option value="moyen">Peau moyenne</option><option value="mat">Peau mate</option><option value="fonce">Peau foncée</option><option value="off">Pas d'animateur</option></select></label>
@@ -226,7 +238,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
 
 <div id="wrap" hidden>
   <div id="stage">
-    <canvas id="bgc" width="1080" height="1920"></canvas><canvas id="fx" width="1080" height="1920"></canvas><div id="vign"></div>
+    <canvas id="bgc" width="1080" height="1920"></canvas><canvas id="bgc2" width="1080" height="1920" style="opacity:0"></canvas><canvas id="fx" width="1080" height="1920"></canvas><div id="vign"></div>
     <div class="sb">
       <div class="side"><span class="lab" id="sSeason">Saison 1</span><span class="val" id="sMatch">Match 1</span></div>
       <div class="mid"><span class="ttl">⚔️ BATAILLE DES CLUBS</span><span id="timer">05:00</span></div>
@@ -238,12 +250,12 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     <div id="top" class="glass"></div>
     <div id="last" class="glass"></div>
     <div id="bub"></div>
-    <div id="goal" hidden><div class="ball">⚽</div><div class="g1">BUT !</div><div class="g2" id="goalS"></div></div>
+    <div id="goal" hidden><div class="tifo" id="tifo"></div><div class="ball">⚽</div><div class="g1">BUT !</div><div class="g2" id="goalS"></div></div>
     <div id="win" hidden><div class="w"><div class="c" id="winCard"></div><h3 id="winT"></h3><p id="winS"></p><div id="winM" class="glass"></div></div></div>
     <div id="tab" hidden><div class="t glass" id="tabIn"></div></div>
   </div>
   <div id="chatSt"></div>
-  <div id="bar"><button id="bPause" type="button">⏸ Pause</button><button id="bEnd" type="button">⏭ Fin de manche</button><button id="bQuit" type="button">✕ Quitter</button></div>
+  <div id="bar"><button id="bRec" type="button" hidden>🎬 Activer le récap</button><button id="bPause" type="button">⏸ Pause</button><button id="bEnd" type="button">⏭ Fin de manche</button><button id="bQuit" type="button">✕ Quitter</button></div>
 </div>
 <script>
 (function () {
@@ -276,7 +288,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   var C;
   try { C = JSON.parse(localStorage.getItem("clubs-set") || "null"); } catch (e) { C = null; }
   if (!C) C = { slots: DEF_SLOTS, dur: 300, gmul: 5, lstep: 10, voice: true, sound: true, events: true, host: "moyen", season: 1, match: 1, wins: {}, spts: {} };
-  if (C.sound == null) C.sound = true; if (C.events == null) C.events = true; if (!C.host) C.host = "moyen"; if (!C.spts) C.spts = {}; if (!C.eng) C.eng = "phone"; if (!C.gvoice) C.gvoice = "Fenrir"; if (!C.evoice) C.evoice = "fr-FR-HenriNeural"; if (!C.sfx) C.sfx = "faible"; if (C.behind == null) C.behind = true; if (C.nonstop == null) C.nonstop = true;
+  if (C.sound == null) C.sound = true; if (C.events == null) C.events = true; if (!C.host) C.host = "moyen"; if (!C.spts) C.spts = {}; if (!C.eng) C.eng = "phone"; if (!C.gvoice) C.gvoice = "Fenrir"; if (!C.evoice) C.evoice = "fr-FR-HenriNeural"; if (!C.sfx) C.sfx = "faible"; if (C.behind == null) C.behind = true; if (C.nonstop == null) C.nonstop = true; if (C.chants == null) C.chants = true; if (C.recap == null) C.recap = false;
   var Q = {}; try { Q = JSON.parse(localStorage.getItem("sq-set") || "{}"); } catch (e) {}
   if (!C.user) C.user = Q.ttUser || ""; if (!C.relay) C.relay = Q.relay || "studio-quiz-relais.onrender.com"; if (C.gkey == null) C.gkey = Q.lbKey || "";
   function save() { try { localStorage.setItem("clubs-set", JSON.stringify(C)); } catch (e) {} }
@@ -330,6 +342,8 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     $("#dur").value = C.dur; $("#dur").onchange = function () { C.dur = +this.value; save(); };
     $("#gmul").value = C.gmul; $("#gmul").onchange = function () { C.gmul = +this.value; save(); };
     $("#lstep").value = C.lstep; $("#lstep").onchange = function () { C.lstep = +this.value; save(); };
+    $("#chants").checked = !!C.chants; $("#chants").onchange = function () { C.chants = this.checked; save(); };
+    $("#recap").checked = !!C.recap; $("#recap").onchange = function () { C.recap = this.checked; save(); };
     $("#nonstop").checked = !!C.nonstop; $("#nonstop").onchange = function () { C.nonstop = this.checked; save(); };
     $("#voice").checked = !!C.voice; $("#voice").onchange = function () { C.voice = this.checked; save(); };
     function engUI() {
@@ -505,6 +519,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
       el.querySelector("[data-br]").style.width = (top ? Math.round(pts[i] / top * 100) : 0) + "%";
       el.querySelector("[data-mu]").textContent = m > 1 ? "×" + m : "";
     });
+    if (!first && top > 0 && o[0] !== bgLead && Date.now() - bgAt > 4000) crowdColors(o[0]);
     if (!first && top > 0 && o[0] !== leader) { var old = leader; leader = o[0]; if (old >= 0) onLead(leader, old); else if (top >= 3) onLead(leader, -1); }
     if (first) leader = -1;
     $("#sLead").textContent = top > 0 ? "1er · " + club(o[0]).abbr : "—";
@@ -598,7 +613,11 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     var q = goalQ.shift(); if (!q || ended) { goalBusy = false; return; } goalBusy = true;
     var c = club(q[0]), el = $("#goal");
     $("#goalS").innerHTML = esc2(c.name) + " franchit les <span style=\"color:var(--acc)\">" + nf(q[1]) + " points</span>";
+    var cells = ""; for (var k = 0; k < 96; k++) { var cx = k % 12, cy = Math.floor(k / 12); cells += "<i style=\"animation-delay:" + ((cy * .045 + Math.abs(cx - 5.5) * .022) + .05).toFixed(2) + "s\"></i>"; }
+    var lg2 = logo(q[0]) || badgeURL(c.abbr, c.c1, c.c2, c.pat, 320);
+    $("#tifo").innerHTML = "<div class=\"tf\" style=\"background:repeating-linear-gradient(90deg," + c.c1 + " 0 90px," + c.c2 + " 90px 180px)\"></div><img alt=\"\" src=\"" + lg2 + "\"><div class=\"cells\">" + cells + "</div>";
     el.hidden = false; el.classList.remove("on"); void el.offsetWidth; el.classList.add("on");
+    if (q[0] !== bgLead) crowdColors(q[0]);
     roar(3, .5); flashBurst = 30; host.mood("happy", 2600);
     speak(rnd(["But ! ", "Gooool ! ", "Et c'est le but ! "]) + c.name + " passe la barre des " + q[1] + " points !", 2);
     setTimeout(function () { el.hidden = true; setTimeout(nextGoal, 350); }, 2400);
@@ -766,6 +785,34 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     s.connect(bp); bp.connect(g); g.connect(master); s.start(t); s.stop(t + len + 1);
   }
   function cheer() { roar(1.4, .18); }
+  function clap(t, v) { // claquement de mains de la foule (plusieurs mains un peu décalées)
+    var a = AC; for (var h = 0; h < 4; h++) { var s = a.createBufferSource(), bp = a.createBiquadFilter(), g = a.createGain(), st = t + Math.random() * .03;
+      s.buffer = noiseBuf(); bp.type = "bandpass"; bp.frequency.value = 1100 + Math.random() * 900; bp.Q.value = .9;
+      g.gain.setValueAtTime(0, st); g.gain.linearRampToValueAtTime(v, st + .004); g.gain.exponentialRampToValueAtTime(.001, st + .09);
+      s.connect(bp); bp.connect(g); g.connect(master); s.start(st, Math.random() * 3); s.stop(st + .12); }
+  }
+  var chantAt = 0;
+  // Chant de tribune « Olé, olé… » puis « Al-lez ! » : un chœur de voix synthétisées avec des voyelles, sur des claquements de mains.
+  function chant() {
+    var a = audio(); if (!a) return; chantAt = Date.now();
+    var t = a.currentTime + .05, out = a.createGain(), f1 = a.createBiquadFilter(), f2 = a.createBiquadFilter(), oscs = [];
+    out.gain.value = 0; out.connect(master); f1.type = f2.type = "bandpass"; f1.Q.value = 5; f2.Q.value = 7; f1.connect(out); f2.connect(out);
+    for (var v = 0; v < 10; v++) { var o = a.createOscillator(), g = a.createGain(); o.type = "sawtooth"; o.detune.value = (v - 4.5) * 8 + Math.random() * 8; g.gain.value = v % 3 === 0 ? .05 : .07; o.connect(g); g.connect(f1); g.connect(f2); o.lowV = v % 3 === 0; oscs.push(o); }
+    var VOW = { o: [480, 850], e: [390, 2000], a: [720, 1200] }, tt = t;
+    var mel = [[67, .4, "o"], [64, .65, "e"], [67, .4, "o"], [64, .65, "e"], [67, .4, "o"], [64, .4, "e"], [66, .4, "o"], [62, 1.1, "e"], [0, .35], [69, .32, "a"], [71, .6, "e"], [0, .25], [69, .32, "a"], [71, .6, "e"], [0, .25], [69, .32, "a"], [71, .9, "e"]];
+    mel.forEach(function (n) {
+      if (!n[0]) { out.gain.setTargetAtTime(0, tt, .03); clap(tt, .5); tt += n[1]; return; }
+      var hz = 440 * Math.pow(2, (n[0] - 69) / 12);
+      oscs.forEach(function (o) { o.frequency.setTargetAtTime(o.lowV ? hz / 2 : hz, tt, .035); });
+      f1.frequency.setTargetAtTime(VOW[n[2]][0], tt, .04); f2.frequency.setTargetAtTime(VOW[n[2]][1], tt, .04);
+      out.gain.setTargetAtTime(.5, tt, .04); out.gain.setTargetAtTime(.32, tt + n[1] * .6, .08);
+      clap(tt, .35); tt += n[1];
+    });
+    out.gain.setTargetAtTime(0, tt, .15);
+    oscs.forEach(function (o) { o.start(t); o.stop(tt + 1); });
+    for (var c2 = 0; c2 < 6; c2++) clap(tt + .1 + c2 * .28, .45); // clap clap clap à la fin
+    crowdLevel(.2);
+  }
   function beep(f, d, v) { var a = audio(); if (!a) return; var t = a.currentTime, o = a.createOscillator(), g = a.createGain(); o.type = "triangle"; o.frequency.value = f; g.gain.setValueAtTime(v || .12, t); g.gain.exponentialRampToValueAtTime(.001, t + d); o.connect(g); g.connect(master); o.start(t); o.stop(t + d + .05); }
   function horn() {
     var a = audio(); if (!a) return; var t = a.currentTime, lp = a.createBiquadFilter(), g = a.createGain(); lp.type = "lowpass"; lp.frequency.value = 1400; lp.connect(g); g.connect(master);
@@ -774,9 +821,17 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   }
 
   /* ---------- décor : stade de nuit ---------- */
-  function drawBg() {
-    var cv = $("#bgc"), g = cv.getContext("2d"), x, y, i, cols = [];
+  var bgCur = 0, bgLead = -2, bgAt = 0;
+  // Redessine le stade : les tribunes prennent les couleurs du club en tête (fondu de 1,6 s).
+  function crowdColors(lead) {
+    if (lead === bgLead) return; bgLead = lead; bgAt = Date.now();
+    var cvs = [$("#bgc"), $("#bgc2")], nx = cvs[1 - bgCur]; drawBg(nx, lead);
+    nx.style.opacity = 1; cvs[bgCur].style.opacity = 0; bgCur = 1 - bgCur;
+  }
+  function drawBg(cv, lead) {
+    cv = cv || $("#bgc"); var g = cv.getContext("2d"), x, y, i, cols = [];
     for (i = 0; i < 12; i++) { var c = club(i); cols.push(c.c1, c.c2); }
+    if (lead >= 0) { var lc = club(lead); for (i = 0; i < 30; i++) cols.push(lc.c1, lc.c2); } // le public du leader envahit les tribunes
     var sky = g.createLinearGradient(0, 0, 0, 760); sky.addColorStop(0, "#01020a"); sky.addColorStop(1, "#0b1532"); g.fillStyle = sky; g.fillRect(0, 0, W, H);
     // tribunes : rangées de supporters aux couleurs des clubs, en arc
     g.fillStyle = "#0a0d1a"; g.beginPath(); g.moveTo(0, 180); g.quadraticCurveTo(540, 60, W, 180); g.lineTo(W, 1460); g.lineTo(0, 1460); g.fill();
@@ -940,7 +995,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   }
   function seasonBadge(name) { for (var i = 0; i < 12; i++) if (club(i).name === name) return logo(i) || img(i) || badgeURL(club(i).abbr, club(i).c1, club(i).c2, club(i).pat, 96); var c = findClub(name); return badgeURL(c.abbr, c.c1, c.c2, c.pat, 96); }
   function endMatch() {
-    if (ended) return; endEvent(); ended = true;
+    if (ended) return; endEvent(); ended = true; recStart();
     var o = order(), w = o[0], c = club(w), mvp = topFans()[0];
     if (pts[w] > 0) C.wins[c.name] = (C.wins[c.name] || 0) + 1;
     C.spts = C.spts || {}; for (var i = 0; i < 12; i++) if (pts[i]) C.spts[club(i).name] = (C.spts[club(i).name] || 0) + pts[i];
@@ -957,6 +1012,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     nextT = setTimeout(function () { showTable(rows, season, m); }, 7500);
   }
   function showTable(rows, season, m) {
+    recStop();
     if ($("#wrap").hidden) return;
     $("#win").hidden = true;
     $("#tabIn").innerHTML = "<h3>🏆 CLASSEMENT · SAISON " + season + "</h3><div class=\"sr hd\"><span>#</span><span></span><span>CLUB</span><span style=\"text-align:right\">VICT.</span><span style=\"text-align:right\">POINTS</span></div>" +
@@ -968,7 +1024,8 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   }
   function loop() {
     rateS = rateS * .6 + secHits * .4; secHits = 0;
-    crowdLevel(ended ? .08 : Math.min(.18, .03 + rateS * .008));
+    var oo = pts.length ? order() : [], gapR = oo.length && pts[oo[0]] ? (pts[oo[0]] - pts[oo[1]]) / pts[oo[0]] : 0;
+    crowdLevel(ended ? .08 : Math.min(.22, .03 + rateS * .008 + gapR * .05)); // l'ovation grandit avec l'écart
     if (paused || ended) return;
     left -= 1; var t = $("#timer"); t.textContent = fmt(left); t.classList.toggle("hurry", left <= 10);
     var el = C.dur - left;
@@ -979,9 +1036,57 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     else if (left === 10) speak("Dix secondes ! Dernier effort !", 3);
     else if (!C.nonstop && left > 15 && Date.now() - lastSpeech > 24000) hype();
     hist.push(pts.slice()); if (hist.length > 30) hist.shift();
+    if (C.chants && left > 12 && Date.now() - chantAt > 30000 && hist.length > 10) {
+      var g10c = gains(10), hi = 0; for (var q = 1; q < 12; q++) if (g10c[q] > g10c[hi]) hi = q;
+      if (g10c[hi] >= Math.max(12, (pts[order()[0]] || 0) * .12)) { chant(); speak(rnd(["Écoutez les supporters " + de(hi) + " ! Ils chantent à pleine voix !", "Les tribunes " + de(hi) + " s'enflamment, quel chant !", "Olé olé ! Le kop " + de(hi) + " est en feu !"]), 1); }
+    }
+    if (left === 20) recStart();
     if (left <= 10 && left > 0) beep(left <= 3 ? 1320 : 880, .15, .1);
     if (left <= 0) endMatch();
   }
+
+  /* ---------- récap vidéo du match (capture de l'onglet, ordinateur) ---------- */
+  var rec = { stream: null, video: null, cv: null, raf: 0, mr: null, chunks: [], list: [], match: 0 };
+  function recOk() { return !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia && window.MediaRecorder); }
+  function recBtn() {
+    var b = $("#bRec"); if (!b) return;
+    b.hidden = !recOk();
+    b.textContent = rec.list.length ? "⬇️ Récap match " + rec.list[0].match : rec.mr ? "🔴 Récap en cours" : rec.stream ? "🎬 Récap activé ✓" : "🎬 Activer le récap";
+  }
+  function recEnable() {
+    if (!recOk()) { alert("Le récap vidéo marche sur ordinateur, dans Chrome ou Edge."); return; }
+    if (rec.stream) return;
+    navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 30 }, audio: true, preferCurrentTab: true, selfBrowserSurface: "include", surfaceSwitching: "exclude" }).then(function (s) {
+      rec.stream = s; var v = document.createElement("video"); v.muted = true; v.playsInline = true; v.srcObject = s; v.play().catch(function () {}); rec.video = v;
+      s.getVideoTracks()[0].onended = function () { recOff(); };
+      if (!ended && left <= 20) recStart(); recBtn();
+    }, function () { recBtn(); });
+  }
+  function recStart() {
+    if (!rec.stream || rec.mr) return;
+    var cv = rec.cv || (rec.cv = document.createElement("canvas")); cv.width = 720; cv.height = 1280; var g = cv.getContext("2d");
+    cancelAnimationFrame(rec.raf);
+    (function draw() { // on ne garde que l'écran du jeu (9:16), sans les bandes noires ni les boutons
+      var v = rec.video; if (v && v.videoWidth) { var r = stage.getBoundingClientRect(), kx = v.videoWidth / innerWidth, ky = v.videoHeight / innerHeight; g.drawImage(v, r.left * kx, r.top * ky, r.width * kx, r.height * ky, 0, 0, 720, 1280); }
+      rec.raf = requestAnimationFrame(draw);
+    })();
+    var out = cv.captureStream(30); rec.stream.getAudioTracks().forEach(function (t) { out.addTrack(t); });
+    var type = ["video/mp4;codecs=avc1.42E01E,mp4a.40.2", "video/mp4", "video/webm;codecs=vp9,opus", "video/webm"].filter(function (t) { return MediaRecorder.isTypeSupported(t); })[0] || "";
+    rec.chunks = []; rec.match = C.match;
+    try { rec.mr = new MediaRecorder(out, type ? { mimeType: type, videoBitsPerSecond: 6000000 } : {}); } catch (e) { rec.mr = null; return; }
+    rec.mr.ondataavailable = function (e) { if (e.data && e.data.size) rec.chunks.push(e.data); };
+    rec.mr.start(1000); recBtn();
+  }
+  function recStop() {
+    var mr = rec.mr; if (!mr) return; rec.mr = null;
+    mr.onstop = function () {
+      cancelAnimationFrame(rec.raf); var type = (mr.mimeType || "video/webm").split(";")[0], blob = new Blob(rec.chunks, { type: type });
+      rec.list.unshift({ blob: blob, match: rec.match, name: "bataille-des-clubs-match-" + rec.match + (/mp4/.test(type) ? ".mp4" : ".webm") }); if (rec.list.length > 3) rec.list.pop(); recBtn();
+    };
+    try { mr.stop(); } catch (e) {}
+  }
+  function recOff() { recStop(); if (rec.stream) rec.stream.getTracks().forEach(function (t) { t.stop(); }); rec.stream = null; rec.video = null; recBtn(); }
+  function recDownload() { var r = rec.list[0]; if (!r) return; var a = document.createElement("a"); a.href = URL.createObjectURL(r.blob); a.download = r.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 60000); }
 
   /* ---------- connexion au relais (mêmes messages que le quiz) ---------- */
   function wsUrl() { var u = String(C.relay || "").trim().replace(/\/+$/, ""); if (!u) return ""; if (!/^[a-z]+:\/\//i.test(u)) u = "https://" + u; return u.replace(/^http/i, "ws") + "/?user=" + encodeURIComponent(String(C.user || "").replace(/^@/, "")); }
@@ -1011,17 +1116,19 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     try { if (navigator.wakeLock) navigator.wakeLock.request("screen").catch(function () {}); } catch (e) {}
     var noHost = C.host === "off"; $("#host").hidden = noHost; $("#hostTag").hidden = noHost; $("#top").classList.toggle("full", noHost); $("#last").classList.toggle("full", noHost); $("#bub").classList.toggle("full", noHost);
     if (gemOn()) ["Trente secondes ! Envoyez la lettre de votre club !", "Dix secondes ! Dernier effort !", "Fin de l'événement ! Retour aux points normaux."].forEach(gem.pre);
-    drawBg(); audio(); crowdStart(); host.start(); clearInterval(fxT); fxT = setInterval(fxLoop, 140);
+    bgLead = -2; $("#bgc").style.opacity = 1; $("#bgc2").style.opacity = 0; bgCur = 0; drawBg($("#bgc"), -1); audio(); crowdStart(); host.start(); clearInterval(fxT); fxT = setInterval(fxLoop, 140);
     startMatch(); clearInterval(tick); tick = setInterval(loop, 1000); clearInterval(talkT); talkT = setInterval(talkTick, 300);
+    recBtn();
     if (isDemo) demo(); else connect();
   }
   function quit() {
     clearInterval(tick); clearInterval(talkT); clearInterval(demoT); clearInterval(fxT); clearTimeout(nextT); wsWant = false; if (ws) try { ws.close(); } catch (e) {}
-    crowdStop(); host.stop(); gem.stop(); $("#wrap").hidden = true; $("#app").hidden = false; fillForm(); try { speechSynthesis.cancel(); } catch (e) {}
+    crowdStop(); host.stop(); gem.stop(); recOff(); $("#wrap").hidden = true; $("#app").hidden = false; fillForm(); try { speechSynthesis.cancel(); } catch (e) {}
   }
-  $("#go").onclick = function () { start(false); };
-  $("#demo").onclick = function () { start(true); };
+  $("#go").onclick = function () { if (C.recap && recOk()) recEnable(); start(false); };
+  $("#demo").onclick = function () { if (C.recap && recOk()) recEnable(); start(true); };
   $("#bQuit").onclick = quit;
+  $("#bRec").onclick = function () { if (rec.list.length) recDownload(); else if (!rec.stream) recEnable(); };
   $("#bPause").onclick = function () { paused = !paused; this.textContent = paused ? "▶ Reprendre" : "⏸ Pause"; crowdLevel(paused ? .01 : .03); };
   $("#bEnd").onclick = function () { left = 1; loop(); };
   fillForm(); setTimeout(autoCut, 800);
