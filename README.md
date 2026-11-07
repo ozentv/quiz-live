@@ -149,6 +149,7 @@ Page : https://ozentv.github.io/quiz-live/clubs.html
 - **🏟️ Sons de stade** (générés par la page) : rumeur de la foule qui monte avec le nombre de votes, coup de sifflet au début et à la fin, ovation sur les buts, bips des 10 dernières secondes.
 - **⚡ Événements surprises** (environ toutes les 70 à 110 secondes) : points doublés pour tous (30 s), Remontada ×2 pour les clubs hors du podium (30 s), ou club en vedette ×3 (20 s). Bandeau avec compte à rebours et badge « ×2 / ×3 » sur les cartes concernées.
 - **Animateur** en bas à gauche : présentateur animé qui parle en même temps que le commentateur et réagit aux buts (4 couleurs de peau, ou pas d'animateur).
+- Volume des sons de stade : faible (par défaut), moyen ou fort.
 - Manches de 2, 3, 5 ou 10 minutes : à la fin du chrono, le club en tête gagne (confettis, trophée 🏆 sur sa carte, MVP), puis le **classement de la saison** s'affiche (victoires et points cumulés), avant la manche suivante. Saisons de 100 matchs.
 - Sur chaque club : « 👤 » met une photo (un joueur) en fond de carte et « 🛡️ » met le logo du club, posé en grand au milieu (PNG transparent conservé). Logo seul : il s'affiche sur un fond aux couleurs du club. Les images restent seulement sur ton téléphone ; sans image, l'écusson aux couleurs du club s'affiche.
 - « 📥 Importer toutes les images d'un coup » : sélectionne jusqu'à 12 images en une fois ; chacune va sur la bonne carte si son nom de fichier est la lettre (A.jpg) ou le nom du club (psg.jpg, real madrid.png), sinon dans l'ordre A, B, C… Un fichier dont le nom contient « logo », « écusson » ou « blason » (psg logo.png) devient le logo du club, les autres deviennent la photo.
@@ -182,7 +183,8 @@ Page : https://ozentv.github.io/quiz-live/vs.html
 - **Au hasard** mélange tous les thèmes.
 
 ## Voix off
-Deux types de voix, au choix dans les réglages du quiz et de la Bataille des clubs (« Type de voix ») :
+Trois types de voix, au choix dans les réglages du quiz et de la Bataille des clubs (« Type de voix ») :
+- **🎙️ Voix pro gratuite** (conseillée) : les voix « Natural » de Microsoft (Henri, Rémy, Denise, Vivienne, Éloïse, plus des voix belges, suisses et québécoises), fabriquées par le relais. Gratuites, sans quota, rapides (moins d'une seconde) : il faut seulement la « Clé du classement » (ADMIN_KEY), rien à créer. Elle passe par le service de lecture à voix haute de Microsoft Edge, qui n'est pas une API officielle : si Microsoft le change, la voix du téléphone prend le relais.
 - **📱 Voix du téléphone** : synthèse vocale du navigateur (`speechSynthesis`) avec une voix française. Sur PC, dans **Microsoft Edge**, choisis une voix « Online (Natural) » (Henri, Denise, Vivienne, Rémy…) : elles sont gratuites et très naturelles. Sur iPhone, pour installer une voix : Réglages, Accessibilité, Contenu énoncé, Voix, Français. Sans voix française, le quiz se joue avec le texte seul.
 - **✨ Voix IA Gemini** : voix très naturelle de Google Gemini (15 voix, hommes et femmes), avec un ton d'animateur télé pour le quiz et de commentateur sportif pour la Bataille des clubs. C'est le relais qui fabrique l'audio : ta clé Gemini reste sur Render et n'est jamais dans la page.
   1. Crée une clé gratuite sur [aistudio.google.com/apikey](https://aistudio.google.com/apikey).
