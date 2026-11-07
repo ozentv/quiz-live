@@ -140,8 +140,15 @@ Dans Render, onglet **Environment** du service :
 Page : https://ozentv.github.io/quiz-live/clubs.html
 - 12 cartes de clubs (au choix parmi les 96 du générateur), chacune avec une lettre de A à L. Le chat écrit la lettre (ou le nom du club) pour lui donner 1 point (un point par seconde maximum par personne).
 - Cadeaux : pièces × 1, 5 ou 10 points pour le club de la personne. Likes : 1 point tous les 5, 10 ou 25 likes pour le dernier club soutenu.
-- Classement en direct : les cartes glissent à leur nouvelle place avec un flash, le top 3 brille (or, argent, bronze), « +1 » et cœurs qui s'envolent, « Le plus envoyé », dernier supporter avec sa photo.
-- Manches de 2, 3, 5 ou 10 minutes : à la fin du chrono, le club en tête gagne (confettis, voix off, trophée 🏆 sur sa carte), puis la manche suivante commence. Saisons de 100 matchs.
+- Classement en direct : les cartes glissent à leur nouvelle place avec un flash, cadres métal or, argent et bronze pour le top 3, ruban de rang, barre de progression par rapport au leader, « +1 » et cœurs qui s'envolent, dernier supporter avec sa photo.
+- **Visuel stade** : stade de nuit dessiné (tribunes aux couleurs des 12 clubs, projecteurs, panneaux LED, pelouse), flashs d'appareils photo qui se multiplient quand le chat s'emballe, tableau d'affichage avec chrono lumineux, saison, match, leader et nombre de votes.
+- **⭐ Top supporters** : les 5 personnes qui ont rapporté le plus de points (photo, club, points). À la fin du match, le premier est élu **MVP**.
+- **⚽ BUT !** : quand un club passe 100, 250, 500, 1 000 ou 2 000 points, grand bandeau « BUT ! », ovation et annonce.
+- **🎙️ Commentateur** (voix + sous-titres) : coup d'envoi, changements de leader, gros cadeaux, événements, « plus qu'une minute », 30 s, 10 s, relances quand le chat est calme, et fin du match avec le gagnant et le MVP.
+- **🏟️ Sons de stade** (générés par la page) : rumeur de la foule qui monte avec le nombre de votes, coup de sifflet au début et à la fin, ovation sur les buts, bips des 10 dernières secondes.
+- **⚡ Événements surprises** (environ toutes les 70 à 110 secondes) : points doublés pour tous (30 s), Remontada ×2 pour les clubs hors du podium (30 s), ou club en vedette ×3 (20 s). Bandeau avec compte à rebours et badge « ×2 / ×3 » sur les cartes concernées.
+- **Animateur** en bas à gauche : présentateur animé qui parle en même temps que le commentateur et réagit aux buts (4 couleurs de peau, ou pas d'animateur).
+- Manches de 2, 3, 5 ou 10 minutes : à la fin du chrono, le club en tête gagne (confettis, trophée 🏆 sur sa carte, MVP), puis le **classement de la saison** s'affiche (victoires et points cumulés), avant la manche suivante. Saisons de 100 matchs.
 - Sur chaque club : « 👤 » met une photo (un joueur) en fond de carte et « 🛡️ » met le logo du club, posé en grand au milieu (PNG transparent conservé). Logo seul : il s'affiche sur un fond aux couleurs du club. Les images restent seulement sur ton téléphone ; sans image, l'écusson aux couleurs du club s'affiche.
 - « 📥 Importer toutes les images d'un coup » : sélectionne jusqu'à 12 images en une fois ; chacune va sur la bonne carte si son nom de fichier est la lettre (A.jpg) ou le nom du club (psg.jpg, real madrid.png), sinon dans l'ordre A, B, C… Un fichier dont le nom contient « logo », « écusson » ou « blason » (psg logo.png) devient le logo du club, les autres deviennent la photo.
 - Utilise les mêmes réglages de relais que le quiz. Mode démo pour tester sans live.
