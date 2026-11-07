@@ -131,10 +131,14 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
 #last.full { left: 30px; }
 #last img { width: 34px; height: 34px; border-radius: 50%; margin-right: 10px; object-fit: cover; }
 #last b { color: var(--acc); margin-left: 6px; }
-#bub { position: absolute; left: 270px; top: 1488px; max-width: 770px; padding: 12px 22px; border-radius: 18px 18px 18px 4px; font: 700 30px/1.25 Figtree, sans-serif; z-index: 12;
-  background: rgba(255,255,255,.96); color: #10131c; box-shadow: 0 12px 30px rgba(0,0,0,.55); border-left: 8px solid var(--acc); opacity: 0; transform: translateY(14px); transition: opacity .3s, transform .3s; pointer-events: none; }
-#bub.on { opacity: 1; transform: none; }
-#bub.full { left: 30px; }
+#bub { position: absolute; left: 30px; right: 30px; top: 252px; min-height: 64px; padding: 6px 22px; border-radius: 14px; z-index: 6; display: flex; align-items: center; justify-content: center; text-align: center;
+  font: 600 25px/1.18 Figtree, sans-serif; color: #fff; background: linear-gradient(90deg, rgba(8,10,18,.6), rgba(8,10,18,.94) 12%, rgba(8,10,18,.94) 88%, rgba(8,10,18,.6)); border: 2px solid rgba(255,214,10,.55);
+  box-shadow: 0 10px 26px rgba(0,0,0,.55); opacity: 0; transition: opacity .25s; pointer-events: none; overflow: hidden; }
+#bub::before { content: "🎙️"; margin-right: 12px; font-size: 26px; }
+#bub.on { opacity: 1; }
+#sub.evt ~ #bub { opacity: 0 !important; }
+#stage.talk #sub:not(.evt) { opacity: 0; }
+#sub { transition: opacity .25s; }
 /* but ! */
 #goal { position: absolute; left: 0; right: 0; top: 760px; height: 330px; display: grid; place-content: center; text-align: center; z-index: 8; pointer-events: none;
   background: linear-gradient(90deg, rgba(0,0,0,0), rgba(4,6,12,.88) 16%, rgba(4,6,12,.88) 84%, rgba(0,0,0,0)); border-top: 4px solid var(--acc); border-bottom: 4px solid var(--acc); }
@@ -201,6 +205,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
       <label>Points par pièce de cadeau<select id="gmul"><option value="1">×1</option><option value="5">×5</option><option value="10">×10</option></select></label>
       <label>Likes pour 1 point<select id="lstep"><option value="5">5 likes</option><option value="10">10 likes</option><option value="25">25 likes</option></select></label>
     </div>
+    <label class="chk"><input type="checkbox" id="nonstop"> 🔁 Commentaire en continu : le commentateur ne s'arrête jamais (leader, dernier, remontées, duels, supporters…)</label>
     <label class="chk"><input type="checkbox" id="voice"> 🎙️ Voix du commentateur (coup d'envoi, changements de leader, buts, fin de match)</label>
     <label>Type de voix<select id="eng"><option value="phone">📱 Voix du téléphone</option><option value="edge">🎙️ Voix pro gratuite (Microsoft, via ton relais)</option><option value="gemini">✨ Voix IA Gemini (via ton relais)</option></select></label>
     <div id="gemBox" style="display:grid;gap:8px;padding:10px;border:1px solid var(--line);border-radius:12px">
@@ -271,7 +276,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   var C;
   try { C = JSON.parse(localStorage.getItem("clubs-set") || "null"); } catch (e) { C = null; }
   if (!C) C = { slots: DEF_SLOTS, dur: 300, gmul: 5, lstep: 10, voice: true, sound: true, events: true, host: "moyen", season: 1, match: 1, wins: {}, spts: {} };
-  if (C.sound == null) C.sound = true; if (C.events == null) C.events = true; if (!C.host) C.host = "moyen"; if (!C.spts) C.spts = {}; if (!C.eng) C.eng = "phone"; if (!C.gvoice) C.gvoice = "Fenrir"; if (!C.evoice) C.evoice = "fr-FR-HenriNeural"; if (!C.sfx) C.sfx = "faible"; if (C.behind == null) C.behind = true;
+  if (C.sound == null) C.sound = true; if (C.events == null) C.events = true; if (!C.host) C.host = "moyen"; if (!C.spts) C.spts = {}; if (!C.eng) C.eng = "phone"; if (!C.gvoice) C.gvoice = "Fenrir"; if (!C.evoice) C.evoice = "fr-FR-HenriNeural"; if (!C.sfx) C.sfx = "faible"; if (C.behind == null) C.behind = true; if (C.nonstop == null) C.nonstop = true;
   var Q = {}; try { Q = JSON.parse(localStorage.getItem("sq-set") || "{}"); } catch (e) {}
   if (!C.user) C.user = Q.ttUser || ""; if (!C.relay) C.relay = Q.relay || "studio-quiz-relais.onrender.com"; if (C.gkey == null) C.gkey = Q.lbKey || "";
   function save() { try { localStorage.setItem("clubs-set", JSON.stringify(C)); } catch (e) {} }
@@ -325,6 +330,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     $("#dur").value = C.dur; $("#dur").onchange = function () { C.dur = +this.value; save(); };
     $("#gmul").value = C.gmul; $("#gmul").onchange = function () { C.gmul = +this.value; save(); };
     $("#lstep").value = C.lstep; $("#lstep").onchange = function () { C.lstep = +this.value; save(); };
+    $("#nonstop").checked = !!C.nonstop; $("#nonstop").onchange = function () { C.nonstop = this.checked; save(); };
     $("#voice").checked = !!C.voice; $("#voice").onchange = function () { C.voice = this.checked; save(); };
     function engUI() {
       var ed = C.eng === "edge"; $("#gemBox").hidden = C.eng === "phone"; $("#edgeNote").hidden = !ed; $("#gemNote").hidden = ed; $("#gemSt").textContent = "";
@@ -449,7 +455,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
 
   /* ---------- jeu ---------- */
   var W = 1080, H = 1920, stage = $("#stage"), flipAt = [], pts = [], sent = [], supporter = {}, fans = {}, lastSlot = 0, cool = {}, likeAcc = 0, likeBase = null, rankOf = [], left = 0, paused = false, ended = false, tick = null, demoT = null, ws = null, wsWant = false, nextT = null;
-  var leader = -1, leadSaidAt = 0, votes = 0, secHits = 0, rateS = 0, evt = null, evtNext = 0, goalQ = [], goalBusy = false, lastSpeech = 0, giftSaidAt = 0;
+  var talkT = null, leader = -1, leadSaidAt = 0, votes = 0, secHits = 0, rateS = 0, evt = null, evtNext = 0, goalQ = [], goalBusy = false, lastSpeech = 0, giftSaidAt = 0;
   var STEPS = [100, 250, 500, 1000, 2000];
   function fitStage() { var w = innerWidth, h = innerHeight, s = Math.min(w / W, h / H); stage.style.transform = "translate(" + ((w - W * s) / 2) + "px," + ((h - H * s) / 2) + "px) scale(" + s + ")"; }
   addEventListener("resize", fitStage);
@@ -493,6 +499,8 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
       for (var k = 1; k <= 3; k++) el.classList.toggle("r" + k, r === k - 1);
       el.classList.toggle("boost", m > 1);
       if (!first && rankOf[i] != null && rankOf[i] !== r && (!flipAt[i] || nowF - flipAt[i] > 1500)) { flipAt[i] = nowF; el.classList.remove("flip"); void el.offsetWidth; el.classList.add("flip"); }
+      if (!first && rankOf[i] != null && pts[i] > 0 && ((rankOf[i] - r >= 2) || (r < 3 && rankOf[i] >= 3))) moves.push({ i: i, r: r, t: nowF });
+      if (!first && rankOf[i] != null && r === 11 && rankOf[i] < 11 && pts[o[0]] > 10) moves.push({ i: i, r: r, down: true, t: nowF });
       rankOf[i] = r; el.querySelector("[data-rk]").textContent = "#" + (r + 1); el.querySelector("[data-pt]").textContent = nf(pts[i]);
       el.querySelector("[data-br]").style.width = (top ? Math.round(pts[i] / top * 100) : 0) + "%";
       el.querySelector("[data-mu]").textContent = m > 1 ? "×" + m : "";
@@ -552,6 +560,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
       var p = document.createElement("div"); p.className = "pop"; p.textContent = "+" + nf(n) + (m > 1 ? " ×" + m : ""); el.appendChild(p); setTimeout(function () { p.remove(); }, 1000);
       if (n >= 5 || Math.random() < .12) { el.classList.remove("hit"); void el.offsetWidth; el.classList.add("hit"); }
     }
+    if (key && who) { recentFans.unshift({ name: who, i: i, t: Date.now() }); if (recentFans.length > 20) recentFans.pop(); }
     if (key) { var f = fans[key] || (fans[key] = { name: who, pic: pic, pts: 0 }); f.pts += n; f.club = i; if (who) f.name = who; if (pic) f.pic = pic; }
     if (who) $("#last").innerHTML = (pic ? "<img alt=\"\" src=\"" + esc2(pic) + "\" referrerpolicy=\"no-referrer\" onerror=\"this.remove()\">" : "") + "<span>" + esc2(who) + " " + (why || "soutient") + "</span><b>" + esc2(club(i).name) + "</b>";
     return n;
@@ -574,6 +583,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   function onGift(m) {
     var k = String(m.id || m.name || "").toLowerCase(), i = supporter[k] != null ? supporter[k] : lastSlot, n = Math.max(1, (Number(m.coins) || 1) * Math.max(1, Number(m.count) || 1) * C.gmul);
     var got = addPts(i, n, m.name || m.id, m.pic, "🎁 offre " + nf(n * eventMult(i)) + " pts à", k); for (var h = 0; h < Math.min(6, 1 + n / 20); h++) setTimeout(function () { heart(i); }, h * 120);
+    if (got >= 5 && got < 100) lastGift = { name: m.name || "un supporter", n: got, i: i, t: Date.now() };
     if (got >= 100 && Date.now() - giftSaidAt > 8000) { giftSaidAt = Date.now(); roar(2.2, .35); host.mood("happy", 2200); speak("Énorme cadeau de " + (m.name || "un supporter") + " ! " + nf(got) + " points pour " + club(i).name + " !", 2); }
   }
   function onLike(m) {
@@ -595,17 +605,18 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   }
 
   /* ---------- commentateur ---------- */
-  var busyUntil = 0, curPrio = 0, bubT = null, fakeT = null, speakTok = 0;
+  var busyUntil = 0, curPrio = 0, bubT = null, fakeT = null, speakTok = 0, talkingNow = false, talkSince = 0, nextTalkAt = 0;
+  function spoke() { talkingNow = false; nextTalkAt = Date.now() + 250 + Math.random() * 650; clearTimeout(bubT); bubT = setTimeout(function () { if (!talkingNow) { $("#bub").classList.remove("on"); stage.classList.remove("talk"); } }, 900); }
   function speak(t, prio) {
     var now = Date.now(); prio = prio || 0;
     if (now < busyUntil && prio < curPrio) return;
     curPrio = prio; lastSpeech = now; busyUntil = now + Math.max(1800, t.length * 62);
-    var b = $("#bub"); b.textContent = t; b.classList.add("on"); clearTimeout(bubT); bubT = setTimeout(function () { b.classList.remove("on"); }, busyUntil - now + 700);
+    var b = $("#bub"); b.textContent = t; b.classList.add("on"); stage.classList.add("talk"); talkingNow = true; talkSince = now; clearTimeout(bubT); bubT = setTimeout(function () { b.classList.remove("on"); stage.classList.remove("talk"); }, busyUntil - now + 700);
     var talk = function (on) { host.talking(on); }, my = ++speakTok;
     clearTimeout(fakeT);
     if (gemOn()) {
       busyUntil += 2000; try { speechSynthesis.cancel(); } catch (e) {}
-      gem.play(t, function () { talk(true); }, 8000).then(function (ok) { if (my === speakTok) { talk(false); curPrio = 0; busyUntil = Math.min(busyUntil, Date.now()); } }, function (e) {
+      gem.play(t, function () { talk(true); }, 8000).then(function (ok) { if (my === speakTok) { talk(false); curPrio = 0; busyUntil = Math.min(busyUntil, Date.now()); spoke(); } }, function (e) {
         gemSt("⚠️ " + (e && e.message || "Voix IA indisponible") + " → voix du téléphone.");
         if (/quota|trop de temps/i.test(e && e.message || "")) gemPause = Date.now() + 120000;
         if (my === speakTok) phoneSay(t, talk);
@@ -615,18 +626,18 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     phoneSay(t, talk);
   }
   function phoneSay(t, talk) {
-    var now = Date.now(); gem.stop(); clearTimeout(fakeT);
+    var now = Date.now(), my = speakTok; gem.stop(); clearTimeout(fakeT);
     if (C.voice && window.speechSynthesis) {
       try {
-        var u = new SpeechSynthesisUtterance(t); u.lang = "fr-FR"; u.rate = 1.07; u.pitch = 1;
+        var u = new SpeechSynthesisUtterance(t); u.lang = "fr-FR"; u.rate = C.nonstop ? 1.14 : 1.07; u.pitch = 1;
         var v = speechSynthesis.getVoices().filter(function (x) { return /^fr/i.test(x.lang); }).sort(function (a, b) { function sc(x) { return (/fr[-_]FR/i.test(x.lang) ? 2 : 0) + (/natural|online|neural|premium|enhanced|google/i.test(x.name) ? 3 : 0); } return sc(b) - sc(a); })[0]; if (v) u.voice = v;
-        u.onstart = function () { talk(true); }; u.onend = u.onerror = function () { talk(false); curPrio = 0; busyUntil = Math.min(busyUntil, Date.now()); };
+        u.onstart = function () { talk(true); }; u.onend = u.onerror = function () { if (my !== speakTok) return; talk(false); curPrio = 0; busyUntil = Math.min(busyUntil, Date.now()); spoke(); };
         speechSynthesis.cancel(); speechSynthesis.speak(u);
-        fakeT = setTimeout(function () { talk(false); }, busyUntil - now + 4000);
+        fakeT = setTimeout(function () { talk(false); if (my === speakTok) spoke(); }, busyUntil - now + 6000);
         return;
       } catch (e) {}
     }
-    talk(true); fakeT = setTimeout(function () { talk(false); curPrio = 0; }, busyUntil - now);
+    talk(true); fakeT = setTimeout(function () { talk(false); curPrio = 0; if (my === speakTok) spoke(); }, busyUntil - now);
   }
   function onLead(i, old) {
     var now = Date.now(); host.mood("happy", 1800); cheer();
@@ -634,10 +645,77 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     var n = club(i).name;
     speak(old >= 0 ? rnd([n + " prend la tête !", "Renversement de situation ! " + n + " passe devant " + club(old).name + " !", n + " s'empare de la première place !", "Ça bouge en haut du classement : " + n + " est leader !"]) : n + " ouvre le score et prend la tête !", 1);
   }
+  /* ---------- commentaire en continu, comme un vrai match ---------- */
+  var ORD = ["première", "deuxième", "troisième", "quatrième", "cinquième", "sixième", "septième", "huitième", "neuvième", "dixième", "onzième", "douzième"];
+  var hist = [], recentFans = [], moves = [], saidRecent = [], lastCat = "", lastGift = null;
+  function nmc(i) { return club(i).name; }
+  function de(i) { var n = nmc(i); return /^[aeiouyhéèêàâîôûAEIOUYHÉ]/.test(n) ? "d'" + n : "de " + n; }
+  function pl(n, w) { return nf(n) + " " + w + (n > 1 ? "s" : ""); }
+  function andList(a) { return a.length > 1 ? a.slice(0, -1).join(", ") + " et " + a[a.length - 1] : a[0]; }
+  var catAt = {}, CAT_COOL = { move: 0, gift: 0, hot: 12000, close: 14000, cta: 7000, cta2: 7000, fans: 10000 };
+  function gains(sec) { var h = hist[Math.max(0, hist.length - 1 - sec)]; return pts.map(function (p, i) { return h ? p - h[i] : 0; }); }
+  function lineFor() {
+    var o = order(), L = o[0], S = o[1], T = o[2], Z = o[11], top = pts[L], now = Date.now(), c = [], k;
+    function add(cat, w, t) { if (t) c.push({ cat: cat, w: w, t: t }); }
+    function cta(i) { return rnd(["Pour " + nmc(i) + ", c'est la lettre " + LET[i] + " !", "Supporters " + de(i) + ", tapez " + LET[i] + " dans le chat !", nmc(i) + ", c'est " + LET[i] + " ! Allez, on pousse !"]); }
+    var any = o[Math.floor(Math.random() * 12)];
+    if (!top) {
+      add("start", 5, rnd(["On attend les premiers votes ! Écrivez la lettre de votre club !", "Le match est lancé, et personne n'a encore marqué ! Qui va ouvrir le score ?", "Tous les clubs sont à zéro ! Le premier qui vote donne l'avantage à son équipe !"]));
+      add("cta", 4, cta(any)); add("cta2", 3, cta(o[Math.floor(Math.random() * 12)]));
+    } else {
+      var gap = pts[L] - pts[S], g10 = gains(10), mo = 0, lo = 0;
+      for (k = 1; k < 12; k++) { if (g10[k] > g10[mo]) mo = k; }
+      for (k = 0; k < 12; k++) { if (g10[k] < g10[lo]) lo = k; }
+      add("lead", 3, rnd([nmc(L) + " est toujours en tête avec " + nf(top) + " points !", nmc(L) + " mène la danse !", "En tête du classement, on retrouve " + nmc(L) + " !", nmc(L) + " tient la première place, mais pour combien de temps ?"]));
+      if (pts[S] && gap <= Math.max(6, top * .08)) add("close", 7, rnd(["Ça se resserre ! Seulement " + pl(gap, "point") + " entre " + nmc(L) + " et " + nmc(S) + " !", nmc(S) + " revient fort sur " + nmc(L) + " !", "Duel au sommet entre " + nmc(L) + " et " + nmc(S) + " ! Tout peut basculer !", "Attention, " + nmc(S) + " n'est qu'à " + pl(gap, "point") + " de la tête !"]));
+      else if (pts[S] && gap > top * .3) add("big", 3, rnd([nmc(L) + " creuse l'écart : " + nf(gap) + " points d'avance sur " + nmc(S) + " !", "Gros avantage pour " + nmc(L) + " ! Qui va réussir à les rattraper ?"]));
+      add("podium", 2, "Le podium pour l'instant : " + nmc(L) + ", " + nmc(S) + " et " + nmc(T) + " !");
+      add("last", 3, pts[Z] === 0 ? nmc(Z) + " n'a encore aucun point ! Supporters " + de(Z) + ", tapez " + LET[Z] + " !" : rnd([nmc(Z) + " est bon dernier avec " + pl(pts[Z], "point") + " ! Supporters " + de(Z) + ", tapez " + LET[Z] + " !", "Lanterne rouge pour " + nmc(Z) + "… Il faut se réveiller !", "C'est dur pour " + nmc(Z) + ", à la dernière place ! On attend une réaction !"]));
+      if (g10[mo] >= 5) add("hot", 6, rnd([nmc(mo) + " est en feu ! " + pl(g10[mo], "point") + " dans les dix dernières secondes !", "Grosse dynamique pour " + nmc(mo) + " ! Les supporters répondent présent !", "Quelle pression de " + nmc(mo) + " en ce moment !"]));
+      if (g10[lo] === 0 && pts[lo] && rankOf[lo] < 6) add("cold", 3, "Plus rien pour " + nmc(lo) + " depuis dix secondes… Attention, ça peut revenir derrière !");
+      for (k = 3; k < 10; k++) { var a = o[k], b2 = o[k + 1]; if (pts[a] && pts[a] - pts[b2] <= 2) { add("duel", 4, "Bagarre pour la " + ORD[k] + " place entre " + nmc(a) + " et " + nmc(b2) + " !"); break; } }
+      if (pts[o[3]] && pts[T] - pts[o[3]] > 0 && pts[T] - pts[o[3]] <= Math.max(4, top * .06)) add("pod2", 4, nmc(o[3]) + " frappe à la porte du podium ! Plus que " + pl(pts[T] - pts[o[3]], "point") + " de retard sur " + nmc(T) + " !");
+      STEPS.forEach(function (st) { if (pts[L] < st && st - pts[L] <= Math.max(15, st * .08)) add("goalnear", 5, nmc(L) + " n'est plus qu'à " + pl(st - pts[L], "point") + " de la barre des " + st + " ! Le but approche !"); });
+      add("cta", 2, cta(o[3 + Math.floor(Math.random() * 9)]));
+      add("votes", 1, "Déjà " + nf(votes) + " votes dans ce match ! Continuez !");
+      var sec = gains(8).reduce(function (x, y) { return x + y; }, 0);
+      if (sec < 3) add("calm", 4, rnd(["C'est calme dans les tribunes… Réveillez-vous, écrivez la lettre de votre club !", "On ne vous entend plus ! Allez, faites du bruit dans le chat !"]));
+      else if (sec > 40) add("crowd", 3, rnd(["Quelle ambiance ! Le chat est en feu !", "Les tribunes s'enflamment !", "Incroyable, ça vote de partout !"]));
+    }
+    // mouvements au classement
+    moves = moves.filter(function (m) { return now - m.t < 9000; });
+    if (moves.length) { var mv = moves.shift();
+      add("move", 9, mv.down ? nmc(mv.i) + " tombe à la dernière place !" : mv.r < 3 ? nmc(mv.i) + " entre sur le podium, " + ORD[mv.r] + " place !" : nmc(mv.i) + " grimpe à la " + ORD[mv.r] + " place !"); }
+    // supporters
+    var tf = topFans()[0];
+    if (tf && tf.pts >= 3) add("mvp", 3, rnd([tf.name + " est le meilleur supporter du match avec " + nf(tf.pts) + " points pour " + nmc(tf.club) + " !", "Le MVP pour l'instant, c'est " + tf.name + " ! Qui va lui prendre sa place ?"]));
+    var rf = recentFans.filter(function (f) { return now - f.t < 12000; }), names = [];
+    rf.forEach(function (f) { if (names.indexOf(f.name) < 0 && names.length < 3) names.push(f.name); });
+    if (names.length >= 2) add("fans", 4, rnd(["Merci " + andList(names) + " ! Continuez à voter !", andList(names) + " poussent pour leur club ! Bravo !"]));
+    else if (names.length === 1) add("fans", 3, "Merci " + names[0] + " qui soutient " + nmc(rf[0].i) + " !");
+    if (lastGift && now - lastGift.t < 15000) { add("gift", 6, "Merci " + lastGift.name + " pour le cadeau ! " + pl(lastGift.n, "point") + " pour " + nmc(lastGift.i) + " !"); }
+    add("tips", 1, rnd(["Les cadeaux donnent des dizaines de points d'un coup à votre club !", "Pensez aux likes : ils donnent aussi des points au dernier club soutenu !", "Le club en tête à la fin du chrono gagne le match !"]));
+    if (evt) add("evt", 6, "Plus que " + Math.max(1, Math.ceil((evt.end - now) / 1000)) + " secondes d'événement ! Profitez-en !");
+    if (left > 15 && left % 60 < 6 && left < C.dur - 20) add("time", 5, "Il reste " + Math.round(left / 60) + " minute" + (left >= 90 ? "s" : "") + " de jeu !");
+    var f = c.filter(function (x) { return x.cat !== lastCat && saidRecent.indexOf(x.t) < 0 && now - (catAt[x.cat] || 0) > (CAT_COOL[x.cat] != null ? CAT_COOL[x.cat] : 20000); });
+    if (!f.length) f = c.filter(function (x) { return x.cat !== lastCat; }); if (!f.length) f = c;
+    var tot = f.reduce(function (x, y) { return x + y.w; }, 0), r = Math.random() * tot, pick = f[0];
+    for (k = 0; k < f.length; k++) { r -= f[k].w; if (r <= 0) { pick = f[k]; break; } }
+    if (pick.cat === "gift") lastGift = null;
+    lastCat = pick.cat; catAt[pick.cat] = now; saidRecent.push(pick.t); if (saidRecent.length > 14) saidRecent.shift();
+    return pick.t;
+  }
+  function talkTick() {
+    if (!C.voice || !C.nonstop || ended || paused || $("#wrap").hidden) return;
+    var now = Date.now();
+    if (talkingNow && now - talkSince > 25000) talkingNow = false; // sécurité
+    if (talkingNow || now < busyUntil || now < nextTalkAt) return;
+    speak(lineFor(), 0);
+  }
   function hype() {
     var o = order(), i = o[3 + Math.floor(Math.random() * 9)], c = club(i), l = club(o[0]);
     speak(rnd([
-      "Allez les supporters de " + c.name + ", écrivez " + LET[i] + " dans le chat !",
+      "Allez les supporters " + de(i) + ", écrivez " + LET[i] + " dans le chat !",
       pts[o[0]] ? l.name + " mène avec " + nf(pts[o[0]]) + " points. Qui va les arrêter ?" : "Écrivez la lettre de votre club dans le chat pour marquer des points !",
       "Les cadeaux rapportent beaucoup de points à votre club ! Pensez aussi aux likes !",
       "Rien n'est joué ! Envoyez la lettre de votre club !"
@@ -846,7 +924,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   function fmt(s) { s = Math.max(0, Math.ceil(s)); return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); }
   function header() { $("#sSeason").textContent = "Saison " + C.season; $("#sMatch").textContent = "Match " + C.match + "/100"; }
   function startMatch() {
-    clearTimeout(nextT); pts = []; sent = []; fans = {}; votes = 0; evt = null; goalQ = []; leader = -1;
+    clearTimeout(nextT); pts = []; sent = []; fans = {}; votes = 0; evt = null; goalQ = []; leader = -1; hist = []; recentFans = []; moves = []; lastGift = null; nextTalkAt = Date.now() + 6000;
     for (var i = 0; i < 12; i++) { pts.push(0); sent.push(0); }
     ended = false; left = C.dur; evtNext = 40 + Math.random() * 20; header(); build(); subLine();
     $("#win").hidden = true; $("#tab").hidden = true; $("#goal").hidden = true; $("#last").innerHTML = "<span>Le match commence ! Envoie la lettre de ton club</span>";
@@ -899,7 +977,8 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     if (left === 60 && C.dur > 60) { var o = order(); speak("Plus qu'une minute !" + (pts[o[0]] ? " " + club(o[0]).name + " est en tête, mais tout peut encore basculer !" : ""), 3); }
     else if (left === 30) speak("Trente secondes ! Envoyez la lettre de votre club !", 3);
     else if (left === 10) speak("Dix secondes ! Dernier effort !", 3);
-    else if (left > 15 && Date.now() - lastSpeech > 24000) hype();
+    else if (!C.nonstop && left > 15 && Date.now() - lastSpeech > 24000) hype();
+    hist.push(pts.slice()); if (hist.length > 30) hist.shift();
     if (left <= 10 && left > 0) beep(left <= 3 ? 1320 : 880, .15, .1);
     if (left <= 0) endMatch();
   }
@@ -933,11 +1012,11 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     var noHost = C.host === "off"; $("#host").hidden = noHost; $("#hostTag").hidden = noHost; $("#top").classList.toggle("full", noHost); $("#last").classList.toggle("full", noHost); $("#bub").classList.toggle("full", noHost);
     if (gemOn()) ["Trente secondes ! Envoyez la lettre de votre club !", "Dix secondes ! Dernier effort !", "Fin de l'événement ! Retour aux points normaux."].forEach(gem.pre);
     drawBg(); audio(); crowdStart(); host.start(); clearInterval(fxT); fxT = setInterval(fxLoop, 140);
-    startMatch(); clearInterval(tick); tick = setInterval(loop, 1000);
+    startMatch(); clearInterval(tick); tick = setInterval(loop, 1000); clearInterval(talkT); talkT = setInterval(talkTick, 300);
     if (isDemo) demo(); else connect();
   }
   function quit() {
-    clearInterval(tick); clearInterval(demoT); clearInterval(fxT); clearTimeout(nextT); wsWant = false; if (ws) try { ws.close(); } catch (e) {}
+    clearInterval(tick); clearInterval(talkT); clearInterval(demoT); clearInterval(fxT); clearTimeout(nextT); wsWant = false; if (ws) try { ws.close(); } catch (e) {}
     crowdStop(); host.stop(); gem.stop(); $("#wrap").hidden = true; $("#app").hidden = false; fillForm(); try { speechSynthesis.cancel(); } catch (e) {}
   }
   $("#go").onclick = function () { start(false); };
