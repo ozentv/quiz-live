@@ -178,6 +178,7 @@ Page : https://ozentv.github.io/quiz-live/vs.html
   - **la vidéo finie** avec le son (MP4 quand le navigateur le permet, sinon WEBM), en 720p ou 1080p, jusqu'à 60 secondes ;
   - **l'image transparente** des cartes, à poser au-dessus de n'importe quelle vidéo dans CapCut ;
   - **l'image avec le fond**.
+- Une fois le fichier créé, un encadré reste affiché avec « ⬇️ Télécharger » (si le téléchargement automatique n'a pas marché) et, sur téléphone, « 📤 Enregistrer dans la galerie / Partager » pour le mettre dans la galerie ou l'envoyer directement dans TikTok ou CapCut.
 - Les réglages restent enregistrés sur le téléphone. « Échanger les équipes » inverse les deux cartes.
 
 ## Thèmes (33 thèmes, 1676 questions)
