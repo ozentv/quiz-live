@@ -142,8 +142,8 @@ Page : https://ozentv.github.io/quiz-live/clubs.html
 - Cadeaux : pièces × 1, 5 ou 10 points pour le club de la personne. Likes : 1 point tous les 5, 10 ou 25 likes pour le dernier club soutenu.
 - Classement en direct : les cartes glissent à leur nouvelle place avec un flash, le top 3 brille (or, argent, bronze), « +1 » et cœurs qui s'envolent, « Le plus envoyé », dernier supporter avec sa photo.
 - Manches de 2, 3, 5 ou 10 minutes : à la fin du chrono, le club en tête gagne (confettis, voix off, trophée 🏆 sur sa carte), puis la manche suivante commence. Saisons de 100 matchs.
-- « 🖼️ » sur chaque club permet de mettre ta propre image (logo ou joueur), gardée seulement sur ton téléphone ; sinon l'écusson aux couleurs du club s'affiche.
-- « 📥 Importer toutes les images d'un coup » : sélectionne jusqu'à 12 images en une fois ; chacune va sur la bonne carte si son nom de fichier est la lettre (A.jpg) ou le nom du club (psg.jpg, real madrid.png), sinon dans l'ordre A, B, C…
+- Sur chaque club : « 👤 » met une photo (un joueur) en fond de carte et « 🛡️ » met le logo du club, posé en grand au milieu (PNG transparent conservé). Logo seul : il s'affiche sur un fond aux couleurs du club. Les images restent seulement sur ton téléphone ; sans image, l'écusson aux couleurs du club s'affiche.
+- « 📥 Importer toutes les images d'un coup » : sélectionne jusqu'à 12 images en une fois ; chacune va sur la bonne carte si son nom de fichier est la lettre (A.jpg) ou le nom du club (psg.jpg, real madrid.png), sinon dans l'ordre A, B, C… Un fichier dont le nom contient « logo », « écusson » ou « blason » (psg logo.png) devient le logo du club, les autres deviennent la photo.
 - Utilise les mêmes réglages de relais que le quiz. Mode démo pour tester sans live.
 
 ## 🆚 Générateur VS (vidéos « Team contre Team »)
