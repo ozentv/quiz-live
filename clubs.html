@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bataille des clubs</title>
+<meta name="description" content="Jeu interactif pour les lives TikTok : le chat écrit la lettre de son club pour lui donner des points.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&family=Figtree:wght@400;600;700&display=swap">
+<style>
+:root { --bg: #0b0d14; --card: #151925; --line: #262c3d; --fg: #f2f4fa; --muted: #9aa3b8; --acc: #ffd60a; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.4 Figtree, system-ui, sans-serif; }
+.app { max-width: 760px; margin: 0 auto; padding: 16px max(16px, env(safe-area-inset-left)) 40px; display: grid; gap: 14px; }
+h1 { margin: 0; font: 900 28px Outfit, sans-serif; } h1 span { color: var(--acc); }
+p.sub, .note { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+.box { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: grid; gap: 10px; }
+.box h2 { margin: 0; font: 800 17px Outfit, sans-serif; }
+label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+input[type=text], select { width: 100%; min-height: 44px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: #0f121b; color: var(--fg); font: 16px Figtree, sans-serif; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+button { min-height: 46px; border: 0; border-radius: 12px; padding: 0 16px; font: 700 15px Figtree, sans-serif; cursor: pointer; background: #262c3d; color: var(--fg); }
+button.main { background: var(--acc); color: #111; } button.mini { min-height: 34px; padding: 0 10px; font-size: 13px; }
+.chk { display: flex; align-items: center; gap: 8px; color: var(--fg); font-size: 14px; } .chk input { width: 20px; height: 20px; }
+.slots { display: grid; gap: 8px; }
+.slot { display: grid; grid-template-columns: 34px 46px 1fr auto auto; gap: 8px; align-items: center; padding: 6px; border: 1px solid var(--line); border-radius: 12px; }
+.slot b { font: 900 22px Outfit, sans-serif; text-align: center; color: var(--acc); }
+.slot img { width: 46px; height: 46px; border-radius: 10px; object-fit: cover; background: #0f121b; }
+.slot select { min-height: 40px; font-size: 14px; }
+.st { font-size: 14px; color: var(--muted); } .st[data-s=connected] { color: #2ecc71; } .st[data-s=error] { color: #ff6b6b; }
+#wrap { position: fixed; inset: 0; z-index: 50; background: #070912; overflow: hidden; }
+#wrap[hidden] { display: none; }
+#stage { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 0 0; font-family: Outfit, sans-serif; color: #fff; overflow: hidden;
+  background: radial-gradient(ellipse at 50% 0%, #2a1f5c 0%, #110c2b 45%, #07060f 100%); }
+#stage::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(115deg, rgba(255,255,255,.025) 0 2px, transparent 2px 60px); }
+.hd { position: absolute; left: 30px; right: 30px; top: 120px; height: 150px; }
+.hd .t { position: absolute; left: 0; right: 0; top: 0; text-align: center; font-size: 64px; font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 24px rgba(255,214,10,.6); }
+.hd .s { position: absolute; left: 0; right: 0; top: 78px; text-align: center; font-size: 34px; font-weight: 800; color: var(--acc); }
+.pill { position: absolute; top: 40px; padding: 8px 22px; border-radius: 30px; background: rgba(0,0,0,.55); border: 3px solid rgba(255,255,255,.25); font-size: 28px; font-weight: 800; }
+#season { left: 30px; top: 40px; } #match { right: 30px; top: 40px; }
+#timer { left: 50%; transform: translateX(-50%); top: 1780px; font-size: 40px; padding: 10px 34px; border-color: var(--acc); }
+#timer.hurry { background: #c1121f; border-color: #fff; }
+.card { position: absolute; left: 0; top: 0; width: 330px; height: 362px; border-radius: 26px; overflow: hidden; transition: transform .7s cubic-bezier(.2, .9, .3, 1); background: #141026; box-shadow: 0 12px 30px rgba(0,0,0,.5); border: 4px solid rgba(255,255,255,.16); }
+.card .in { position: absolute; inset: 0; transition: transform .6s; transform-style: preserve-3d; }
+.card.flip .in { animation: flip .6s ease-in-out; }
+@keyframes flip { 0% { transform: scaleX(1); filter: brightness(1); } 45% { transform: scaleX(.06); filter: brightness(1.8); } 55% { transform: scaleX(.06); filter: brightness(1.8); } 100% { transform: scaleX(1); filter: brightness(1); } }
+.card .bg { position: absolute; inset: 0; }
+.card img.pic { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; }
+.card .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.35) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0) 55%, rgba(0,0,0,.85) 100%); }
+.card .rk { position: absolute; left: 14px; top: 12px; font-size: 30px; font-weight: 900; text-shadow: 0 2px 6px #000; }
+.card .tr { position: absolute; right: 14px; top: 12px; font-size: 26px; font-weight: 800; text-shadow: 0 2px 6px #000; }
+.card .nm { position: absolute; left: 12px; right: 12px; bottom: 74px; text-align: center; font-size: 30px; font-weight: 900; text-transform: uppercase; text-shadow: 0 2px 8px #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card .lt { position: absolute; left: 14px; bottom: 12px; width: 64px; height: 64px; border-radius: 50%; background: var(--acc); color: #111; display: grid; place-items: center; font-size: 40px; font-weight: 900; box-shadow: 0 0 0 4px #111, 0 0 18px rgba(255,214,10,.7); }
+.card .pt { position: absolute; right: 16px; bottom: 14px; text-align: right; font-size: 50px; font-weight: 900; line-height: 1; text-shadow: 0 2px 8px #000; }
+.card .pt small { display: block; font-size: 20px; color: var(--acc); letter-spacing: 2px; }
+.card.r1 { border-color: #ffd60a; box-shadow: 0 0 0 4px rgba(255,214,10,.4), 0 0 50px rgba(255,214,10,.55); }
+.card.r2 { border-color: #d7dde8; } .card.r3 { border-color: #cd7f32; }
+.card .pop { position: absolute; right: 18px; bottom: 80px; font-size: 34px; font-weight: 900; color: #fff; text-shadow: 0 0 10px var(--acc); animation: pop 1s ease-out forwards; pointer-events: none; }
+@keyframes pop { from { opacity: 1; transform: translateY(0) scale(1.2); } to { opacity: 0; transform: translateY(-120px) scale(.8); } }
+.heart { position: absolute; font-size: 54px; animation: fly 1.6s ease-out forwards; pointer-events: none; z-index: 5; }
+@keyframes fly { from { opacity: 1; transform: translate(0, 0) scale(.6); } to { opacity: 0; transform: translate(var(--dx), -320px) scale(1.3); } }
+.feed { position: absolute; left: 40px; right: 40px; top: 1690px; height: 70px; display: flex; gap: 16px; align-items: center; justify-content: center; font-size: 32px; font-weight: 800; white-space: nowrap; overflow: hidden; }
+.feed .k { color: var(--acc); }
+#last { position: absolute; left: 40px; right: 40px; top: 1640px; text-align: center; font-size: 28px; font-weight: 700; opacity: .9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#last img { width: 40px; height: 40px; border-radius: 50%; vertical-align: middle; margin-right: 8px; object-fit: cover; }
+#win { position: absolute; inset: 0; background: rgba(5,4,12,.86); display: grid; place-items: center; z-index: 10; }
+#win[hidden] { display: none; }
+#win .w { text-align: center; } #win .w .c { width: 520px; height: 570px; margin: 0 auto 30px; position: relative; transform: none; left: auto; top: auto; animation: zoom .8s cubic-bezier(.2,1.4,.4,1); }
+#win .w .c .card { position: relative; width: 520px; height: 570px; transition: none; }
+#win .w h3 { margin: 0; font-size: 84px; font-weight: 900; color: var(--acc); text-shadow: 0 0 30px rgba(255,214,10,.7); }
+#win .w p { margin: 10px 0 0; font-size: 40px; font-weight: 800; }
+@keyframes zoom { from { transform: scale(.3) rotate(-10deg); opacity: 0; } to { transform: none; opacity: 1; } }
+.cf { position: absolute; top: -40px; width: 18px; height: 30px; z-index: 11; animation: cf linear forwards; }
+@keyframes cf { to { transform: translate(var(--dx), 2050px) rotate(var(--r)); } }
+#bar { position: absolute; right: max(8px, env(safe-area-inset-right)); bottom: max(10px, env(safe-area-inset-bottom)); display: flex; gap: 6px; z-index: 60; opacity: .85; }
+#bar button { min-height: 40px; font-size: 13px; padding: 0 12px; background: rgba(6,12,24,.8); }
+#chatSt { position: absolute; left: 10px; top: 10px; z-index: 60; font: 700 13px Figtree, sans-serif; color: #9aa3b8; background: rgba(6,12,24,.7); padding: 4px 10px; border-radius: 20px; }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div><h1>⚔️ Bataille des <span>clubs</span></h1><p class="sub">Jeu pour tes lives : le chat écrit la lettre de son club (A à L) pour lui donner des points. Le classement bouge en direct, et le club en tête à la fin du chrono gagne la manche.</p></div>
+  <div class="box">
+    <h2>Connexion au live</h2>
+    <div class="row2"><label>Ton pseudo TikTok<input type="text" id="user" placeholder="tonpseudo" autocapitalize="off"></label><label>Adresse du relais<input type="text" id="relay" placeholder="studio-quiz-relais.onrender.com" autocapitalize="off"></label></div>
+    <p class="note">Ce sont les mêmes réglages que pour le quiz : ils sont repris automatiquement.</p>
+  </div>
+  <div class="box">
+    <h2>Les 12 clubs</h2>
+    <p class="note">Choisis un club par lettre. « 🖼️ » met ta propre image sur la carte (logo ou joueur) : elle reste sur ton téléphone. Utilise des images que tu as le droit d'utiliser.</p>
+    <div class="slots" id="slots"></div>
+  </div>
+  <div class="box">
+    <h2>Règles</h2>
+    <div class="row3">
+      <label>Durée d'une manche<select id="dur"><option value="120">2 min</option><option value="180">3 min</option><option value="300">5 min</option><option value="600">10 min</option></select></label>
+      <label>Points par pièce de cadeau<select id="gmul"><option value="1">×1</option><option value="5">×5</option><option value="10">×10</option></select></label>
+      <label>Likes pour 1 point<select id="lstep"><option value="5">5 likes</option><option value="10">10 likes</option><option value="25">25 likes</option></select></label>
+    </div>
+    <label class="chk"><input type="checkbox" id="voice"> Voix qui annonce le gagnant de chaque manche</label>
+    <div class="row2"><button class="mini" id="resetSeason" type="button">Remettre la saison à zéro</button><span class="st" id="seasonInfo"></span></div>
+  </div>
+  <div class="row2"><button class="main" id="go" type="button">▶ Lancer le jeu en live</button><button id="demo" type="button">🎮 Tester en mode démo</button></div>
+</div>
+
+<div id="wrap" hidden>
+  <div id="stage">
+    <div class="pill" id="season"></div><div class="pill" id="match"></div>
+    <div class="hd"><div class="t">⚔️ BATAILLE DES CLUBS</div><div class="s">Écris la lettre de ton club dans le chat !</div></div>
+    <div id="grid"></div>
+    <div id="last"></div>
+    <div class="feed" id="feed"></div>
+    <div class="pill" id="timer">05:00</div>
+    <div id="win" hidden><div class="w"><div class="c" id="winCard"></div><h3 id="winT"></h3><p id="winS"></p></div></div>
+  </div>
+  <div id="chatSt"></div>
+  <div id="bar"><button id="bPause" type="button">⏸ Pause</button><button id="bEnd" type="button">⏭ Fin de manche</button><button id="bQuit" type="button">✕ Quitter</button></div>
+</div>
+<script>
+(function () {
+  "use strict";
+  var $ = function (s) { return document.querySelector(s); };
+  var CLUBS = {"Premier League": [["Arsenal", "ARS", "#EF0107", "#FFFFFF"], ["Aston Villa", "AVL", "#670E36", "#95BFE5"], ["Bournemouth", "BOU", "#DA291C", "#000000"], ["Brentford", "BRE", "#E30613", "#FFFFFF"], ["Brighton", "BHA", "#0057B8", "#FFFFFF"], ["Burnley", "BUR", "#6C1D45", "#99D6EA"], ["Chelsea", "CHE", "#034694", "#FFFFFF"], ["Crystal Palace", "CRY", "#1B458F", "#C4122E"], ["Everton", "EVE", "#003399", "#FFFFFF"], ["Fulham", "FUL", "#FFFFFF", "#000000"], ["Leeds United", "LEE", "#FFFFFF", "#1D428A"], ["Liverpool", "LIV", "#C8102E", "#F6EB61"], ["Manchester City", "MCI", "#6CABDD", "#1C2C5B"], ["Manchester United", "MUN", "#DA291C", "#FBE122"], ["Newcastle", "NEW", "#241F20", "#FFFFFF"], ["Nottingham Forest", "NFO", "#DD0000", "#FFFFFF"], ["Sunderland", "SUN", "#EB172B", "#FFFFFF"], ["Tottenham", "TOT", "#FFFFFF", "#132257"], ["West Ham", "WHU", "#7A263A", "#1BB1E7"], ["Wolverhampton", "WOL", "#FDB913", "#231F20"]], "Liga": [["Alavés", "ALA", "#0761AF", "#FFFFFF"], ["Athletic Club", "ATH", "#EE2523", "#FFFFFF"], ["Atlético Madrid", "ATM", "#CB3524", "#272E61"], ["FC Barcelone", "FCB", "#A50044", "#004D98"], ["Celta Vigo", "CEL", "#8AC3EE", "#FFFFFF"], ["Elche", "ELC", "#05642C", "#FFFFFF"], ["Espanyol", "ESP", "#007FC8", "#FFFFFF"], ["Getafe", "GET", "#005999", "#FFFFFF"], ["Girona", "GIR", "#CD2534", "#FFFFFF"], ["Levante", "LEV", "#B4053F", "#005496"], ["Majorque", "MLL", "#E20613", "#000000"], ["Osasuna", "OSA", "#D91A21", "#0A346F"], ["Rayo Vallecano", "RAY", "#FFFFFF", "#E53027"], ["Real Betis", "BET", "#00954C", "#FFFFFF"], ["Real Madrid", "RMA", "#FFFFFF", "#FEBE10"], ["Real Oviedo", "OVI", "#0C4DA2", "#FFFFFF"], ["Real Sociedad", "RSO", "#0067B1", "#FFFFFF"], ["FC Séville", "SEV", "#FFFFFF", "#D81E05"], ["Valence", "VAL", "#FFFFFF", "#F18E00"], ["Villarreal", "VIL", "#FFE667", "#005187"]], "Serie A": [["Atalanta", "ATA", "#1E71B8", "#000000"], ["Bologne", "BOL", "#1A2F48", "#A21C26"], ["Cagliari", "CAG", "#A2001E", "#002350"], ["Côme", "COM", "#1A3B6E", "#FFFFFF"], ["Cremonese", "CRE", "#E1001A", "#8E8E8E"], ["Fiorentina", "FIO", "#482E92", "#FFFFFF"], ["Genoa", "GEN", "#A51D23", "#002147"], ["Hellas Vérone", "VER", "#002F6C", "#FFD200"], ["Inter Milan", "INT", "#0068A8", "#000000"], ["Juventus", "JUV", "#FFFFFF", "#000000"], ["Lazio", "LAZ", "#87D8F7", "#FFFFFF"], ["Lecce", "LEC", "#FFE600", "#E30613"], ["AC Milan", "MIL", "#FB090B", "#000000"], ["Naples", "NAP", "#12A0D7", "#FFFFFF"], ["Parme", "PAR", "#FFDD00", "#0033A0"], ["Pise", "PIS", "#000000", "#0057B8"], ["AS Rome", "ROM", "#8E1F2F", "#F0BC42"], ["Sassuolo", "SAS", "#00A752", "#000000"], ["Torino", "TOR", "#8A1E03", "#FFFFFF"], ["Udinese", "UDI", "#FFFFFF", "#000000"]], "Bundesliga": [["Augsbourg", "FCA", "#BA3733", "#46714D"], ["Union Berlin", "FCU", "#EB1923", "#FFFFFF"], ["Werder Brême", "SVW", "#1D9053", "#FFFFFF"], ["Borussia Dortmund", "BVB", "#FDE100", "#000000"], ["Eintracht Francfort", "SGE", "#E1000F", "#000000"], ["Fribourg", "SCF", "#000000", "#E2001A"], ["Hambourg SV", "HSV", "#0A3F86", "#FFFFFF"], ["Heidenheim", "FCH", "#E30613", "#003B79"], ["Hoffenheim", "TSG", "#1961B5", "#FFFFFF"], ["Cologne", "KOE", "#ED1C24", "#FFFFFF"], ["RB Leipzig", "RBL", "#DD0741", "#FFFFFF"], ["Bayer Leverkusen", "B04", "#E32221", "#000000"], ["Mayence", "M05", "#C3141E", "#FFFFFF"], ["Mönchengladbach", "BMG", "#000000", "#00B140"], ["Bayern Munich", "FCB", "#DC052D", "#0066B2"], ["St. Pauli", "STP", "#624839", "#FFFFFF"], ["VfB Stuttgart", "VFB", "#FFFFFF", "#E32219"], ["Wolfsburg", "WOB", "#65B32E", "#FFFFFF"]], "Ligue 1": [["Angers", "SCO", "#000000", "#FFFFFF"], ["Auxerre", "AJA", "#FFFFFF", "#0063B0"], ["Brest", "SB29", "#E30613", "#FFFFFF"], ["Le Havre", "HAC", "#6CABDD", "#1D3E6E"], ["Lens", "RCL", "#FFD100", "#E30613"], ["Lille", "LOSC", "#E01E13", "#1A2B4C"], ["Lorient", "FCL", "#F47920", "#000000"], ["Lyon", "OL", "#FFFFFF", "#1C3E8C"], ["Marseille", "OM", "#FFFFFF", "#2FAEE0"], ["Metz", "FCM", "#7A1E3A", "#FFFFFF"], ["Monaco", "ASM", "#E51B22", "#FFFFFF"], ["Nantes", "FCN", "#FCD405", "#00843D"], ["Nice", "OGCN", "#000000", "#C8102E"], ["Paris FC", "PFC", "#1C2D5A", "#8CC8EC"], ["Paris Saint-Germain", "PSG", "#004170", "#DA291C"], ["Rennes", "SRFC", "#E13327", "#000000"], ["Strasbourg", "RCSA", "#009FE3", "#FFFFFF"], ["Toulouse", "TFC", "#5B2C83", "#FFFFFF"]]};
+  function lum(hex) { var n = parseInt(hex.slice(1), 16); return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255; }
+  function badgeURL(abbr, c1, c2, pat, size) {
+    size = size || 320; var c = document.createElement("canvas"); c.width = c.height = size; var g = c.getContext("2d"), m = size / 320;
+    g.scale(m, m); g.fillStyle = c1; g.fillRect(0, 0, 320, 320);
+    g.save(); g.beginPath(); g.arc(160, 160, 160, 0, Math.PI * 2); g.clip(); g.fillStyle = c2;
+    if (pat === 0) g.fillRect(160, 0, 160, 320);
+    else if (pat === 1) g.fillRect(0, 196, 320, 124);
+    else if (pat === 2) { g.beginPath(); g.moveTo(-20, 230); g.lineTo(230, -20); g.lineTo(320, -20); g.lineTo(320, 40); g.lineTo(40, 340); g.lineTo(-20, 340); g.fill(); }
+    else { g.fillRect(124, 0, 72, 320); }
+    g.restore();
+    // bouclier central
+    var dark = lum(c1) > .6 && lum(c2) > .6;
+    g.fillStyle = dark ? "#1b1b1f" : "rgba(255,255,255,.94)"; g.beginPath(); g.moveTo(92, 78); g.lineTo(228, 78); g.lineTo(228, 168); g.quadraticCurveTo(228, 228, 160, 262); g.quadraticCurveTo(92, 228, 92, 168); g.closePath(); g.fill();
+    g.lineWidth = 8; g.strokeStyle = lum(c1) > .85 ? c2 : c1; g.stroke();
+    var txt = lum(c1) > .85 ? c2 : c1; if (lum(txt) > .8) txt = "#1b1b1f"; if (dark) txt = "#ffffff";
+    g.fillStyle = txt; g.textAlign = "center"; g.textBaseline = "middle"; var fs = abbr.length > 3 ? 46 : 60; g.font = "900 " + fs + "px Outfit, Figtree, sans-serif"; g.fillText(abbr, 160, 160);
+    g.lineWidth = 14; g.strokeStyle = lum(c2) > .9 && lum(c1) > .9 ? "#1b1b1f" : c2; g.beginPath(); g.arc(160, 160, 153, 0, Math.PI * 2); g.stroke();
+    return c.toDataURL("image/png");
+  }
+
+  var DEF_SLOTS = [["Liga", "Real Madrid"], ["Liga", "FC Barcelone"], ["Premier League", "Manchester United"], ["Premier League", "Chelsea"], ["Premier League", "Manchester City"], ["Serie A", "Juventus"],
+    ["Bundesliga", "Bayern Munich"], ["Ligue 1", "Paris Saint-Germain"], ["Premier League", "Liverpool"], ["Premier League", "Arsenal"], ["Serie A", "AC Milan"], ["Serie A", "Inter Milan"]];
+  var LET = "ABCDEFGHIJKL";
+  var C;
+  try { C = JSON.parse(localStorage.getItem("clubs-set") || "null"); } catch (e) { C = null; }
+  if (!C) C = { slots: DEF_SLOTS, dur: 300, gmul: 5, lstep: 10, voice: true, season: 1, match: 1, wins: {} };
+  var Q = {}; try { Q = JSON.parse(localStorage.getItem("sq-set") || "{}"); } catch (e) {}
+  if (!C.user) C.user = Q.ttUser || ""; if (!C.relay) C.relay = Q.relay || "studio-quiz-relais.onrender.com";
+  function save() { try { localStorage.setItem("clubs-set", JSON.stringify(C)); } catch (e) {} }
+  function club(i) { var s = C.slots[i], l = CLUBS[s[0]] || [], c = l.filter(function (x) { return x[0] === s[1]; })[0] || l[0]; return { name: c[0], abbr: c[1], c1: c[2], c2: c[3], pat: l.indexOf(c) % 4 }; }
+  function img(i) { try { return localStorage.getItem("clubs-img-" + i) || ""; } catch (e) { return ""; } }
+
+  /* ---------- écran de réglages ---------- */
+  function slotsForm() {
+    var opts = Object.keys(CLUBS).map(function (lg) { return "<optgroup label=\"" + lg + "\">" + CLUBS[lg].map(function (c) { return "<option value=\"" + lg + "|" + c[0] + "\">" + c[0] + "</option>"; }).join("") + "</optgroup>"; }).join("");
+    $("#slots").innerHTML = C.slots.map(function (s, i) {
+      var c = club(i), im = img(i);
+      return "<div class=\"slot\"><b>" + LET[i] + "</b><img alt=\"\" src=\"" + (im || badgeURL(c.abbr, c.c1, c.c2, c.pat, 96)) + "\"><select data-i=\"" + i + "\">" + opts + "</select>" +
+        "<label class=\"mini\" style=\"display:block\"><input type=\"file\" accept=\"image/*\" data-img=\"" + i + "\" hidden><span class=\"st\" style=\"cursor:pointer;font-size:22px\">🖼️</span></label>" +
+        "<button class=\"mini\" type=\"button\" data-clr=\"" + i + "\"" + (im ? "" : " hidden") + ">✕</button></div>";
+    }).join("");
+    Array.prototype.forEach.call(document.querySelectorAll("#slots select"), function (sel) { var i = +sel.getAttribute("data-i"); sel.value = C.slots[i].join("|"); sel.onchange = function () { C.slots[i] = sel.value.split("|"); save(); slotsForm(); }; });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-img]"), function (inp) { inp.onchange = function () {
+      var f = this.files && this.files[0], i = +inp.getAttribute("data-img"); if (!f) return;
+      var im = new Image(); im.onload = function () { var cv = document.createElement("canvas"), w = 420, h = 460, r = Math.max(w / im.width, h / im.height); cv.width = w; cv.height = h;
+        cv.getContext("2d").drawImage(im, (w - im.width * r) / 2, (h - im.height * r) / 2, im.width * r, im.height * r);
+        try { localStorage.setItem("clubs-img-" + i, cv.toDataURL("image/jpeg", .85)); } catch (e) { alert("Plus de place pour les images : retire-en une."); } URL.revokeObjectURL(im.src); slotsForm(); };
+      im.src = URL.createObjectURL(f);
+    }; });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-clr]"), function (b) { b.onclick = function () { try { localStorage.removeItem("clubs-img-" + b.getAttribute("data-clr")); } catch (e) {} slotsForm(); }; });
+  }
+  function fillForm() {
+    $("#user").value = C.user; $("#user").oninput = function () { C.user = this.value.trim().replace(/^@/, ""); save(); };
+    $("#relay").value = C.relay; $("#relay").oninput = function () { C.relay = this.value.trim(); save(); };
+    $("#dur").value = C.dur; $("#dur").onchange = function () { C.dur = +this.value; save(); };
+    $("#gmul").value = C.gmul; $("#gmul").onchange = function () { C.gmul = +this.value; save(); };
+    $("#lstep").value = C.lstep; $("#lstep").onchange = function () { C.lstep = +this.value; save(); };
+    $("#voice").checked = !!C.voice; $("#voice").onchange = function () { C.voice = this.checked; save(); };
+    $("#seasonInfo").textContent = "Saison " + C.season + " · match " + C.match + "/100";
+    slotsForm();
+  }
+  $("#resetSeason").onclick = function () { if (!confirm("Remettre la saison et les trophées à zéro ?")) return; C.season = 1; C.match = 1; C.wins = {}; save(); fillForm(); };
+
+  /* ---------- jeu ---------- */
+  var W = 1080, H = 1920, stage = $("#stage"), flipAt = [], pts = [], sent = [], supporter = {}, lastSlot = 0, cool = {}, likeAcc = 0, likeBase = null, rankOf = [], left = 0, paused = false, ended = false, tick = null, demoT = null, ws = null, wsWant = false;
+  function fitStage() { var w = innerWidth, h = innerHeight, s = Math.min(w / W, h / H); stage.style.transform = "translate(" + ((w - W * s) / 2) + "px," + ((h - H * s) / 2) + "px) scale(" + s + ")"; }
+  addEventListener("resize", fitStage);
+  function cardHTML(i, big) {
+    var c = club(i), im = img(i), wins = C.wins[c.name] || 0;
+    var bg = "linear-gradient(160deg," + c.c1 + " 0%," + c.c1 + " 45%," + c.c2 + " 100%)";
+    return "<div class=\"in\"><div class=\"bg\" style=\"background:" + bg + "\"></div><img class=\"pic\" alt=\"\" src=\"" + (im || badgeURL(c.abbr, c.c1, c.c2, c.pat, 320)) + "\"" + (im ? "" : " style=\"object-fit:contain;padding:46px 46px 110px\"") + "><div class=\"shade\"></div>" +
+      "<div class=\"rk\" data-rk></div><div class=\"tr\">" + (wins ? "🏆" + wins : "") + "</div><div class=\"nm\">" + c.name + "</div><div class=\"lt\">" + LET[i] + "</div><div class=\"pt\"><span data-pt>" + (big ? pts[i] : 0) + "</span><small>PTS</small></div></div>";
+  }
+  function build() {
+    var gHTML = ""; for (var i = 0; i < 12; i++) gHTML += "<div class=\"card\" id=\"card" + i + "\">" + cardHTML(i) + "</div>";
+    $("#grid").innerHTML = gHTML; rankOf = []; layout(true);
+  }
+  function order() { return pts.map(function (p, i) { return [p, i]; }).sort(function (a, b) { return b[0] - a[0] || a[1] - b[1]; }).map(function (x) { return x[1]; }); }
+  function layout(first) {
+    order().forEach(function (i, r) {
+      var el = $("#card" + i); if (!el) return;
+      var col = r % 3, row = Math.floor(r / 3), x = 30 + col * 350, y = 300 + row * 336;
+      el.style.transform = "translate(" + x + "px," + y + "px)"; el.style.height = "318px";
+      el.className = "card" + (r < 3 ? " r" + (r + 1) : "");
+      var nowF = Date.now(); if (!first && rankOf[i] != null && rankOf[i] !== r && (!flipAt[i] || nowF - flipAt[i] > 1500)) { flipAt[i] = nowF; el.classList.remove("flip"); void el.offsetWidth; el.classList.add("flip"); }
+      rankOf[i] = r; el.querySelector("[data-rk]").textContent = "#" + (r + 1); el.querySelector("[data-pt]").textContent = pts[i].toLocaleString("fr-FR");
+    });
+    var best = 0; for (var k = 1; k < 12; k++) if (sent[k] > sent[best]) best = k;
+    $("#feed").innerHTML = sent[best] ? "<span>🔥 Le plus envoyé :</span><span class=\"k\">" + LET[best] + " · " + club(best).abbr + "</span><span>×" + sent[best].toLocaleString("fr-FR") + "</span>" : "<span>Écris A, B, C… pour soutenir ton club !</span>";
+  }
+  var layT = null; function relayout() { if (!layT) layT = setTimeout(function () { layT = null; layout(); }, 250); }
+  function addPts(i, n, who, pic, why) {
+    if (ended || paused || i < 0 || i > 11) return;
+    pts[i] += n; lastSlot = i; relayout();
+    var el = $("#card" + i);
+    if (el) { var p = document.createElement("div"); p.className = "pop"; p.textContent = "+" + n; el.appendChild(p); setTimeout(function () { p.remove(); }, 1000); }
+    if (who) $("#last").innerHTML = (pic ? "<img alt=\"\" src=\"" + pic + "\" referrerpolicy=\"no-referrer\" onerror=\"this.remove()\">" : "") + esc2(who) + " " + (why || "soutient") + " <b style=\"color:var(--acc)\">" + club(i).name + "</b>";
+  }
+  function heart(i) { var el = $("#card" + i); if (!el) return; var r = el.getBoundingClientRect(), sr = stage.getBoundingClientRect(), k = sr.width / W;
+    var h = document.createElement("div"); h.className = "heart"; h.textContent = ["❤️", "💛", "💙", "🔥"][Math.floor(Math.random() * 4)]; h.style.left = ((r.left - sr.left) / k + 150 + Math.random() * 60) + "px"; h.style.top = ((r.top - sr.top) / k + 160) + "px"; h.style.setProperty("--dx", (Math.random() * 120 - 60) + "px"); stage.appendChild(h); setTimeout(function () { h.remove(); }, 1600); }
+  function esc2(x) { return String(x).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]; }); }
+  function plain(t) { return String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+  function parseVote(text) {
+    var t = plain(text); if (!t) return -1;
+    var m = t.match(/^(?:(?:go|allez|team|vote|je vote|pour|moi)\s+)*([a-l])(?:\s+\1)*$/); if (m) return LET.indexOf(m[1].toUpperCase());
+    for (var i = 0; i < 12; i++) { var c = club(i); if (t === plain(c.name) || t === plain(c.abbr) || t.split(" ").indexOf(plain(c.abbr)) >= 0) return i; }
+    return -1;
+  }
+  function onChat(m) {
+    var i = parseVote(m.text), k = String(m.id || m.name || "").toLowerCase(); if (i < 0) return;
+    var now = Date.now(); if (cool[k] && now - cool[k] < 800) return; cool[k] = now;
+    supporter[k] = i; sent[i]++; addPts(i, 1, m.name || m.id, m.pic); if (Math.random() < .35) heart(i);
+  }
+  function onGift(m) {
+    var k = String(m.id || m.name || "").toLowerCase(), i = supporter[k] != null ? supporter[k] : lastSlot, n = Math.max(1, (Number(m.coins) || 1) * Math.max(1, Number(m.count) || 1) * C.gmul);
+    addPts(i, n, m.name || m.id, m.pic, "🎁 offre " + n + " pts à"); for (var h = 0; h < Math.min(6, 1 + n / 20); h++) setTimeout(function () { heart(i); }, h * 120);
+  }
+  function onLike(m) {
+    var total = Number(m.total) || 0, c = Number(m.count) || 0;
+    if (total) { if (likeBase == null || total < likeBase) likeBase = total - c; c = total - likeBase - (onLike.done || 0); onLike.done = (onLike.done || 0) + Math.max(0, c); }
+    likeAcc += Math.max(0, c); while (likeAcc >= C.lstep) { likeAcc -= C.lstep; addPts(lastSlot, 1); heart(lastSlot); }
+  }
+  function fmt(s) { s = Math.max(0, Math.ceil(s)); return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); }
+  function say(t) { try { if (!C.voice || !window.speechSynthesis) return; var u = new SpeechSynthesisUtterance(t); u.lang = "fr-FR"; var v = speechSynthesis.getVoices().filter(function (x) { return /^fr/i.test(x.lang); })[0]; if (v) u.voice = v; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) {} }
+  function header() { $("#season").textContent = "SAISON " + C.season; $("#match").textContent = "MATCH " + C.match + "/100"; }
+  function startMatch() {
+    pts = []; sent = []; for (var i = 0; i < 12; i++) { pts.push(0); sent.push(0); }
+    ended = false; left = C.dur; header(); build(); $("#win").hidden = true; $("#last").textContent = "";
+    say("Match " + C.match + " ! Écrivez la lettre de votre club dans le chat !");
+  }
+  function confetti() { for (var i = 0; i < 120; i++) { var c = document.createElement("div"); c.className = "cf"; c.style.left = Math.random() * W + "px"; c.style.background = ["#ffd60a", "#ff3b6b", "#3bc9ff", "#2ecc71", "#ffffff"][i % 5]; c.style.setProperty("--dx", (Math.random() * 300 - 150) + "px"); c.style.setProperty("--r", (Math.random() * 900 - 450) + "deg"); c.style.animationDuration = (2 + Math.random() * 2) + "s"; c.style.animationDelay = (Math.random() * .6) + "s"; stage.appendChild(c); setTimeout(function () { c.remove(); }, 5000); } }
+  function endMatch() {
+    if (ended) return; ended = true;
+    var o = order(), w = o[0], c = club(w);
+    if (pts[w] > 0) { C.wins[c.name] = (C.wins[c.name] || 0) + 1; }
+    $("#winCard").innerHTML = "<div class=\"card r1\">" + cardHTML(w, true) + "</div>"; $("#winCard .card [data-rk]").textContent = "#1";
+    $("#winT").textContent = pts[w] > 0 ? "🏆 VICTOIRE DE " + c.name.toUpperCase() : "Aucun point cette manche";
+    $("#winS").textContent = pts[w] > 0 ? pts[w].toLocaleString("fr-FR") + " points · " + (C.wins[c.name]) + " victoire" + (C.wins[c.name] > 1 ? "s" : "") + " cette saison" : "Écrivez la lettre de votre club !";
+    $("#win").hidden = false; if (pts[w] > 0) { confetti(); say("Victoire de " + c.name + " avec " + pts[w] + " points ! Bravo à tous ses supporters !"); }
+    C.match++; if (C.match > 100) { C.match = 1; C.season++; C.wins = {}; } save();
+    setTimeout(function () { if (!$("#wrap").hidden) startMatch(); }, 9000);
+  }
+  function loop() { if (!paused && !ended) { left -= 1; var t = $("#timer"); t.textContent = "⏱ " + fmt(left); t.classList.toggle("hurry", left <= 10); if (left <= 0) endMatch(); } }
+
+  /* ---------- connexion au relais (mêmes messages que le quiz) ---------- */
+  function wsUrl() { var u = String(C.relay || "").trim().replace(/\/+$/, ""); if (!u) return ""; if (!/^[a-z]+:\/\//i.test(u)) u = "https://" + u; return u.replace(/^http/i, "ws") + "/?user=" + encodeURIComponent(String(C.user || "").replace(/^@/, "")); }
+  function st(s, t) { var e = $("#chatSt"); e.textContent = t; e.setAttribute("data-s", s); }
+  function connect() {
+    var url = wsUrl(); if (!url || !C.user) { st("error", "Renseigne ton pseudo TikTok et le relais"); return; }
+    wsWant = true; st("waiting", "Connexion au chat…");
+    try { ws = new WebSocket(url); } catch (e) { st("error", "Adresse du relais invalide"); return; }
+    ws.onmessage = function (ev) { var m; try { m = JSON.parse(ev.data); } catch (e) { return; }
+      if (m.type === "chat") onChat(m); else if (m.type === "gift") onGift(m); else if (m.type === "like") onLike(m);
+      else if (m.type === "status") st(m.state, m.state === "connected" ? "Chat connecté ✓" : (m.message || "")); };
+    ws.onclose = function () { ws = null; if (wsWant) { st("waiting", "Reconnexion…"); setTimeout(function () { if (wsWant) connect(); }, 5000); } };
+  }
+  function demo() {
+    var names = ["Lina", "Yanis", "Chloé", "Max_93", "Inès", "Tom", "Sarah", "Noah", "Jade", "Ethan", "Léa", "Adam", "Kenza", "Lucas"], bias = [9, 8, 6, 4, 5, 4, 5, 9, 6, 4, 3, 3];
+    st("connected", "Mode démo : faux votes");
+    demoT = setInterval(function () {
+      for (var n = 0; n < 3; n++) { var r = Math.random() * 66, i = 0; while (r > bias[i]) { r -= bias[i]; i++; } var nm = names[Math.floor(Math.random() * names.length)];
+        onChat({ id: nm + n, name: nm, text: Math.random() < .8 ? LET[i] : club(i).abbr }); }
+      if (Math.random() < .08) { var g = names[Math.floor(Math.random() * names.length)]; onGift({ id: g + "0", name: g, coins: [1, 1, 5, 10][Math.floor(Math.random() * 4)], count: 1 }); }
+      if (Math.random() < .5) onLike({ count: 3 + Math.floor(Math.random() * 10) });
+    }, 450);
+  }
+  function start(isDemo) {
+    $("#app").hidden = true; $("#wrap").hidden = false; fitStage(); paused = false;
+    try { if (navigator.wakeLock) navigator.wakeLock.request("screen").catch(function () {}); } catch (e) {}
+    startMatch(); clearInterval(tick); tick = setInterval(loop, 1000); $("#timer").textContent = "⏱ " + fmt(left);
+    if (isDemo) demo(); else connect();
+  }
+  function quit() { clearInterval(tick); clearInterval(demoT); wsWant = false; if (ws) try { ws.close(); } catch (e) {} $("#wrap").hidden = true; $("#app").hidden = false; fillForm(); try { speechSynthesis.cancel(); } catch (e) {} }
+  $("#go").onclick = function () { start(false); };
+  $("#demo").onclick = function () { start(true); };
+  $("#bQuit").onclick = quit;
+  $("#bPause").onclick = function () { paused = !paused; this.textContent = paused ? "▶ Reprendre" : "⏸ Pause"; };
+  $("#bEnd").onclick = function () { left = 0; loop(); };
+  fillForm();
+})();
+</script>
+</body>
+</html>
