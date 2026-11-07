@@ -143,6 +143,7 @@ Page : https://ozentv.github.io/quiz-live/clubs.html
 - Classement en direct : les cartes glissent à leur nouvelle place avec un flash, le top 3 brille (or, argent, bronze), « +1 » et cœurs qui s'envolent, « Le plus envoyé », dernier supporter avec sa photo.
 - Manches de 2, 3, 5 ou 10 minutes : à la fin du chrono, le club en tête gagne (confettis, voix off, trophée 🏆 sur sa carte), puis la manche suivante commence. Saisons de 100 matchs.
 - « 🖼️ » sur chaque club permet de mettre ta propre image (logo ou joueur), gardée seulement sur ton téléphone ; sinon l'écusson aux couleurs du club s'affiche.
+- « 📥 Importer toutes les images d'un coup » : sélectionne jusqu'à 12 images en une fois ; chacune va sur la bonne carte si son nom de fichier est la lettre (A.jpg) ou le nom du club (psg.jpg, real madrid.png), sinon dans l'ordre A, B, C…
 - Utilise les mêmes réglages de relais que le quiz. Mode démo pour tester sans live.
 
 ## 🆚 Générateur VS (vidéos « Team contre Team »)
