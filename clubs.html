@@ -625,12 +625,25 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
 
   /* ---------- commentateur ---------- */
   var busyUntil = 0, curPrio = 0, bubT = null, fakeT = null, speakTok = 0, talkingNow = false, talkSince = 0, nextTalkAt = 0;
-  function spoke() { talkingNow = false; nextTalkAt = Date.now() + 250 + Math.random() * 650; clearTimeout(bubT); bubT = setTimeout(function () { if (!talkingNow) { $("#bub").classList.remove("on"); stage.classList.remove("talk"); } }, 900); }
-  function speak(t, prio) {
+  function spoke() { talkingNow = false; nextTalkAt = Date.now() + 250 + Math.random() * 650; setTimeout(pump, 280); clearTimeout(bubT); bubT = setTimeout(function () { if (!talkingNow) { $("#bub").classList.remove("on"); stage.classList.remove("talk"); } }, 900); }
+  // File d'attente : le commentateur finit toujours sa phrase, puis enchaîne sur la plus importante en attente.
+  var sq = [];
+  function speak(t, prio, key) {
     var now = Date.now(); prio = prio || 0;
-    if (now < busyUntil && prio < curPrio) return;
-    curPrio = prio; lastSpeech = now; busyUntil = now + Math.max(1800, t.length * 62);
-    var b = $("#bub"); b.textContent = t; b.classList.add("on"); stage.classList.add("talk"); talkingNow = true; talkSince = now; clearTimeout(bubT); bubT = setTimeout(function () { b.classList.remove("on"); stage.classList.remove("talk"); }, busyUntil - now + 700);
+    if (key) sq = sq.filter(function (x) { return x.key !== key; }); // une info plus récente remplace l'ancienne
+    if (prio >= 4) sq = [];
+    sq.push({ t: t, prio: prio, at: now, ttl: prio >= 2 ? 10000 : prio === 1 ? 7000 : 3500, key: key });
+    sq.sort(function (a, b) { return b.prio - a.prio || a.at - b.at; }); if (sq.length > 4) sq.length = 4;
+    pump();
+  }
+  function pump() {
+    if (talkingNow) return;
+    var now = Date.now(); sq = sq.filter(function (x) { return now - x.at < x.ttl; });
+    var it = sq.shift(); if (it) sayNow(it.t);
+  }
+  function sayNow(t) {
+    var now = Date.now(); lastSpeech = now; busyUntil = now + Math.max(1800, t.length * 62);
+    var b = $("#bub"); b.textContent = t; b.classList.add("on"); stage.classList.add("talk"); talkingNow = true; talkSince = now; clearTimeout(bubT); bubT = setTimeout(function () { b.classList.remove("on"); stage.classList.remove("talk"); }, busyUntil - now + 8000);
     var talk = function (on) { host.talking(on); }, my = ++speakTok;
     clearTimeout(fakeT);
     if (gemOn()) {
@@ -662,7 +675,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     var now = Date.now(); host.mood("happy", 1800); cheer();
     if (now - leadSaidAt < 9000 || left < 12) return; leadSaidAt = now;
     var n = club(i).name;
-    speak(old >= 0 ? rnd([n + " prend la tête !", "Renversement de situation ! " + n + " passe devant " + club(old).name + " !", n + " s'empare de la première place !", "Ça bouge en haut du classement : " + n + " est leader !"]) : n + " ouvre le score et prend la tête !", 1);
+    speak(old >= 0 ? rnd([n + " prend la tête !", "Renversement de situation ! " + n + " passe devant " + club(old).name + " !", n + " s'empare de la première place !", "Ça bouge en haut du classement : " + n + " est leader !"]) : n + " ouvre le score et prend la tête !", 1, "lead");
   }
   /* ---------- commentaire en continu, comme un vrai match ---------- */
   var ORD = ["première", "deuxième", "troisième", "quatrième", "cinquième", "sixième", "septième", "huitième", "neuvième", "dixième", "onzième", "douzième"];
@@ -728,7 +741,10 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     if (!C.voice || !C.nonstop || ended || paused || $("#wrap").hidden) return;
     var now = Date.now();
     if (talkingNow && now - talkSince > 25000) talkingNow = false; // sécurité
-    if (talkingNow || now < busyUntil || now < nextTalkAt) return;
+    if (talkingNow) return;
+    if (sq.length) { if (now >= nextTalkAt - 300) pump(); return; }
+    if (now < nextTalkAt) return;
+    if ((left > 60 && left <= 65) || (left > 30 && left <= 35) || (left > 10 && left <= 15) || left <= 3) return; // laisse la place aux annonces du chrono
     speak(lineFor(), 0);
   }
   function hype() {
@@ -979,7 +995,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   function fmt(s) { s = Math.max(0, Math.ceil(s)); return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); }
   function header() { $("#sSeason").textContent = "Saison " + C.season; $("#sMatch").textContent = "Match " + C.match + "/100"; }
   function startMatch() {
-    clearTimeout(nextT); pts = []; sent = []; fans = {}; votes = 0; evt = null; goalQ = []; leader = -1; hist = []; recentFans = []; moves = []; lastGift = null; nextTalkAt = Date.now() + 6000;
+    clearTimeout(nextT); pts = []; sent = []; fans = {}; votes = 0; evt = null; goalQ = []; leader = -1; hist = []; recentFans = []; moves = []; lastGift = null; nextTalkAt = Date.now() + 6000; sq = [];
     for (var i = 0; i < 12; i++) { pts.push(0); sent.push(0); }
     ended = false; left = C.dur; evtNext = 40 + Math.random() * 20; header(); build(); subLine();
     $("#win").hidden = true; $("#tab").hidden = true; $("#goal").hidden = true; $("#last").innerHTML = "<span>Le match commence ! Envoie la lettre de ton club</span>";
@@ -1029,7 +1045,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     if (paused || ended) return;
     left -= 1; var t = $("#timer"); t.textContent = fmt(left); t.classList.toggle("hurry", left <= 10);
     var el = C.dur - left;
-    if (evt) { if (Date.now() > evt.end) { endEvent(); speak("Fin de l'événement ! Retour aux points normaux.", 1); } else subLine(); }
+    if (evt) { if (Date.now() > evt.end) { endEvent(); speak("Fin de l'événement ! Retour aux points normaux.", 1, "evt"); } else subLine(); }
     else if (C.events && el >= evtNext && left > 25) startEvent();
     if (left === 60 && C.dur > 60) { var o = order(); speak("Plus qu'une minute !" + (pts[o[0]] ? " " + club(o[0]).name + " est en tête, mais tout peut encore basculer !" : ""), 3); }
     else if (left === 30) speak("Trente secondes ! Envoyez la lettre de votre club !", 3);
@@ -1123,7 +1139,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   }
   function quit() {
     clearInterval(tick); clearInterval(talkT); clearInterval(demoT); clearInterval(fxT); clearTimeout(nextT); wsWant = false; if (ws) try { ws.close(); } catch (e) {}
-    crowdStop(); host.stop(); gem.stop(); recOff(); $("#wrap").hidden = true; $("#app").hidden = false; fillForm(); try { speechSynthesis.cancel(); } catch (e) {}
+    sq = []; talkingNow = false; crowdStop(); host.stop(); gem.stop(); recOff(); $("#wrap").hidden = true; $("#app").hidden = false; fillForm(); try { speechSynthesis.cancel(); } catch (e) {}
   }
   $("#go").onclick = function () { if (C.recap && recOk()) recEnable(); start(false); };
   $("#demo").onclick = function () { if (C.recap && recOk()) recEnable(); start(true); };
