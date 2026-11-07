@@ -79,6 +79,9 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   background: radial-gradient(circle at 35% 28%, rgba(255,255,255,.45), rgba(10,12,20,.55) 70%); box-shadow: 0 6px 16px rgba(0,0,0,.55), inset 0 0 12px rgba(255,255,255,.25); }
 .card .crest img { width: 60px; height: 60px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,.6)); }
 .card .in.combo .tr { top: 96px; }
+.card img.logo.behind { top: 40%; width: 104%; height: 84%; filter: drop-shadow(0 0 16px rgba(255,255,255,.35)) drop-shadow(0 10px 18px rgba(0,0,0,.55)); }
+.card img.pic.cut { object-position: 50% 16%; filter: drop-shadow(0 0 12px rgba(0,0,0,.75)) contrast(1.08) saturate(1.15); }
+.card .in.combo:has(img.cut) .tr { top: 12px; } .card .in.combo:has(img.cut) .mult { top: 52px; }
 .card .in.combo .mult { top: 130px; }
 #win .card .crest { width: 130px; height: 130px; right: 16px; top: 16px; } #win .card .crest img { width: 100px; height: 100px; }
 #win .card .in.combo .tr { top: 156px; right: 20px; font-size: 32px; }
@@ -187,6 +190,8 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     <label class="main" style="display:block"><input type="file" id="bulk" accept="image/*" multiple hidden><span style="display:block;text-align:center;padding:12px;border-radius:12px;background:var(--acc);color:#111;font-weight:800;cursor:pointer">📥 Importer toutes les images d'un coup</span></label>
     <p class="note">Nomme tes fichiers avec la lettre (A.jpg, B.png…) ou le nom du club (psg.jpg, real madrid.png…). Sinon, ils sont placés dans l'ordre A, B, C…</p>
     <p class="note" id="bulkMsg" style="color:#2ecc71"></p>
+    <label class="chk"><input type="checkbox" id="behind"> ✂️ Logo derrière le joueur : la photo est détourée automatiquement, sur ton téléphone (rien n'est envoyé)</label>
+    <div class="row2"><button class="mini" id="cutAll" type="button">✂️ Détourer les photos</button><span class="st" id="cutMsg"></span></div>
     <div class="slots" id="slots"></div>
   </div>
   <div class="box">
@@ -266,7 +271,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   var C;
   try { C = JSON.parse(localStorage.getItem("clubs-set") || "null"); } catch (e) { C = null; }
   if (!C) C = { slots: DEF_SLOTS, dur: 300, gmul: 5, lstep: 10, voice: true, sound: true, events: true, host: "moyen", season: 1, match: 1, wins: {}, spts: {} };
-  if (C.sound == null) C.sound = true; if (C.events == null) C.events = true; if (!C.host) C.host = "moyen"; if (!C.spts) C.spts = {}; if (!C.eng) C.eng = "phone"; if (!C.gvoice) C.gvoice = "Fenrir"; if (!C.evoice) C.evoice = "fr-FR-HenriNeural"; if (!C.sfx) C.sfx = "faible";
+  if (C.sound == null) C.sound = true; if (C.events == null) C.events = true; if (!C.host) C.host = "moyen"; if (!C.spts) C.spts = {}; if (!C.eng) C.eng = "phone"; if (!C.gvoice) C.gvoice = "Fenrir"; if (!C.evoice) C.evoice = "fr-FR-HenriNeural"; if (!C.sfx) C.sfx = "faible"; if (C.behind == null) C.behind = true;
   var Q = {}; try { Q = JSON.parse(localStorage.getItem("sq-set") || "{}"); } catch (e) {}
   if (!C.user) C.user = Q.ttUser || ""; if (!C.relay) C.relay = Q.relay || "studio-quiz-relais.onrender.com"; if (C.gkey == null) C.gkey = Q.lbKey || "";
   function save() { try { localStorage.setItem("clubs-set", JSON.stringify(C)); } catch (e) {} }
@@ -289,13 +294,13 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
       var f = this.files && this.files[0], i = +inp.getAttribute("data-img"); if (!f) return;
       storeImg(i, f, function (ok) { if (!ok) alert("Plus de place pour les images : retire-en une."); slotsForm(); }, inp.getAttribute("data-kind"));
     }; });
-    Array.prototype.forEach.call(document.querySelectorAll("[data-clr]"), function (b) { b.onclick = function () { try { localStorage.removeItem("clubs-img-" + b.getAttribute("data-clr")); localStorage.removeItem("clubs-logo-" + b.getAttribute("data-clr")); } catch (e) {} slotsForm(); }; });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-clr]"), function (b) { b.onclick = function () { try { localStorage.removeItem("clubs-img-" + b.getAttribute("data-clr")); localStorage.removeItem("clubs-mask-" + b.getAttribute("data-clr")); localStorage.removeItem("clubs-logo-" + b.getAttribute("data-clr")); } catch (e) {} slotsForm(); }; });
   }
   function storeImg(i, file, done, kind) {
     var im = new Image(); im.onload = function () {
       var cv = document.createElement("canvas"), isLogo = kind === "logo", w = isLogo ? 320 : 420, h = isLogo ? 320 : 460, r = isLogo ? Math.min(w / im.width, h / im.height) : Math.max(w / im.width, h / im.height); cv.width = w; cv.height = h;
-      cv.getContext("2d").drawImage(im, (w - im.width * r) / 2, (h - im.height * r) / 2, im.width * r, im.height * r);
-      var ok = true; try { localStorage.setItem((isLogo ? "clubs-logo-" : "clubs-img-") + i, isLogo ? cv.toDataURL("image/png") : cv.toDataURL("image/jpeg", .85)); } catch (e) { ok = false; } URL.revokeObjectURL(im.src); done(ok); };
+      cv.getContext("2d").drawImage(im, (w - im.width * r) / 2, (h - im.height * r) * (isLogo ? .5 : .2), im.width * r, im.height * r); // photo : on garde le haut (la tête)
+      var ok = true; try { localStorage.setItem((isLogo ? "clubs-logo-" : "clubs-img-") + i, isLogo ? cv.toDataURL("image/png") : cv.toDataURL("image/jpeg", .85)); if (!isLogo) { localStorage.removeItem("clubs-mask-" + i); setTimeout(autoCut, 300); } } catch (e) { ok = false; } URL.revokeObjectURL(im.src); done(ok); };
     im.onerror = function () { done(false); }; im.src = URL.createObjectURL(file);
   }
   function slotForFile(name) { // lettre seule, abréviation ou nom du club dans le nom du fichier
@@ -328,6 +333,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     $("#eng").value = C.eng; $("#eng").onchange = function () { C.eng = this.value; save(); engUI(); }; engUI();
     $("#gemVoice").onchange = function () { if (C.eng === "edge") C.evoice = this.value; else C.gvoice = this.value; save(); };
     $("#gkey").value = C.gkey; $("#gkey").oninput = function () { C.gkey = this.value.trim(); save(); };
+    $("#behind").checked = !!C.behind; $("#behind").onchange = function () { C.behind = this.checked; save(); if (C.behind) autoCut(); };
     $("#sfx").value = C.sfx; $("#sfx").onchange = function () { C.sfx = this.value; save(); };
     $("#sound").checked = !!C.sound; $("#sound").onchange = function () { C.sound = this.checked; save(); };
     $("#events").checked = !!C.events; $("#events").onchange = function () { C.events = this.checked; save(); };
@@ -384,6 +390,63 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     gem.get(tt).then(function () { gemSt("✅ Voix OK", "connected"); }, function () {});
     gem.play(tt, null, 15000).catch(function (e) { gemSt("⚠️ " + (e && e.message || "Erreur")); });
   };
+  /* ---------- détourage du joueur (logo derrière lui) ---------- */
+  var MP = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.21", segP = null, cutBusy = false, cutAgain = false, cutURL = {};
+  function mask(i) { try { return localStorage.getItem("clubs-mask-" + i) || ""; } catch (e) { return ""; } }
+  function segmenter() {
+    if (!segP) {
+      segP = import(MP + "/vision_bundle.mjs").then(function (m) {
+        return m.FilesetResolver.forVisionTasks(MP + "/wasm").then(function (fs) {
+          return m.ImageSegmenter.createFromOptions(fs, { baseOptions: { modelAssetPath: "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_multiclass_256x256/float32/latest/selfie_multiclass_256x256.tflite" }, runningMode: "IMAGE", outputCategoryMask: false, outputConfidenceMasks: true });
+        });
+      });
+      segP.catch(function () { segP = null; });
+    }
+    return segP;
+  }
+  function loadImg(src) { return new Promise(function (res, rej) { var im = new Image(); im.onload = function () { res(im); }; im.onerror = rej; im.src = src; }); }
+  function makeMask(i) {
+    var src = img(i); if (!src) return Promise.resolve(false);
+    return Promise.all([segmenter(), loadImg(src)]).then(function (a) {
+      var seg = a[0], im = a[1], r = seg.segment(im), cm = r.confidenceMasks[0], w = cm.width, h = cm.height, bg = cm.getAsFloat32Array();
+      var cv = document.createElement("canvas"); cv.width = w; cv.height = h; var g = cv.getContext("2d"), d = g.createImageData(w, h);
+      for (var k = 0; k < w * h; k++) { var v = Math.round(Math.max(0, Math.min(1, (1 - bg[k] - .2) / .6)) * 255); d.data[k * 4] = d.data[k * 4 + 1] = d.data[k * 4 + 2] = v; d.data[k * 4 + 3] = 255; }
+      g.putImageData(d, 0, 0); try { r.close(); } catch (e) {}
+      var out = document.createElement("canvas"); out.width = im.width; out.height = im.height; var og = out.getContext("2d"); og.filter = "blur(1px)"; og.drawImage(cv, 0, 0, im.width, im.height);
+      localStorage.setItem("clubs-mask-" + i, out.toDataURL("image/jpeg", .9)); delete cutURL[i];
+      return true;
+    });
+  }
+  function autoCut() {
+    if (!C.behind) return; if (cutBusy) { cutAgain = true; return; } cutAgain = false;
+    var todo = []; for (var i = 0; i < 12; i++) if (img(i) && !mask(i)) todo.push(i);
+    var m = $("#cutMsg"); if (!todo.length) return;
+    cutBusy = true; var done = 0, fails = 0, total = todo.length;
+    if (m) { m.removeAttribute("data-s"); m.textContent = segP ? "✂️ Détourage…" : "⏳ Chargement de l'outil de détourage (une seule fois)…"; }
+    (function next() {
+      var i = todo.shift();
+      if (i == null) { cutBusy = false; if (cutAgain) { setTimeout(autoCut, 50); return; } if (m) { m.setAttribute("data-s", fails ? "error" : "connected"); m.textContent = fails ? "⚠️ Détourage impossible pour " + fails + " photo" + (fails > 1 ? "s" : "") + " (connexion internet ?)" : "✅ " + done + " joueur" + (done > 1 ? "s" : "") + " détouré" + (done > 1 ? "s" : ""); } return; }
+      makeMask(i).then(function () { done++; if (m) m.textContent = "✂️ Détourage… " + done + "/" + total; next(); }, function (e) { console.warn("détourage", e); fails++; next(); });
+    })();
+  }
+  $("#cutAll").onclick = function () { for (var i = 0; i < 12; i++) try { localStorage.removeItem("clubs-mask-" + i); } catch (e) {} cutURL = {}; C.behind = true; $("#behind").checked = true; save(); autoCut(); };
+  // Joueur détouré : la photo avec le masque en transparence (fabriqué au lancement, gardé en mémoire).
+  function prepCuts() {
+    if (!C.behind) return Promise.resolve();
+    var jobs = [];
+    for (var i = 0; i < 12; i++) (function (i) {
+      var p = img(i), mk = mask(i), key = p.length + "|" + mk.length;
+      if (!p || !mk || !logo(i) || (cutURL[i] && cutURL[i].key === key)) return;
+      jobs.push(Promise.all([loadImg(p), loadImg(mk)]).then(function (a) {
+        var w = a[0].width, h = a[0].height, cv = document.createElement("canvas"); cv.width = w; cv.height = h; var g = cv.getContext("2d");
+        g.drawImage(a[1], 0, 0, w, h); var md = g.getImageData(0, 0, w, h); g.clearRect(0, 0, w, h); g.drawImage(a[0], 0, 0);
+        var pd = g.getImageData(0, 0, w, h); for (var k = 0; k < w * h; k++) pd.data[k * 4 + 3] = md.data[k * 4];
+        g.putImageData(pd, 0, 0); cutURL[i] = { key: key, url: cv.toDataURL("image/png") };
+      }, function () {}));
+    })(i);
+    return Promise.all(jobs);
+  }
+
   /* ---------- jeu ---------- */
   var W = 1080, H = 1920, stage = $("#stage"), flipAt = [], pts = [], sent = [], supporter = {}, fans = {}, lastSlot = 0, cool = {}, likeAcc = 0, likeBase = null, rankOf = [], left = 0, paused = false, ended = false, tick = null, demoT = null, ws = null, wsWant = false, nextT = null;
   var leader = -1, leadSaidAt = 0, votes = 0, secHits = 0, rateS = 0, evt = null, evtNext = 0, goalQ = [], goalBusy = false, lastSpeech = 0, giftSaidAt = 0;
@@ -399,7 +462,14 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     var bg = "linear-gradient(160deg," + c.c1 + " 0%," + c.c1 + " 48%," + c.c2 + " 100%)";
     var pic = im ? "<img class=\"pic\" alt=\"\" src=\"" + im + "\">" : lg ? "" : "<img class=\"pic\" alt=\"\" src=\"" + badgeURL(c.abbr, c.c1, c.c2, c.pat, 320) + "\" style=\"object-fit:contain;padding:30px 70px 110px\">";
     var mid;
-    if (combo) { // photo du joueur + logo : carte façon carte de collection
+    var cut = combo && C.behind && cutURL[i] ? cutURL[i].url : "";
+    if (cut) { // joueur détouré devant le grand logo du club
+      var tc2 = textCol(c), c22 = lum(c.c2) > .85 && lum(c.c1) > .85 ? "#ffd60a" : c.c2;
+      mid = "<div class=\"tint\" style=\"background:radial-gradient(ellipse at 50% 30%," + hexA(c22, .45) + " 0%,rgba(0,0,0,0) 60%),linear-gradient(0deg," + hexA(tc2, .9) + " 0%,rgba(0,0,0,0) 70%)\"></div>" +
+        "<img class=\"logo behind\" alt=\"\" src=\"" + lg + "\"><div class=\"stripe\" style=\"background:linear-gradient(90deg," + tc2 + "," + c22 + " 60%," + tc2 + ")\"></div>" +
+        "<img class=\"pic cut\" alt=\"\" src=\"" + cut + "\"><div class=\"shade\"></div>";
+      combo = true;
+    } else if (combo) { // photo du joueur + logo : carte façon carte de collection
       var tc = textCol(c), c2 = lum(c.c2) > .85 && lum(c.c1) > .85 ? "#ffd60a" : c.c2;
       mid = pic + "<div class=\"tint\" style=\"background:linear-gradient(0deg," + hexA(tc, .8) + " 0%," + hexA(tc, .35) + " 40%,rgba(0,0,0,0) 64%),linear-gradient(125deg," + hexA(c2, .35) + " 0%,rgba(0,0,0,0) 38%)\"></div>" +
         "<img class=\"wm\" alt=\"\" src=\"" + lg + "\"><div class=\"stripe\" style=\"background:linear-gradient(90deg," + tc + "," + c2 + " 60%," + tc + ")\"></div><div class=\"shade\"></div>" +
@@ -856,7 +926,8 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
       if (Math.random() < .5) onLike({ count: 3 + Math.floor(Math.random() * 10) });
     }, 450);
   }
-  function start(isDemo) {
+  function start(isDemo) { prepCuts().then(function () { start2(isDemo); }); }
+  function start2(isDemo) {
     $("#app").hidden = true; $("#wrap").hidden = false; fitStage(); paused = false;
     try { if (navigator.wakeLock) navigator.wakeLock.request("screen").catch(function () {}); } catch (e) {}
     var noHost = C.host === "off"; $("#host").hidden = noHost; $("#hostTag").hidden = noHost; $("#top").classList.toggle("full", noHost); $("#last").classList.toggle("full", noHost); $("#bub").classList.toggle("full", noHost);
@@ -874,7 +945,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   $("#bQuit").onclick = quit;
   $("#bPause").onclick = function () { paused = !paused; this.textContent = paused ? "▶ Reprendre" : "⏸ Pause"; crowdLevel(paused ? .01 : .03); };
   $("#bEnd").onclick = function () { left = 1; loop(); };
-  fillForm();
+  fillForm(); setTimeout(autoCut, 800);
 })();
 </script>
 </body>
