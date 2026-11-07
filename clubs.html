@@ -69,6 +69,19 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
 .card img.pic { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; }
 .card img.logo { position: absolute; left: 50%; top: 44%; width: 58%; height: 50%; object-fit: contain; transform: translate(-50%, -50%); filter: drop-shadow(0 8px 14px rgba(0,0,0,.65)); }
 .card img.logo.solo { width: 70%; height: 58%; top: 40%; }
+.card .in.combo img.pic { object-position: 50% 16%; filter: contrast(1.08) saturate(1.15); }
+.card .tint { position: absolute; inset: 0; }
+.card img.wm { position: absolute; right: -30%; top: -8%; width: 100%; height: 100%; object-fit: contain; opacity: .3; mix-blend-mode: screen; transform: rotate(-14deg); filter: brightness(1.4); pointer-events: none; }
+.card .stripe { position: absolute; left: -12%; right: -12%; top: 56%; height: 14px; transform: rotate(-9deg); box-shadow: 0 0 20px rgba(0,0,0,.45); opacity: .95; }
+.card .stripe::after { content: ""; position: absolute; left: 0; right: 0; top: 20px; height: 4px; background: inherit; opacity: .75; }
+.card .in.combo .shade { background: linear-gradient(180deg, rgba(0,0,0,.3) 0%, rgba(0,0,0,0) 22%, rgba(0,0,0,0) 50%, rgba(5,7,14,.5) 66%, rgba(5,7,14,.94) 86%); }
+.card .crest { position: absolute; right: 10px; top: 10px; width: 78px; height: 78px; border-radius: 50%; display: grid; place-items: center; border: 3px solid #fff;
+  background: radial-gradient(circle at 35% 28%, rgba(255,255,255,.45), rgba(10,12,20,.55) 70%); box-shadow: 0 6px 16px rgba(0,0,0,.55), inset 0 0 12px rgba(255,255,255,.25); }
+.card .crest img { width: 60px; height: 60px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,.6)); }
+.card .in.combo .tr { top: 96px; }
+.card .in.combo .mult { top: 130px; }
+#win .card .crest { width: 130px; height: 130px; right: 16px; top: 16px; } #win .card .crest img { width: 100px; height: 100px; }
+#win .card .in.combo .tr { top: 156px; right: 20px; font-size: 32px; }
 .card .shade { background: linear-gradient(180deg, rgba(0,0,0,.4) 0%, rgba(0,0,0,0) 26%, rgba(0,0,0,0) 50%, rgba(5,7,14,.92) 82%); }
 .card .sheen { background: linear-gradient(112deg, rgba(255,255,255,0) 38%, rgba(255,255,255,.38) 50%, rgba(255,255,255,0) 62%); transform: translateX(-130%); }
 .card.r1 .sheen { animation: sheen 3.4s ease-in-out infinite; }
@@ -380,11 +393,19 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   function nf(n) { return Math.round(n).toLocaleString("fr-FR"); }
   function rnd(a) { return a[Math.floor(Math.random() * a.length)]; }
   function textCol(c) { return lum(c.c1) > .85 ? (lum(c.c2) > .85 ? "#ffd60a" : c.c2) : c.c1; }
+  function hexA(hex, a) { var n = parseInt(String(hex).slice(1), 16); return "rgba(" + (n >> 16) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")"; }
   function cardHTML(i, big) {
-    var c = club(i), im = img(i), lg = logo(i), wins = C.wins[c.name] || 0;
+    var c = club(i), im = img(i), lg = logo(i), wins = C.wins[c.name] || 0, combo = !!(im && lg);
     var bg = "linear-gradient(160deg," + c.c1 + " 0%," + c.c1 + " 48%," + c.c2 + " 100%)";
     var pic = im ? "<img class=\"pic\" alt=\"\" src=\"" + im + "\">" : lg ? "" : "<img class=\"pic\" alt=\"\" src=\"" + badgeURL(c.abbr, c.c1, c.c2, c.pat, 320) + "\" style=\"object-fit:contain;padding:30px 70px 110px\">";
-    return "<div class=\"in\"><div class=\"bg\" style=\"background:" + bg + "\"></div><div class=\"kit\"></div>" + pic + "<div class=\"shade\"></div>" + (lg ? "<img class=\"logo" + (im ? "" : " solo") + "\" alt=\"\" src=\"" + lg + "\">" : "") +
+    var mid;
+    if (combo) { // photo du joueur + logo : carte façon carte de collection
+      var tc = textCol(c), c2 = lum(c.c2) > .85 && lum(c.c1) > .85 ? "#ffd60a" : c.c2;
+      mid = pic + "<div class=\"tint\" style=\"background:linear-gradient(0deg," + hexA(tc, .8) + " 0%," + hexA(tc, .35) + " 40%,rgba(0,0,0,0) 64%),linear-gradient(125deg," + hexA(c2, .35) + " 0%,rgba(0,0,0,0) 38%)\"></div>" +
+        "<img class=\"wm\" alt=\"\" src=\"" + lg + "\"><div class=\"stripe\" style=\"background:linear-gradient(90deg," + tc + "," + c2 + " 60%," + tc + ")\"></div><div class=\"shade\"></div>" +
+        "<div class=\"crest\" style=\"border-color:" + c2 + "\"><img alt=\"\" src=\"" + lg + "\"></div>";
+    } else mid = pic + "<div class=\"shade\"></div>" + (lg ? "<img class=\"logo" + (im ? "" : " solo") + "\" alt=\"\" src=\"" + lg + "\">" : "");
+    return "<div class=\"in" + (combo ? " combo" : "") + "\"><div class=\"bg\" style=\"background:" + bg + "\"></div><div class=\"kit\"></div>" + mid +
       "<div class=\"sheen\"></div><div class=\"rk\" data-rk></div><div class=\"tr\">" + (wins ? "🏆 " + wins : "") + "</div><div class=\"mult\" data-mu></div><div class=\"nm\">" + esc2(c.name) + "</div><div class=\"lt\">" + LET[i] + "</div>" +
       "<div class=\"pt\"><span data-pt>" + (big ? nf(pts[i]) : 0) + "</span><small>PTS</small></div><div class=\"bar\"><i data-br></i></div></div>";
   }

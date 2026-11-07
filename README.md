@@ -152,6 +152,7 @@ Page : https://ozentv.github.io/quiz-live/clubs.html
 - Volume des sons de stade : faible (par défaut), moyen ou fort.
 - Manches de 2, 3, 5 ou 10 minutes : à la fin du chrono, le club en tête gagne (confettis, trophée 🏆 sur sa carte, MVP), puis le **classement de la saison** s'affiche (victoires et points cumulés), avant la manche suivante. Saisons de 100 matchs.
 - Sur chaque club : « 👤 » met une photo (un joueur) en fond de carte et « 🛡️ » met le logo du club, posé en grand au milieu (PNG transparent conservé). Logo seul : il s'affiche sur un fond aux couleurs du club. Les images restent seulement sur ton téléphone ; sans image, l'écusson aux couleurs du club s'affiche.
+- **Combo photo + logo** : quand un club a les deux, la carte devient une carte de collection. La photo du joueur est cadrée sur le visage, avec un dégradé et une double bande diagonale aux couleurs du club, le logo en filigrane sur la photo et le logo net dans un médaillon en haut à droite.
 - « 📥 Importer toutes les images d'un coup » : sélectionne jusqu'à 12 images en une fois ; chacune va sur la bonne carte si son nom de fichier est la lettre (A.jpg) ou le nom du club (psg.jpg, real madrid.png), sinon dans l'ordre A, B, C… Un fichier dont le nom contient « logo », « écusson » ou « blason » (psg logo.png) devient le logo du club, les autres deviennent la photo.
 - Utilise les mêmes réglages de relais que le quiz. Mode démo pour tester sans live.
 
