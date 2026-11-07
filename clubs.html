@@ -184,14 +184,16 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
       <label>Likes pour 1 point<select id="lstep"><option value="5">5 likes</option><option value="10">10 likes</option><option value="25">25 likes</option></select></label>
     </div>
     <label class="chk"><input type="checkbox" id="voice"> 🎙️ Voix du commentateur (coup d'envoi, changements de leader, buts, fin de match)</label>
-    <label>Type de voix<select id="eng"><option value="phone">📱 Voix du téléphone</option><option value="gemini">✨ Voix IA Gemini (très naturelle, via ton relais)</option></select></label>
+    <label>Type de voix<select id="eng"><option value="phone">📱 Voix du téléphone</option><option value="edge">🎙️ Voix pro gratuite (Microsoft, via ton relais)</option><option value="gemini">✨ Voix IA Gemini (via ton relais)</option></select></label>
     <div id="gemBox" style="display:grid;gap:8px;padding:10px;border:1px solid var(--line);border-radius:12px">
-      <label>Voix Gemini<select id="gemVoice"></select></label>
+      <label>Voix<select id="gemVoice"></select></label>
       <label>Clé du relais (ADMIN_KEY, la même que la « Clé du classement » du quiz)<input type="password" id="gkey" autocomplete="off"></label>
       <div class="row2"><button class="mini" id="gemTest" type="button">▶ Écouter la voix</button><span class="st" id="gemSt"></span></div>
-      <p class="note">Sur Render, ajoute <b>GEMINI_API_KEY</b> (clé gratuite sur aistudio.google.com/apikey). Si Gemini ne répond pas, la voix du téléphone prend le relais.</p>
+      <p class="note" id="edgeNote">Voix pro de Microsoft, gratuites et sans limite : rien à créer, il faut juste la clé ci-dessus. Si le relais ne répond pas, la voix du téléphone prend le relais.</p>
+      <p class="note" id="gemNote">Sur Render, ajoute <b>GEMINI_API_KEY</b> (clé gratuite sur aistudio.google.com/apikey). Si Gemini ne répond pas, la voix du téléphone prend le relais.</p>
     </div>
     <label class="chk"><input type="checkbox" id="sound"> 🏟️ Sons de stade (foule, sifflet, ovation)</label>
+    <label>Volume des sons de stade<select id="sfx"><option value="faible">Faible (conseillé)</option><option value="moyen">Moyen</option><option value="fort">Fort</option></select></label>
     <label class="chk"><input type="checkbox" id="events"> ⚡ Événements surprises (points doublés, remontada, club en vedette)</label>
     <label>Animateur en bas à gauche<select id="hostSel"><option value="clair">Peau claire</option><option value="moyen">Peau moyenne</option><option value="mat">Peau mate</option><option value="fonce">Peau foncée</option><option value="off">Pas d'animateur</option></select></label>
     <div class="row2"><button class="mini" id="resetSeason" type="button">Remettre la saison à zéro</button><span class="st" id="seasonInfo"></span></div>
@@ -251,7 +253,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   var C;
   try { C = JSON.parse(localStorage.getItem("clubs-set") || "null"); } catch (e) { C = null; }
   if (!C) C = { slots: DEF_SLOTS, dur: 300, gmul: 5, lstep: 10, voice: true, sound: true, events: true, host: "moyen", season: 1, match: 1, wins: {}, spts: {} };
-  if (C.sound == null) C.sound = true; if (C.events == null) C.events = true; if (!C.host) C.host = "moyen"; if (!C.spts) C.spts = {}; if (!C.eng) C.eng = "phone"; if (!C.gvoice) C.gvoice = "Fenrir";
+  if (C.sound == null) C.sound = true; if (C.events == null) C.events = true; if (!C.host) C.host = "moyen"; if (!C.spts) C.spts = {}; if (!C.eng) C.eng = "phone"; if (!C.gvoice) C.gvoice = "Fenrir"; if (!C.evoice) C.evoice = "fr-FR-HenriNeural"; if (!C.sfx) C.sfx = "faible";
   var Q = {}; try { Q = JSON.parse(localStorage.getItem("sq-set") || "{}"); } catch (e) {}
   if (!C.user) C.user = Q.ttUser || ""; if (!C.relay) C.relay = Q.relay || "studio-quiz-relais.onrender.com"; if (C.gkey == null) C.gkey = Q.lbKey || "";
   function save() { try { localStorage.setItem("clubs-set", JSON.stringify(C)); } catch (e) {} }
@@ -306,9 +308,14 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     $("#gmul").value = C.gmul; $("#gmul").onchange = function () { C.gmul = +this.value; save(); };
     $("#lstep").value = C.lstep; $("#lstep").onchange = function () { C.lstep = +this.value; save(); };
     $("#voice").checked = !!C.voice; $("#voice").onchange = function () { C.voice = this.checked; save(); };
-    $("#eng").value = C.eng; $("#eng").onchange = function () { C.eng = this.value; save(); $("#gemBox").hidden = C.eng !== "gemini"; }; $("#gemBox").hidden = C.eng !== "gemini";
-    $("#gemVoice").innerHTML = GEM_VOICES.map(function (v) { return "<option value=\"" + v[0] + "\">" + v[1] + "</option>"; }).join(""); $("#gemVoice").value = C.gvoice; $("#gemVoice").onchange = function () { C.gvoice = this.value; save(); };
+    function engUI() {
+      var ed = C.eng === "edge"; $("#gemBox").hidden = C.eng === "phone"; $("#edgeNote").hidden = !ed; $("#gemNote").hidden = ed; $("#gemSt").textContent = "";
+      $("#gemVoice").innerHTML = (ed ? EDGE_VOICES : GEM_VOICES).map(function (v) { return "<option value=\"" + v[0] + "\">" + v[1] + "</option>"; }).join(""); $("#gemVoice").value = ed ? C.evoice : C.gvoice;
+    }
+    $("#eng").value = C.eng; $("#eng").onchange = function () { C.eng = this.value; save(); engUI(); }; engUI();
+    $("#gemVoice").onchange = function () { if (C.eng === "edge") C.evoice = this.value; else C.gvoice = this.value; save(); };
     $("#gkey").value = C.gkey; $("#gkey").oninput = function () { C.gkey = this.value.trim(); save(); };
+    $("#sfx").value = C.sfx; $("#sfx").onchange = function () { C.sfx = this.value; save(); };
     $("#sound").checked = !!C.sound; $("#sound").onchange = function () { C.sound = this.checked; save(); };
     $("#events").checked = !!C.events; $("#events").onchange = function () { C.events = this.checked; save(); };
     $("#hostSel").value = C.host; $("#hostSel").onchange = function () { C.host = this.value; save(); };
@@ -317,14 +324,14 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   }
   $("#resetSeason").onclick = function () { if (!confirm("Remettre la saison et les trophées à zéro ?")) return; C.season = 1; C.match = 1; C.wins = {}; C.spts = {}; save(); fillForm(); };
 
-  // Voix IA Gemini, fabriquée par le relais (la clé Gemini reste sur Render).
+  // Voix IA (Microsoft « Natural » gratuite ou Google Gemini), fabriquée par le relais.
   function gemMake(cfg) {
     var cache = {}, order = [], au = null, tok = 0, done = null;
     function base() { var u = String(cfg().relay || "studio-quiz-relais.onrender.com").trim().replace(/\/+$/, ""); if (!/^[a-z]+:\/\//i.test(u)) u = "https://" + u; return u.replace(/^ws/i, "http"); }
     function get(t) {
-      var c = cfg(), k = c.voice + "|" + c.style + "|" + t;
+      var c = cfg(), k = c.engine + "|" + c.voice + "|" + c.style + "|" + t;
       if (cache[k]) return cache[k];
-      var p = fetch(base() + "/tts?voice=" + encodeURIComponent(c.voice) + "&style=" + encodeURIComponent(c.style) + "&key=" + encodeURIComponent(c.key || "") + "&text=" + encodeURIComponent(t))
+      var p = fetch(base() + "/tts?" + (c.engine === "edge" ? "engine=edge&rate=" + encodeURIComponent(c.srate || "") + "&" : "") + "voice=" + encodeURIComponent(c.voice) + "&style=" + encodeURIComponent(c.style) + "&key=" + encodeURIComponent(c.key || "") + "&text=" + encodeURIComponent(t))
         .then(function (r) { if (r.ok) return r.blob(); return r.json().then(function (j) { throw new Error(j.error || "Erreur " + r.status); }, function () { throw new Error("Le relais ne répond pas (erreur " + r.status + "). Mets-le à jour sur Render."); }); })
         .then(function (bl) { return URL.createObjectURL(bl); });
       cache[k] = p; order.push(k);
@@ -333,12 +340,12 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
       return p;
     }
     function stop() { tok++; if (au) { try { au.pause(); } catch (e) {} au = null; } if (done) { var d = done; done = null; d(false); } }
-    // Joue la phrase ; se résout à la fin (ou si une autre phrase la coupe), échoue si Gemini ne répond pas à temps.
+    // Joue la phrase ; se résout à la fin (ou si une autre phrase la coupe), échoue si la voix IA ne répond pas à temps.
     function play(t, onStart, wait) {
       stop(); var my = tok, dead = false;
       return new Promise(function (res, rej) {
         done = res;
-        var to = setTimeout(function () { dead = true; if (done === res) done = null; rej(new Error("Gemini a mis trop de temps à répondre.")); }, wait || 9000);
+        var to = setTimeout(function () { dead = true; if (done === res) done = null; rej(new Error("La voix IA a mis trop de temps à répondre.")); }, wait || 9000);
         get(t).then(function (src) {
           clearTimeout(to); if (dead) return; if (my !== tok) return res(false);
           var a = new Audio(src); au = a; a.playbackRate = cfg().rate || 1;
@@ -350,15 +357,19 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     }
     return { get: get, pre: function (t) { if (t) get(String(t)).catch(function () {}); }, play: play, stop: stop };
   }
+  var EDGE_VOICES = [["fr-FR-HenriNeural", "Henri · homme, voix radio"], ["fr-FR-RemyMultilingualNeural", "Rémy · homme, très naturel"], ["fr-FR-DeniseNeural", "Denise · femme, claire"], ["fr-FR-VivienneMultilingualNeural", "Vivienne · femme, très naturelle"], ["fr-FR-EloiseNeural", "Éloïse · voix jeune"],
+    ["fr-BE-GerardNeural", "Gérard · homme (Belgique)"], ["fr-CH-FabriceNeural", "Fabrice · homme (Suisse)"], ["fr-CA-AntoineNeural", "Antoine · homme (Québec)"], ["fr-CA-ThierryNeural", "Thierry · homme (Québec)"], ["fr-CA-SylvieNeural", "Sylvie · femme (Québec)"], ["fr-BE-CharlineNeural", "Charline · femme (Belgique)"], ["fr-CH-ArianeNeural", "Ariane · femme (Suisse)"]];
   var GEM_VOICES = [["Puck", "Puck · homme, enjoué"], ["Fenrir", "Fenrir · homme, survolté"], ["Charon", "Charon · homme, posé"], ["Orus", "Orus · homme, ferme"], ["Algenib", "Algenib · homme, voix grave"], ["Sadachbia", "Sadachbia · homme, vif"], ["Achird", "Achird · homme, amical"], ["Iapetus", "Iapetus · homme, clair"], ["Alnilam", "Alnilam · homme, assuré"],
     ["Kore", "Kore · femme, ferme"], ["Aoede", "Aoede · femme, légère"], ["Leda", "Leda · femme, jeune"], ["Zephyr", "Zephyr · femme, lumineuse"], ["Laomedeia", "Laomedeia · femme, enjouée"], ["Sulafat", "Sulafat · femme, chaleureuse"]];
-  var gem = gemMake(function () { return { relay: C.relay, key: C.gkey, voice: C.gvoice || "Fenrir", style: "commentateur sportif français passionné, énergique, rythme rapide, comme dans un stade", rate: 1 }; });
+  var gem = gemMake(function () { return { relay: C.relay, key: C.gkey, engine: C.eng, voice: C.eng === "edge" ? (C.evoice || "fr-FR-HenriNeural") : (C.gvoice || "Fenrir"), srate: "+10%", style: "commentateur sportif français passionné, énergique, rythme rapide, comme dans un stade", rate: 1 }; });
   var gemPause = 0;
   function gemSt(t, s2) { var e = $("#gemSt"); e.textContent = t; e.setAttribute("data-s", s2 || "error"); }
-  function gemOn() { return C.voice && C.eng === "gemini" && Date.now() > gemPause; }
+  function gemOn() { return C.voice && (C.eng === "gemini" || C.eng === "edge") && Date.now() > gemPause; }
   $("#gemTest").onclick = function () {
-    gemPause = 0; gemSt("⏳ Gemini prépare la voix…", "waiting");
-    gem.play("Coup d'envoi du match ! Écrivez la lettre de votre club dans le chat !", null, 15000).then(function () { gemSt("✅ Voix Gemini OK", "connected"); }, function (e) { gemSt("⚠️ " + (e && e.message || "Erreur")); });
+    gemPause = 0; gemSt("⏳ Préparation de la voix…", "waiting");
+    var tt = "Coup d'envoi du match ! Écrivez la lettre de votre club dans le chat !";
+    gem.get(tt).then(function () { gemSt("✅ Voix OK", "connected"); }, function () {});
+    gem.play(tt, null, 15000).catch(function (e) { gemSt("⚠️ " + (e && e.message || "Erreur")); });
   };
   /* ---------- jeu ---------- */
   var W = 1080, H = 1920, stage = $("#stage"), flipAt = [], pts = [], sent = [], supporter = {}, fans = {}, lastSlot = 0, cool = {}, likeAcc = 0, likeBase = null, rankOf = [], left = 0, paused = false, ended = false, tick = null, demoT = null, ws = null, wsWant = false, nextT = null;
@@ -504,7 +515,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     if (gemOn()) {
       busyUntil += 2000; try { speechSynthesis.cancel(); } catch (e) {}
       gem.play(t, function () { talk(true); }, 8000).then(function (ok) { if (my === speakTok) { talk(false); curPrio = 0; busyUntil = Math.min(busyUntil, Date.now()); } }, function (e) {
-        gemSt("⚠️ " + (e && e.message || "Voix Gemini indisponible") + " → voix du téléphone.");
+        gemSt("⚠️ " + (e && e.message || "Voix IA indisponible") + " → voix du téléphone.");
         if (/quota|trop de temps/i.test(e && e.message || "")) gemPause = Date.now() + 120000;
         if (my === speakTok) phoneSay(t, talk);
       });
@@ -543,10 +554,12 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   }
 
   /* ---------- sons de stade (générés) ---------- */
-  var AC = null, crowd = [], crowdG = null, noise = null, flashBurst = 0;
+  var AC = null, master = null, crowd = [], crowdG = null, noise = null, flashBurst = 0, SFXV = { faible: .3, moyen: .6, fort: 1 };
   function audio() {
     if (!C.sound) return null;
     if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } }
+    if (!master) { master = AC.createGain(); master.connect(AC.destination); }
+    master.gain.value = SFXV[C.sfx] || .3;
     if (AC.state === "suspended") try { AC.resume(); } catch (e) {}
     return AC;
   }
@@ -557,7 +570,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   }
   function crowdStart() {
     var a = audio(); if (!a || crowd.length) return;
-    crowdG = a.createGain(); crowdG.gain.value = 0; crowdG.connect(a.destination);
+    crowdG = a.createGain(); crowdG.gain.value = 0; crowdG.connect(master);
     [[420, .7], [950, .9], [2100, 1.2]].forEach(function (f, k) { // trois bandes « voix » qui ondulent : rumeur de foule
       var s = a.createBufferSource(); s.buffer = noiseBuf(); s.loop = true; s.loopStart = k; s.playbackRate.value = .9 + k * .08;
       var bp = a.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = f[0]; bp.Q.value = f[1];
@@ -574,19 +587,19 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
       var o = a.createOscillator(), l = a.createOscillator(), lg = a.createGain(), g = a.createGain(), s = t + p[0], e = s + p[1];
       o.frequency.value = 2850; l.frequency.value = 26; lg.gain.value = 170; l.connect(lg); lg.connect(o.frequency);
       g.gain.setValueAtTime(0, s); g.gain.linearRampToValueAtTime(.16, s + .02); g.gain.setValueAtTime(.16, e - .04); g.gain.linearRampToValueAtTime(0, e);
-      o.connect(g); g.connect(a.destination); o.start(s); l.start(s); o.stop(e + .05); l.stop(e + .05);
+      o.connect(g); g.connect(master); o.start(s); l.start(s); o.stop(e + .05); l.stop(e + .05);
     });
   }
   function roar(len, vol) {
     var a = audio(); if (!a) return; var t = a.currentTime, s = a.createBufferSource(), bp = a.createBiquadFilter(), g = a.createGain();
     s.buffer = noiseBuf(); s.loop = true; bp.type = "bandpass"; bp.Q.value = .6; bp.frequency.setValueAtTime(380, t); bp.frequency.linearRampToValueAtTime(900, t + .5); bp.frequency.linearRampToValueAtTime(650, t + len);
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .3); g.gain.setTargetAtTime(0, t + .6, len / 3.5);
-    s.connect(bp); bp.connect(g); g.connect(a.destination); s.start(t); s.stop(t + len + 1);
+    s.connect(bp); bp.connect(g); g.connect(master); s.start(t); s.stop(t + len + 1);
   }
   function cheer() { roar(1.4, .18); }
-  function beep(f, d, v) { var a = audio(); if (!a) return; var t = a.currentTime, o = a.createOscillator(), g = a.createGain(); o.type = "triangle"; o.frequency.value = f; g.gain.setValueAtTime(v || .12, t); g.gain.exponentialRampToValueAtTime(.001, t + d); o.connect(g); g.connect(a.destination); o.start(t); o.stop(t + d + .05); }
+  function beep(f, d, v) { var a = audio(); if (!a) return; var t = a.currentTime, o = a.createOscillator(), g = a.createGain(); o.type = "triangle"; o.frequency.value = f; g.gain.setValueAtTime(v || .12, t); g.gain.exponentialRampToValueAtTime(.001, t + d); o.connect(g); g.connect(master); o.start(t); o.stop(t + d + .05); }
   function horn() {
-    var a = audio(); if (!a) return; var t = a.currentTime, lp = a.createBiquadFilter(), g = a.createGain(); lp.type = "lowpass"; lp.frequency.value = 1400; lp.connect(g); g.connect(a.destination);
+    var a = audio(); if (!a) return; var t = a.currentTime, lp = a.createBiquadFilter(), g = a.createGain(); lp.type = "lowpass"; lp.frequency.value = 1400; lp.connect(g); g.connect(master);
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.09, t + .05); g.gain.setValueAtTime(.09, t + .8); g.gain.linearRampToValueAtTime(0, t + 1.1);
     [233, 294, 349].forEach(function (f) { var o = a.createOscillator(); o.type = "sawtooth"; o.frequency.value = f; o.connect(lp); o.start(t); o.stop(t + 1.2); });
   }
@@ -747,7 +760,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     ended = false; left = C.dur; evtNext = 40 + Math.random() * 20; header(); build(); subLine();
     $("#win").hidden = true; $("#tab").hidden = true; $("#goal").hidden = true; $("#last").innerHTML = "<span>Le match commence ! Envoie la lettre de ton club</span>";
     $("#timer").textContent = fmt(left); $("#timer").classList.remove("hurry");
-    whistle([[0, 1]]); crowdLevel(.05);
+    whistle([[0, 1]]); crowdLevel(.03);
     speak("Coup d'envoi du match " + C.match + " ! Écrivez la lettre de votre club dans le chat pour lui donner des points !", 3);
   }
   function confetti() { for (var i = 0; i < 120; i++) { var c = document.createElement("div"); c.className = "cf"; c.style.left = Math.random() * W + "px"; c.style.background = ["#ffd60a", "#ff3b6b", "#3bc9ff", "#2ecc71", "#ffffff"][i % 5]; c.style.setProperty("--dx", (Math.random() * 300 - 150) + "px"); c.style.setProperty("--r", (Math.random() * 900 - 450) + "deg"); c.style.animationDuration = (2 + Math.random() * 2) + "s"; c.style.animationDelay = (Math.random() * .6) + "s"; stage.appendChild(c); setTimeout(function () { c.remove(); }, 5000); } }
@@ -786,7 +799,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   }
   function loop() {
     rateS = rateS * .6 + secHits * .4; secHits = 0;
-    crowdLevel(ended ? .12 : Math.min(.3, .05 + rateS * .012));
+    crowdLevel(ended ? .08 : Math.min(.18, .03 + rateS * .008));
     if (paused || ended) return;
     left -= 1; var t = $("#timer"); t.textContent = fmt(left); t.classList.toggle("hurry", left <= 10);
     var el = C.dur - left;
@@ -838,7 +851,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   $("#go").onclick = function () { start(false); };
   $("#demo").onclick = function () { start(true); };
   $("#bQuit").onclick = quit;
-  $("#bPause").onclick = function () { paused = !paused; this.textContent = paused ? "▶ Reprendre" : "⏸ Pause"; crowdLevel(paused ? .02 : .05); };
+  $("#bPause").onclick = function () { paused = !paused; this.textContent = paused ? "▶ Reprendre" : "⏸ Pause"; crowdLevel(paused ? .01 : .03); };
   $("#bEnd").onclick = function () { left = 1; loop(); };
   fillForm();
 })();

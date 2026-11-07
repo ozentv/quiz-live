@@ -7,12 +7,17 @@
 //                     pour que personne d'autre n'utilise ton quota Gemini.
 //
 // GET /tts?text=...&voice=Puck&style=...&key=<ADMIN_KEY>  ->  audio/wav
+//
+// Voix pro gratuites Microsoft (les voix « Natural » de Edge), sans clé à créer :
+// GET /tts?engine=edge&voice=fr-FR-HenriNeural&rate=+8%&text=...&key=<ADMIN_KEY>  ->  audio/mpeg
 
 const GEMINI_KEY = (process.env.GEMINI_API_KEY || "").trim();
 const MODEL = (process.env.GEMINI_TTS_MODEL || "gemini-3.8-flash-tts").trim();
 const OLD_MODEL = "gemini-2.5-flash-preview-tts";
 const ADMIN = (process.env.ADMIN_KEY || "").trim();
 const API = (process.env.GEMINI_API_BASE || "https://generativelanguage.googleapis.com/v1beta").replace(/\/+$/, "");
+import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
+
 const cache = new Map(); // phrases déjà générées (les phrases qui reviennent ne coûtent rien)
 
 function wav(pcm, rate = 24000) {
@@ -62,14 +67,44 @@ async function generate(text, voice, style) {
   }
 }
 
+function edgeSay(text, voice, rate) {
+  return new Promise(async (resolve, reject) => {
+    const tts = new MsEdgeTTS(), chunks = [];
+    const to = setTimeout(() => { try { tts.close(); } catch (e) {} reject(new Error("délai dépassé")); }, 20000);
+    try {
+      await tts.setMetadata(voice, OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3);
+      const { audioStream } = tts.toStream(text, rate ? { rate } : {});
+      audioStream.on("data", (c) => chunks.push(c));
+      audioStream.on("error", (e) => { clearTimeout(to); reject(e); });
+      audioStream.on("close", () => {
+        clearTimeout(to); try { tts.close(); } catch (e) {}
+        const b = Buffer.concat(chunks); if (b.length < 500) reject(new Error("réponse vide")); else resolve(b);
+      });
+    } catch (e) { clearTimeout(to); reject(e); }
+  });
+}
+
 export async function handle(u, res) {
   res.setHeader("access-control-allow-origin", "*");
   const fail = (code, error) => { res.writeHead(code, { "content-type": "application/json; charset=utf-8" }); res.end(JSON.stringify({ error })); };
-  if (!GEMINI_KEY) return fail(503, "Voix Gemini : GEMINI_API_KEY n'est pas réglée sur Render (onglet Environment).");
-  if (!ADMIN) return fail(503, "Voix Gemini : règle aussi ADMIN_KEY sur Render.");
-  if (String(u.searchParams.get("key") || "").trim() !== ADMIN) return fail(403, "Voix Gemini : la clé (ADMIN_KEY) est absente ou incorrecte dans la page.");
+  const edge = u.searchParams.get("engine") === "edge", who = edge ? "Voix pro" : "Voix Gemini";
+  if (!edge && !GEMINI_KEY) return fail(503, "Voix Gemini : GEMINI_API_KEY n'est pas réglée sur Render (onglet Environment).");
+  if (!ADMIN) return fail(503, who + " : règle ADMIN_KEY sur Render.");
+  if (String(u.searchParams.get("key") || "").trim() !== ADMIN) return fail(403, who + " : la clé (ADMIN_KEY) est absente ou incorrecte dans la page.");
   const text = String(u.searchParams.get("text") || "").replace(/\s+/g, " ").trim().slice(0, 600);
   if (!text) return fail(400, "Texte vide.");
+  if (edge) {
+    const ev = String(u.searchParams.get("voice") || ""), voice = /^[a-z]{2}-[A-Z]{2}-[A-Za-z]+Neural$/.test(ev) ? ev : "fr-FR-HenriNeural";
+    const r = String(u.searchParams.get("rate") || ""), rate = /^[+-]\d{1,2}%$/.test(r) ? r : "";
+    const ck = "edge|" + voice + "|" + rate + "|" + text;
+    try {
+      let audio = cache.get(ck);
+      if (!audio) { audio = await edgeSay(text, voice, rate); cache.set(ck, audio); if (cache.size > 400) cache.delete(cache.keys().next().value); }
+      res.writeHead(200, { "content-type": "audio/mpeg", "cache-control": "public, max-age=86400" });
+      res.end(audio);
+    } catch (e) { console.error("tts edge", e && e.message); fail(502, "Voix pro indisponible pour le moment : " + String(e && e.message || e).slice(0, 120)); }
+    return;
+  }
   const v = String(u.searchParams.get("voice") || ""), voice = /^[A-Za-z]{3,20}$/.test(v) ? v : "Puck";
   const style = String(u.searchParams.get("style") || "").slice(0, 160);
   const ck = voice + "|" + style + "|" + text;
