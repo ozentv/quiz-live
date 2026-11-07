@@ -127,6 +127,7 @@ Les points sont enregistrés seulement avec la bonne clé : personne d'autre ne 
 ### Options du relais (facultatif)
 Dans Render, onglet **Environment** du service :
 - `ALLOWED_USERS` : ton pseudo TikTok, pour que personne d'autre n'utilise ton relais.
+- `GEMINI_API_KEY` : voix off IA Gemini (voir « Voix off » plus bas).
 - `EULER_API_KEY` : clé gratuite de [eulerstream.com](https://www.eulerstream.com). **Recommandée** : sans clé, le service gratuit qui permet de se connecter aux lives TikTok est vite limité, surtout depuis Render. Le message « Limite gratuite du service de connexion TikTok atteinte » veut dire qu'il faut l'ajouter.
 
 ### Ajouter la clé Euler Stream
@@ -181,9 +182,16 @@ Page : https://ozentv.github.io/quiz-live/vs.html
 - **Au hasard** mélange tous les thèmes.
 
 ## Voix off
-La voix utilise la synthèse vocale du navigateur (`speechSynthesis`) avec une voix française.
-- Sur iPhone, pour installer une voix : Réglages, Accessibilité, Contenu énoncé, Voix, Français.
-- Sans voix française, le quiz se joue avec le texte seul.
+Deux types de voix, au choix dans les réglages du quiz et de la Bataille des clubs (« Type de voix ») :
+- **📱 Voix du téléphone** : synthèse vocale du navigateur (`speechSynthesis`) avec une voix française. Sur PC, dans **Microsoft Edge**, choisis une voix « Online (Natural) » (Henri, Denise, Vivienne, Rémy…) : elles sont gratuites et très naturelles. Sur iPhone, pour installer une voix : Réglages, Accessibilité, Contenu énoncé, Voix, Français. Sans voix française, le quiz se joue avec le texte seul.
+- **✨ Voix IA Gemini** : voix très naturelle de Google Gemini (15 voix, hommes et femmes), avec un ton d'animateur télé pour le quiz et de commentateur sportif pour la Bataille des clubs. C'est le relais qui fabrique l'audio : ta clé Gemini reste sur Render et n'est jamais dans la page.
+  1. Crée une clé gratuite sur [aistudio.google.com/apikey](https://aistudio.google.com/apikey).
+  2. Sur Render, service **studio-quiz-relais**, onglet **Environment** : ajoute `GEMINI_API_KEY` avec cette clé (garde aussi `ADMIN_KEY`). Enregistre, puis **Manual Deploy**.
+  3. Dans le quiz, mets ta « Clé du classement » (la valeur d'`ADMIN_KEY`) : elle empêche les autres d'utiliser ton quota. La Bataille des clubs la reprend toute seule.
+  4. Choisis « ✨ Voix IA Gemini », une voix, puis « Écouter la voix ».
+  - Le quiz prépare la voix des questions à l'avance pour ne pas faire attendre. Les phrases déjà dites sont gardées en mémoire et ne coûtent rien.
+  - Si Gemini est trop lent, refuse la clé ou dépasse le quota gratuit de Google, la voix du téléphone prend le relais automatiquement et le message s'affiche sous le choix de la voix.
+  - Variable facultative `GEMINI_TTS_MODEL` pour changer de modèle (par défaut `gemini-3.8-flash-tts`).
 
 ## Astuces
 - Désactive le mode silencieux et mets un volume moyen.

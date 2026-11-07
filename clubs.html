@@ -16,7 +16,7 @@ p.sub, .note { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
 .box { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: grid; gap: 10px; }
 .box h2 { margin: 0; font: 800 17px Outfit, sans-serif; }
 label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
-input[type=text], select { width: 100%; min-height: 44px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: #0f121b; color: var(--fg); font: 16px Figtree, sans-serif; }
+input[type=text], input[type=password], select { width: 100%; min-height: 44px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: #0f121b; color: var(--fg); font: 16px Figtree, sans-serif; }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 button { min-height: 46px; border: 0; border-radius: 12px; padding: 0 16px; font: 700 15px Figtree, sans-serif; cursor: pointer; background: #262c3d; color: var(--fg); }
 button.main { background: var(--acc); color: #111; } button.mini { min-height: 34px; padding: 0 10px; font-size: 13px; }
@@ -184,6 +184,13 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
       <label>Likes pour 1 point<select id="lstep"><option value="5">5 likes</option><option value="10">10 likes</option><option value="25">25 likes</option></select></label>
     </div>
     <label class="chk"><input type="checkbox" id="voice"> 🎙️ Voix du commentateur (coup d'envoi, changements de leader, buts, fin de match)</label>
+    <label>Type de voix<select id="eng"><option value="phone">📱 Voix du téléphone</option><option value="gemini">✨ Voix IA Gemini (très naturelle, via ton relais)</option></select></label>
+    <div id="gemBox" style="display:grid;gap:8px;padding:10px;border:1px solid var(--line);border-radius:12px">
+      <label>Voix Gemini<select id="gemVoice"></select></label>
+      <label>Clé du relais (ADMIN_KEY, la même que la « Clé du classement » du quiz)<input type="password" id="gkey" autocomplete="off"></label>
+      <div class="row2"><button class="mini" id="gemTest" type="button">▶ Écouter la voix</button><span class="st" id="gemSt"></span></div>
+      <p class="note">Sur Render, ajoute <b>GEMINI_API_KEY</b> (clé gratuite sur aistudio.google.com/apikey). Si Gemini ne répond pas, la voix du téléphone prend le relais.</p>
+    </div>
     <label class="chk"><input type="checkbox" id="sound"> 🏟️ Sons de stade (foule, sifflet, ovation)</label>
     <label class="chk"><input type="checkbox" id="events"> ⚡ Événements surprises (points doublés, remontada, club en vedette)</label>
     <label>Animateur en bas à gauche<select id="hostSel"><option value="clair">Peau claire</option><option value="moyen">Peau moyenne</option><option value="mat">Peau mate</option><option value="fonce">Peau foncée</option><option value="off">Pas d'animateur</option></select></label>
@@ -244,9 +251,9 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   var C;
   try { C = JSON.parse(localStorage.getItem("clubs-set") || "null"); } catch (e) { C = null; }
   if (!C) C = { slots: DEF_SLOTS, dur: 300, gmul: 5, lstep: 10, voice: true, sound: true, events: true, host: "moyen", season: 1, match: 1, wins: {}, spts: {} };
-  if (C.sound == null) C.sound = true; if (C.events == null) C.events = true; if (!C.host) C.host = "moyen"; if (!C.spts) C.spts = {};
+  if (C.sound == null) C.sound = true; if (C.events == null) C.events = true; if (!C.host) C.host = "moyen"; if (!C.spts) C.spts = {}; if (!C.eng) C.eng = "phone"; if (!C.gvoice) C.gvoice = "Fenrir";
   var Q = {}; try { Q = JSON.parse(localStorage.getItem("sq-set") || "{}"); } catch (e) {}
-  if (!C.user) C.user = Q.ttUser || ""; if (!C.relay) C.relay = Q.relay || "studio-quiz-relais.onrender.com";
+  if (!C.user) C.user = Q.ttUser || ""; if (!C.relay) C.relay = Q.relay || "studio-quiz-relais.onrender.com"; if (C.gkey == null) C.gkey = Q.lbKey || "";
   function save() { try { localStorage.setItem("clubs-set", JSON.stringify(C)); } catch (e) {} }
   function club(i) { var s = C.slots[i], l = CLUBS[s[0]] || [], c = l.filter(function (x) { return x[0] === s[1]; })[0] || l[0]; return { name: c[0], abbr: c[1], c1: c[2], c2: c[3], pat: l.indexOf(c) % 4 }; }
   function logo(i) { try { return localStorage.getItem("clubs-logo-" + i) || ""; } catch (e) { return ""; } }
@@ -299,6 +306,9 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     $("#gmul").value = C.gmul; $("#gmul").onchange = function () { C.gmul = +this.value; save(); };
     $("#lstep").value = C.lstep; $("#lstep").onchange = function () { C.lstep = +this.value; save(); };
     $("#voice").checked = !!C.voice; $("#voice").onchange = function () { C.voice = this.checked; save(); };
+    $("#eng").value = C.eng; $("#eng").onchange = function () { C.eng = this.value; save(); $("#gemBox").hidden = C.eng !== "gemini"; }; $("#gemBox").hidden = C.eng !== "gemini";
+    $("#gemVoice").innerHTML = GEM_VOICES.map(function (v) { return "<option value=\"" + v[0] + "\">" + v[1] + "</option>"; }).join(""); $("#gemVoice").value = C.gvoice; $("#gemVoice").onchange = function () { C.gvoice = this.value; save(); };
+    $("#gkey").value = C.gkey; $("#gkey").oninput = function () { C.gkey = this.value.trim(); save(); };
     $("#sound").checked = !!C.sound; $("#sound").onchange = function () { C.sound = this.checked; save(); };
     $("#events").checked = !!C.events; $("#events").onchange = function () { C.events = this.checked; save(); };
     $("#hostSel").value = C.host; $("#hostSel").onchange = function () { C.host = this.value; save(); };
@@ -307,6 +317,49 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   }
   $("#resetSeason").onclick = function () { if (!confirm("Remettre la saison et les trophées à zéro ?")) return; C.season = 1; C.match = 1; C.wins = {}; C.spts = {}; save(); fillForm(); };
 
+  // Voix IA Gemini, fabriquée par le relais (la clé Gemini reste sur Render).
+  function gemMake(cfg) {
+    var cache = {}, order = [], au = null, tok = 0, done = null;
+    function base() { var u = String(cfg().relay || "studio-quiz-relais.onrender.com").trim().replace(/\/+$/, ""); if (!/^[a-z]+:\/\//i.test(u)) u = "https://" + u; return u.replace(/^ws/i, "http"); }
+    function get(t) {
+      var c = cfg(), k = c.voice + "|" + c.style + "|" + t;
+      if (cache[k]) return cache[k];
+      var p = fetch(base() + "/tts?voice=" + encodeURIComponent(c.voice) + "&style=" + encodeURIComponent(c.style) + "&key=" + encodeURIComponent(c.key || "") + "&text=" + encodeURIComponent(t))
+        .then(function (r) { if (r.ok) return r.blob(); return r.json().then(function (j) { throw new Error(j.error || "Erreur " + r.status); }, function () { throw new Error("Le relais ne répond pas (erreur " + r.status + "). Mets-le à jour sur Render."); }); })
+        .then(function (bl) { return URL.createObjectURL(bl); });
+      cache[k] = p; order.push(k);
+      p.catch(function () { if (cache[k] === p) delete cache[k]; });
+      if (order.length > 80) { var old = order.shift(), op = cache[old]; delete cache[old]; if (op) op.then(function (s) { URL.revokeObjectURL(s); }, function () {}); }
+      return p;
+    }
+    function stop() { tok++; if (au) { try { au.pause(); } catch (e) {} au = null; } if (done) { var d = done; done = null; d(false); } }
+    // Joue la phrase ; se résout à la fin (ou si une autre phrase la coupe), échoue si Gemini ne répond pas à temps.
+    function play(t, onStart, wait) {
+      stop(); var my = tok, dead = false;
+      return new Promise(function (res, rej) {
+        done = res;
+        var to = setTimeout(function () { dead = true; if (done === res) done = null; rej(new Error("Gemini a mis trop de temps à répondre.")); }, wait || 9000);
+        get(t).then(function (src) {
+          clearTimeout(to); if (dead) return; if (my !== tok) return res(false);
+          var a = new Audio(src); au = a; a.playbackRate = cfg().rate || 1;
+          a.onended = function () { if (au === a) au = null; if (done === res) done = null; res(true); };
+          a.onerror = function () { if (done === res) done = null; rej(new Error("Lecture de l'audio impossible.")); };
+          a.play().then(function () { if (onStart && my === tok) onStart(); }, function (e) { if (done === res) done = null; rej(e); });
+        }, function (e) { clearTimeout(to); if (dead) return; if (done === res) done = null; rej(e); });
+      });
+    }
+    return { get: get, pre: function (t) { if (t) get(String(t)).catch(function () {}); }, play: play, stop: stop };
+  }
+  var GEM_VOICES = [["Puck", "Puck · homme, enjoué"], ["Fenrir", "Fenrir · homme, survolté"], ["Charon", "Charon · homme, posé"], ["Orus", "Orus · homme, ferme"], ["Algenib", "Algenib · homme, voix grave"], ["Sadachbia", "Sadachbia · homme, vif"], ["Achird", "Achird · homme, amical"], ["Iapetus", "Iapetus · homme, clair"], ["Alnilam", "Alnilam · homme, assuré"],
+    ["Kore", "Kore · femme, ferme"], ["Aoede", "Aoede · femme, légère"], ["Leda", "Leda · femme, jeune"], ["Zephyr", "Zephyr · femme, lumineuse"], ["Laomedeia", "Laomedeia · femme, enjouée"], ["Sulafat", "Sulafat · femme, chaleureuse"]];
+  var gem = gemMake(function () { return { relay: C.relay, key: C.gkey, voice: C.gvoice || "Fenrir", style: "commentateur sportif français passionné, énergique, rythme rapide, comme dans un stade", rate: 1 }; });
+  var gemPause = 0;
+  function gemSt(t, s2) { var e = $("#gemSt"); e.textContent = t; e.setAttribute("data-s", s2 || "error"); }
+  function gemOn() { return C.voice && C.eng === "gemini" && Date.now() > gemPause; }
+  $("#gemTest").onclick = function () {
+    gemPause = 0; gemSt("⏳ Gemini prépare la voix…", "waiting");
+    gem.play("Coup d'envoi du match ! Écrivez la lettre de votre club dans le chat !", null, 15000).then(function () { gemSt("✅ Voix Gemini OK", "connected"); }, function (e) { gemSt("⚠️ " + (e && e.message || "Erreur")); });
+  };
   /* ---------- jeu ---------- */
   var W = 1080, H = 1920, stage = $("#stage"), flipAt = [], pts = [], sent = [], supporter = {}, fans = {}, lastSlot = 0, cool = {}, likeAcc = 0, likeBase = null, rankOf = [], left = 0, paused = false, ended = false, tick = null, demoT = null, ws = null, wsWant = false, nextT = null;
   var leader = -1, leadSaidAt = 0, votes = 0, secHits = 0, rateS = 0, evt = null, evtNext = 0, goalQ = [], goalBusy = false, lastSpeech = 0, giftSaidAt = 0;
@@ -440,18 +493,31 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   }
 
   /* ---------- commentateur ---------- */
-  var busyUntil = 0, curPrio = 0, bubT = null, fakeT = null;
+  var busyUntil = 0, curPrio = 0, bubT = null, fakeT = null, speakTok = 0;
   function speak(t, prio) {
     var now = Date.now(); prio = prio || 0;
     if (now < busyUntil && prio < curPrio) return;
     curPrio = prio; lastSpeech = now; busyUntil = now + Math.max(1800, t.length * 62);
     var b = $("#bub"); b.textContent = t; b.classList.add("on"); clearTimeout(bubT); bubT = setTimeout(function () { b.classList.remove("on"); }, busyUntil - now + 700);
-    var talk = function (on) { host.talking(on); };
+    var talk = function (on) { host.talking(on); }, my = ++speakTok;
     clearTimeout(fakeT);
+    if (gemOn()) {
+      busyUntil += 2000; try { speechSynthesis.cancel(); } catch (e) {}
+      gem.play(t, function () { talk(true); }, 8000).then(function (ok) { if (my === speakTok) { talk(false); curPrio = 0; busyUntil = Math.min(busyUntil, Date.now()); } }, function (e) {
+        gemSt("⚠️ " + (e && e.message || "Voix Gemini indisponible") + " → voix du téléphone.");
+        if (/quota|trop de temps/i.test(e && e.message || "")) gemPause = Date.now() + 120000;
+        if (my === speakTok) phoneSay(t, talk);
+      });
+      return;
+    }
+    phoneSay(t, talk);
+  }
+  function phoneSay(t, talk) {
+    var now = Date.now(); gem.stop(); clearTimeout(fakeT);
     if (C.voice && window.speechSynthesis) {
       try {
         var u = new SpeechSynthesisUtterance(t); u.lang = "fr-FR"; u.rate = 1.07; u.pitch = 1;
-        var v = speechSynthesis.getVoices().filter(function (x) { return /^fr/i.test(x.lang); })[0]; if (v) u.voice = v;
+        var v = speechSynthesis.getVoices().filter(function (x) { return /^fr/i.test(x.lang); }).sort(function (a, b) { function sc(x) { return (/fr[-_]FR/i.test(x.lang) ? 2 : 0) + (/natural|online|neural|premium|enhanced|google/i.test(x.name) ? 3 : 0); } return sc(b) - sc(a); })[0]; if (v) u.voice = v;
         u.onstart = function () { talk(true); }; u.onend = u.onerror = function () { talk(false); curPrio = 0; busyUntil = Math.min(busyUntil, Date.now()); };
         speechSynthesis.cancel(); speechSynthesis.speak(u);
         fakeT = setTimeout(function () { talk(false); }, busyUntil - now + 4000);
@@ -760,13 +826,14 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     $("#app").hidden = true; $("#wrap").hidden = false; fitStage(); paused = false;
     try { if (navigator.wakeLock) navigator.wakeLock.request("screen").catch(function () {}); } catch (e) {}
     var noHost = C.host === "off"; $("#host").hidden = noHost; $("#hostTag").hidden = noHost; $("#top").classList.toggle("full", noHost); $("#last").classList.toggle("full", noHost); $("#bub").classList.toggle("full", noHost);
+    if (gemOn()) ["Trente secondes ! Envoyez la lettre de votre club !", "Dix secondes ! Dernier effort !", "Fin de l'événement ! Retour aux points normaux."].forEach(gem.pre);
     drawBg(); audio(); crowdStart(); host.start(); clearInterval(fxT); fxT = setInterval(fxLoop, 140);
     startMatch(); clearInterval(tick); tick = setInterval(loop, 1000);
     if (isDemo) demo(); else connect();
   }
   function quit() {
     clearInterval(tick); clearInterval(demoT); clearInterval(fxT); clearTimeout(nextT); wsWant = false; if (ws) try { ws.close(); } catch (e) {}
-    crowdStop(); host.stop(); $("#wrap").hidden = true; $("#app").hidden = false; fillForm(); try { speechSynthesis.cancel(); } catch (e) {}
+    crowdStop(); host.stop(); gem.stop(); $("#wrap").hidden = true; $("#app").hidden = false; fillForm(); try { speechSynthesis.cancel(); } catch (e) {}
   }
   $("#go").onclick = function () { start(false); };
   $("#demo").onclick = function () { start(true); };
