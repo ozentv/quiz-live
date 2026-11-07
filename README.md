@@ -136,6 +136,16 @@ Dans Render, onglet **Environment** du service :
 
 > ⚠️ La lecture du chat passe par une bibliothèque non officielle ([TikTok-Live-Connector](https://github.com/zerodytrash/TikTok-Live-Connector)). TikTok peut la casser lors d'une mise à jour, et ce type d'usage n'est pas prévu par ses conditions d'utilisation. En cas de panne, le bouton **+ Point** manuel fonctionne toujours.
 
+## ⚔️ Bataille des clubs (jeu interactif pour les lives)
+Page : https://ozentv.github.io/quiz-live/clubs.html
+- 12 cartes de clubs (au choix parmi les 96 du générateur), chacune avec une lettre de A à L. Le chat écrit la lettre (ou le nom du club) pour lui donner 1 point (un point par seconde maximum par personne).
+- Cadeaux : pièces × 1, 5 ou 10 points pour le club de la personne. Likes : 1 point tous les 5, 10 ou 25 likes pour le dernier club soutenu.
+- Classement en direct : les cartes glissent à leur nouvelle place avec un flash, le top 3 brille (or, argent, bronze), « +1 » et cœurs qui s'envolent, « Le plus envoyé », dernier supporter avec sa photo.
+- Manches de 2, 3, 5 ou 10 minutes : à la fin du chrono, le club en tête gagne (confettis, voix off, trophée 🏆 sur sa carte), puis la manche suivante commence. Saisons de 100 matchs.
+- « 🖼️ » sur chaque club permet de mettre ta propre image (logo ou joueur), gardée seulement sur ton téléphone ; sinon l'écusson aux couleurs du club s'affiche.
+- « 📥 Importer toutes les images d'un coup » : sélectionne jusqu'à 12 images en une fois ; chacune va sur la bonne carte si son nom de fichier est la lettre (A.jpg) ou le nom du club (psg.jpg, real madrid.png), sinon dans l'ordre A, B, C…
+- Utilise les mêmes réglages de relais que le quiz. Mode démo pour tester sans live.
+
 ## 🆚 Générateur VS (vidéos « Team contre Team »)
 Page : https://ozentv.github.io/quiz-live/vs.html
 - Deux cartes de profil (nom, emoji, @pseudo, suivis, followers, j'aime, photo, boutons Suivre / Message en option) et un grand texte au milieu (« VS » par défaut).
