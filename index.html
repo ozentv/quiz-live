@@ -469,7 +469,13 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     <div class="row">
       <div class="voice-line">
         <label class="switch"><input type="checkbox" id="voiceOn"> Voix off qui lit tout</label>
+        <div class="chat-test"><span class="lab">Type de voix</span><div class="seg" id="segEng" role="group" aria-label="Type de voix"></div></div>
         <select id="voiceSel" aria-label="Voix"></select>
+        <div class="pip-row" id="gemRow">
+          <select class="field" id="gemVoice" aria-label="Voix Gemini"></select>
+          <p class="note" style="margin:0">✨ Voix IA de Google Gemini, très naturelle, fabriquée par ton relais. Sur Render, ajoute <b>GEMINI_API_KEY</b> (clé gratuite sur aistudio.google.com/apikey). La page utilise ta « Clé du classement » (ADMIN_KEY), pour que personne d'autre n'utilise ton quota. Si Gemini ne répond pas, la voix du téléphone prend le relais.</p>
+          <span class="chat-st" id="gemSt"></span>
+        </div>
         <div class="seg" id="segR" role="group" aria-label="Vitesse de la voix"></div>
         <div><button class="btn ghost" id="hear" type="button">Écouter la voix</button></div>
         <div class="row"><span class="lab">Style de l'écran</span><div class="seg" id="segSkin" role="group" aria-label="Style de l'écran"></div></div>
@@ -2307,7 +2313,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   };
   var KEYS = Object.keys(BANK);
   var RATES = [["Lente", 0.9], ["Normale", 1.05], ["Rapide", 1.2]];
-  var S = { theme: "random", n: 4, count: 3, voiceOn: true, voiceName: "", rate: 1.05, mode: "video", liveCount: 15, boardMin: 5, chatOn: false, ttUser: "", relay: "", lag: 6, lbKey: "", recapSec: 7, likeGoal: 1000, giftsOn: true, gameOn: true, musicOn: true, musicVol: 1, tvOn: true, themes: null, diff: "normal", bonusEvery: 5, voteEvery: 0 };
+  var S = { theme: "random", n: 4, count: 3, voiceOn: true, voiceName: "", voiceEng: "phone", gemVoice: "Puck", rate: 1.05, mode: "video", liveCount: 15, boardMin: 5, chatOn: false, ttUser: "", relay: "", lag: 6, lbKey: "", recapSec: 7, likeGoal: 1000, giftsOn: true, gameOn: true, musicOn: true, musicVol: 1, tvOn: true, themes: null, diff: "normal", bonusEvery: 5, voteEvery: 0 };
   try { Object.assign(S, JSON.parse(localStorage.getItem("sq-set") || "{}")); } catch (e) {}
   if (!Array.isArray(S.themes)) S.themes = S.theme && S.theme !== "random" && BANK[S.theme] ? [S.theme] : [];
   S.themes = S.themes.filter(function (k) { return BANK[k]; });
@@ -2385,6 +2391,51 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   applyMode();
 
   /* ---------- voix ---------- */
+  // Voix IA Gemini, fabriquée par le relais (la clé Gemini reste sur Render).
+  function gemMake(cfg) {
+    var cache = {}, order = [], au = null, tok = 0, done = null;
+    function base() { var u = String(cfg().relay || "studio-quiz-relais.onrender.com").trim().replace(/\/+$/, ""); if (!/^[a-z]+:\/\//i.test(u)) u = "https://" + u; return u.replace(/^ws/i, "http"); }
+    function get(t) {
+      var c = cfg(), k = c.voice + "|" + c.style + "|" + t;
+      if (cache[k]) return cache[k];
+      var p = fetch(base() + "/tts?voice=" + encodeURIComponent(c.voice) + "&style=" + encodeURIComponent(c.style) + "&key=" + encodeURIComponent(c.key || "") + "&text=" + encodeURIComponent(t))
+        .then(function (r) { if (r.ok) return r.blob(); return r.json().then(function (j) { throw new Error(j.error || "Erreur " + r.status); }, function () { throw new Error("Le relais ne répond pas (erreur " + r.status + "). Mets-le à jour sur Render."); }); })
+        .then(function (bl) { return URL.createObjectURL(bl); });
+      cache[k] = p; order.push(k);
+      p.catch(function () { if (cache[k] === p) delete cache[k]; });
+      if (order.length > 80) { var old = order.shift(), op = cache[old]; delete cache[old]; if (op) op.then(function (s) { URL.revokeObjectURL(s); }, function () {}); }
+      return p;
+    }
+    function stop() { tok++; if (au) { try { au.pause(); } catch (e) {} au = null; } if (done) { var d = done; done = null; d(false); } }
+    // Joue la phrase ; se résout à la fin (ou si une autre phrase la coupe), échoue si Gemini ne répond pas à temps.
+    function play(t, onStart, wait) {
+      stop(); var my = tok, dead = false;
+      return new Promise(function (res, rej) {
+        done = res;
+        var to = setTimeout(function () { dead = true; if (done === res) done = null; rej(new Error("Gemini a mis trop de temps à répondre.")); }, wait || 9000);
+        get(t).then(function (src) {
+          clearTimeout(to); if (dead) return; if (my !== tok) return res(false);
+          var a = new Audio(src); au = a; a.playbackRate = cfg().rate || 1;
+          a.onended = function () { if (au === a) au = null; if (done === res) done = null; res(true); };
+          a.onerror = function () { if (done === res) done = null; rej(new Error("Lecture de l'audio impossible.")); };
+          a.play().then(function () { if (onStart && my === tok) onStart(); }, function (e) { if (done === res) done = null; rej(e); });
+        }, function (e) { clearTimeout(to); if (dead) return; if (done === res) done = null; rej(e); });
+      });
+    }
+    return { get: get, pre: function (t) { if (t) get(String(t)).catch(function () {}); }, play: play, stop: stop };
+  }
+  var GEM_VOICES = [["Puck", "Puck · homme, enjoué"], ["Fenrir", "Fenrir · homme, survolté"], ["Charon", "Charon · homme, posé"], ["Orus", "Orus · homme, ferme"], ["Algenib", "Algenib · homme, voix grave"], ["Sadachbia", "Sadachbia · homme, vif"], ["Achird", "Achird · homme, amical"], ["Iapetus", "Iapetus · homme, clair"], ["Alnilam", "Alnilam · homme, assuré"],
+    ["Kore", "Kore · femme, ferme"], ["Aoede", "Aoede · femme, légère"], ["Leda", "Leda · femme, jeune"], ["Zephyr", "Zephyr · femme, lumineuse"], ["Laomedeia", "Laomedeia · femme, enjouée"], ["Sulafat", "Sulafat · femme, chaleureuse"]];
+  var gem = gemMake(function () { return { relay: S.relay, key: S.lbKey, voice: S.gemVoice || "Puck", style: "animateur de jeu télévisé français, chaleureux, dynamique et souriant", rate: S.rate }; });
+  var gemPause = 0;
+  function gemSt(t, s2) { var e = $("#gemSt"); if (e) { e.textContent = t; e.setAttribute("data-s", s2 || "error"); } }
+  function gemOn() { return S.voiceOn && S.voiceEng === "gemini" && Date.now() > gemPause; }
+  function gemPre(t) { if (gemOn()) gem.pre(t); }
+  $("#gemVoice").innerHTML = GEM_VOICES.map(function (v) { return "<option value=\"" + v[0] + "\">" + v[1] + "</option>"; }).join("");
+  $("#gemVoice").value = S.gemVoice || "Puck"; $("#gemVoice").onchange = function () { S.gemVoice = this.value; save(); };
+  function engUI() { $("#gemRow").hidden = S.voiceEng !== "gemini"; $("#voiceSel").hidden = S.voiceEng === "gemini"; }
+  seg($("#segEng"), [["📱 Voix du téléphone", "phone"], ["✨ Voix IA Gemini", "gemini"]], function () { return S.voiceEng; }, function (v) { S.voiceEng = v; engUI(); });
+  engUI();
   var synth = window.speechSynthesis || null;
   var frVoices = [];
   function loadVoices() {
@@ -2447,6 +2498,22 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     return out.length ? out : [String(text)];
   }
   function say(text) {
+    if (!gemOn()) return sayBrowser(text);
+    return new Promise(function (res) {
+      var my = ++sayId; try { if (synth) synth.cancel(); gem.stop(); } catch (e) {}
+      clearTimeout(unduckT); music.duck(true);
+      gem.play(String(text), function () { if (my === sayId) mascot.talk(true); }, 9000).then(function () {
+        if (my === sayId) { mascot.talk(false); clearTimeout(unduckT); unduckT = setTimeout(function () { if (my === sayId) music.duck(false); }, 450); }
+        res();
+      }, function (e) {
+        gemSt("⚠️ " + (e && e.message || "Voix Gemini indisponible") + " → voix du téléphone.");
+        if (/quota|trop de temps/i.test(e && e.message || "")) gemPause = Date.now() + 120000;
+        if (my !== sayId) return res();
+        sayBrowser(text).then(res);
+      });
+    });
+  }
+  function sayBrowser(text) {
     return new Promise(function (res) {
       var rate = S.rate, words = String(text).split(/\s+/).length;
       function est(n) { return (n * 0.36 / rate + 0.5) * 1000; }
@@ -2477,7 +2544,10 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   $("#hear").onclick = function () {
     unlockAudio();
     var was = S.voiceOn; S.voiceOn = true;
-    say(speakable("Quelle est la capitale de l'Australie ? A : Sydney. B : Canberra.")).then(function () { S.voiceOn = was; });
+    if (S.voiceEng === "gemini") { gemPause = 0; gemSt("⏳ Gemini prépare la voix…", "waiting"); }
+    var tt = speakable("Quelle est la capitale de l'Australie ? A : Sydney. B : Canberra.");
+    if (S.voiceEng === "gemini") gem.get(tt).then(function () { gemSt("✅ Voix Gemini OK", "connected"); }, function () {});
+    say(tt).then(function () { S.voiceOn = was; });
   };
 
   /* ---------- sons ---------- */
@@ -3059,7 +3129,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   function stopAll() {
     mascot.show(false);
     runId++; clearTimeout(curTimer);
-    try { if (synth) synth.cancel(); } catch (e) {}
+    try { if (synth) synth.cancel(); gem.stop(); } catch (e) {}
     $("#preroll").hidden = true; $("#endsheet").hidden = true; wrap.hidden = true; parkour.stop(); music.stop(); musicTrying = false;
     $("#liveBar").hidden = true; $("#addSheet").hidden = true; finaleOn = false; closeBoard(); curQ = false; round = null; vote = null; chatClose();
     renderScores();
@@ -3196,7 +3266,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   $("#bGifts").onclick = function () { showBoard(14000, giftsHTML()); };
   $("#lbLayer").onclick = function () { if (!finaleOn) closeBoard(); };
   $("#lbClose").onclick = function (e) {
-    e.stopPropagation(); try { if (synth) synth.cancel(); } catch (x) {}
+    e.stopPropagation(); try { if (synth) synth.cancel(); gem.stop(); } catch (x) {}
     if (finaleOn) { finaleOn = false; stopAll(); } else closeBoard();
   };
   var finaleOn = false;
@@ -3214,7 +3284,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     var r = ranking();
     if (S.mode !== "live" || !r.length) { stopAll(); return; }
     runId++; clearTimeout(curTimer); round = null; vote = null; curQ = false;
-    try { if (synth) synth.cancel(); } catch (e) {}
+    try { if (synth) synth.cancel(); gem.stop(); } catch (e) {}
     $("#liveBar").hidden = true; $("#addSheet").hidden = true;
     closeBoard(); finaleOn = true;
     $("#lbIn").innerHTML = podiumHTML(); $("#lbLayer").hidden = false; if (S.tvOn) jingle("podium"); else { sweep(); setTimeout(chime, 500); }
@@ -3889,6 +3959,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         }
         used[it[0] + ":" + it[1]] = 1; last = it;
         var T = BANK[it[0]], q = prep(T.q[it[1]]); num++;
+        gemPre(askText(q)); gemPre("ABCD"[q.a] + ", " + speakable(q.choices[q.a]) + ". " + speakable(q.f));
         var bonus = fx.likeBonus ? 3 : (forcedBonus || !!(S.bonusEvery && num % S.bonusEvery === 0)) ? 2 : 0;
         var likeQ = fx.likeBonus; fx.likeBonus = false;
         var cm = chestMult(); if (cm > bonus) bonus = cm;
@@ -3953,6 +4024,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     try {
       var ks = selKeys(), key = ks[Math.floor(Math.random() * ks.length)];
       var T = BANK[key], qs = pick(key, S.n), n = qs.length;
+      qs.forEach(function (q) { gemPre(askText(q)); gemPre("ABCD"[q.a] + ", " + speakable(q.choices[q.a]) + ". " + speakable(q.f)); });
       $("#endsheet").hidden = true; wrap.hidden = false;
       setPalette(T.pal); fitStage(); tvLayout();
       try { await ok(document.fonts.ready); } catch (e) { if (my !== runId) return; }

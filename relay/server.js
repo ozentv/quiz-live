@@ -10,6 +10,7 @@
 //   EULER_API_KEY  clé gratuite https://www.eulerstream.com, si les connexions sans clé sont limitées
 //   ALLOWED_USERS  liste de pseudos autorisés, séparés par des virgules (ex. "monpseudo,autrepseudo")
 //   UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN, ADMIN_KEY : classement public du mois (voir leaderboard.js)
+//   GEMINI_API_KEY : voix off IA Gemini (voir tts.js)
 //
 // Pseudo spécial "demo" : simule des commentaires, pour tester sans être en live.
 
@@ -17,6 +18,7 @@ import http from "node:http";
 import { WebSocketServer } from "ws";
 import { TikTokLiveConnection, WebcastEvent, ControlEvent, SignatureRateLimitError } from "tiktok-live-connector";
 import * as lb from "./leaderboard.js";
+import * as tts from "./tts.js";
 
 const liveNow = new Map(); // pseudo -> nombre de connexions actives au live
 
@@ -69,6 +71,7 @@ function explain(err) {
 
 const server = http.createServer(async (req, res) => {
   const u = new URL(req.url || "/", "http://relais");
+  if (u.pathname === "/tts") { await tts.handle(u, res); return; }
   if (u.pathname === "/classement") {
     const ch = cleanUser(u.searchParams.get("user"));
     res.setHeader("access-control-allow-origin", "*");
