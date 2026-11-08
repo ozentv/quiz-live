@@ -23,6 +23,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
 .chk { display: flex; align-items: center; gap: 8px; color: var(--fg); font-size: 14px; } .chk input { width: 20px; height: 20px; }
 .slots { display: grid; gap: 8px; }
 .slot { display: grid; grid-template-columns: 34px 46px 1fr auto auto auto; gap: 6px; align-items: center; padding: 6px; border: 1px solid var(--line); border-radius: 12px; }
+.slot[hidden] { display: none; }
 .slot b { font: 900 22px Outfit, sans-serif; text-align: center; color: var(--acc); }
 .slot img { width: 46px; height: 46px; border-radius: 10px; object-fit: cover; background: #0f121b; }
 .slot select { min-height: 40px; font-size: 14px; }
@@ -111,6 +112,29 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
 @keyframes pop { from { opacity: 1; transform: translateY(0) scale(1.25); } to { opacity: 0; transform: translateY(-120px) scale(.8); } }
 .heart { position: absolute; font-size: 54px; animation: fly 1.6s ease-out forwards; pointer-events: none; z-index: 5; }
 @keyframes fly { from { opacity: 1; transform: translate(0, 0) scale(.6); } to { opacity: 0; transform: translate(var(--dx), -320px) scale(1.3); } }
+/* mode derby */
+#stage.derby .card { width: 505px; height: 700px; }
+#stage.derby .card .nm { font-size: 46px; left: 120px; bottom: 96px; }
+#stage.derby .card .pt { font-size: 86px; left: 120px; bottom: 18px; }
+#stage.derby .card .pt small { font-size: 30px; }
+#stage.derby .card .lt { width: 92px; height: 92px; font-size: 60px; bottom: 22px; }
+#stage.derby .card .rk { font-size: 40px; }
+#stage.derby .card .crest { width: 120px; height: 120px; } #stage.derby .card .crest img { width: 92px; height: 92px; }
+#stage.derby .card .in.combo .tr { top: 140px; } #stage.derby .card .bar { height: 10px; }
+#stage.derby .card .pop { font-size: 54px; bottom: 120px; }
+#tug { position: absolute; left: 30px; right: 30px; top: 1052px; height: 200px; }
+#tug[hidden], #dfeed[hidden] { display: none; }
+#tug .tb { position: relative; height: 90px; border-radius: 45px; overflow: hidden; display: flex; border: 4px solid rgba(255,255,255,.85); box-shadow: 0 12px 30px rgba(0,0,0,.6); }
+#tug .tl, #tug .tr2 { display: block; height: 100%; transition: width .5s cubic-bezier(.3,1.4,.5,1); }
+#tug .tl { background: var(--cl, #1e6fd9); } #tug .tr2 { background: var(--cr, #d0021b); flex: 1; }
+#tug .knot { position: absolute; top: 50%; font-size: 76px; line-height: 1; transform: translate(-50%, -50%); transition: left .5s cubic-bezier(.3,1.4,.5,1); filter: drop-shadow(0 4px 8px rgba(0,0,0,.7)); }
+#tug .pcs { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font: 700 64px Oswald, Outfit, sans-serif; text-shadow: 0 3px 10px #000; }
+#tug .pcs span { font: 600 26px Oswald, Outfit, sans-serif; letter-spacing: 3px; color: #c8d0e0; }
+#dfeed { position: absolute; left: 30px; right: 30px; top: 1270px; height: 300px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+#dfeed > div { border-radius: 18px; padding: 10px 16px; background: rgba(8,10,18,.82); border: 2px solid rgba(255,255,255,.12); overflow: hidden; }
+#dfeed h5 { margin: 0 0 6px; font: 600 24px Oswald, Outfit, sans-serif; letter-spacing: 2px; }
+#dfeed .fi { display: flex; align-items: center; gap: 10px; height: 46px; font: 600 26px Figtree, sans-serif; white-space: nowrap; overflow: hidden; animation: fin .4s; }
+@keyframes fin { from { opacity: 0; transform: translateX(-20px); } }
 /* bas de l'écran */
 .glass { background: linear-gradient(180deg, rgba(20,24,38,.9), rgba(8,10,18,.94)); border: 2px solid rgba(255,255,255,.13); box-shadow: 0 16px 36px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.14); }
 #host { position: absolute; left: 6px; top: 1556px; width: 290px; height: 358px; }
@@ -211,6 +235,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   <div class="box">
     <h2>Règles</h2>
     <div class="row3">
+      <label>Mode de jeu<select id="mode"><option value="12">⚔️ 12 clubs</option><option value="derby">🔥 Derby : 2 clubs face à face (A contre B)</option></select></label>
       <label>Durée d'une manche<select id="dur"><option value="120">2 min</option><option value="180">3 min</option><option value="300">5 min</option><option value="600">10 min</option></select></label>
       <label>Points par pièce de cadeau<select id="gmul"><option value="1">×1</option><option value="5">×5</option><option value="10">×10</option></select></label>
       <label>Likes pour 1 point<select id="lstep"><option value="5">5 likes</option><option value="10">10 likes</option><option value="25">25 likes</option></select></label>
@@ -246,6 +271,8 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     </div>
     <div id="sub">Écris la lettre de ton club dans le chat !</div>
     <div id="grid"></div>
+    <div id="tug" hidden><div class="tb"><i class="tl"></i><i class="tr2"></i><span class="knot">⚽</span></div><div class="pcs"><b id="pcL"></b><span>LA CORDE PENCHE…</span><b id="pcR"></b></div></div>
+    <div id="dfeed" hidden><div id="dfL"></div><div id="dfR"></div></div>
     <canvas id="host" width="340" height="420"></canvas><div id="hostTag">🎙️ ANIMATEUR</div>
     <div id="top" class="glass"></div>
     <div id="last" class="glass"></div>
@@ -288,7 +315,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   var C;
   try { C = JSON.parse(localStorage.getItem("clubs-set") || "null"); } catch (e) { C = null; }
   if (!C) C = { slots: DEF_SLOTS, dur: 300, gmul: 5, lstep: 10, voice: true, sound: true, events: true, host: "moyen", season: 1, match: 1, wins: {}, spts: {} };
-  if (C.sound == null) C.sound = true; if (C.events == null) C.events = true; if (!C.host) C.host = "moyen"; if (!C.spts) C.spts = {}; if (!C.eng) C.eng = "phone"; if (!C.gvoice) C.gvoice = "Fenrir"; if (!C.evoice) C.evoice = "fr-FR-HenriNeural"; if (!C.sfx) C.sfx = "faible"; if (C.behind == null) C.behind = true; if (C.nonstop == null) C.nonstop = true; if (C.chants == null) C.chants = true; if (C.recap == null) C.recap = false;
+  if (C.sound == null) C.sound = true; if (C.events == null) C.events = true; if (!C.host) C.host = "moyen"; if (!C.spts) C.spts = {}; if (!C.eng) C.eng = "phone"; if (!C.gvoice) C.gvoice = "Fenrir"; if (!C.evoice) C.evoice = "fr-FR-HenriNeural"; if (!C.sfx) C.sfx = "faible"; if (C.behind == null) C.behind = true; if (C.nonstop == null) C.nonstop = true; if (C.chants == null) C.chants = true; if (C.recap == null) C.recap = false; if (!C.mode) C.mode = "12";
   var Q = {}; try { Q = JSON.parse(localStorage.getItem("sq-set") || "{}"); } catch (e) {}
   if (!C.user) C.user = Q.ttUser || ""; if (!C.relay) C.relay = Q.relay || "studio-quiz-relais.onrender.com"; if (C.gkey == null) C.gkey = Q.lbKey || "";
   function save() { try { localStorage.setItem("clubs-set", JSON.stringify(C)); } catch (e) {} }
@@ -301,7 +328,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     var opts = Object.keys(CLUBS).map(function (lg) { return "<optgroup label=\"" + lg + "\">" + CLUBS[lg].map(function (c) { return "<option value=\"" + lg + "|" + c[0] + "\">" + c[0] + "</option>"; }).join("") + "</optgroup>"; }).join("");
     $("#slots").innerHTML = C.slots.map(function (s, i) {
       var c = club(i), im = img(i), lg = logo(i);
-      return "<div class=\"slot\"><b>" + LET[i] + "</b><img alt=\"\" src=\"" + (lg || im || badgeURL(c.abbr, c.c1, c.c2, c.pat, 96)) + "\" style=\"" + (lg ? "object-fit:contain;background:" + c.c1 : "") + "\"><select data-i=\"" + i + "\">" + opts + "</select>" +
+      return "<div class=\"slot\"" + (C.mode === "derby" && i > 1 ? " hidden" : "") + "><b>" + LET[i] + "</b><img alt=\"\" src=\"" + (lg || im || badgeURL(c.abbr, c.c1, c.c2, c.pat, 96)) + "\" style=\"" + (lg ? "object-fit:contain;background:" + c.c1 : "") + "\"><select data-i=\"" + i + "\">" + opts + "</select>" +
         "<label class=\"ib" + (im ? " on" : "") + "\" title=\"Photo (joueur)\"><input type=\"file\" accept=\"image/*\" data-img=\"" + i + "\" data-kind=\"photo\" hidden>👤</label>" +
         "<label class=\"ib" + (lg ? " on" : "") + "\" title=\"Logo du club\"><input type=\"file\" accept=\"image/*\" data-img=\"" + i + "\" data-kind=\"logo\" hidden>🛡️</label>" +
         "<button class=\"mini\" type=\"button\" data-clr=\"" + i + "\"" + (im || lg ? "" : " hidden") + " title=\"Retirer la photo et le logo\">✕</button></div>";
@@ -342,6 +369,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     $("#dur").value = C.dur; $("#dur").onchange = function () { C.dur = +this.value; save(); };
     $("#gmul").value = C.gmul; $("#gmul").onchange = function () { C.gmul = +this.value; save(); };
     $("#lstep").value = C.lstep; $("#lstep").onchange = function () { C.lstep = +this.value; save(); };
+    $("#mode").value = C.mode; $("#mode").onchange = function () { C.mode = this.value; save(); slotsForm(); };
     $("#chants").checked = !!C.chants; $("#chants").onchange = function () { C.chants = this.checked; save(); };
     $("#recap").checked = !!C.recap; $("#recap").onchange = function () { C.recap = this.checked; save(); };
     $("#nonstop").checked = !!C.nonstop; $("#nonstop").onchange = function () { C.nonstop = this.checked; save(); };
@@ -468,6 +496,8 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   }
 
   /* ---------- jeu ---------- */
+  function DER() { return C.mode === "derby"; }
+  function NC() { return DER() ? 2 : 12; }
   var W = 1080, H = 1920, stage = $("#stage"), flipAt = [], pts = [], sent = [], supporter = {}, fans = {}, lastSlot = 0, cool = {}, likeAcc = 0, likeBase = null, rankOf = [], left = 0, paused = false, ended = false, tick = null, demoT = null, ws = null, wsWant = false, nextT = null;
   var talkT = null, leader = -1, leadSaidAt = 0, votes = 0, secHits = 0, rateS = 0, evt = null, evtNext = 0, goalQ = [], goalBusy = false, lastSpeech = 0, giftSaidAt = 0;
   var STEPS = [100, 250, 500, 1000, 2000];
@@ -500,7 +530,8 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
       "<div class=\"pt\"><span data-pt>" + (big ? nf(pts[i]) : 0) + "</span><small>PTS</small></div><div class=\"bar\"><i data-br></i></div></div>";
   }
   function build() {
-    var gHTML = ""; for (var i = 0; i < 12; i++) gHTML += "<div class=\"card\" id=\"card" + i + "\">" + cardHTML(i) + "</div>";
+    stage.classList.toggle("derby", DER()); $("#tug").hidden = $("#dfeed").hidden = !DER();
+    var gHTML = ""; for (var i = 0; i < NC(); i++) gHTML += "<div class=\"card\" id=\"card" + i + "\">" + cardHTML(i) + "</div>";
     $("#grid").innerHTML = gHTML; rankOf = []; layout(true);
   }
   function order() { return pts.map(function (p, i) { return [p, i]; }).sort(function (a, b) { return b[0] - a[0] || a[1] - b[1]; }).map(function (x) { return x[1]; }); }
@@ -508,7 +539,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     var o = order(), top = pts[o[0]] || 0, nowF = Date.now();
     o.forEach(function (i, r) {
       var el = $("#card" + i); if (!el) return;
-      var col = r % 3, row = Math.floor(r / 3), x = 30 + col * 350, y = 322 + row * 318, m = eventMult(i);
+      var col = r % 3, row = Math.floor(r / 3), x = DER() ? (i === 0 ? 30 : 545) : 30 + col * 350, y = DER() ? 330 : 322 + row * 318, m = eventMult(i);
       el.style.transform = "translate(" + x + "px," + y + "px)";
       for (var k = 1; k <= 3; k++) el.classList.toggle("r" + k, r === k - 1);
       el.classList.toggle("boost", m > 1);
@@ -522,10 +553,24 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     if (!first && top > 0 && o[0] !== bgLead && Date.now() - bgAt > 4000) crowdColors(o[0]);
     if (!first && top > 0 && o[0] !== leader) { var old = leader; leader = o[0]; if (old >= 0) onLead(leader, old); else if (top >= 3) onLead(leader, -1); }
     if (first) leader = -1;
+    if (DER()) derbyUI();
     $("#sLead").textContent = top > 0 ? "1er · " + club(o[0]).abbr : "—";
     $("#sVotes").textContent = nf(votes) + " vote" + (votes > 1 ? "s" : "");
     renderTop();
   }
+  function derbyUI() {
+    var a = club(0), b = club(1), tot = pts[0] + pts[1], sh = tot ? pts[0] / tot : .5, pc = Math.round(sh * 100);
+    var tug = $("#tug"); tug.style.setProperty("--cl", textCol(a)); tug.style.setProperty("--cr", textCol(b));
+    var lw = Math.max(4, Math.min(96, sh * 100)); tug.querySelector(".tl").style.width = lw + "%"; tug.querySelector(".knot").style.left = lw + "%";
+    $("#pcL").textContent = pc + " %"; $("#pcR").textContent = (100 - pc) + " %";
+    $("#pcL").style.color = mixCol(textCol(a)); $("#pcR").style.color = mixCol(textCol(b));
+    tug.querySelector(".pcs span").textContent = !tot ? "À VOUS DE TIRER !" : pc === 50 ? "ÉGALITÉ PARFAITE !" : "LA CORDE PENCHE VERS " + (pc > 50 ? a.abbr : b.abbr);
+    [0, 1].forEach(function (i) {
+      var list = recentFans.filter(function (f) { return f.i === i; }).slice(0, 5), c = club(i);
+      $(i ? "#dfR" : "#dfL").innerHTML = "<h5 style=\"color:" + mixCol(textCol(c)) + "\">📣 SUPPORTERS " + esc2(c.abbr) + "</h5>" + (list.length ? list.map(function (f) { return "<div class=\"fi\">" + avatar({ name: f.name, pic: f.pic, club: i }) + "<span>" + esc2(f.name) + "</span></div>"; }).join("") : "<div class=\"fi\" style=\"color:#8f9bb8\">Tape " + LET[i] + " !</div>");
+    });
+  }
+  function mixCol(c) { return lum(c) < .25 ? "#ffffff" : c; }
   var layT = null; function relayout() { if (!layT) layT = setTimeout(function () { layT = null; layout(); }, 250); }
 
   /* ---------- supporters ---------- */
@@ -543,17 +588,17 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   function eventMult(i) {
     if (!evt || Date.now() > evt.end) return 1;
     if (evt.k === "x2") return 2;
-    if (evt.k === "remo") return rankOf[i] >= 3 ? 2 : 1;
+    if (evt.k === "remo") return rankOf[i] >= (DER() ? 1 : 3) ? 2 : 1;
     return i === evt.i ? 3 : 1;
   }
   function startEvent() {
     var o = order(), r = Math.random(), k = r < .34 ? "x2" : r < .67 ? "remo" : "star";
     if (k === "remo" && !pts[o[0]]) k = "x2";
     evt = { k: k, end: Date.now() + (k === "star" ? 20000 : 30000) };
-    if (k === "star") evt.i = o[3 + Math.floor(Math.random() * 9)];
+    if (k === "star") evt.i = DER() ? o[1] : o[3 + Math.floor(Math.random() * 9)];
     var n = k === "star" ? club(evt.i).name : "";
-    evt.label = k === "x2" ? "⚡ Points doublés pour tous" : k === "remo" ? "🔄 Remontada : ×2 hors du podium" : "🎯 Club en vedette : " + esc2(n) + " ×3";
-    speak(k === "x2" ? "Événement surprise ! Pendant 30 secondes, tous les points sont doublés !" : k === "remo" ? "Remontada ! Pendant 30 secondes, les clubs hors du podium marquent double !" : "Club en vedette ! Pendant 20 secondes, chaque vote pour " + n + " vaut triple ! Écrivez " + LET[evt.i] + " !", 3);
+    evt.label = k === "x2" ? "⚡ Points doublés pour tous" : k === "remo" ? (DER() ? "🔄 Remontada : ×2 pour " + esc2(nmc(o[1])) : "🔄 Remontada : ×2 hors du podium") : "🎯 Club en vedette : " + esc2(n) + " ×3";
+    speak(k === "x2" ? "Événement surprise ! Pendant 30 secondes, tous les points sont doublés !" : k === "remo" ? (DER() ? "Remontada ! Pendant 30 secondes, chaque vote pour " + nmc(o[1]) + " compte double !" : "Remontada ! Pendant 30 secondes, les clubs hors du podium marquent double !") : "Club en vedette ! Pendant 20 secondes, chaque vote pour " + n + " vaut triple ! Écrivez " + LET[evt.i] + " !", 3);
     horn(); host.mood("happy", 2500); subLine(); layout();
     evtNext = C.dur - left + 70 + Math.random() * 40;
   }
@@ -566,7 +611,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
 
   /* ---------- points ---------- */
   function addPts(i, n, who, pic, why, key) {
-    if (ended || paused || i < 0 || i > 11) return 0;
+    if (ended || paused || i < 0 || i >= NC()) return 0;
     var m = eventMult(i), before = pts[i]; n *= m;
     pts[i] += n; lastSlot = i; votes++; secHits++; relayout();
     STEPS.forEach(function (s) { if (before < s && pts[i] >= s) goal(i, s); });
@@ -575,7 +620,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
       var p = document.createElement("div"); p.className = "pop"; p.textContent = "+" + nf(n) + (m > 1 ? " ×" + m : ""); el.appendChild(p); setTimeout(function () { p.remove(); }, 1000);
       if (n >= 5 || Math.random() < .12) { el.classList.remove("hit"); void el.offsetWidth; el.classList.add("hit"); }
     }
-    if (key && who) { recentFans.unshift({ name: who, i: i, t: Date.now() }); if (recentFans.length > 20) recentFans.pop(); }
+    if (key && who) { recentFans.unshift({ name: who, pic: pic, i: i, t: Date.now() }); if (recentFans.length > 20) recentFans.pop(); }
     if (key) { var f = fans[key] || (fans[key] = { name: who, pic: pic, pts: 0 }); f.pts += n; f.club = i; if (who) f.name = who; if (pic) f.pic = pic; }
     if (who) $("#last").innerHTML = (pic ? "<img alt=\"\" src=\"" + esc2(pic) + "\" referrerpolicy=\"no-referrer\" onerror=\"this.remove()\">" : "") + "<span>" + esc2(who) + " " + (why || "soutient") + "</span><b>" + esc2(club(i).name) + "</b>";
     return n;
@@ -586,8 +631,8 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   function plain(t) { return String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
   function parseVote(text) {
     var t = plain(text); if (!t) return -1;
-    var m = t.match(/^(?:(?:go|allez|team|vote|je vote|pour|moi)\s+)*([a-l])(?:\s+\1)*$/); if (m) return LET.indexOf(m[1].toUpperCase());
-    for (var i = 0; i < 12; i++) { var c = club(i); if (t === plain(c.name) || t === plain(c.abbr) || t.split(" ").indexOf(plain(c.abbr)) >= 0) return i; }
+    var m = t.match(/^(?:(?:go|allez|team|vote|je vote|pour|moi)\s+)*([a-l])(?:\s+\1)*$/); if (m) { var li = LET.indexOf(m[1].toUpperCase()); return li < NC() ? li : -1; }
+    for (var i = 0; i < NC(); i++) { var c = club(i); if (t === plain(c.name) || t === plain(c.abbr) || t.split(" ").indexOf(plain(c.abbr)) >= 0) return i; }
     return -1;
   }
   function onChat(m) {
@@ -687,13 +732,29 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   var catAt = {}, CAT_COOL = { move: 0, gift: 0, hot: 12000, close: 14000, cta: 7000, cta2: 7000, fans: 10000 };
   function gains(sec) { var h = hist[Math.max(0, hist.length - 1 - sec)]; return pts.map(function (p, i) { return h ? p - h[i] : 0; }); }
   function lineFor() {
-    var o = order(), L = o[0], S = o[1], T = o[2], Z = o[11], top = pts[L], now = Date.now(), c = [], k;
+    var o = order(), L = o[0], S = o[1], T = o[Math.min(2, NC() - 1)], Z = o[NC() - 1], top = pts[L], now = Date.now(), c = [], k;
     function add(cat, w, t) { if (t) c.push({ cat: cat, w: w, t: t }); }
     function cta(i) { return rnd(["Pour " + nmc(i) + ", c'est la lettre " + LET[i] + " !", "Supporters " + de(i) + ", tapez " + LET[i] + " dans le chat !", nmc(i) + ", c'est " + LET[i] + " ! Allez, on pousse !"]); }
-    var any = o[Math.floor(Math.random() * 12)];
+    var any = o[Math.floor(Math.random() * NC())];
     if (!top) {
       add("start", 5, rnd(["On attend les premiers votes ! Écrivez la lettre de votre club !", "Le match est lancé, et personne n'a encore marqué ! Qui va ouvrir le score ?", "Tous les clubs sont à zéro ! Le premier qui vote donne l'avantage à son équipe !"]));
-      add("cta", 4, cta(any)); add("cta2", 3, cta(o[Math.floor(Math.random() * 12)]));
+      add("cta", 4, cta(any)); add("cta2", 3, DER() ? "Supporters " + de(0) + ", tapez A ! Supporters " + de(1) + ", tapez B ! C'est parti !" : cta(o[Math.floor(Math.random() * 12)]));
+    } else if (DER()) {
+      var dg = pts[L] - pts[S], tot = pts[0] + pts[1], pcL = Math.round(pts[L] / tot * 100), g10d = gains(10), hot = g10d[0] >= g10d[1] ? 0 : 1;
+      if (dg === 0) add("tie", 7, rnd(["Égalité parfaite ! " + nf(pts[0]) + " partout !", "Rien ne sépare " + nmc(0) + " et " + nmc(1) + " ! Égalité !"]));
+      else {
+        add("lead", 4, rnd([nmc(L) + " mène " + nf(pts[L]) + " à " + nf(pts[S]) + " !", nmc(L) + " devant, avec " + pl(dg, "point") + " d'avance !", "Pour l'instant, c'est " + nmc(L) + " qui domine le derby !"]));
+        add("rope", 4, rnd(["La corde penche du côté " + de(L) + " : " + pcL + " pour cent !", nmc(L) + " tire plus fort ! " + pcL + " pour cent du terrain !"]));
+        if (dg <= Math.max(5, top * .06)) add("close", 7, rnd(["Ça se joue à rien ! Seulement " + pl(dg, "point") + " d'écart !", nmc(S) + " revient ! Plus que " + pl(dg, "point") + " de retard !", "Quel suspense ! " + pl(dg, "point") + " entre les deux clubs !"]));
+        else if (dg > top * .3) add("big", 4, rnd([nmc(L) + " écrase le derby ! Supporters " + de(S) + ", réveillez-vous !", "Gros écart ! " + nmc(S) + " doit réagir, tapez " + LET[S] + " !"]));
+        add("chase", 4, "Supporters " + de(S) + ", il faut pousser ! Tapez " + LET[S] + " pour revenir !");
+      }
+      if (g10d[hot] >= 5) add("hot", 6, rnd([nmc(hot) + " pousse fort ! " + pl(g10d[hot], "point") + " dans les dix dernières secondes !", "Grosse pression " + de(hot) + " en ce moment !"]));
+      add("cta", 3, "Supporters " + de(0) + ", tapez A ! Supporters " + de(1) + ", tapez B !");
+      add("votes", 1, "Déjà " + nf(votes) + " votes dans ce derby !");
+      var secD = gains(8).reduce(function (x, y) { return x + y; }, 0);
+      if (secD < 3) add("calm", 4, "C'est calme… Les deux kops se regardent ! Allez, envoyez A ou B !");
+      else if (secD > 40) add("crowd", 3, rnd(["Quelle ambiance dans ce derby !", "Les deux tribunes sont en feu !"]));
     } else {
       var gap = pts[L] - pts[S], g10 = gains(10), mo = 0, lo = 0;
       for (k = 1; k < 12; k++) { if (g10[k] > g10[mo]) mo = k; }
@@ -748,7 +809,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     speak(lineFor(), 0);
   }
   function hype() {
-    var o = order(), i = o[3 + Math.floor(Math.random() * 9)], c = club(i), l = club(o[0]);
+    var o = order(), i = DER() ? o[1] : o[3 + Math.floor(Math.random() * 9)], c = club(i), l = club(o[0]);
     speak(rnd([
       "Allez les supporters " + de(i) + ", écrivez " + LET[i] + " dans le chat !",
       pts[o[0]] ? l.name + " mène avec " + nf(pts[o[0]]) + " points. Qui va les arrêter ?" : "Écrivez la lettre de votre club dans le chat pour marquer des points !",
@@ -846,7 +907,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   }
   function drawBg(cv, lead) {
     cv = cv || $("#bgc"); var g = cv.getContext("2d"), x, y, i, cols = [];
-    for (i = 0; i < 12; i++) { var c = club(i); cols.push(c.c1, c.c2); }
+    for (i = 0; i < NC(); i++) { var c = club(i); cols.push(c.c1, c.c2); }
     if (lead >= 0) { var lc = club(lead); for (i = 0; i < 30; i++) cols.push(lc.c1, lc.c2); } // le public du leader envahit les tribunes
     var sky = g.createLinearGradient(0, 0, 0, 760); sky.addColorStop(0, "#01020a"); sky.addColorStop(1, "#0b1532"); g.fillStyle = sky; g.fillRect(0, 0, W, H);
     // tribunes : rangées de supporters aux couleurs des clubs, en arc
@@ -996,7 +1057,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
   function header() { $("#sSeason").textContent = "Saison " + C.season; $("#sMatch").textContent = "Match " + C.match + "/100"; }
   function startMatch() {
     clearTimeout(nextT); pts = []; sent = []; fans = {}; votes = 0; evt = null; goalQ = []; leader = -1; hist = []; recentFans = []; moves = []; lastGift = null; nextTalkAt = Date.now() + 6000; sq = [];
-    for (var i = 0; i < 12; i++) { pts.push(0); sent.push(0); }
+    for (var i = 0; i < NC(); i++) { pts.push(0); sent.push(0); }
     ended = false; left = C.dur; evtNext = 40 + Math.random() * 20; header(); build(); subLine();
     $("#win").hidden = true; $("#tab").hidden = true; $("#goal").hidden = true; $("#last").innerHTML = "<span>Le match commence ! Envoie la lettre de ton club</span>";
     $("#timer").textContent = fmt(left); $("#timer").classList.remove("hurry");
@@ -1053,7 +1114,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     else if (!C.nonstop && left > 15 && Date.now() - lastSpeech > 24000) hype();
     hist.push(pts.slice()); if (hist.length > 30) hist.shift();
     if (C.chants && left > 12 && Date.now() - chantAt > 30000 && hist.length > 10) {
-      var g10c = gains(10), hi = 0; for (var q = 1; q < 12; q++) if (g10c[q] > g10c[hi]) hi = q;
+      var g10c = gains(10), hi = 0; for (var q = 1; q < NC(); q++) if (g10c[q] > g10c[hi]) hi = q;
       if (g10c[hi] >= Math.max(12, (pts[order()[0]] || 0) * .12)) { chant(); speak(rnd(["Écoutez les supporters " + de(hi) + " ! Ils chantent à pleine voix !", "Les tribunes " + de(hi) + " s'enflamment, quel chant !", "Olé olé ! Le kop " + de(hi) + " est en feu !"]), 1); }
     }
     if (left === 20) recStart();
@@ -1120,7 +1181,7 @@ button.main { background: var(--acc); color: #111; } button.mini { min-height: 3
     var names = ["Lina", "Yanis", "Chloé", "Max_93", "Inès", "Tom", "Sarah", "Noah", "Jade", "Ethan", "Léa", "Adam", "Kenza", "Lucas"], bias = [9, 8, 6, 4, 5, 4, 5, 9, 6, 4, 3, 3];
     st("connected", "Mode démo : faux votes");
     demoT = setInterval(function () {
-      for (var n = 0; n < 3; n++) { var r = Math.random() * 66, i = 0; while (r > bias[i]) { r -= bias[i]; i++; } var nm = names[Math.floor(Math.random() * names.length)];
+      for (var n = 0; n < 3; n++) { var r = Math.random() * 66, i = 0; while (r > bias[i]) { r -= bias[i]; i++; } if (DER()) i = Math.random() < .55 ? 0 : 1; var nm = names[Math.floor(Math.random() * names.length)];
         onChat({ id: nm, name: nm, text: Math.random() < .8 ? LET[i] : club(i).abbr }); }
       if (Math.random() < .08) { var gn = names[Math.floor(Math.random() * names.length)]; onGift({ id: gn, name: gn, coins: [1, 1, 5, 10, 30][Math.floor(Math.random() * 5)], count: 1 }); }
       if (Math.random() < .5) onLike({ count: 3 + Math.floor(Math.random() * 10) });

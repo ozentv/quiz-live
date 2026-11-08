@@ -148,6 +148,7 @@ Page : https://ozentv.github.io/quiz-live/clubs.html
 - **📣 Chants de supporters** (activés par défaut) : quand un club est en feu, la tribune chante « Olé, olé… Al-lez ! » sur des claquements de mains, et le commentateur en parle. L'ovation de la foule grandit avec l'écart au score.
 - **🎬 Récap vidéo** (sur ordinateur, Chrome ou Edge) : coche l'option ou clique sur « 🎬 Activer le récap » pendant le jeu, puis choisis l'onglet du jeu. La page filme les 20 dernières secondes de chaque match et l'écran de victoire, avec le son, en 720 × 1280 (format TikTok). Le bouton « ⬇️ Récap match N » télécharge la vidéo (MP4 quand le navigateur le permet, sinon WEBM). Les 3 derniers récaps restent disponibles.
 - **⚽ BUT !** : quand un club passe 100, 250, 500, 1 000 ou 2 000 points, grand bandeau « BUT ! », ovation et annonce.
+- **🔥 Mode derby** (réglage « Mode de jeu ») : seulement 2 clubs, par exemple OM contre PSG. Deux grandes cartes, une barre façon tir à la corde avec les pourcentages, les derniers supporters de chaque camp, et un commentaire propre au derby (égalité, écart, la corde penche…). Le chat vote avec A ou B, ou avec le nom du club.
 - **🔁 Commentaire en continu** (activé par défaut) : le commentateur parle sans arrêt, comme pendant un vrai match. Il annonce le leader, l'écart avec le 2e, la lanterne rouge, les clubs qui grimpent ou tombent, les duels serrés, le club en feu sur les 10 dernières secondes, le meilleur supporter, les pseudos qui votent, les cadeaux, le temps restant et les buts qui approchent. Il évite de répéter la même phrase, et les sous-titres s'affichent en haut sous le tableau d'affichage.
 - **🎙️ Commentateur** (voix + sous-titres) : coup d'envoi, changements de leader, gros cadeaux, événements, « plus qu'une minute », 30 s, 10 s, relances quand le chat est calme, et fin du match avec le gagnant et le MVP.
 - **🏟️ Sons de stade** (générés par la page) : rumeur de la foule qui monte avec le nombre de votes, coup de sifflet au début et à la fin, ovation sur les buts, bips des 10 dernières secondes.
@@ -160,6 +161,14 @@ Page : https://ozentv.github.io/quiz-live/clubs.html
 - **Combo photo + logo** : quand un club a les deux, la carte devient une carte de collection. La photo du joueur est cadrée sur le visage, avec un dégradé et une double bande diagonale aux couleurs du club, le logo en filigrane sur la photo et le logo net dans un médaillon en haut à droite.
 - « 📥 Importer toutes les images d'un coup » : sélectionne jusqu'à 12 images en une fois ; chacune va sur la bonne carte si son nom de fichier est la lettre (A.jpg) ou le nom du club (psg.jpg, real madrid.png), sinon dans l'ordre A, B, C… Un fichier dont le nom contient « logo », « écusson » ou « blason » (psg logo.png) devient le logo du club, les autres deviennent la photo.
 - Utilise les mêmes réglages de relais que le quiz. Mode démo pour tester sans live.
+
+## 📊 Duel en chiffres (vidéos « Clasico en chiffres »)
+Page : https://ozentv.github.io/quiz-live/duel.html
+- Deux clubs face à face, chacun avec son nom, ses couleurs et son logo (importé, gardé sur le téléphone ; sinon un écusson aux couleurs du club).
+- Jusqu'à 8 chiffres : chaque ligne arrive avec un whoosh, les nombres défilent, une barre façon tir à la corde penche, et le gagnant de la ligne s'allume en or. L'option « Le plus petit gagne » sert par exemple pour l'année de création. Le score des chiffres gagnés monte en haut.
+- Fin de vidéo : le score final, « Avantage … », et ta phrase de fin.
+- Versions **Team OM**, **Team PSG** ou **Neutre** : elles changent le titre et la phrase de fin, que tu peux modifier. « Préremplir OM contre PSG » remplit 6 chiffres (à la fin de la saison 2024-2025 : vérifie-les avant de poster). « Échanger les côtés » met l'autre club à gauche.
+- Vidéo d'environ 20 secondes en 720p ou 1080p, avec beat et effets sonores, plus l'image finale. Encadré « Télécharger » et « Enregistrer / Partager » comme sur le VS.
 
 ## 🆚 Générateur VS (vidéos « Team contre Team »)
 Page : https://ozentv.github.io/quiz-live/vs.html
@@ -181,12 +190,13 @@ Page : https://ozentv.github.io/quiz-live/vs.html
 - Une fois le fichier créé, un encadré reste affiché avec « ⬇️ Télécharger » (si le téléchargement automatique n'a pas marché) et, sur téléphone, « 📤 Enregistrer dans la galerie / Partager » pour le mettre dans la galerie ou l'envoyer directement dans TikTok ou CapCut.
 - Les réglages restent enregistrés sur le téléphone. « Échanger les équipes » inverse les deux cartes.
 
-## Thèmes (33 thèmes, 1676 questions)
+## Thèmes (35 thèmes, 1732 questions)
 - **57 questions** : Géographie, Animaux, Sciences, Histoire, Culture générale, Sport, Gastronomie, Corps humain, Mythologie, Langue française, Pays et capitales, Technologie, Cinéma, Musique, Jeux vidéo, Espace, Dessins animés, Football, Drapeaux, Séries, Marques et logos, France.
 - **85 questions** : Calcul mental.
 - **61 questions** : Vrai ou faux.
 - **42 questions** : Monuments du monde, Inventions, Nature.
 - **25 questions** : Mangas et animes, Anglais, Dinosaures et préhistoire, Art et peinture, Littérature, Rap français.
+- **28 questions** : OM et PSG (pour les comptes de supporters : fondation, titres, finales, légendes, stades…).
 - **Au hasard** mélange tous les thèmes.
 
 ## Voix off
