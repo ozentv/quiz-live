@@ -188,6 +188,7 @@ Page : https://ozentv.github.io/quiz-live/vs.html
 - **🎬 Animation d'entrée** (activée par défaut) : les cartes arrivent de chaque côté, puis le « VS » tombe en zoom avec un flash blanc et un éclair. « Revoir l'animation d'entrée » la rejoue dans l'aperçu.
 - **🔥 Effet autour du VS** : flammes, éclairs ou étincelles animés.
 - **💾 Mes VS enregistrés** : enregistre un VS sous un nom (20 au maximum) et rouvre-le en un clic.
+- **🖼️ Cadres** : contour au choix (aucun, simple, néon lumineux, dégradé de 2 couleurs, couleurs de chaque équipe, arc-en-ciel animé), avec la couleur, l'épaisseur et l'arrondi des coins réglables. Tu peux aussi changer la taille des cadres (60 à 125 %), la couleur et l'opacité de leur fond, les cacher tous les deux, ou revenir aux cadres d'origine.
 - **Textes** : ajoute autant de textes que tu veux (taille, couleur, style contour, ombre ou bandeau) et fais-les glisser avec le doigt sur l'aperçu. Le « VS » et les deux cadres entiers se déplacent de la même façon (bouton pour les remettre à leur place).
 - Ou choisis ta propre vidéo ou photo de fond depuis ta galerie, puis télécharge :
   - **la vidéo finie** avec le son (MP4 quand le navigateur le permet, sinon WEBM), en 720p ou 1080p, jusqu'à 60 secondes ;
