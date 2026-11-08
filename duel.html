@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Duel en chiffres</title>
+<meta name="description" content="Crée des vidéos « Clasico en chiffres » : deux clubs, leurs statistiques face à face, animées et prêtes pour TikTok.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&family=Oswald:wght@500;600;700&family=Figtree:wght@400;600;700&display=swap">
+<style>
+:root { --bg: #0b0d14; --card: #151925; --line: #262c3d; --fg: #f2f4fa; --muted: #9aa3b8; --acc: #ffd60a; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.4 Figtree, system-ui, sans-serif; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 16px max(16px, env(safe-area-inset-left)) 40px; display: grid; gap: 18px; }
+@media (min-width: 900px) { .wrap { grid-template-columns: 400px 1fr; align-items: start; } .prev { position: sticky; top: 16px; } }
+@media (max-width: 899px) { .prev { order: -1; } .prev canvas { width: min(62vw, 340px) !important; } }
+h1 { margin: 0; font: 900 26px Outfit, sans-serif; } h1 span { color: var(--acc); }
+.sub, .note { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+.side { display: grid; gap: 14px; }
+.box { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: grid; gap: 10px; }
+.box h2 { margin: 0; font: 800 17px Outfit, sans-serif; }
+label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+input[type=text], input[type=number], select, textarea { width: 100%; min-height: 42px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: #0f121b; color: var(--fg); font: 16px Figtree, sans-serif; }
+textarea { min-height: 64px; resize: vertical; }
+input[type=color] { width: 100%; height: 42px; border: 1px solid var(--line); border-radius: 10px; background: #0f121b; padding: 3px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+button, .btn { min-height: 44px; border: 0; border-radius: 12px; padding: 0 14px; font: 700 15px Figtree, sans-serif; cursor: pointer; background: #262c3d; color: var(--fg); }
+button.main { background: var(--acc); color: #111; } button.mini { min-height: 34px; font-size: 13px; padding: 0 10px; }
+button:disabled { opacity: .5; }
+.team { display: grid; gap: 8px; padding: 10px; border: 1px solid var(--line); border-radius: 12px; }
+.team b { font: 800 15px Outfit, sans-serif; }
+.stat { display: grid; grid-template-columns: 1fr 74px 74px 34px; gap: 6px; align-items: center; }
+.stat input { min-height: 38px; font-size: 14px; padding: 6px 8px; }
+.stat .x { min-height: 38px; padding: 0; }
+.chk { display: flex; align-items: center; gap: 8px; color: var(--fg); font-size: 14px; } .chk input { width: 20px; height: 20px; }
+.lowrow { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--muted); grid-column: 1 / -1; margin-top: -4px; }
+.prev { display: grid; gap: 10px; justify-items: center; }
+.prev canvas { width: min(100%, 420px); aspect-ratio: 9 / 16; border-radius: 16px; background: #000; box-shadow: 0 10px 40px rgba(0,0,0,.5); }
+.bar { width: min(100%, 420px); height: 8px; border-radius: 4px; background: #262c3d; overflow: hidden; } .bar[hidden] { display: none; }
+.bar i { display: block; height: 100%; width: 0; background: var(--acc); }
+.msg { width: min(100%, 420px); min-height: 20px; color: var(--muted); font-size: 14px; text-align: center; }
+.got { width: min(100%, 420px); display: grid; gap: 8px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); text-align: center; }
+.got[hidden] { display: none; }
+.got .nm { font-size: 14px; color: var(--muted); } #gotName { word-break: break-all; color: var(--fg); }
+.got a.dl { display: grid; place-items: center; min-height: 48px; border-radius: 12px; text-decoration: none; font: 800 16px Figtree, sans-serif; background: var(--acc); color: #111; }
+.links { display: flex; gap: 10px; flex-wrap: wrap; font-size: 14px; } .links a { color: var(--acc); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="side">
+    <div><h1>📊 Duel <span>en chiffres</span></h1><p class="sub">Deux clubs, leurs chiffres face à face : la page anime tout et sort une vidéo prête pour TikTok.</p>
+      <div class="links"><a href="./">Quiz</a><a href="vs.html">Générateur VS</a><a href="clubs.html">Bataille des clubs</a></div></div>
+
+    <div class="box">
+      <h2>Version</h2>
+      <div class="row3"><button class="mini" type="button" data-ver="om">💙 Team OM</button><button class="mini" type="button" data-ver="psg">❤️ Team PSG</button><button class="mini" type="button" data-ver="neutre">⚖️ Neutre</button></div>
+      <p class="note">Change le titre et la phrase de fin selon ton compte. Tu peux ensuite tout modifier.</p>
+      <label>Titre<input type="text" id="title" maxlength="28"></label>
+      <label>Sous-titre<input type="text" id="subt" maxlength="34"></label>
+      <label>Phrase de fin<textarea id="outro" maxlength="90"></textarea></label>
+    </div>
+
+    <div class="box">
+      <h2>Les deux clubs</h2>
+      <div class="team" data-t="0"></div>
+      <div class="team" data-t="1"></div>
+      <button class="mini" type="button" id="swap">⇄ Échanger les côtés</button>
+    </div>
+
+    <div class="box">
+      <h2>Les chiffres</h2>
+      <button class="mini" type="button" id="preset">⚽ Préremplir OM contre PSG</button>
+      <p class="note" id="presetNote">Chiffres à la fin de la saison 2024-2025 : vérifie-les et mets-les à jour avant de poster.</p>
+      <div id="stats" style="display:grid;gap:10px"></div>
+      <button class="mini" type="button" id="addStat">＋ Ajouter un chiffre (8 au maximum)</button>
+      <p class="note">« Le plus petit gagne » : pour un chiffre où le plus bas est le meilleur (année de création, défaites…).</p>
+    </div>
+
+    <div class="box">
+      <h2>Vidéo</h2>
+      <div class="row2">
+        <label>Musique<select id="music"><option value="beat">Beat</option><option value="none">Sans musique</option></select></label>
+        <label>Qualité<select id="q"><option value="720">720p</option><option value="1080">1080p</option></select></label>
+      </div>
+      <button class="main" type="button" id="dlVideo">🎬 Télécharger la vidéo</button>
+      <button type="button" id="dlImg">📷 Image finale</button>
+      <p class="note">La vidéo se crée en temps réel (environ 25 secondes) : garde la page ouverte.</p>
+    </div>
+  </div>
+
+  <div class="prev">
+    <canvas id="view" width="1080" height="1920" aria-label="Aperçu"></canvas>
+    <button class="mini" type="button" id="replay">↻ Revoir l'animation</button>
+    <div class="bar" id="bar" hidden><i id="barI"></i></div>
+    <div class="msg" id="msg" role="status"></div>
+    <div class="got" id="got" hidden>
+      <span class="nm" id="gotName"></span>
+      <a class="dl" id="gotDl" href="#" download>⬇️ Télécharger</a>
+      <button id="gotShare" type="button">📤 Enregistrer dans la galerie / Partager</button>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  "use strict";
+  var $ = function (s) { return document.querySelector(s); };
+  var W = 1080, H = 1920;
+  var PRESET = {
+    teams: [{ name: "OM", full: "Olympique de Marseille", c1: "#2faee0", c2: "#ffffff" }, { name: "PSG", full: "Paris Saint-Germain", c1: "#004170", c2: "#da291c" }],
+    stats: [["Année de création", "1899", "1970", true], ["Titres de champion de France", "9", "13", false], ["Coupes de France", "10", "16", false], ["Ligues des champions", "1", "1", false], ["Coupes de la Ligue", "3", "9", false], ["Places au stade", "67394", "47929", false]]
+  };
+  var VER = {
+    om: { title: "LE CLASSIQUE", subt: "EN CHIFFRES", outro: "Les chiffres ne font pas tout… 💙 Droit au but ! Commente OM 👇" },
+    psg: { title: "LE CLASSIQUE", subt: "EN CHIFFRES", outro: "Les chiffres parlent d'eux-mêmes ❤️💙 Ici c'est Paris ! Commente PSG 👇" },
+    neutre: { title: "LE CLASSIQUE", subt: "EN CHIFFRES", outro: "Alors, c'est qui le plus grand club de France ? Commente 👇" }
+  };
+  var S;
+  try { S = JSON.parse(localStorage.getItem("duel-set") || "null"); } catch (e) { S = null; }
+  if (!S) S = { teams: JSON.parse(JSON.stringify(PRESET.teams)), stats: JSON.parse(JSON.stringify(PRESET.stats)), title: VER.neutre.title, subt: VER.neutre.subt, outro: VER.neutre.outro, music: "beat", q: "720" };
+  function save() { try { localStorage.setItem("duel-set", JSON.stringify(S)); } catch (e) {} }
+  function esc(x) { return String(x).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]; }); }
+
+  /* ---------- logos (sur l'appareil seulement) ---------- */
+  var logoImg = [null, null];
+  function lum(hex) { var n = parseInt(String(hex).slice(1), 16); return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255; }
+  function badge(t) { // écusson généré aux couleurs du club, avec ses initiales
+    var c = document.createElement("canvas"); c.width = c.height = 320; var g = c.getContext("2d"), c1 = t.c1, c2 = t.c2;
+    g.fillStyle = c1; g.beginPath(); g.arc(160, 160, 160, 0, Math.PI * 2); g.fill();
+    g.save(); g.beginPath(); g.arc(160, 160, 160, 0, Math.PI * 2); g.clip(); g.fillStyle = c2; g.fillRect(160, 0, 160, 320); g.restore();
+    var dark = lum(c1) > .6 && lum(c2) > .6;
+    g.fillStyle = dark ? "#1b1b1f" : "rgba(255,255,255,.94)"; g.beginPath(); g.moveTo(92, 78); g.lineTo(228, 78); g.lineTo(228, 168); g.quadraticCurveTo(228, 228, 160, 262); g.quadraticCurveTo(92, 228, 92, 168); g.closePath(); g.fill();
+    var txt = lum(c1) > .85 ? c2 : c1; if (lum(txt) > .8) txt = "#1b1b1f"; if (dark) txt = "#fff";
+    g.fillStyle = txt; g.textAlign = "center"; g.textBaseline = "middle"; g.font = "900 " + (t.name.length > 3 ? 46 : 60) + "px Outfit, sans-serif"; g.fillText(t.name.slice(0, 5), 160, 160);
+    g.lineWidth = 14; g.strokeStyle = lum(c2) > .9 && lum(c1) > .9 ? "#1b1b1f" : c2; g.beginPath(); g.arc(160, 160, 153, 0, Math.PI * 2); g.stroke();
+    return c;
+  }
+  function loadLogo(i) { var src = ""; try { src = localStorage.getItem("duel-logo-" + i) || ""; } catch (e) {} if (!src) { logoImg[i] = null; return; } var im = new Image(); im.onload = function () { logoImg[i] = im; }; im.src = src; }
+  function storeLogo(i, file) {
+    var im = new Image(); im.onload = function () {
+      var cv = document.createElement("canvas"), r = Math.min(320 / im.width, 320 / im.height); cv.width = cv.height = 320;
+      cv.getContext("2d").drawImage(im, (320 - im.width * r) / 2, (320 - im.height * r) / 2, im.width * r, im.height * r);
+      try { localStorage.setItem("duel-logo-" + i, cv.toDataURL("image/png")); } catch (e) { alert("Plus de place pour l'image."); }
+      URL.revokeObjectURL(im.src); loadLogo(i); teamsForm();
+    }; im.src = URL.createObjectURL(file);
+  }
+  var badgeCache = {};
+  function teamLogo(i) { if (logoImg[i]) return logoImg[i]; var t = S.teams[i], k = t.name + "|" + t.c1 + "|" + t.c2; return badgeCache[k] || (badgeCache[k] = badge(t)); }
+
+  /* ---------- formulaires ---------- */
+  function teamsForm() {
+    Array.prototype.forEach.call(document.querySelectorAll(".team"), function (el) {
+      var i = +el.getAttribute("data-t"), t = S.teams[i], has = !!logoImg[i];
+      el.innerHTML = "<b>" + (i ? "Club de droite" : "Club de gauche") + "</b><div class=\"row2\"><label>Nom court<input type=\"text\" maxlength=\"10\" data-k=\"name\" value=\"" + esc(t.name) + "\"></label><label>Nom complet<input type=\"text\" maxlength=\"30\" data-k=\"full\" value=\"" + esc(t.full) + "\"></label></div>" +
+        "<div class=\"row3\"><label>Couleur 1<input type=\"color\" data-k=\"c1\" value=\"" + t.c1 + "\"></label><label>Couleur 2<input type=\"color\" data-k=\"c2\" value=\"" + t.c2 + "\"></label><label>Logo<span class=\"btn\" style=\"display:grid;place-items:center;min-height:42px\">" + (has ? "✓ Changer" : "🛡️ Ajouter") + "<input type=\"file\" accept=\"image/*\" hidden data-logo></span></label></div>" +
+        (has ? "<button class=\"mini\" type=\"button\" data-rmlogo>Retirer le logo</button>" : "");
+      el.querySelectorAll("[data-k]").forEach(function (inp) { inp.oninput = function () { t[inp.getAttribute("data-k")] = inp.value; save(); restart(); }; });
+      el.querySelector("[data-logo]").onchange = function () { if (this.files && this.files[0]) storeLogo(i, this.files[0]); };
+      var rm = el.querySelector("[data-rmlogo]"); if (rm) rm.onclick = function () { try { localStorage.removeItem("duel-logo-" + i); } catch (e) {} logoImg[i] = null; teamsForm(); };
+    });
+  }
+  function statsForm() {
+    $("#stats").innerHTML = S.stats.map(function (r, k) {
+      return "<div class=\"stat\"><input type=\"text\" data-s=\"" + k + "\" data-c=\"0\" maxlength=\"34\" value=\"" + esc(r[0]) + "\" placeholder=\"Chiffre\"><input type=\"text\" inputmode=\"decimal\" data-s=\"" + k + "\" data-c=\"1\" value=\"" + esc(r[1]) + "\" placeholder=\"" + esc(S.teams[0].name) + "\"><input type=\"text\" inputmode=\"decimal\" data-s=\"" + k + "\" data-c=\"2\" value=\"" + esc(r[2]) + "\" placeholder=\"" + esc(S.teams[1].name) + "\"><button class=\"x mini\" type=\"button\" data-del=\"" + k + "\">✕</button>" +
+        "<label class=\"lowrow\"><input type=\"checkbox\" data-low=\"" + k + "\"" + (r[3] ? " checked" : "") + "> Le plus petit gagne</label></div>";
+    }).join("");
+    $("#stats").querySelectorAll("[data-s]").forEach(function (inp) { inp.oninput = function () { S.stats[+inp.getAttribute("data-s")][+inp.getAttribute("data-c")] = inp.value; save(); restart(); }; });
+    $("#stats").querySelectorAll("[data-low]").forEach(function (inp) { inp.onchange = function () { S.stats[+inp.getAttribute("data-low")][3] = inp.checked; save(); restart(); }; });
+    $("#stats").querySelectorAll("[data-del]").forEach(function (b) { b.onclick = function () { S.stats.splice(+b.getAttribute("data-del"), 1); save(); statsForm(); restart(); }; });
+    $("#addStat").disabled = S.stats.length >= 8;
+  }
+  function textsForm() {
+    $("#title").value = S.title; $("#subt").value = S.subt; $("#outro").value = S.outro;
+    $("#title").oninput = function () { S.title = this.value; save(); };
+    $("#subt").oninput = function () { S.subt = this.value; save(); };
+    $("#outro").oninput = function () { S.outro = this.value; save(); };
+    $("#music").value = S.music; $("#music").onchange = function () { S.music = this.value; save(); };
+    $("#q").value = S.q; $("#q").onchange = function () { S.q = this.value; save(); };
+  }
+  document.querySelectorAll("[data-ver]").forEach(function (b) { b.onclick = function () { var v = VER[b.getAttribute("data-ver")]; S.title = v.title; S.subt = v.subt; S.outro = v.outro; save(); textsForm(); restart(); }; });
+  $("#addStat").onclick = function () { if (S.stats.length < 8) { S.stats.push(["", "", "", false]); save(); statsForm(); } };
+  $("#preset").onclick = function () { S.teams = JSON.parse(JSON.stringify(PRESET.teams)); S.stats = JSON.parse(JSON.stringify(PRESET.stats)); save(); teamsForm(); statsForm(); restart(); };
+  $("#swap").onclick = function () {
+    S.teams.reverse(); S.stats.forEach(function (r) { var x = r[1]; r[1] = r[2]; r[2] = x; });
+    var a = "", b = ""; try { a = localStorage.getItem("duel-logo-0") || ""; b = localStorage.getItem("duel-logo-1") || ""; if (b) localStorage.setItem("duel-logo-0", b); else localStorage.removeItem("duel-logo-0"); if (a) localStorage.setItem("duel-logo-1", a); else localStorage.removeItem("duel-logo-1"); } catch (e) {}
+    loadLogo(0); loadLogo(1); save(); setTimeout(function () { teamsForm(); statsForm(); restart(); }, 80);
+  };
+
+  /* ---------- animation ---------- */
+  function num(v) { var n = parseFloat(String(v).replace(/\s/g, "").replace(",", ".")); return isFinite(n) ? n : null; }
+  function fmtN(n, ref) { var dec = /[.,]/.test(String(ref)) ? 1 : 0; return n.toLocaleString("fr-FR", { minimumFractionDigits: dec, maximumFractionDigits: dec }); }
+  function ease(x) { x = Math.max(0, Math.min(1, x)); return 1 - Math.pow(1 - x, 3); }
+  function back(x) { x = Math.max(0, Math.min(1, x)); var c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); }
+  var INTRO = 1.6, ROW = 2.3, OUT = 4;
+  function timeline() { var n = S.stats.filter(function (r) { return r[0]; }).length; return { n: n, end: INTRO + n * ROW, total: INTRO + n * ROW + OUT }; }
+  function winner(r) { var a = num(r[1]), b = num(r[2]); if (a == null || b == null || a === b) return -1; return (r[3] ? a < b : a > b) ? 0 : 1; }
+  function vivid(c) { return lum(c) > .85 ? "#d8dee8" : c; }
+  function fit(g, txt, max, size, font) { g.font = font.replace("#", size); while (g.measureText(txt).width > max && size > 14) { size -= 2; g.font = font.replace("#", size); } return size; }
+  function rr(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+  function draw(g, t) {
+    var A = S.teams[0], B = S.teams[1], rows = S.stats.filter(function (r) { return r[0]; }), tl = timeline();
+    // fond : deux moitiés aux couleurs des clubs, séparées en diagonale
+    g.fillStyle = "#06070c"; g.fillRect(0, 0, W, H);
+    g.save(); g.globalAlpha = .8;
+    var ga = g.createLinearGradient(0, 0, 540, 0); ga.addColorStop(0, vivid(A.c1)); ga.addColorStop(1, "rgba(0,0,0,0)"); g.fillStyle = ga;
+    g.beginPath(); g.moveTo(0, 0); g.lineTo(620, 0); g.lineTo(460, H); g.lineTo(0, H); g.fill();
+    var gb = g.createLinearGradient(W, 0, 540, 0); gb.addColorStop(0, vivid(B.c1)); gb.addColorStop(1, "rgba(0,0,0,0)"); g.fillStyle = gb;
+    g.beginPath(); g.moveTo(W, 0); g.lineTo(620, 0); g.lineTo(460, H); g.lineTo(W, H); g.fill(); g.restore();
+    var vg = g.createRadialGradient(540, 900, 200, 540, 900, 1200); vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,.75)"); g.fillStyle = vg; g.fillRect(0, 0, W, H);
+    g.strokeStyle = "rgba(255,255,255,.08)"; g.lineWidth = 2; for (var k = -20; k < 40; k++) { g.beginPath(); g.moveTo(k * 60, 0); g.lineTo(k * 60 - 300, H); g.stroke(); }
+    // titre
+    var ti = ease(t / .6); g.globalAlpha = ti; g.textAlign = "center"; g.textBaseline = "middle";
+    g.fillStyle = "#ffd60a"; fit(g, S.title.toUpperCase(), 980, 96, "italic 700 #px Oswald, Outfit, sans-serif"); g.fillText(S.title.toUpperCase(), 540, 120 - (1 - ti) * 40);
+    g.fillStyle = "#fff"; fit(g, S.subt.toUpperCase(), 900, 48, "600 #px Oswald, Outfit, sans-serif"); g.fillText(S.subt.toUpperCase(), 540, 200); g.globalAlpha = 1;
+    // écussons qui arrivent de chaque côté
+    var sl = back((t - .2) / .9), size = 230;
+    [[A, 0, 250], [B, 1, 830]].forEach(function (x) {
+      var cx = x[1] ? W + 200 - (W + 200 - x[2]) * sl : -200 + (x[2] + 200) * sl, cy = 400;
+      g.save(); g.shadowColor = "rgba(0,0,0,.6)"; g.shadowBlur = 30; g.drawImage(teamLogo(x[1]), cx - size / 2, cy - size / 2, size, size); g.restore();
+      g.fillStyle = "#fff"; fit(g, x[0].name.toUpperCase(), 330, 54, "700 #px Oswald, Outfit, sans-serif"); g.fillText(x[0].name.toUpperCase(), cx, cy + 160);
+    });
+    // score des chiffres gagnés
+    var wa = 0, wb = 0; rows.forEach(function (r, k) { if (t >= INTRO + k * ROW + 1.4) { var w = winner(r); if (w === 0) wa++; else if (w === 1) wb++; } });
+    var vs = ease((t - .9) / .5); g.globalAlpha = vs;
+    g.fillStyle = "#fff"; g.font = "700 130px Oswald, Outfit, sans-serif"; g.fillText(wa + "-" + wb, 540, 390);
+    g.fillStyle = "#ffd60a"; g.font = "600 30px Oswald, Outfit, sans-serif"; g.fillText("CHIFFRES GAGNÉS", 540, 480); g.globalAlpha = 1;
+    // lignes de chiffres
+    var top0 = 600, rh = Math.min(165, 1180 / Math.max(1, rows.length));
+    rows.forEach(function (r, k) {
+      var st = INTRO + k * ROW, p = (t - st); if (p < 0) return;
+      var y = top0 + k * rh, ap = ease(p / .35), w = winner(r), cnt = ease((p - .25) / 1.05), won = p > 1.4;
+      g.save(); g.globalAlpha = ap; g.translate((1 - ap) * 80, 0);
+      g.fillStyle = "rgba(8,10,18,.72)"; rr(g, 40, y, 1000, rh - 16, 22); g.fill();
+      g.fillStyle = "#c9d2e3"; fit(g, r[0].toUpperCase(), 560, 32, "600 #px Oswald, Outfit, sans-serif"); g.fillText(r[0].toUpperCase(), 540, y + 34);
+      var a = num(r[1]), b = num(r[2]);
+      [[a, r[1], 0, 170], [b, r[2], 1, 910]].forEach(function (v) {
+        var shown = v[0] == null ? String(v[1] || "–") : fmtN(v[0] * cnt, v[1]), hl = won && w === v[2];
+        g.fillStyle = hl ? "#ffd60a" : won && w >= 0 ? "rgba(255,255,255,.55)" : "#fff";
+        var fs = fit(g, shown, 290, hl ? 78 : 70, "700 #px Oswald, Outfit, sans-serif");
+        g.fillText(shown, v[3], y + (rh - 16) / 2 + 4);
+        if (hl) { var bxc = v[2] ? 1018 : 62; g.fillStyle = "#ffd60a"; g.beginPath(); g.arc(bxc, y + 22, 20, 0, Math.PI * 2); g.fill(); g.fillStyle = "#111"; g.font = "800 26px Figtree, sans-serif"; g.fillText("✓", bxc, y + 23); }
+      });
+      // barre tir à la corde
+      var bx = 360, bw = 360, by = y + rh - 16 - 46, tot = (a || 0) + (b || 0), sh = tot ? (r[3] ? (b || 0) / tot : (a || 0) / tot) : .5, cur = .5 + (sh - .5) * cnt;
+      g.fillStyle = "rgba(255,255,255,.25)"; rr(g, bx - 3, by - 3, bw + 6, 24, 12); g.fill();
+      g.fillStyle = vivid(A.c1); rr(g, bx, by, bw * cur, 18, 9); g.fill();
+      g.fillStyle = vivid(B.c1); rr(g, bx + bw * cur, by, bw * (1 - cur), 18, 9); g.fill();
+      g.fillStyle = "#fff"; g.beginPath(); g.arc(bx + bw * cur, by + 9, 13, 0, Math.PI * 2); g.fill();
+      if (won && w >= 0) { g.strokeStyle = "#ffd60a"; g.lineWidth = 5; rr(g, w ? 740 : 40, y, 300, rh - 16, 22); g.stroke(); }
+      g.restore();
+    });
+    // fin : verdict + phrase
+    var fo = ease((t - tl.end - .3) / .6);
+    if (fo > 0) {
+      g.fillStyle = "rgba(4,5,10," + (.86 * fo) + ")"; g.fillRect(0, 0, W, H);
+      g.globalAlpha = fo; var sc = .8 + .2 * back((t - tl.end - .3) / .7);
+      g.save(); g.translate(540, 760); g.scale(sc, sc);
+      g.drawImage(teamLogo(0), -430, -110, 200, 200); g.drawImage(teamLogo(1), 230, -110, 200, 200);
+      g.fillStyle = "#fff"; g.font = "700 200px Oswald, Outfit, sans-serif"; g.fillText(wa + " - " + wb, 0, 0);
+      g.fillStyle = "#ffd60a"; g.font = "600 46px Oswald, Outfit, sans-serif";
+      g.fillText(wa === wb ? "ÉGALITÉ PARFAITE !" : "AVANTAGE " + (wa > wb ? A.name : B.name).toUpperCase(), 0, 170);
+      g.restore();
+      // phrase de fin sur plusieurs lignes
+      var words = String(S.outro || "").split(/\s+/), lines = [], cur2 = ""; g.font = "800 58px Outfit, sans-serif";
+      words.forEach(function (wd) { var tst = cur2 ? cur2 + " " + wd : wd; if (g.measureText(tst).width > 900 && cur2) { lines.push(cur2); cur2 = wd; } else cur2 = tst; }); if (cur2) lines.push(cur2);
+      g.fillStyle = "#fff"; lines.slice(0, 4).forEach(function (l, k) { g.fillText(l, 540, 1100 + k * 76); });
+      g.globalAlpha = 1;
+    }
+  }
+
+  /* ---------- aperçu ---------- */
+  var view = $("#view"), vg = view.getContext("2d"), t0 = performance.now(), busy = false;
+  function restart() { t0 = performance.now(); }
+  $("#replay").onclick = restart;
+  (function loop(now) { if (!busy) { var tl = timeline(), t = (now - t0) / 1000; if (t > tl.total + 1.5) { t0 = now; t = 0; } draw(vg, t); } requestAnimationFrame(loop); })(performance.now());
+
+  /* ---------- sons (whoosh, comptage, validation) et beat ---------- */
+  function sfx(ac, dest, t0, tl, withBeat) {
+    var noise = ac.createBuffer(1, ac.sampleRate, ac.sampleRate), d = noise.getChannelData(0); for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    function whoosh(t) { var s = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain(); s.buffer = noise; f.type = "bandpass"; f.Q.value = 1.2; f.frequency.setValueAtTime(400, t); f.frequency.exponentialRampToValueAtTime(3000, t + .35); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.25, t + .15); g.gain.linearRampToValueAtTime(0, t + .4); s.connect(f); f.connect(g); g.connect(dest); s.start(t); s.stop(t + .45); }
+    function tone(t, f, d, v, type) { var o = ac.createOscillator(), g = ac.createGain(); o.type = type || "triangle"; o.frequency.value = f; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.001, t + d); o.connect(g); g.connect(dest); o.start(t); o.stop(t + d + .05); }
+    function hit(t) { var o = ac.createOscillator(), g = ac.createGain(); o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(40, t + .4); g.gain.setValueAtTime(.7, t); g.gain.exponentialRampToValueAtTime(.001, t + .5); o.connect(g); g.connect(dest); o.start(t); o.stop(t + .55); }
+    whoosh(t0 + .2); hit(t0 + 1);
+    for (var k = 0; k < tl.n; k++) { var st = t0 + INTRO + k * ROW; whoosh(st); for (var c = 0; c < 8; c++) tone(st + .3 + c * .12, 900 + c * 60, .05, .05, "square"); tone(st + 1.4, 1320, .25, .14); tone(st + 1.48, 1760, .3, .1); }
+    hit(t0 + tl.end + .3); tone(t0 + tl.end + .3, 523, .6, .12); tone(t0 + tl.end + .45, 784, .8, .1);
+    if (withBeat) { var bpm = 118, sp = 60 / bpm, n = Math.floor(tl.total / sp); for (var b = 0; b < n; b++) { var tt = t0 + b * sp; if (b % 2 === 0) { var o = ac.createOscillator(), g = ac.createGain(); o.frequency.setValueAtTime(110, tt); o.frequency.exponentialRampToValueAtTime(45, tt + .2); g.gain.setValueAtTime(.45, tt); g.gain.exponentialRampToValueAtTime(.001, tt + .25); o.connect(g); g.connect(dest); o.start(tt); o.stop(tt + .3); }
+      var hs = ac.createBufferSource(), hf = ac.createBiquadFilter(), hg = ac.createGain(); hs.buffer = noise; hf.type = "highpass"; hf.frequency.value = 7000; hg.gain.setValueAtTime(.06, tt + sp / 2); hg.gain.exponentialRampToValueAtTime(.001, tt + sp / 2 + .05); hs.connect(hf); hf.connect(hg); hg.connect(dest); hs.start(tt + sp / 2); hs.stop(tt + sp / 2 + .06); } }
+  }
+
+  /* ---------- téléchargements ---------- */
+  function msg(t) { $("#msg").textContent = t; }
+  function stamp() { var d = new Date(); return d.getFullYear() + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0") + "-" + String(d.getHours()).padStart(2, "0") + String(d.getMinutes()).padStart(2, "0") + String(d.getSeconds()).padStart(2, "0"); }
+  var lastURL = null, lastFile = null;
+  function download(blob, name) {
+    if (lastURL) URL.revokeObjectURL(lastURL); lastURL = URL.createObjectURL(blob);
+    try { lastFile = new File([blob], name, { type: blob.type }); } catch (e) { lastFile = null; }
+    var a = document.createElement("a"); a.href = lastURL; a.download = name; document.body.appendChild(a); try { a.click(); } catch (e) {} a.remove();
+    var mo = blob.size / 1048576; $("#gotName").textContent = "✅ " + name + " · " + (mo >= 1 ? mo.toFixed(1) + " Mo" : Math.max(1, Math.round(blob.size / 1024)) + " Ko");
+    $("#gotDl").href = lastURL; $("#gotDl").setAttribute("download", name);
+    var can = false; try { can = !!(lastFile && navigator.canShare && navigator.canShare({ files: [lastFile] })); } catch (e) {} $("#gotShare").hidden = !can;
+    $("#got").hidden = false;
+  }
+  $("#gotShare").onclick = function () { if (lastFile) navigator.share({ files: [lastFile] }).catch(function () {}); };
+  $("#dlImg").onclick = function () { var c = document.createElement("canvas"); c.width = W; c.height = H; draw(c.getContext("2d"), timeline().total); c.toBlob(function (b) { download(b, "duel-" + stamp() + ".png"); msg("Image téléchargée."); }, "image/png"); };
+  var audioCtx = null;
+  $("#dlVideo").onclick = function () {
+    if (busy) return;
+    if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) { msg("Ce navigateur ne sait pas créer de vidéo. Utilise Chrome."); return; }
+    var types = ["video/mp4;codecs=avc1.42E01E,mp4a.40.2", "video/mp4;codecs=avc1,mp4a.40.2", "video/mp4", "video/webm;codecs=vp9,opus", "video/webm"];
+    var mime = types.filter(function (t) { return MediaRecorder.isTypeSupported(t); })[0] || "", hq = S.q === "1080", cw = hq ? 1080 : 720, ch = hq ? 1920 : 1280;
+    var c = document.createElement("canvas"); c.width = cw; c.height = ch; var g = c.getContext("2d");
+    var tmp = document.createElement("canvas"); tmp.width = W; tmp.height = H; var tg = tmp.getContext("2d");
+    var stream = c.captureStream(30), lead = .25, tl = timeline();
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+      var dest = audioCtx.createMediaStreamDestination(); sfx(audioCtx, dest, audioCtx.currentTime + lead, tl, S.music !== "none");
+      dest.stream.getAudioTracks().forEach(function (tr) { stream.addTrack(tr); });
+    } catch (e) {}
+    var rec, chunks = [];
+    try { rec = new MediaRecorder(stream, mime ? { mimeType: mime, videoBitsPerSecond: hq ? 10e6 : 6e6 } : {}); } catch (e) { msg("Impossible de démarrer l'enregistrement."); return; }
+    rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
+    busy = true; $("#dlVideo").disabled = $("#dlImg").disabled = true; $("#bar").hidden = false; msg("Création de la vidéo… garde la page ouverte.");
+    var start = performance.now() + lead * 1000; rec.start(500);
+    (function frame() {
+      var t = Math.max(0, (performance.now() - start) / 1000);
+      draw(tg, t); g.drawImage(tmp, 0, 0, cw, ch); vg.drawImage(tmp, 0, 0, W, H);
+      $("#barI").style.width = Math.round(Math.min(1, t / tl.total) * 100) + "%";
+      if (t >= tl.total) {
+        rec.onstop = function () {
+          var ext = /mp4/.test(rec.mimeType || mime) ? "mp4" : "webm";
+          download(new Blob(chunks, { type: rec.mimeType || mime || "video/webm" }), "duel-" + stamp() + "." + ext);
+          msg(ext === "mp4" ? "Vidéo téléchargée ✅" : "Vidéo téléchargée ✅ (format WEBM) : si ta galerie ne la voit pas, ouvre-la dans CapCut et réexporte-la.");
+          busy = false; $("#dlVideo").disabled = $("#dlImg").disabled = false; $("#bar").hidden = true; restart();
+        };
+        try { rec.stop(); } catch (e) { rec.onstop(); }
+        return;
+      }
+      requestAnimationFrame(frame);
+    })();
+  };
+
+  loadLogo(0); loadLogo(1); teamsForm(); statsForm(); textsForm();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(restart);
+})();
+</script>
+</body>
+</html>
