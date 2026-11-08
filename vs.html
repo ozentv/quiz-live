@@ -73,7 +73,7 @@ a { color: var(--ok); }
           <label>Vitesse<select id="dBpm"><option value="92">Lente</option><option value="110">Normale</option><option value="128">Rapide</option></select></label>
         </div>
         <div class="row2">
-          <label>Décor<select id="dScene"><option value="ciel">Ciel et parking</option><option value="ville">Ville au coucher du soleil</option><option value="neon">Néon</option><option value="studio">Studio et projecteurs</option><option value="stade">⚽ Stade de foot</option></select></label>
+          <label>Décor<select id="dScene"><option value="ciel">Ciel et parking</option><option value="ville">Ville au coucher du soleil</option><option value="neon">Néon</option><option value="studio">Studio et projecteurs</option><option value="stade">⚽ Stade de foot</option><option value="velodrome">💙 Vélodrome la nuit (fumigènes)</option><option value="parc">❤️💙 Parc des Princes (tifo)</option><option value="marseille">⛵ Marseille, le Vieux-Port</option><option value="paris">🗼 Paris, la tour Eiffel</option><option value="vestiaire">👕 Vestiaire</option><option value="plage">🏖️ Plage</option></select></label>
           <label>Les deux danseurs<select id="dDuo"><option value="same">Ensemble</option><option value="mirror">En miroir</option><option value="offset">Décalés</option></select></label>
         </div>
         <div class="row2">
@@ -490,7 +490,15 @@ a { color: var(--ok); }
     { n: "T-shirt noir + bandeau", top: "tshirt", bot: "jeans", head: "band", face: "face", skin: "#8d5a3b", c: ["#141414", "#2a2a2e", "#ff2fd5"] },
     { n: "Sweat violet", top: "hoodie", bot: "jogger", head: "hood", face: "ski", c: ["#6d28d9", "#2e1065", "#facc15"] },
     { n: "Coiffure afro", top: "tshirt", bot: "shorts", head: "afro", face: "face", skin: "#6b4226", c: ["#f97316", "#1e3a8a", "#111111"] },
-    { n: "Le roi du VS (couronne)", top: "jacket", bot: "jogger", head: "crown", face: "face", skin: "#c68863", c: ["#7c3aed", "#111111", "#f5c518"] }
+    { n: "Le roi du VS (couronne)", top: "jacket", bot: "jogger", head: "crown", face: "face", skin: "#c68863", c: ["#7c3aed", "#111111", "#f5c518"] },
+    { n: "💙 Maillot OM domicile", top: "jersey", bot: "shorts", head: "none", face: "face", skin: "#e0ac85", trim: "#2faee0", numc: "#2faee0", c: ["#ffffff", "#ffffff", "#2faee0"] },
+    { n: "💙 Maillot OM extérieur", top: "jersey", bot: "shorts", head: "none", face: "face", skin: "#8d5a3b", trim: "#ffffff", numc: "#ffffff", c: ["#2faee0", "#ffffff", "#ffffff"] },
+    { n: "💙 Maillot OM third", top: "jersey", bot: "shorts", head: "none", face: "face", skin: "#c68863", trim: "#2faee0", numc: "#2faee0", c: ["#1d2b4f", "#1d2b4f", "#2faee0"] },
+    { n: "💙 Écharpe OM + sweat blanc", top: "hoodie", bot: "jeans", head: "none", face: "face", skin: "#e0ac85", scarf: ["#2faee0", "#ffffff"], c: ["#f2f2f4", "#2b3a5c", "#2faee0"] },
+    { n: "❤️ Maillot PSG domicile", top: "jersey", bot: "shorts", head: "none", face: "face", skin: "#8d5a3b", hechter: ["#ffffff", "#da291c"], trim: "#da291c", numc: "#ffffff", c: ["#0b2a5b", "#0b2a5b", "#da291c"] },
+    { n: "❤️ Maillot PSG extérieur", top: "jersey", bot: "shorts", head: "none", face: "face", skin: "#e0ac85", hechter: ["#0b2a5b", "#da291c"], trim: "#0b2a5b", numc: "#0b2a5b", c: ["#ffffff", "#ffffff", "#0b2a5b"] },
+    { n: "❤️ Maillot PSG third", top: "jersey", bot: "shorts", head: "none", face: "face", skin: "#c68863", hechter: ["#da291c", "#0b2a5b"], trim: "#da291c", numc: "#ffffff", c: ["#141414", "#141414", "#da291c"] },
+    { n: "❤️ Écharpe PSG + doudoune", top: "jacket", bot: "jogger", head: "none", face: "face", skin: "#c68863", scarf: ["#0b2a5b", "#da291c"], c: ["#18191d", "#2a2b30", "#da291c"] }
   ];
   // segment de membre effilé, avec lumière à gauche et ombre à droite (effet de volume)
   function seg(g, ax, ay, bx, by, w1, w2, col) {
@@ -576,15 +584,32 @@ a { color: var(--ok); }
       g.strokeStyle = shade(top, 1.6); g.lineWidth = 5; g.beginPath(); g.moveTo(-46, -TORSO); g.lineTo(0, -TORSO + 190); g.lineTo(46, -TORSO); g.stroke();
       g.fillStyle = shade(top, 1.5); g.beginPath(); g.arc(0, -TORSO + 240, 7, 0, Math.PI * 2); g.arc(0, -TORSO + 300, 7, 0, Math.PI * 2); g.fill();
     } else {
-      if (o.vs) { g.save(); g.clip(); g.fillStyle = acc; for (var vx = -wS; vx < wS; vx += 76) g.fillRect(vx + 38, -TORSO - 20, 38, TORSO + 60); g.restore(); }
+      var torsoPath = function () { g.beginPath(); g.moveTo(-wB, 6); g.quadraticCurveTo(-wB - 10, -TORSO * .45, -wS + 4, -TORSO + 70 - sh); g.quadraticCurveTo(-wS + 6, -TORSO - 10 - sh, -64, -TORSO - sh * .5); g.lineTo(64, -TORSO - sh * .5); g.quadraticCurveTo(wS - 6, -TORSO - 10 - sh, wS - 4, -TORSO + 70 - sh); g.quadraticCurveTo(wB + 10, -TORSO * .45, wB, 6); g.quadraticCurveTo(0, 30, -wB, 6); g.closePath(); };
+      if (o.vs) { g.save(); torsoPath(); g.clip(); g.fillStyle = acc; for (var vx = -wS; vx < wS; vx += 76) g.fillRect(vx + 38, -TORSO - 20, 38, TORSO + 60); g.restore(); }
+      if (o.hechter) { g.save(); torsoPath(); g.clip(); g.fillStyle = o.hechter[0]; g.fillRect(-58, -TORSO - 20, 116, TORSO + 60); g.fillStyle = o.hechter[1]; g.fillRect(-44, -TORSO - 20, 88, TORSO + 60); g.fillStyle = o.hechter[0]; g.fillRect(-6, -TORSO - 20, 12, TORSO + 60); g.restore(); }
+      if (o.trim) { g.save(); torsoPath(); g.clip(); g.fillStyle = o.trim; g.fillRect(-wS, -8, wS * 2, 14); g.restore(); }
       g.fillStyle = skin; g.beginPath(); g.ellipse(0, -TORSO + 2, 46, 24, 0, 0, Math.PI); g.fill();
       g.strokeStyle = shade(top, .7); g.lineWidth = 8; g.beginPath(); g.ellipse(0, -TORSO + 2, 50, 28, 0, .1, Math.PI - .1); g.stroke();
-      if (o.top === "jersey") { g.textAlign = "center"; g.textBaseline = "middle"; g.font = "900 150px Outfit, sans-serif"; if (o.vs) { g.lineWidth = 14; g.strokeStyle = "#111"; g.strokeText("10", 0, -TORSO * .5); g.fillStyle = "#fff"; } else g.fillStyle = acc; g.fillText("10", 0, -TORSO * .5); g.textAlign = "left"; g.textBaseline = "alphabetic"; }
+      if (o.trim) { g.strokeStyle = o.trim; g.lineWidth = 9; g.beginPath(); g.ellipse(0, -TORSO + 2, 50, 28, 0, .1, Math.PI - .1); g.stroke(); }
+      if (o.top === "jersey") { g.textAlign = "center"; g.textBaseline = "middle"; g.font = "900 150px Outfit, sans-serif"; if (o.vs || o.hechter) { g.lineWidth = 14; g.strokeStyle = o.vs ? "#111" : "rgba(0,0,0,.45)"; g.strokeText("10", 0, -TORSO * .5); g.fillStyle = o.numc || "#fff"; } else g.fillStyle = o.numc || acc; g.fillText("10", 0, -TORSO * .5); g.textAlign = "left"; g.textBaseline = "alphabetic"; }
     }
     g.restore();
     // cou
     var ha = lean + P.head * Math.PI / 180, hdx = nx + Math.sin(ha) * 118, hdy = ny - Math.cos(ha) * 118;
     seg(g, nx, ny + 10, hdx + Math.sin(ha) * -40, hdy + Math.cos(ha) * 40, 70, 64, o.face === "ski" ? "#16171b" : skin);
+    if (o.scarf) { // écharpe de supporter : tour du cou + deux pans rayés avec franges
+      g.save(); g.translate(nx, ny + 34); g.rotate(lean);
+      var sc1 = o.scarf[0], sc2 = o.scarf[1];
+      g.fillStyle = sc1; g.beginPath(); g.ellipse(0, 0, 92, 34, 0, 0, Math.PI * 2); g.fill();
+      g.fillStyle = sc2; g.beginPath(); g.ellipse(0, 0, 92, 34, 0, .2, Math.PI - .2); g.ellipse(0, 0, 70, 20, 0, Math.PI - .2, .2, true); g.fill();
+      [[-36, .08], [26, -.05]].forEach(function (tl) {
+        g.save(); g.translate(tl[0], 14); g.rotate(tl[1] + Math.sin(Date.now() / 300 + tl[0]) * .03);
+        for (var st = 0; st < 7; st++) { g.fillStyle = st % 2 ? sc2 : sc1; g.fillRect(-24, st * 34, 48, 34); }
+        g.strokeStyle = sc1; g.lineWidth = 4; for (var fr = -20; fr <= 20; fr += 8) { g.beginPath(); g.moveTo(fr, 238); g.lineTo(fr + 2, 262); g.stroke(); }
+        g.fillStyle = "rgba(0,0,0,.12)"; g.fillRect(8, 0, 16, 238); g.restore();
+      });
+      g.restore();
+    }
     // bras : épaule ronde, bras effilé, coude, main avec doigts
     [[-1, P.aL], [1, P.aR]].forEach(function (sd) {
       var s = sd[0], a1 = sd[1][0] * Math.PI / 180, a2 = (sd[1][0] + sd[1][1]) * Math.PI / 180, sh2 = P.sh || 0;
@@ -598,6 +623,7 @@ a { color: var(--ok); }
         var mx2 = sx + (ex - sx) * .5, my2 = sy + (ey - sy) * .5;
         seg(g, sx, sy, ex, ey, 64, 52, skin); seg(g, ex, ey, wx, wy, 52, 42, skin);
         seg(g, sx, sy - 6, mx2, my2, 104, 92, top);
+        if (o.trim) { var dX = ex - sx, dY = ey - sy, dL = Math.hypot(dX, dY) || 1, pX = -dY / dL * 46, pY = dX / dL * 46, bX = mx2 - dX / dL * 6, bY = my2 - dY / dL * 6; g.strokeStyle = o.trim; g.lineWidth = 14; g.lineCap = "butt"; g.beginPath(); g.moveTo(bX + pX, bY + pY); g.lineTo(bX - pX, bY - pY); g.stroke(); g.lineCap = "round"; }
       }
       hand(g, wx, wy, Math.atan2(Math.cos(a2), Math.sin(a2) * s) - Math.PI / 2, s, glove);
     });
@@ -643,8 +669,108 @@ a { color: var(--ok); }
     }
     g.restore();
   }
+  /* ---------- décors en plus : Vélodrome, Parc, Marseille, Paris, vestiaire, plage ---------- */
+  function seeded(x) { var v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); }
+  function crowd(g, t, top, rows, cols, rowH) {
+    for (var row = 0; row < rows; row++) {
+      var ry = top + row * rowH, l = .5 + row * .03; g.fillStyle = "rgb(" + Math.round(22 * l * 1.6) + "," + Math.round(26 * l * 1.6) + "," + Math.round(38 * l * 1.6) + ")"; g.fillRect(0, ry, W, rowH);
+      for (var sx = (row % 2) * 18; sx < W; sx += 36) { var c = cols(sx, row), wig = Math.sin(t * 6 + sx * .05 + row) * 3; g.fillStyle = c; g.beginPath(); g.arc(sx + 12, ry + rowH * .35 + wig, 11, 0, Math.PI * 2); g.fill(); g.fillRect(sx + 3, ry + rowH * .5 + wig, 18, rowH * .45); }
+    }
+  }
+  function pitch(g, y0) {
+    for (var k = 0; k < 9; k++) { var a = y0 + Math.pow(k / 9, 1.4) * (H - y0), b = y0 + Math.pow((k + 1) / 9, 1.4) * (H - y0); g.fillStyle = k % 2 ? "#2f8f3a" : "#38a145"; g.fillRect(0, a, W, b - a + 1); }
+    g.strokeStyle = "rgba(255,255,255,.85)"; g.lineWidth = 6; g.beginPath(); g.moveTo(0, y0 + 20); g.lineTo(W, y0 + 20); g.stroke();
+  }
+  function lights(g, xs, y) { xs.forEach(function (px) { var gl = g.createRadialGradient(px, y, 10, px, y, 260); gl.addColorStop(0, "rgba(255,255,240,.6)"); gl.addColorStop(1, "rgba(255,255,240,0)"); g.fillStyle = gl; g.beginPath(); g.arc(px, y, 260, 0, Math.PI * 2); g.fill(); g.fillStyle = "#f8fbff"; for (var lx = -2; lx <= 2; lx++) { g.beginPath(); g.arc(px + lx * 24, y, 9, 0, Math.PI * 2); g.fill(); } }); }
+  var DECOR = {
+    velodrome: function (g, t) {
+      var sky = g.createLinearGradient(0, 0, 0, 900); sky.addColorStop(0, "#03060f"); sky.addColorStop(1, "#0e2a44"); g.fillStyle = sky; g.fillRect(0, 0, W, H);
+      crowd(g, t, 520, 16, function (sx, row) { return (Math.floor(sx / 36) + row) % 4 === 0 ? "#ffffff" : "#2faee0"; }, 52);
+      // toit ondulé du stade
+      g.fillStyle = "#e9eef4"; g.beginPath(); g.moveTo(0, 360); for (var x = 0; x <= W; x += 20) g.lineTo(x, 380 + Math.sin(x / W * Math.PI) * 120); g.lineTo(W, 470); for (x = W; x >= 0; x -= 20) g.lineTo(x, 470 + Math.sin(x / W * Math.PI) * 120); g.closePath(); g.fill();
+      g.strokeStyle = "rgba(0,0,0,.15)"; g.lineWidth = 3; for (x = 30; x < W; x += 60) { g.beginPath(); g.moveTo(x, 380 + Math.sin(x / W * Math.PI) * 120); g.lineTo(x, 470 + Math.sin(x / W * Math.PI) * 120); g.stroke(); }
+      lights(g, [120, 960], 300);
+      // fumigènes bleu ciel et blancs qui montent
+      for (var k = 0; k < 22; k++) {
+        var bx = seeded(k) * W, life = ((t * .18 + seeded(k + 9)) % 1), y = 1300 - life * 900, r = 60 + life * 220, c = k % 3 ? "47,174,224" : "255,255,255";
+        var sg = g.createRadialGradient(bx + Math.sin(t + k) * 40, y, 0, bx + Math.sin(t + k) * 40, y, r); sg.addColorStop(0, "rgba(" + c + "," + (.32 * (1 - life)) + ")"); sg.addColorStop(1, "rgba(" + c + ",0)"); g.fillStyle = sg; g.beginPath(); g.arc(bx + Math.sin(t + k) * 40, y, r, 0, Math.PI * 2); g.fill();
+      }
+      for (k = 0; k < 4; k++) { var fx = 120 + k * 280, fl = .6 + .4 * Math.sin(t * 20 + k * 3); var fg = g.createRadialGradient(fx, 1290, 0, fx, 1290, 90); fg.addColorStop(0, "rgba(255,120,60," + (.9 * fl) + ")"); fg.addColorStop(1, "rgba(255,80,40,0)"); g.fillStyle = fg; g.beginPath(); g.arc(fx, 1290, 90, 0, Math.PI * 2); g.fill(); }
+      pitch(g, 1352);
+    },
+    parc: function (g, t) {
+      var sky = g.createLinearGradient(0, 0, 0, 900); sky.addColorStop(0, "#04050c"); sky.addColorStop(1, "#141a33"); g.fillStyle = sky; g.fillRect(0, 0, W, H);
+      g.fillStyle = "#1a1f30"; g.fillRect(0, 360, W, 120); g.fillStyle = "#2b3249"; for (var x = 0; x < W; x += 54) g.fillRect(x, 360, 30, 120);
+      // tifo géant : bandes bleu, rouge, bleu qui ondulent comme une vague
+      var cols = 18, cw = W / cols;
+      for (var c = 0; c < cols; c++) {
+        var wave = Math.sin(t * 2.4 - c * .5) * 18, x0 = c * cw;
+        var col = c < 6 ? "#0b2a5b" : c < 12 ? "#da291c" : "#0b2a5b";
+        g.fillStyle = col; g.fillRect(x0, 500 + wave, cw + 1, 820);
+        g.fillStyle = "rgba(255,255,255,.95)"; if (c === 5 || c === 12) g.fillRect(x0 + (c === 5 ? cw - 14 : 0), 500 + wave, 14, 820);
+        g.fillStyle = "rgba(0,0,0," + (.12 + .1 * Math.sin(t * 2.4 - c * .5)) + ")"; g.fillRect(x0, 500 + wave, cw + 1, 820);
+      }
+      g.fillStyle = "#ffffff"; g.font = "900 150px Outfit, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle"; g.globalAlpha = .9; g.fillText("PARIS", 540, 900 + Math.sin(t * 2.4 - 4.5) * 18); g.globalAlpha = 1; g.textAlign = "left"; g.textBaseline = "alphabetic";
+      lights(g, [160, 920], 280);
+      pitch(g, 1340);
+    },
+    marseille: function (g, t) {
+      var sky = g.createLinearGradient(0, 0, 0, 1300); sky.addColorStop(0, "#1b2a5c"); sky.addColorStop(.55, "#f08a5d"); sky.addColorStop(1, "#ffd27a"); g.fillStyle = sky; g.fillRect(0, 0, W, H);
+      g.fillStyle = "rgba(255,240,200,.9)"; g.beginPath(); g.arc(760, 1060, 110, 0, Math.PI * 2); g.fill();
+      // colline et Notre-Dame de la Garde (silhouette)
+      g.fillStyle = "#3b2a3f"; g.beginPath(); g.moveTo(0, 1180); g.quadraticCurveTo(260, 720, 560, 860); g.quadraticCurveTo(820, 960, W, 1100); g.lineTo(W, 1300); g.lineTo(0, 1300); g.fill();
+      g.fillStyle = "#2a1d2e"; g.fillRect(250, 640, 150, 170); g.fillRect(295, 460, 60, 190); g.beginPath(); g.moveTo(290, 470); g.lineTo(325, 410); g.lineTo(360, 470); g.fill();
+      g.fillStyle = "#ffd700"; g.beginPath(); g.ellipse(325, 386, 10, 26, 0, 0, Math.PI * 2); g.fill();
+      // immeubles du port
+      for (var k = 0; k < 14; k++) { var bw = 70 + (k * 29) % 50, bh = 120 + (k * 71) % 160, bx = k * 80 - 20; g.fillStyle = k % 2 ? "#5b3b4a" : "#6e4656"; g.fillRect(bx, 1300 - bh, bw, bh); g.fillStyle = "rgba(255,210,140,.7)"; for (var wy = 1300 - bh + 20; wy < 1290; wy += 40) for (var wx = bx + 12; wx < bx + bw - 14; wx += 26) if ((wx + wy + k) % 3 === 0) g.fillRect(wx, wy, 12, 18); }
+      // eau du Vieux-Port avec reflets et mâts de bateaux
+      var sea = g.createLinearGradient(0, 1300, 0, 1560); sea.addColorStop(0, "#d9805e"); sea.addColorStop(1, "#2b4f78"); g.fillStyle = sea; g.fillRect(0, 1300, W, 260);
+      g.strokeStyle = "rgba(255,230,180,.55)"; g.lineWidth = 3; for (k = 0; k < 16; k++) { var yy = 1320 + k * 15, ox = Math.sin(t * 1.5 + k) * 30; g.beginPath(); g.moveTo(560 + ox, yy); g.lineTo(960 + ox, yy); g.stroke(); }
+      for (k = 0; k < 7; k++) { var mx = 60 + k * 150, bob = Math.sin(t * 1.8 + k) * 4; g.strokeStyle = "#2a1d2e"; g.lineWidth = 5; g.beginPath(); g.moveTo(mx, 1440 + bob); g.lineTo(mx, 1180 + bob); g.stroke(); g.fillStyle = "#f3efe6"; g.beginPath(); g.moveTo(mx - 50, 1440 + bob); g.lineTo(mx + 60, 1440 + bob); g.lineTo(mx + 40, 1470 + bob); g.lineTo(mx - 34, 1470 + bob); g.fill(); }
+      var q = g.createLinearGradient(0, 1560, 0, H); q.addColorStop(0, "#a58f7a"); q.addColorStop(1, "#7c6a5a"); g.fillStyle = q; g.fillRect(0, 1560, W, H - 1560);
+    },
+    paris: function (g, t) {
+      var sky = g.createLinearGradient(0, 0, 0, 1500); sky.addColorStop(0, "#050816"); sky.addColorStop(1, "#1c2a5a"); g.fillStyle = sky; g.fillRect(0, 0, W, H);
+      for (var k = 0; k < 80; k++) { g.fillStyle = "rgba(255,255,255," + (.3 + .5 * seeded(k)) + ")"; g.fillRect(seeded(k + 1) * W, seeded(k + 2) * 900, 3, 3); }
+      // tour Eiffel (silhouette avec ses étages)
+      var cx = 540, base = 1480, topY = 180;
+      g.fillStyle = "#3a2a1c"; g.beginPath(); g.moveTo(cx - 6, topY); g.lineTo(cx + 6, topY); g.lineTo(cx + 40, 640); g.lineTo(cx + 90, 900); g.quadraticCurveTo(cx + 170, 1200, cx + 300, base); g.lineTo(cx + 200, base); g.quadraticCurveTo(cx + 100, 1220, cx, 1200); g.quadraticCurveTo(cx - 100, 1220, cx - 200, base); g.lineTo(cx - 300, base); g.quadraticCurveTo(cx - 170, 1200, cx - 90, 900); g.lineTo(cx - 40, 640); g.closePath(); g.fill();
+      g.fillStyle = "#4d3826"; g.fillRect(cx - 110, 880, 220, 26); g.fillRect(cx - 54, 630, 108, 18);
+      g.strokeStyle = "rgba(255,200,110,.35)"; g.lineWidth = 2; for (var y = 260; y < base; y += 40) { var hw = y < 640 ? 6 + (y - topY) * .074 : y < 900 ? 40 + (y - 640) * .19 : 90 + Math.pow((y - 900) / 580, 1.6) * 210; g.beginPath(); g.moveTo(cx - hw, y); g.lineTo(cx + hw, y + 20); g.moveTo(cx + hw, y); g.lineTo(cx - hw, y + 20); g.stroke(); }
+      // scintillement
+      if ((t % 6) < 2) for (k = 0; k < 40; k++) { if (seeded(k + Math.floor(t * 12)) < .5) continue; var yy = topY + seeded(k + 3) * (base - topY), hw2 = yy < 640 ? 6 + (yy - topY) * .074 : yy < 900 ? 40 + (yy - 640) * .19 : 90 + Math.pow((yy - 900) / 580, 1.6) * 210; g.fillStyle = "#fffbe0"; g.beginPath(); g.arc(cx + (seeded(k + 5) - .5) * 2 * hw2, yy, 4, 0, Math.PI * 2); g.fill(); }
+      var bm = g.createRadialGradient(cx, topY, 5, cx, topY, 60); bm.addColorStop(0, "rgba(255,240,180,.9)"); bm.addColorStop(1, "rgba(255,240,180,0)"); g.fillStyle = bm; g.beginPath(); g.arc(cx, topY, 60, 0, Math.PI * 2); g.fill();
+      var gr = g.createLinearGradient(0, base, 0, H); gr.addColorStop(0, "#2b2d38"); gr.addColorStop(1, "#18191f"); g.fillStyle = gr; g.fillRect(0, base, W, H - base);
+    },
+    vestiaire: function (g, t) {
+      var wall = g.createLinearGradient(0, 0, 0, 1500); wall.addColorStop(0, "#1c2230"); wall.addColorStop(1, "#2c3446"); g.fillStyle = wall; g.fillRect(0, 0, W, H);
+      for (var k = 0; k < 3; k++) { var lx = 180 + k * 360, lg = g.createRadialGradient(lx, 60, 10, lx, 60, 420); lg.addColorStop(0, "rgba(255,255,255,.35)"); lg.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = lg; g.fillRect(0, 0, W, 700); g.fillStyle = "#eef3ff"; g.fillRect(lx - 90, 30, 180, 14); }
+      for (k = 0; k < 6; k++) {
+        var x = 20 + k * 175, col = k < 3 ? teamColor(0) : teamColor(1);
+        g.fillStyle = "#39435a"; g.fillRect(x, 260, 160, 1020); g.strokeStyle = "#232a3a"; g.lineWidth = 6; g.strokeRect(x, 260, 160, 1020);
+        g.fillStyle = "#2a3245"; g.fillRect(x + 12, 300, 136, 940);
+        g.fillStyle = col; g.beginPath(); g.moveTo(x + 30, 470); g.lineTo(x + 58, 440); g.lineTo(x + 102, 440); g.lineTo(x + 130, 470); g.lineTo(x + 116, 500); g.lineTo(x + 112, 760); g.lineTo(x + 48, 760); g.lineTo(x + 44, 500); g.closePath(); g.fill();
+        g.fillStyle = lumHex(col) > .7 ? "#1b1b1f" : "#ffffff"; g.font = "900 70px Outfit, sans-serif"; g.textAlign = "center"; g.fillText(String([7, 10, 9, 11, 10, 7][k]), x + 80, 640); g.textAlign = "left";
+        g.strokeStyle = "#b8c0d0"; g.lineWidth = 4; g.beginPath(); g.moveTo(x + 66, 440); g.quadraticCurveTo(x + 80, 410, x + 94, 440); g.stroke();
+      }
+      g.fillStyle = "#6b4a2f"; g.fillRect(0, 1300, W, 46); g.fillStyle = "#4e3622"; g.fillRect(0, 1346, W, 16);
+      for (var tx = 0; tx < W; tx += 90) for (var ty = 1362; ty < H; ty += 90) { g.fillStyle = (tx / 90 + ty / 90) % 2 < 1 ? "#cfd5de" : "#bfc6d1"; g.fillRect(tx, ty, 90, 90); }
+    },
+    plage: function (g, t) {
+      var sky = g.createLinearGradient(0, 0, 0, 1200); sky.addColorStop(0, "#2d8bd8"); sky.addColorStop(.7, "#ffcf8a"); sky.addColorStop(1, "#ff9a5c"); g.fillStyle = sky; g.fillRect(0, 0, W, H);
+      g.fillStyle = "rgba(255,245,200,.95)"; g.beginPath(); g.arc(300, 1080, 120, 0, Math.PI * 2); g.fill();
+      var sea = g.createLinearGradient(0, 1160, 0, 1500); sea.addColorStop(0, "#1f6fb2"); sea.addColorStop(1, "#46b5d6"); g.fillStyle = sea; g.fillRect(0, 1160, W, 340);
+      g.strokeStyle = "rgba(255,255,255,.55)"; g.lineWidth = 4; for (var k = 0; k < 10; k++) { var y = 1180 + k * 30; g.beginPath(); for (var x = 0; x <= W; x += 30) g.lineTo(x, y + Math.sin(x * .02 + t * 2 + k) * 5); g.stroke(); }
+      var foam = 1500 + Math.sin(t * 1.2) * 18; g.fillStyle = "rgba(255,255,255,.85)"; g.beginPath(); g.moveTo(0, foam); for (x = 0; x <= W; x += 30) g.lineTo(x, foam + Math.sin(x * .03 + t * 2) * 8); g.lineTo(W, foam + 30); g.lineTo(0, foam + 30); g.fill();
+      var sand = g.createLinearGradient(0, 1520, 0, H); sand.addColorStop(0, "#f2d49b"); sand.addColorStop(1, "#d9b06f"); g.fillStyle = sand; g.fillRect(0, foam + 20, W, H);
+      // palmier
+      g.strokeStyle = "#5b3a1e"; g.lineWidth = 30; g.lineCap = "round"; g.beginPath(); g.moveTo(980, 1700); g.quadraticCurveTo(1010, 1100, 900, 640); g.stroke();
+      g.fillStyle = "#1f6b3a"; for (k = 0; k < 7; k++) { var a = -Math.PI * .9 + k * .45 + Math.sin(t * 1.4 + k) * .05; g.save(); g.translate(900, 640); g.rotate(a); g.beginPath(); g.ellipse(150, 0, 170, 34, .25, 0, Math.PI * 2); g.fill(); g.restore(); }
+    }
+  };
   function scene(g, t) {
     var sc = S.d.scene, k;
+    if (DECOR[sc]) { DECOR[sc](g, t); return; }
     if (sc === "ville") {
       var gv = g.createLinearGradient(0, 0, 0, H); gv.addColorStop(0, "#2b1b55"); gv.addColorStop(.55, "#e76f51"); gv.addColorStop(.75, "#f4a261"); g.fillStyle = gv; g.fillRect(0, 0, W, H);
       g.fillStyle = "rgba(255,230,180,.9)"; g.beginPath(); g.arc(540, 1240, 150, 0, Math.PI * 2); g.fill();
