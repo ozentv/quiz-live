@@ -99,6 +99,20 @@ a { color: var(--ok); }
     </div>
 
     <div class="box">
+      <h2>🖼️ Cadres</h2>
+      <label class="chk"><input type="checkbox" id="frHide"> Cacher les deux cadres</label>
+      <div id="frOpts" style="display:grid;gap:10px">
+        <label>Contour<select id="frStyle"><option value="none">Aucun</option><option value="simple">Simple</option><option value="neon">Néon (lumineux)</option><option value="degrade">Dégradé (2 couleurs)</option><option value="club">Couleurs de chaque équipe</option><option value="anime">Arc-en-ciel animé</option></select></label>
+        <div class="row2" id="frCols"><label>Couleur du contour<input type="color" id="frCol"></label><label id="frCol2L">2e couleur<input type="color" id="frCol2"></label></div>
+        <label>Épaisseur du contour : <b id="frWv"></b><input type="range" id="frW" min="2" max="30" step="1"></label>
+        <label>Taille des cadres : <b id="frSv"></b><input type="range" id="frS" min="60" max="125" step="5"></label>
+        <label>Arrondi des coins : <b id="frRv"></b><input type="range" id="frR" min="0" max="80" step="2"></label>
+        <div class="row2"><label>Fond du cadre<input type="color" id="frBg"></label><label>Opacité du fond<select id="frOp"><option value="1">Plein</option><option value="0.8">80 %</option><option value="0.6">60 %</option><option value="0.35">Transparent</option></select></label></div>
+        <button class="mini" id="frReset" type="button">↺ Cadres d'origine</button>
+      </div>
+    </div>
+
+    <div class="box">
       <h2>Textes <button class="mini main" id="addTxt" type="button">+ Ajouter un texte</button></h2>
       <p class="note">Fais glisser un texte, le « VS » ou un cadre entier avec le doigt sur l'aperçu pour le déplacer.</p>
       <button class="mini" id="resetPos" type="button">↺ Remettre les cadres et le VS à leur place</button>
@@ -154,6 +168,8 @@ a { color: var(--ok); }
   try { S = JSON.parse(localStorage.getItem("vs-set") || "null"); } catch (e) { S = null; }
   if (!S || !S.t || S.t.length !== 2) S = JSON.parse(JSON.stringify(DEF));
   if (!S.d || !S.d.c) { S.d = JSON.parse(JSON.stringify(DEF.d)); S.fond = "dance"; }
+  var FR0 = { hide: false, style: "none", col: "#ffffff", col2: "#fe2c55", w: 8, size: 100, r: 8, bg: "#000000", op: 1 };
+  if (!S.fr) S.fr = JSON.parse(JSON.stringify(FR0));
   if (!S.texts) S.texts = []; if (!S.midPos) S.midPos = [540, 640]; if (!S.cardPos) S.cardPos = [[60, 70], [60, 860]];
   function save() { try { localStorage.setItem("vs-set", JSON.stringify(S)); } catch (e) { try { var c = JSON.parse(JSON.stringify(S)); c.t.forEach(function (t) { t.pic = ""; }); localStorage.setItem("vs-set", JSON.stringify(c)); } catch (e2) {} } }
   var pics = [null, null], bgVid = null, bgImg = null, busy = false;
@@ -251,8 +267,20 @@ a { color: var(--ok); }
     [0, 1].forEach(function (i) { ["a", "b", "c"].forEach(function (k, j) { var el = $("#c" + i + k); el.value = S.d.c[i][j]; el.oninput = function () { S.d.c[i][j] = el.value; save(); }; }); });
   }
   $("#swap").onclick = function () { S.t.reverse(); var b = S.t[0].btn; S.t[0].btn = S.t[1].btn; S.t[1].btn = b; var p = S.t[0].plus; S.t[0].plus = S.t[1].plus; S.t[1].plus = p; save(); fill(); };
-  $("#reset").onclick = function () { if (!confirm("Remettre les réglages de départ ?")) return; S = JSON.parse(JSON.stringify(DEF)); save(); fill(); };
+  $("#reset").onclick = function () { if (!confirm("Remettre les réglages de départ ?")) return; S = JSON.parse(JSON.stringify(DEF)); S.fr = JSON.parse(JSON.stringify(FR0)); save(); fill(); frForm(); };
   $("#mid").addEventListener("dblclick", function () { S.midPos = [540, 640]; save(); });
+  function frForm() {
+    var F = S.fr;
+    $("#frHide").checked = !!F.hide; $("#frOpts").hidden = !!F.hide;
+    $("#frStyle").value = F.style; $("#frCol").value = F.col; $("#frCol2").value = F.col2; $("#frW").value = F.w; $("#frS").value = F.size; $("#frR").value = F.r; $("#frBg").value = F.bg; $("#frOp").value = String(F.op);
+    $("#frWv").textContent = F.w + " px"; $("#frSv").textContent = F.size + " %"; $("#frRv").textContent = F.r + " px";
+    $("#frCols").hidden = F.style === "none" || F.style === "club" || F.style === "anime"; $("#frCol2L").hidden = F.style !== "degrade";
+  }
+  [["#frHide", "hide", "checked"], ["#frStyle", "style"], ["#frCol", "col"], ["#frCol2", "col2"], ["#frW", "w", "num"], ["#frS", "size", "num"], ["#frR", "r", "num"], ["#frBg", "bg"], ["#frOp", "op", "num"]].forEach(function (b) {
+    var el = $(b[0]); el[el.type === "checkbox" || el.tagName === "SELECT" ? "onchange" : "oninput"] = function () { S.fr[b[1]] = b[2] === "checked" ? el.checked : b[2] === "num" ? +el.value : el.value; save(); frForm(); };
+  });
+  $("#frReset").onclick = function () { S.fr = JSON.parse(JSON.stringify(FR0)); save(); frForm(); };
+  frForm();
   $("#resetPos").onclick = function () { S.cardPos = [[60, 70], [60, 860]]; S.midPos = [540, 640]; save(); msg("Cadres et VS remis à leur place."); };
   var TXT_STYLES = [["outline", "Contour noir"], ["inverse", "Noir, contour blanc"], ["shadow", "Ombre"], ["band", "Bandeau"]];
   function txtForm() {
@@ -306,9 +334,24 @@ a { color: var(--ok); }
   function rr(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
   function cover(g, src, sw, sh) { var r = Math.max(W / sw, H / sh); g.drawImage(src, (W - sw * r) / 2, (H - sh * r) / 2, sw * r, sh * r); }
   function fitText(g, txt, font, size, max) { do { g.font = font.replace("{s}", size); size -= 2; } while (g.measureText(txt).width > max && size > 20); }
+  function hexRgba(h, a) { var n = parseInt(String(h).slice(1), 16); return "rgba(" + (n >> 16) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")"; }
+  function frame(g, x, y, w, h, i) { // contour du cadre selon les réglages
+    var F = S.fr || FR0, st = F.style; if (st === "none") return;
+    var lw = +F.w || 8, r = Math.max(0, +F.r || 0), col = F.col;
+    g.save(); g.lineWidth = lw; g.lineJoin = "round";
+    rr(g, x - lw / 2, y - lw / 2, w + lw, h + lw, r + lw / 2);
+    if (st === "degrade") { var gr = g.createLinearGradient(x, y, x + w, y + h); gr.addColorStop(0, F.col); gr.addColorStop(1, F.col2); col = gr; }
+    else if (st === "club") col = teamColor(i);
+    else if (st === "anime") { var tt = performance.now() / 1000, gr2 = g.createLinearGradient(x, y, x + w, y + h); for (var k = 0; k <= 6; k++) gr2.addColorStop(k / 6, "hsl(" + Math.round((k * 60 + tt * 120) % 360) + ",95%,60%)"); col = gr2; }
+    if (st === "neon" || st === "anime") { g.shadowColor = st === "neon" ? F.col : "#ffffff"; g.shadowBlur = 34; g.strokeStyle = col; g.stroke(); g.shadowBlur = 14; }
+    g.strokeStyle = col; g.stroke();
+    if (st === "neon") { g.shadowBlur = 0; g.lineWidth = Math.max(2, lw / 3); g.strokeStyle = "rgba(255,255,255,.85)"; g.stroke(); }
+    g.restore();
+  }
   function card(g, x, y, t) {
-    var w = 960, h = t.btn ? 452 : 340;
-    g.save(); g.shadowColor = "rgba(0,0,0,.35)"; g.shadowBlur = 30; g.fillStyle = "#000"; rr(g, x, y, w, h, 8); g.fill(); g.restore();
+    var w = 960, h = t.btn ? 452 : 340, F = S.fr || {};
+    g.save(); g.shadowColor = "rgba(0,0,0,.35)"; g.shadowBlur = 30; g.fillStyle = hexRgba(F.bg || "#000000", F.op == null ? 1 : +F.op); rr(g, x, y, w, h, Math.max(0, +F.r || 0)); g.fill(); g.restore();
+    frame(g, x, y, w, h, S.t.indexOf(t));
     var name = (t.name || "") + (t.emoji ? " " + t.emoji : "");
     g.fillStyle = "#fff"; g.textBaseline = "alphabetic"; g.textAlign = "left";
     fitText(g, name, "800 {s}px Outfit, Figtree, sans-serif", 78, 640); g.fillText(name, x + 44, y + 108);
@@ -940,8 +983,9 @@ a { color: var(--ok); }
     if (!S.intro) et = 99;
     var now = t == null ? performance.now() / 1000 : t;
     var o0 = (1 - easeOut((et - .1) / .55)) * -1150, o1 = (1 - easeOut((et - .3) / .55)) * 1150;
-    if (o0 > -1149) { g.save(); g.translate(o0, 0); card(g, S.cardPos[0][0], S.cardPos[0][1], S.t[0]); g.restore(); }
-    if (o1 < 1149) { g.save(); g.translate(o1, 0); card(g, S.cardPos[1][0], S.cardPos[1][1], S.t[1]); g.restore(); }
+    var ks = (S.fr && +S.fr.size || 100) / 100, hideC = S.fr && S.fr.hide;
+    if (!hideC && o0 > -1149) { g.save(); g.translate(o0 + S.cardPos[0][0], S.cardPos[0][1]); g.scale(ks, ks); card(g, 0, 0, S.t[0]); g.restore(); }
+    if (!hideC && o1 < 1149) { g.save(); g.translate(o1 + S.cardPos[1][0], S.cardPos[1][1]); g.scale(ks, ks); card(g, 0, 0, S.t[1]); g.restore(); }
     var mid = S.mid || ""; if (mid && et > .75) {
       var mx = S.midPos[0], my = S.midPos[1], sc = et < 1.15 ? 2.6 - 1.6 * easeBack((et - .75) / .4) : 1;
       vsFx(g, now, mx, my);
@@ -964,13 +1008,13 @@ a { color: var(--ok); }
   // déplacer un texte ou le « VS » avec le doigt
   function toCanvas(e) { var r = view.getBoundingClientRect(); return [(e.clientX - r.left) * W / r.width, (e.clientY - r.top) * H / r.height]; }
   function midBox() { var g = vg; fitText(g, S.mid || " ", "900 {s}px Outfit, Figtree, sans-serif", 270, 920); var w = g.measureText(S.mid || " ").width, h = parseInt(g.font.match(/(\d+)px/)[1], 10); return { x: S.midPos[0] - w / 2 - 20, y: S.midPos[1] - h / 2 - 10, w: w + 40, h: h + 20 }; }
-  function cardBox(i) { return { x: S.cardPos[i][0], y: S.cardPos[i][1], w: 960, h: S.t[i].btn ? 452 : 340 }; }
+  function cardBox(i) { var k = (S.fr && +S.fr.size || 100) / 100; return { x: S.cardPos[i][0], y: S.cardPos[i][1], w: 960 * k, h: (S.t[i].btn ? 452 : 340) * k }; }
   function inside(b, p) { return p[0] >= b.x && p[0] <= b.x + b.w && p[1] >= b.y && p[1] <= b.y + b.h; }
   view.addEventListener("pointerdown", function (e) {
     if (busy) return; var p = toCanvas(e), hit = null, i;
     for (i = S.texts.length - 1; i >= 0 && !hit; i--) { var t = S.texts[i]; if (t.s && inside(txtBox(vg, t), p)) hit = { o: t, keyX: "x", keyY: "y", box: (function (tt) { return function () { return txtBox(vg, tt); }; })(t) }; }
     if (!hit && S.mid && inside(midBox(), p)) hit = { o: S.midPos, keyX: 0, keyY: 1, box: midBox };
-    for (i = 1; i >= 0 && !hit; i--) { var cb = cardBox(i); if (inside(cb, p)) hit = { o: S.cardPos[i], keyX: 0, keyY: 1, box: (function (j) { return function () { return cardBox(j); }; })(i) }; }
+    for (i = 1; i >= 0 && !hit && !(S.fr && S.fr.hide); i--) { var cb = cardBox(i); if (inside(cb, p)) hit = { o: S.cardPos[i], keyX: 0, keyY: 1, box: (function (j) { return function () { return cardBox(j); }; })(i) }; }
     if (!hit) return;
     drag = hit; drag.dx = p[0] - hit.o[hit.keyX]; drag.dy = p[1] - hit.o[hit.keyY];
     view.setPointerCapture(e.pointerId); view.style.cursor = "grabbing"; e.preventDefault();
