@@ -53,8 +53,8 @@ button:disabled { opacity: .5; }
 
     <div class="box">
       <h2>Version</h2>
-      <div class="row3"><button class="mini" type="button" data-ver="om">💙 Team OM</button><button class="mini" type="button" data-ver="psg">❤️ Team PSG</button><button class="mini" type="button" data-ver="neutre">⚖️ Neutre</button></div>
-      <p class="note">Change le titre et la phrase de fin selon ton compte. Tu peux ensuite tout modifier.</p>
+      <div class="row3"><button class="mini" type="button" data-ver="a" id="verA">💪 Team A</button><button class="mini" type="button" data-ver="b" id="verB">💪 Team B</button><button class="mini" type="button" data-ver="neutre">⚖️ Neutre</button></div>
+      <p class="note">Change la phrase de fin selon ton compte (avec le slogan du club). Tu peux ensuite tout modifier.</p>
       <label>Titre<input type="text" id="title" maxlength="28"></label>
       <label>Sous-titre<input type="text" id="subt" maxlength="34"></label>
       <label>Phrase de fin<textarea id="outro" maxlength="90"></textarea></label>
@@ -69,8 +69,8 @@ button:disabled { opacity: .5; }
 
     <div class="box">
       <h2>Les chiffres</h2>
-      <button class="mini" type="button" id="preset">⚽ Préremplir OM contre PSG</button>
-      <p class="note" id="presetNote">Chiffres à la fin de la saison 2024-2025 : vérifie-les et mets-les à jour avant de poster.</p>
+      <label>Modèle prêt à l'emploi<select id="tpl"></select></label>
+      <p class="note" id="tplNote">⚠️ Chiffres à la fin de la saison 2024-2025 : vérifie-les et mets-les à jour avant de poster.</p>
       <div id="stats" style="display:grid;gap:10px"></div>
       <button class="mini" type="button" id="addStat">＋ Ajouter un chiffre (8 au maximum)</button>
       <p class="note">« Le plus petit gagne » : pour un chiffre où le plus bas est le meilleur (année de création, défaites…).</p>
@@ -82,9 +82,19 @@ button:disabled { opacity: .5; }
         <label>Musique<select id="music"><option value="beat">Beat</option><option value="none">Sans musique</option></select></label>
         <label>Qualité<select id="q"><option value="720">720p</option><option value="1080">1080p</option></select></label>
       </div>
+      <label class="chk"><input type="checkbox" id="fx"> 💥 Effets : flash et confettis sur chaque gagnant, tremblements, ralenti sur le dernier chiffre</label>
+      <label class="chk"><input type="checkbox" id="suspense"> ❓ Fin avec suspense pour cette vidéo : le dernier chiffre reste caché (« partie 1 »)</label>
+      <label id="sOutroL">Phrase de fin du suspense<textarea id="sOutro" maxlength="90"></textarea></label>
       <button class="main" type="button" id="dlVideo">🎬 Télécharger la vidéo</button>
       <button type="button" id="dlImg">📷 Image finale</button>
       <p class="note">La vidéo se crée en temps réel (environ 25 secondes) : garde la page ouverte.</p>
+    </div>
+
+    <div class="box">
+      <h2>📋 Légende TikTok</h2>
+      <textarea id="cap" style="min-height:110px"></textarea>
+      <div class="row2"><button class="mini" type="button" id="capNew">🎲 Autre idée</button><button class="mini main" type="button" id="capCopy">📋 Copier la légende</button></div>
+      <p class="note">Elle s'écrit toute seule avec les deux équipes et les bons hashtags. Tu peux la modifier avant de la copier.</p>
     </div>
   </div>
 
@@ -105,18 +115,41 @@ button:disabled { opacity: .5; }
   "use strict";
   var $ = function (s) { return document.querySelector(s); };
   var W = 1080, H = 1920;
-  var PRESET = {
-    teams: [{ name: "OM", full: "Olympique de Marseille", c1: "#2faee0", c2: "#ffffff" }, { name: "PSG", full: "Paris Saint-Germain", c1: "#004170", c2: "#da291c" }],
-    stats: [["Année de création", "1899", "1970", true], ["Titres de champion de France", "9", "13", false], ["Coupes de France", "10", "16", false], ["Ligues des champions", "1", "1", false], ["Coupes de la Ligue", "3", "9", false], ["Places au stade", "67394", "47929", false]]
+  // Modèles prêts à l'emploi (chiffres à la fin de la saison 2024-2025 : à vérifier avant de poster).
+  function T(name, full, c1, c2) { return { name: name, full: full, c1: c1, c2: c2 }; }
+  var PRESETS = {
+    classique: { label: "⚽ OM contre PSG (Le Classique)", title: "LE CLASSIQUE", tag: "#leclassique", teams: [T("OM", "Olympique de Marseille", "#2faee0", "#ffffff"), T("PSG", "Paris Saint-Germain", "#004170", "#da291c")],
+      stats: [["Année de création", "1899", "1970", true], ["Titres de champion de France", "9", "13", false], ["Coupes de France", "10", "16", false], ["Ligues des champions", "1", "1", false], ["Coupes de la Ligue", "3", "9", false], ["Places au stade", "67394", "47929", false]] },
+    clasico: { label: "🇪🇸 Real Madrid contre Barça (El Clásico)", title: "EL CLÁSICO", tag: "#elclasico", teams: [T("Real Madrid", "Real Madrid", "#ffffff", "#febe10"), T("Barça", "FC Barcelone", "#a50044", "#004d98")],
+      stats: [["Année de création", "1902", "1899", true], ["Championnats d'Espagne", "36", "28", false], ["Ligues des champions", "15", "5", false], ["Coupes du Roi", "20", "32", false], ["Supercoupes d'Espagne", "13", "15", false]] },
+    goat: { label: "🐐 Messi contre Ronaldo", title: "MESSI VS RONALDO", tag: "#goat", teams: [T("Messi", "Lionel Messi", "#75aadb", "#ffffff"), T("Ronaldo", "Cristiano Ronaldo", "#da291c", "#046a38")],
+      stats: [["Ballons d'Or", "8", "5", false], ["Ligues des champions", "4", "5", false], ["Coupes du monde", "1", "0", false], ["Copa América / Euro gagnés", "2", "1", false], ["Souliers d'or européens", "6", "4", false]] },
+    next: { label: "⚡ Mbappé contre Haaland", title: "MBAPPÉ VS HAALAND", tag: "#mbappevshaaland", teams: [T("Mbappé", "Kylian Mbappé", "#002395", "#ffffff"), T("Haaland", "Erling Haaland", "#6cabdd", "#ba0c2f")],
+      stats: [["Coupes du monde", "1", "0", false], ["Finales de Coupe du monde jouées", "2", "0", false], ["Buts en finale de Coupe du monde", "4", "0", false], ["Ligues des champions", "0", "1", false], ["Souliers d'or européens", "1", "1", false]] },
+    northwest: { label: "🏴 Liverpool contre Man United", title: "NORTH WEST DERBY", tag: "#northwestderby", teams: [T("Liverpool", "Liverpool FC", "#c8102e", "#f6eb61"), T("Man United", "Manchester United", "#da291c", "#fbe122")],
+      stats: [["Année de création", "1892", "1878", true], ["Championnats d'Angleterre", "20", "20", false], ["Ligues des champions", "6", "3", false], ["FA Cups", "8", "13", false], ["Coupes de la Ligue", "10", "6", false], ["Coupes UEFA / Ligue Europa", "3", "1", false]] },
+    klassiker: { label: "🇩🇪 Bayern contre Dortmund (Der Klassiker)", title: "DER KLASSIKER", tag: "#derklassiker", teams: [T("Bayern", "Bayern Munich", "#dc052d", "#0066b2"), T("Dortmund", "Borussia Dortmund", "#fde100", "#000000")],
+      stats: [["Année de création", "1900", "1909", true], ["Championnats d'Allemagne", "34", "8", false], ["Ligues des champions", "6", "1", false], ["Coupes d'Allemagne", "20", "5", false]] },
+    italia: { label: "🇮🇹 Juventus contre Inter (Derby d'Italia)", title: "DERBY D'ITALIA", tag: "#derbyditalia", teams: [T("Juventus", "Juventus", "#ffffff", "#000000"), T("Inter", "Inter Milan", "#0068a8", "#000000")],
+      stats: [["Année de création", "1897", "1908", true], ["Championnats d'Italie", "36", "20", false], ["Ligues des champions", "2", "3", false], ["Coupes d'Italie", "15", "9", false]] },
+    northlondon: { label: "🏴 Arsenal contre Tottenham", title: "NORTH LONDON DERBY", tag: "#northlondonderby", teams: [T("Arsenal", "Arsenal", "#ef0107", "#ffffff"), T("Tottenham", "Tottenham Hotspur", "#ffffff", "#132257")],
+      stats: [["Année de création", "1886", "1882", true], ["Championnats d'Angleterre", "13", "2", false], ["FA Cups", "14", "8", false], ["Coupes de la Ligue", "2", "4", false], ["Coupes UEFA / Ligue Europa", "0", "3", false]] },
+    pays: { label: "🌍 France contre Argentine", title: "FRANCE VS ARGENTINE", tag: "#franceargentine", teams: [T("France", "Équipe de France", "#002395", "#ffffff"), T("Argentine", "Argentine", "#75aadb", "#ffffff")],
+      stats: [["Coupes du monde", "2", "3", false], ["Finales de Coupe du monde", "4", "6", false], ["Euro / Copa América gagnés", "2", "16", false], ["Ballons d'Or des joueurs du pays", "8", "8", false]] },
+    rhone: { label: "🦁 Lyon contre Saint-Étienne (Derby)", title: "LE DERBY", tag: "#derbyolasse", teams: [T("OL", "Olympique lyonnais", "#ffffff", "#1c3e8c"), T("ASSE", "AS Saint-Étienne", "#00843d", "#ffffff")],
+      stats: [["Année de création", "1950", "1919", true], ["Titres de champion de France", "7", "10", false], ["Coupes de France", "5", "6", false], ["Coupes de la Ligue", "1", "1", false]] },
+    vide: { label: "✏️ Vide : mes propres chiffres", title: "LE DUEL", tag: "", teams: [T("Équipe A", "Équipe A", "#1e6fd9", "#ffffff"), T("Équipe B", "Équipe B", "#d0021b", "#ffffff")], stats: [["", "", "", false], ["", "", "", false], ["", "", "", false]] }
   };
-  var VER = {
-    om: { title: "LE CLASSIQUE", subt: "EN CHIFFRES", outro: "Les chiffres ne font pas tout… 💙 Droit au but ! Commente OM 👇" },
-    psg: { title: "LE CLASSIQUE", subt: "EN CHIFFRES", outro: "Les chiffres parlent d'eux-mêmes ❤️💙 Ici c'est Paris ! Commente PSG 👇" },
-    neutre: { title: "LE CLASSIQUE", subt: "EN CHIFFRES", outro: "Alors, c'est qui le plus grand club de France ? Commente 👇" }
-  };
+  var SLOGAN = { "om": "Droit au but !", "psg": "Ici c'est Paris !", "real madrid": "¡Hala Madrid !", "barca": "Visca el Barça !", "liverpool": "You'll Never Walk Alone !", "man united": "Glory Glory Man United !", "bayern": "Mia san mia !", "dortmund": "Echte Liebe !", "juventus": "Fino alla fine !", "inter": "Forza Inter !", "arsenal": "Come on you Gunners !", "tottenham": "Come on you Spurs !", "france": "Allez les Bleus !", "argentine": "Vamos Argentina !", "ol": "Allez l'OL !", "asse": "Allez les Verts !", "messi": "Le GOAT, c'est lui !", "ronaldo": "SIUUU !", "mbappe": "Allez Kylian !", "haaland": "Le cyborg ne s'arrête jamais !" };
+  var PRESET = PRESETS.classique;
+  function plainK(x) { return String(x || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim(); }
+  function neutralOutro(a, b) { return "Alors, qui est le meilleur : " + a + " ou " + b + " ? Commente 👇"; }
+  var VER = { neutre: { title: "LE CLASSIQUE", subt: "EN CHIFFRES", outro: neutralOutro("OM", "PSG") } };
   var S;
   try { S = JSON.parse(localStorage.getItem("duel-set") || "null"); } catch (e) { S = null; }
   if (!S) S = { teams: JSON.parse(JSON.stringify(PRESET.teams)), stats: JSON.parse(JSON.stringify(PRESET.stats)), title: VER.neutre.title, subt: VER.neutre.subt, outro: VER.neutre.outro, music: "beat", q: "720" };
+  if (!S.tpl) S.tpl = "classique"; if (S.fx == null) S.fx = true; if (S.suspense == null) S.suspense = false;
+  if (!S.sOutro) S.sOutro = "Le dernier chiffre ? Réponse dans la partie 2 ! Devinez en commentaire 👇";
   function save() { try { localStorage.setItem("duel-set", JSON.stringify(S)); } catch (e) {} }
   function esc(x) { return String(x).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]; }); }
 
@@ -130,7 +163,7 @@ button:disabled { opacity: .5; }
     var dark = lum(c1) > .6 && lum(c2) > .6;
     g.fillStyle = dark ? "#1b1b1f" : "rgba(255,255,255,.94)"; g.beginPath(); g.moveTo(92, 78); g.lineTo(228, 78); g.lineTo(228, 168); g.quadraticCurveTo(228, 228, 160, 262); g.quadraticCurveTo(92, 228, 92, 168); g.closePath(); g.fill();
     var txt = lum(c1) > .85 ? c2 : c1; if (lum(txt) > .8) txt = "#1b1b1f"; if (dark) txt = "#fff";
-    g.fillStyle = txt; g.textAlign = "center"; g.textBaseline = "middle"; g.font = "900 " + (t.name.length > 3 ? 46 : 60) + "px Outfit, sans-serif"; g.fillText(t.name.slice(0, 5), 160, 160);
+    g.fillStyle = txt; g.textAlign = "center"; g.textBaseline = "middle"; var ab = t.name.length <= 4 ? t.name : plainK(t.name).replace(/[^a-z]/g, "").slice(0, 3).toUpperCase(); g.font = "900 " + (ab.length > 3 ? 46 : 60) + "px Outfit, sans-serif"; g.fillText(ab, 160, 160);
     g.lineWidth = 14; g.strokeStyle = lum(c2) > .9 && lum(c1) > .9 ? "#1b1b1f" : c2; g.beginPath(); g.arc(160, 160, 153, 0, Math.PI * 2); g.stroke();
     return c;
   }
@@ -153,7 +186,7 @@ button:disabled { opacity: .5; }
       el.innerHTML = "<b>" + (i ? "Club de droite" : "Club de gauche") + "</b><div class=\"row2\"><label>Nom court<input type=\"text\" maxlength=\"10\" data-k=\"name\" value=\"" + esc(t.name) + "\"></label><label>Nom complet<input type=\"text\" maxlength=\"30\" data-k=\"full\" value=\"" + esc(t.full) + "\"></label></div>" +
         "<div class=\"row3\"><label>Couleur 1<input type=\"color\" data-k=\"c1\" value=\"" + t.c1 + "\"></label><label>Couleur 2<input type=\"color\" data-k=\"c2\" value=\"" + t.c2 + "\"></label><label>Logo<span class=\"btn\" style=\"display:grid;place-items:center;min-height:42px\">" + (has ? "✓ Changer" : "🛡️ Ajouter") + "<input type=\"file\" accept=\"image/*\" hidden data-logo></span></label></div>" +
         (has ? "<button class=\"mini\" type=\"button\" data-rmlogo>Retirer le logo</button>" : "");
-      el.querySelectorAll("[data-k]").forEach(function (inp) { inp.oninput = function () { t[inp.getAttribute("data-k")] = inp.value; save(); restart(); }; });
+      el.querySelectorAll("[data-k]").forEach(function (inp) { inp.oninput = function () { t[inp.getAttribute("data-k")] = inp.value; save(); restart(); $("#verA").textContent = "💪 Team " + S.teams[0].name; $("#verB").textContent = "💪 Team " + S.teams[1].name; makeCap(); }; });
       el.querySelector("[data-logo]").onchange = function () { if (this.files && this.files[0]) storeLogo(i, this.files[0]); };
       var rm = el.querySelector("[data-rmlogo]"); if (rm) rm.onclick = function () { try { localStorage.removeItem("duel-logo-" + i); } catch (e) {} logoImg[i] = null; teamsForm(); };
     });
@@ -173,16 +206,37 @@ button:disabled { opacity: .5; }
     $("#title").oninput = function () { S.title = this.value; save(); };
     $("#subt").oninput = function () { S.subt = this.value; save(); };
     $("#outro").oninput = function () { S.outro = this.value; save(); };
+    $("#fx").checked = !!S.fx; $("#fx").onchange = function () { S.fx = this.checked; save(); restart(); };
+    $("#suspense").checked = !!S.suspense; $("#suspense").onchange = function () { S.suspense = this.checked; save(); $("#sOutroL").hidden = !S.suspense; restart(); makeCap(); };
+    $("#sOutroL").hidden = !S.suspense; $("#sOutro").value = S.sOutro; $("#sOutro").oninput = function () { S.sOutro = this.value; save(); };
+    $("#verA").textContent = "💪 Team " + S.teams[0].name; $("#verB").textContent = "💪 Team " + S.teams[1].name;
     $("#music").value = S.music; $("#music").onchange = function () { S.music = this.value; save(); };
     $("#q").value = S.q; $("#q").onchange = function () { S.q = this.value; save(); };
   }
-  document.querySelectorAll("[data-ver]").forEach(function (b) { b.onclick = function () { var v = VER[b.getAttribute("data-ver")]; S.title = v.title; S.subt = v.subt; S.outro = v.outro; save(); textsForm(); restart(); }; });
+  function finalScore() { var a = 0, b = 0; S.stats.forEach(function (r) { if (!r[0]) return; var w = winner(r); if (w === 0) a++; else if (w === 1) b++; }); return [a, b]; }
+  document.querySelectorAll("[data-ver]").forEach(function (b) { b.onclick = function () {
+    var v = b.getAttribute("data-ver"), A = S.teams[0].name, B = S.teams[1].name;
+    if (v === "neutre") S.outro = neutralOutro(A, B);
+    else {
+      var me = v === "a" ? 0 : 1, nm = S.teams[me].name, sc = finalScore(), ahead = sc[me] > sc[1 - me], slg = SLOGAN[plainK(nm)] || "Team " + nm + " pour toujours !";
+      S.outro = (ahead ? "Les chiffres parlent d'eux-mêmes 🔥 " : sc[0] === sc[1] ? "Égalité dans les chiffres, mais dans le cœur… " : "Les chiffres ne font pas tout… ") + slg + " Commente " + nm + " 👇";
+    }
+    save(); textsForm(); restart(); makeCap();
+  }; });
+  $("#tpl").innerHTML = Object.keys(PRESETS).map(function (k) { return "<option value=\"" + k + "\">" + PRESETS[k].label + "</option>"; }).join("");
+  $("#tpl").value = S.tpl; $("#tplNote").hidden = S.tpl === "vide";
+  $("#tpl").onchange = function () {
+    var P = PRESETS[this.value]; S.tpl = this.value;
+    S.teams = JSON.parse(JSON.stringify(P.teams)); S.stats = JSON.parse(JSON.stringify(P.stats)); S.title = P.title; S.subt = "EN CHIFFRES"; S.outro = neutralOutro(P.teams[0].name, P.teams[1].name);
+    try { localStorage.removeItem("duel-logo-0"); localStorage.removeItem("duel-logo-1"); } catch (e) {} logoImg = [null, null];
+    $("#tplNote").hidden = this.value === "vide";
+    save(); teamsForm(); statsForm(); textsForm(); restart(); makeCap();
+  };
   $("#addStat").onclick = function () { if (S.stats.length < 8) { S.stats.push(["", "", "", false]); save(); statsForm(); } };
-  $("#preset").onclick = function () { S.teams = JSON.parse(JSON.stringify(PRESET.teams)); S.stats = JSON.parse(JSON.stringify(PRESET.stats)); save(); teamsForm(); statsForm(); restart(); };
   $("#swap").onclick = function () {
     S.teams.reverse(); S.stats.forEach(function (r) { var x = r[1]; r[1] = r[2]; r[2] = x; });
     var a = "", b = ""; try { a = localStorage.getItem("duel-logo-0") || ""; b = localStorage.getItem("duel-logo-1") || ""; if (b) localStorage.setItem("duel-logo-0", b); else localStorage.removeItem("duel-logo-0"); if (a) localStorage.setItem("duel-logo-1", a); else localStorage.removeItem("duel-logo-1"); } catch (e) {}
-    loadLogo(0); loadLogo(1); save(); setTimeout(function () { teamsForm(); statsForm(); restart(); }, 80);
+    loadLogo(0); loadLogo(1); save(); setTimeout(function () { teamsForm(); statsForm(); textsForm(); restart(); makeCap(); }, 80);
   };
 
   /* ---------- animation ---------- */
@@ -190,14 +244,33 @@ button:disabled { opacity: .5; }
   function fmtN(n, ref) { var dec = /[.,]/.test(String(ref)) ? 1 : 0; return n.toLocaleString("fr-FR", { minimumFractionDigits: dec, maximumFractionDigits: dec }); }
   function ease(x) { x = Math.max(0, Math.min(1, x)); return 1 - Math.pow(1 - x, 3); }
   function back(x) { x = Math.max(0, Math.min(1, x)); var c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); }
-  var INTRO = 1.6, ROW = 2.3, OUT = 4;
-  function timeline() { var n = S.stats.filter(function (r) { return r[0]; }).length; return { n: n, end: INTRO + n * ROW, total: INTRO + n * ROW + OUT }; }
+  var INTRO = 1.6, ROW = 2.3, OUT = 4, SLOW = 1.5;
+  function slowLast(k, n) { return S.fx && n > 1 && k === n - 1; }
+  function timeline() {
+    var n = S.stats.filter(function (r) { return r[0]; }).length, st = [], t = INTRO;
+    for (var k = 0; k < n; k++) { st.push(t); t += ROW + (slowLast(k, n) ? SLOW : 0); }
+    return { n: n, st: st, end: t, total: t + OUT };
+  }
+  function rowT(k, n) { return slowLast(k, n) ? { cnt: 2.4, win: 3.0 } : { cnt: 1.05, win: 1.4 }; }
+  function hiddenRow(k, n) { return S.suspense && k === n - 1; }
+  function sr(x) { var v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); }
+  function confetti(g, ox, oy, dt, cols, seed, count, life) {
+    if (dt < 0 || dt > life) return;
+    for (var j = 0; j < count; j++) {
+      var a = -Math.PI / 2 + (sr(seed + j * 1.7) - .5) * 2.4, sp = 700 + sr(seed + j * 3.1) * 900, x = ox + Math.cos(a) * sp * dt, y = oy + Math.sin(a) * sp * dt + 1500 * dt * dt;
+      g.save(); g.globalAlpha = Math.max(0, 1 - dt / life); g.translate(x, y); g.rotate(sr(seed + j) * 6 + dt * 9); g.fillStyle = cols[j % cols.length]; g.fillRect(-8, -5, 16, 10); g.restore();
+    }
+  }
   function winner(r) { var a = num(r[1]), b = num(r[2]); if (a == null || b == null || a === b) return -1; return (r[3] ? a < b : a > b) ? 0 : 1; }
   function vivid(c) { return lum(c) > .85 ? "#d8dee8" : c; }
   function fit(g, txt, max, size, font) { g.font = font.replace("#", size); while (g.measureText(txt).width > max && size > 14) { size -= 2; g.font = font.replace("#", size); } return size; }
   function rr(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
   function draw(g, t) {
-    var A = S.teams[0], B = S.teams[1], rows = S.stats.filter(function (r) { return r[0]; }), tl = timeline();
+    var A = S.teams[0], B = S.teams[1], rows = S.stats.filter(function (r) { return r[0]; }), tl = timeline(), n = rows.length;
+    var shk = 0; // tremblement de l'écran à l'arrivée de chaque chiffre et sur chaque gagnant
+    if (S.fx) { rows.forEach(function (r, k) { var p = t - tl.st[k], wt = p - rowT(k, n).win; if (p >= 0 && p < .3) shk = Math.max(shk, 7 * (1 - p / .3)); if (wt >= 0 && wt < .35 && !hiddenRow(k, n) && winner(r) >= 0) shk = Math.max(shk, 12 * (1 - wt / .35)); });
+      var fe = t - tl.end - .3; if (fe >= 0 && fe < .4) shk = Math.max(shk, 16 * (1 - fe / .4)); }
+    g.save(); if (shk) g.translate(Math.sin(t * 90) * shk, Math.cos(t * 77) * shk * .6);
     // fond : deux moitiés aux couleurs des clubs, séparées en diagonale
     g.fillStyle = "#06070c"; g.fillRect(0, 0, W, H);
     g.save(); g.globalAlpha = .8;
@@ -219,20 +292,25 @@ button:disabled { opacity: .5; }
       g.fillStyle = "#fff"; fit(g, x[0].name.toUpperCase(), 330, 54, "700 #px Oswald, Outfit, sans-serif"); g.fillText(x[0].name.toUpperCase(), cx, cy + 160);
     });
     // score des chiffres gagnés
-    var wa = 0, wb = 0; rows.forEach(function (r, k) { if (t >= INTRO + k * ROW + 1.4) { var w = winner(r); if (w === 0) wa++; else if (w === 1) wb++; } });
+    var wa = 0, wb = 0; rows.forEach(function (r, k) { if (!hiddenRow(k, n) && t >= tl.st[k] + rowT(k, n).win) { var w = winner(r); if (w === 0) wa++; else if (w === 1) wb++; } });
+    if (S.suspense) { g.fillStyle = "#d0021b"; rr(g, 445, 236, 190, 46, 23); g.fill(); g.fillStyle = "#fff"; g.font = "700 28px Oswald, Outfit, sans-serif"; g.fillText("PARTIE 1", 540, 260); }
     var vs = ease((t - .9) / .5); g.globalAlpha = vs;
     g.fillStyle = "#fff"; g.font = "700 130px Oswald, Outfit, sans-serif"; g.fillText(wa + "-" + wb, 540, 390);
     g.fillStyle = "#ffd60a"; g.font = "600 30px Oswald, Outfit, sans-serif"; g.fillText("CHIFFRES GAGNÉS", 540, 480); g.globalAlpha = 1;
     // lignes de chiffres
     var top0 = 600, rh = Math.min(165, 1180 / Math.max(1, rows.length));
     rows.forEach(function (r, k) {
-      var st = INTRO + k * ROW, p = (t - st); if (p < 0) return;
-      var y = top0 + k * rh, ap = ease(p / .35), w = winner(r), cnt = ease((p - .25) / 1.05), won = p > 1.4;
+      var st = tl.st[k], p = (t - st); if (p < 0) return;
+      var rt = rowT(k, n), hid = hiddenRow(k, n), slow = slowLast(k, n);
+      var y = top0 + k * rh, ap = ease(p / .35), w = hid ? -1 : winner(r), cx = Math.max(0, Math.min(1, (p - .25) / rt.cnt)), cnt = slow ? cx * cx * (3 - 2 * cx) : ease(cx), won = !hid && p > rt.win;
+      if (hid) cnt = 0;
       g.save(); g.globalAlpha = ap; g.translate((1 - ap) * 80, 0);
       g.fillStyle = "rgba(8,10,18,.72)"; rr(g, 40, y, 1000, rh - 16, 22); g.fill();
-      g.fillStyle = "#c9d2e3"; fit(g, r[0].toUpperCase(), 560, 32, "600 #px Oswald, Outfit, sans-serif"); g.fillText(r[0].toUpperCase(), 540, y + 34);
+      var lab = (hid ? "❓ " : slow && p < rt.win ? "⏳ " : "") + r[0].toUpperCase();
+      g.fillStyle = hid ? "#ffd60a" : "#c9d2e3"; fit(g, lab, 560, 32, "600 #px Oswald, Outfit, sans-serif"); g.fillText(lab, 540, y + 34);
       var a = num(r[1]), b = num(r[2]);
       [[a, r[1], 0, 170], [b, r[2], 1, 910]].forEach(function (v) {
+        if (hid) { g.save(); var pu = 1 + .08 * Math.sin(t * 6 + v[2] * 2); g.translate(v[3], y + (rh - 16) / 2 + 4); g.scale(pu, pu); g.fillStyle = "#ffd60a"; g.font = "700 84px Oswald, Outfit, sans-serif"; g.fillText("?", 0, 0); g.restore(); return; }
         var shown = v[0] == null ? String(v[1] || "–") : fmtN(v[0] * cnt, v[1]), hl = won && w === v[2];
         g.fillStyle = hl ? "#ffd60a" : won && w >= 0 ? "rgba(255,255,255,.55)" : "#fff";
         var fs = fit(g, shown, 290, hl ? 78 : 70, "700 #px Oswald, Outfit, sans-serif");
@@ -247,6 +325,8 @@ button:disabled { opacity: .5; }
       g.fillStyle = "#fff"; g.beginPath(); g.arc(bx + bw * cur, by + 9, 13, 0, Math.PI * 2); g.fill();
       if (won && w >= 0) { g.strokeStyle = "#ffd60a"; g.lineWidth = 5; rr(g, w ? 740 : 40, y, 300, rh - 16, 22); g.stroke(); }
       g.restore();
+      if (S.fx && w >= 0) { var wt = p - rt.win, tc = S.teams[w]; confetti(g, w ? 910 : 170, y + (rh - 16) / 2, wt, [vivid(tc.c1), tc.c2, "#ffd60a"], k * 31 + 7, slow ? 60 : 34, slow ? 2.2 : 1.5);
+        if (wt >= 0 && wt < .35) { g.fillStyle = "rgba(255,255,255," + (.35 * (1 - wt / .35)) + ")"; g.fillRect(-40, -40, W + 80, H + 80); } }
     });
     // fin : verdict + phrase
     var fo = ease((t - tl.end - .3) / .6);
@@ -257,14 +337,16 @@ button:disabled { opacity: .5; }
       g.drawImage(teamLogo(0), -430, -110, 200, 200); g.drawImage(teamLogo(1), 230, -110, 200, 200);
       g.fillStyle = "#fff"; g.font = "700 200px Oswald, Outfit, sans-serif"; g.fillText(wa + " - " + wb, 0, 0);
       g.fillStyle = "#ffd60a"; g.font = "600 46px Oswald, Outfit, sans-serif";
-      g.fillText(wa === wb ? "ÉGALITÉ PARFAITE !" : "AVANTAGE " + (wa > wb ? A.name : B.name).toUpperCase(), 0, 170);
+      g.fillText(S.suspense ? "+ 1 CHIFFRE MYSTÈRE ❓" : wa === wb ? "ÉGALITÉ PARFAITE !" : "AVANTAGE " + (wa > wb ? A.name : B.name).toUpperCase(), 0, 170);
       g.restore();
+      if (S.fx && !S.suspense && wa !== wb) { var wt2 = t - tl.end - .3, wc = S.teams[wa > wb ? 0 : 1]; for (var z = 0; z < 4; z++) confetti(g, 140 + z * 270, 1950, wt2 - z * .12, [vivid(wc.c1), wc.c2, "#ffd60a", "#ffffff"], 500 + z * 40, 40, 2.6); }
       // phrase de fin sur plusieurs lignes
-      var words = String(S.outro || "").split(/\s+/), lines = [], cur2 = ""; g.font = "800 58px Outfit, sans-serif";
+      var words = String((S.suspense ? S.sOutro : S.outro) || "").split(/\s+/), lines = [], cur2 = ""; g.font = "800 58px Outfit, sans-serif";
       words.forEach(function (wd) { var tst = cur2 ? cur2 + " " + wd : wd; if (g.measureText(tst).width > 900 && cur2) { lines.push(cur2); cur2 = wd; } else cur2 = tst; }); if (cur2) lines.push(cur2);
       g.fillStyle = "#fff"; lines.slice(0, 4).forEach(function (l, k) { g.fillText(l, 540, 1100 + k * 76); });
       g.globalAlpha = 1;
     }
+    g.restore();
   }
 
   /* ---------- aperçu ---------- */
@@ -280,7 +362,12 @@ button:disabled { opacity: .5; }
     function tone(t, f, d, v, type) { var o = ac.createOscillator(), g = ac.createGain(); o.type = type || "triangle"; o.frequency.value = f; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.001, t + d); o.connect(g); g.connect(dest); o.start(t); o.stop(t + d + .05); }
     function hit(t) { var o = ac.createOscillator(), g = ac.createGain(); o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(40, t + .4); g.gain.setValueAtTime(.7, t); g.gain.exponentialRampToValueAtTime(.001, t + .5); o.connect(g); g.connect(dest); o.start(t); o.stop(t + .55); }
     whoosh(t0 + .2); hit(t0 + 1);
-    for (var k = 0; k < tl.n; k++) { var st = t0 + INTRO + k * ROW; whoosh(st); for (var c = 0; c < 8; c++) tone(st + .3 + c * .12, 900 + c * 60, .05, .05, "square"); tone(st + 1.4, 1320, .25, .14); tone(st + 1.48, 1760, .3, .1); }
+    for (var k = 0; k < tl.n; k++) {
+      var st = t0 + tl.st[k], rt = rowT(k, tl.n), sl = slowLast(k, tl.n), nt = sl ? 16 : 8, hid = hiddenRow(k, tl.n); whoosh(st);
+      if (!hid) for (var c = 0; c < nt; c++) tone(st + .3 + c * (rt.cnt / nt), 900 + c * (sl ? 45 : 60), .05, .05, "square");
+      if (hid) { tone(st + .5, 220, .9, .18, "sawtooth"); tone(st + .75, 207, 1, .14, "sawtooth"); }
+      else { tone(st + rt.win, 1320, .25, .14); tone(st + rt.win + .08, 1760, .3, .1); if (S.fx) hit(st + rt.win); }
+    }
     hit(t0 + tl.end + .3); tone(t0 + tl.end + .3, 523, .6, .12); tone(t0 + tl.end + .45, 784, .8, .1);
     if (withBeat) { var bpm = 118, sp = 60 / bpm, n = Math.floor(tl.total / sp); for (var b = 0; b < n; b++) { var tt = t0 + b * sp; if (b % 2 === 0) { var o = ac.createOscillator(), g = ac.createGain(); o.frequency.setValueAtTime(110, tt); o.frequency.exponentialRampToValueAtTime(45, tt + .2); g.gain.setValueAtTime(.45, tt); g.gain.exponentialRampToValueAtTime(.001, tt + .25); o.connect(g); g.connect(dest); o.start(tt); o.stop(tt + .3); }
       var hs = ac.createBufferSource(), hf = ac.createBiquadFilter(), hg = ac.createGain(); hs.buffer = noise; hf.type = "highpass"; hf.frequency.value = 7000; hg.gain.setValueAtTime(.06, tt + sp / 2); hg.gain.exponentialRampToValueAtTime(.001, tt + sp / 2 + .05); hs.connect(hf); hf.connect(hg); hg.connect(dest); hs.start(tt + sp / 2); hs.stop(tt + sp / 2 + .06); } }
@@ -339,7 +426,21 @@ button:disabled { opacity: .5; }
     })();
   };
 
-  loadLogo(0); loadLogo(1); teamsForm(); statsForm(); textsForm();
+  /* ---------- légende TikTok ---------- */
+  var TAGS = { "om": "#om #teamom #olympiquedemarseille", "psg": "#psg #teampsg #parissaintgermain", "real madrid": "#realmadrid #halamadrid", "barca": "#fcbarcelona #barca", "messi": "#messi #leomessi", "ronaldo": "#cristianoronaldo #cr7", "mbappe": "#mbappe #kylianmbappe", "haaland": "#haaland", "liverpool": "#liverpool #ynwa", "man united": "#manutd #manchesterunited", "bayern": "#fcbayern #bayernmunich", "dortmund": "#bvb #dortmund", "juventus": "#juventus #juve", "inter": "#inter #intermilan", "arsenal": "#arsenal #gunners", "tottenham": "#tottenham #spurs", "france": "#equipedefrance #allezlesbleus", "argentine": "#argentina #seleccionargentina", "ol": "#ol #olympiquelyonnais", "asse": "#asse #allezlesverts" };
+  var capK = 0;
+  function makeCap() {
+    var A = S.teams[0].name, B = S.teams[1].name, P = PRESETS[S.tpl] || {};
+    var ideas = [A + " ou " + B + " ? Les chiffres ont parlé 📊👇", "Qui est le plus grand : " + A + " ou " + B + " ? 🤔 Réponds en commentaire", A + " contre " + B + " : le duel en chiffres 🔥 T'es team qui ?", "Les chiffres ne mentent pas… ou si ? 👀 " + A + " ou " + B + " ?"];
+    var line = ideas[capK % ideas.length];
+    if (S.suspense) line += "\nDevinez le dernier chiffre en commentaire 👀 Réponse en partie 2 !";
+    function tg(n) { var k = plainK(n); return TAGS[k] || "#" + k.replace(/[^a-z0-9]+/g, ""); }
+    var tags = [tg(A), tg(B), P.tag || "", "#football #foot #duel #fyp #pourtoi"].filter(Boolean).join(" ");
+    $("#cap").value = line + "\n\n" + tags;
+  }
+  $("#capNew").onclick = function () { capK++; makeCap(); };
+  $("#capCopy").onclick = function () { var c = $("#cap"); c.select(); var ok = false; try { if (navigator.clipboard) { navigator.clipboard.writeText(c.value); ok = true; } } catch (e) {} if (!ok) try { document.execCommand("copy"); } catch (e) {} msg("Légende copiée ✅ Colle-la dans TikTok."); };
+  loadLogo(0); loadLogo(1); teamsForm(); statsForm(); textsForm(); makeCap();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(restart);
 })();
 </script>
