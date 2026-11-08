@@ -167,7 +167,11 @@ Page : https://ozentv.github.io/quiz-live/duel.html
 - Deux clubs face à face, chacun avec son nom, ses couleurs et son logo (importé, gardé sur le téléphone ; sinon un écusson aux couleurs du club).
 - Jusqu'à 8 chiffres : chaque ligne arrive avec un whoosh, les nombres défilent, une barre façon tir à la corde penche, et le gagnant de la ligne s'allume en or. L'option « Le plus petit gagne » sert par exemple pour l'année de création. Le score des chiffres gagnés monte en haut.
 - Fin de vidéo : le score final, « Avantage … », et ta phrase de fin.
-- Versions **Team OM**, **Team PSG** ou **Neutre** : elles changent le titre et la phrase de fin, que tu peux modifier. « Préremplir OM contre PSG » remplit 6 chiffres (à la fin de la saison 2024-2025 : vérifie-les avant de poster). « Échanger les côtés » met l'autre club à gauche.
+- **11 modèles prêts à l'emploi** : OM contre PSG, Real contre Barça, Messi contre Ronaldo, Mbappé contre Haaland, Liverpool contre Man United, Bayern contre Dortmund, Juventus contre Inter, Arsenal contre Tottenham, France contre Argentine, Lyon contre Saint-Étienne, ou vide pour tes propres chiffres. Les chiffres sont ceux de la fin de la saison 2024-2025 : vérifie-les avant de poster.
+- Boutons **Team [club de gauche]**, **Team [club de droite]** ou **Neutre** : ils écrivent la phrase de fin avec le slogan du club (« Droit au but ! », « Ici c'est Paris ! », « ¡Hala Madrid ! »…). « Échanger les côtés » met l'autre club à gauche.
+- **💥 Effets** (activés par défaut) : flash et confettis aux couleurs du club gagnant sur chaque chiffre, tremblement de l'écran, ralenti avec suspense sur le dernier chiffre, pluie de confettis à la fin.
+- **❓ Fin avec suspense** (case à cocher pour chaque vidéo) : le dernier chiffre reste caché avec des « ? », le badge « PARTIE 1 » s'affiche, et la vidéo finit sur « + 1 chiffre mystère » avec une phrase de fin à part (« Réponse dans la partie 2 ! »). Décoche la case pour faire la partie 2 avec tout révélé.
+- **📋 Légende TikTok** : écrite toute seule avec les deux équipes et leurs hashtags (#om #psg #leclassique…), « 🎲 Autre idée » et « 📋 Copier la légende ».
 - Vidéo d'environ 20 secondes en 720p ou 1080p, avec beat et effets sonores, plus l'image finale. Encadré « Télécharger » et « Enregistrer / Partager » comme sur le VS.
 
 ## 🆚 Générateur VS (vidéos « Team contre Team »)
