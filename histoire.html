@@ -2867,12 +2867,15 @@ Moi: Si, un peu 😂
   function fmtClock(m) { return String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0"); }
   function batteryAt(t) { var n = 0; clockJumps.forEach(function (c, i) { if (i && c.at <= t) n++; }); return Math.max(4, Math.round(87 - t * .12 - n * 4)); }
   function parse() {
-    var raw = String(S.script || "").split(/\n/), list = [], sp = +S.speed || 1, t = .8 + (S.lock ? LOCK_T : 0);
+    var raw = String(S.script || "").split(/\n/), list = [], sp = +S.speed || 1, t = S.lock ? LOCK_T - .2 : .8;
     var me = { name: "OM", c1: "#2faee0", c2: "#ffffff" }, other = { name: "PSG", emo: "", c1: "#004170", c2: "#da291c" }, first = true, lastMsg = null, start = 21 * 60;
     var m0 = String(S.clock || "21:00").match(/^(\d{1,2}):(\d{2})$/); if (m0) start = (+m0[1]) * 60 + (+m0[2]);
     clockJumps = [{ at: 0, min: start }]; lockNotifs = [];
-    function addOther(from, it, wait, rec) { var a = t + wait * sp; list.push({ k: "typing", from: from, at: t, end: a, rec: rec }); it.at = a; it.who = "other"; it.from = from; list.push(it); lastMsg = it; return a; }
-    function lockN(from, text) { if (S.lock && lockNotifs.length < 3) lockNotifs.push({ from: from, text: text, at: .5 + lockNotifs.length * .75 }); }
+    var lockFrom = null, firstOther = !!S.lock;
+    function addOther(from, it, wait, rec) {
+      if (firstOther) { firstOther = false; it.at = t; it.who = "other"; it.from = from; list.push(it); lastMsg = it; return t; } // déjà annoncé sur l'écran verrouillé : visible dès l'ouverture
+      var a = t + wait * sp; list.push({ k: "typing", from: from, at: t, end: a, rec: rec }); it.at = a; it.who = "other"; it.from = from; list.push(it); lastMsg = it; return a; }
+    function lockN(from) { if (S.lock && !lockFrom) lockFrom = from; }
     raw.forEach(function (l) {
       l = l.trim(); if (!l) return; var m;
       if ((m = l.match(/^@(contact|groupe)\s+(.+)$/i))) { var p = m[2].split("|").map(function (x) { return x.trim(); }), o = { name: p[0] || other.name, emo: p[1] != null ? p[1] : other.emo, c1: p[2] || other.c1, c2: p[3] || other.c2, group: /groupe/i.test(m[1]) || (other.group && !/contact/i.test(m[1])) };
@@ -2920,6 +2923,8 @@ Moi: Si, un peu 😂
         }
       }
     });
+    if (S.lock) { var lf = lockFrom || other.name, grp = (header0 || other).group, who = grp ? (header0 || other).name : lf, pre = grp ? lf + " " : "";
+      lockNotifs = [{ from: who, text: pre + "est en train d'écrire", typing: true, at: .5 }, { from: who, text: pre + (grp ? "a envoyé un message" : "t'a envoyé un message"), at: 2.1 }]; }
     items = list; total = t + 2.5; ME = me; header0 = header0 || other; OTHER0 = other;
     $("#durNote").textContent = "Durée de la vidéo : " + Math.round(total) + " secondes.";
   }
@@ -3153,12 +3158,13 @@ Moi: Si, un peu 😂
     g.fillText(days[d.getDay()] + " " + d.getDate() + " " + months[d.getMonth()], W / 2, 250);
     g.font = "800 230px " + FONT; g.fillText(fmtClock(clockAt(0)), W / 2, 420);
     g.font = "700 30px " + FONT; g.fillText("🔒", W / 2, 120);
-    lockNotifs.forEach(function (n, i) {
-      if (t < n.at) return; var a = Math.min(1, (t - n.at) / .3), yy = 640 + i * 190 + (1 - a) * 40;
+    var cur = null; lockNotifs.forEach(function (n) { if (t >= n.at) cur = n; }); // une seule notification, qui se met à jour
+    [cur].forEach(function (n) {
+      if (!n) return; var a = Math.min(1, (t - n.at) / .3), yy = 640 + (1 - a) * 40;
       g.save(); g.globalAlpha = a; g.fillStyle = "rgba(255,255,255,.88)"; rr(g, 40, yy, W - 80, 170, 34); g.fill();
       g.fillStyle = "#ffd60a"; rr(g, 70, yy + 26, 42, 42, 10); g.fill(); g.font = "900 26px " + FONT; g.fillText("💬", 91, yy + 48);
       g.textAlign = "left"; g.fillStyle = "#6b7280"; g.font = "700 26px " + FONT; g.fillText("MESSAGES", 128, yy + 48); g.textAlign = "right"; g.fillText("maintenant", W - 76, yy + 48); g.textAlign = "left";
-      g.fillStyle = "#111"; g.font = "800 34px " + FONT; g.fillText(n.from, 70, yy + 98); g.font = "500 32px " + FONT; var tx = n.text; while (g.measureText(tx).width > W - 160 && tx.length > 4) tx = tx.slice(0, -2); g.fillText(tx + (tx !== n.text ? "…" : ""), 70, yy + 140);
+      g.fillStyle = "#111"; g.font = "800 34px " + FONT; g.fillText(n.from, 70, yy + 98); g.font = "500 32px " + FONT; var tx = n.typing ? n.text + ".".repeat(1 + Math.floor(t * 3) % 3) : n.text; while (g.measureText(tx).width > W - 160 && tx.length > 4) tx = tx.slice(0, -2); g.fillText(tx + (tx !== n.text ? "…" : ""), 70, yy + 140);
       g.restore(); g.textAlign = "center";
     });
     g.fillStyle = "rgba(255,255,255,.18)"; g.beginPath(); g.arc(150, 1760, 60, 0, Math.PI * 2); g.arc(W - 150, 1760, 60, 0, Math.PI * 2); g.fill();
