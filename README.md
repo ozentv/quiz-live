@@ -2,7 +2,7 @@
 
 Un quiz en plein écran au format vertical 9:16, lu par la voix de ton téléphone. Pensé pour TikTok.
 
-Toutes les pages du studio (Quiz, VS, Bataille des clubs, Duel en chiffres, Histoires) ont le même menu en haut, défini une seule fois dans `nav.js`.
+Toutes les pages du studio (Quiz, VS, Bataille des clubs, Duel en chiffres, Histoires, Packs) ont le même menu en haut, défini une seule fois dans `nav.js`.
 
 Le quiz tient dans un seul fichier, `index.html`, sans rien à installer. Le relais facultatif qui lit le chat TikTok est dans `relay/`.
 
@@ -210,6 +210,16 @@ Page : https://ozentv.github.io/quiz-live/histoire.html
 - 6 emplacements pour tes photos (gardées sur le téléphone), vitesse lente, normale ou rapide, texte normal ou grand.
 - Sons (clavier, envoi, réception, notification) et musique d'ambiance douce, créés par la page.
 - Vidéo en 720p ou 1080p, encadré « Télécharger » et « Partager », et légende TikTok avec hashtags prête à copier.
+
+## 🃏 Packs et album (série « pack opening »)
+Page : https://ozentv.github.io/quiz-live/packs.html
+- **Une vidéo = un épisode** : tes abonnés choisissent le pack en commentaire ; tu tapes le pseudo et le commentaire, la vidéo commence par ce commentaire (comme une réponse TikTok), puis le pack s'ouvre.
+- **500 joueurs des 18 clubs de Ligue 1** (effectifs 2026-2027 relevés sur Wikipédia en novembre 2026), modifiables dans la page après un transfert. Les notes sont calculées par la page (niveau du club, sélection nationale, âge).
+- **5 raretés** : commune, or rare, équipe de la semaine, joueur du mois, héros. **5 packs** : de base (500 🪙), club (1 500), or (2 500), équipe de la semaine (5 000), premium (10 000) ; 5 à 7 cartes, la meilleure en dernier avec le suspense (club, poste, note) puis la carte qui se retourne.
+- **Album** : une page par club (case grise « ? » pour les joueurs manquants) et une page des cartes spéciales. Club complété = 1 pack offert.
+- **Doublons revendus** automatiquement (commune 50, or 200, équipe de la semaine 1 000, joueur du mois 1 500, héros 2 500) + **bonus d'épisode** de 500 🪙. Si tu ne peux plus rien acheter, le pack de base est offert : la série ne s'arrête jamais.
+- La fin de la vidéo fait le **bilan** : nouvelles cartes, doublons, pièces gagnées, solde, album qui se remplit, « Quel pack j'ouvre ensuite ? 👇 ».
+- Une collection **Team OM** et une **Team PSG**, gardées sur le téléphone, avec copie de secours (fichier) ; logos des clubs facultatifs ; légende TikTok prête à copier.
 
 ## 📊 Duel en chiffres (vidéos « Clasico en chiffres »)
 Page : https://ozentv.github.io/quiz-live/duel.html

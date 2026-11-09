@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Packs et album</title>
+<meta name="description" content="Ouvre des packs de cartes de Ligue 1 choisis par tes abonnés, complète l'album et revends les doublons : une vidéo TikTok par épisode.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&family=Figtree:wght@400;500;600;700;800;900&display=swap">
+<style>
+:root { --bg: #0b0d14; --card: #151925; --line: #262c3d; --fg: #f2f4fa; --muted: #9aa3b8; --acc: #f5c542; --ok: #34d399; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.4 Figtree, system-ui, sans-serif; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 16px max(16px, env(safe-area-inset-left)) 40px; display: grid; gap: 18px; }
+@media (min-width: 900px) { .wrap { grid-template-columns: 1fr 420px; align-items: start; } .prev { position: sticky; top: 16px; } }
+@media (max-width: 899px) { .prev { order: -1; } .prev canvas { width: min(62vw, 340px) !important; } }
+h1 { margin: 0; font: 900 26px Outfit, sans-serif; } h1 span { color: var(--acc); }
+.sub, .note { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+.side { display: grid; gap: 14px; min-width: 0; }
+.box { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: grid; gap: 10px; min-width: 0; }
+.box h2 { margin: 0; font: 800 17px Outfit, sans-serif; }
+label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+select, input[type=text], textarea { width: 100%; min-height: 42px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: #0f121b; color: var(--fg); font: 16px Figtree, sans-serif; }
+textarea { min-height: 70px; } textarea#db { min-height: 260px; font: 13px/1.5 ui-monospace, Menlo, Consolas, monospace; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+button, .btn { min-height: 44px; border: 0; border-radius: 12px; padding: 0 14px; font: 700 15px Figtree, sans-serif; cursor: pointer; background: #262c3d; color: var(--fg); }
+button.main { background: var(--acc); color: #1a1300; font-weight: 800; } button.mini { min-height: 34px; font-size: 13px; padding: 0 10px; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible, a:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+.wallet { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.wallet div { background: #0f121b; border: 1px solid var(--line); border-radius: 12px; padding: 8px; text-align: center; }
+.wallet b { display: block; font: 900 22px Outfit, sans-serif; } .wallet span { color: var(--muted); font-size: 12px; }
+.shop { display: grid; gap: 6px; }
+.shop label.pk { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 10px; border: 1px solid var(--line); border-radius: 12px; color: var(--fg); font-size: 14px; cursor: pointer; }
+.shop label.pk:has(input:checked) { border-color: var(--acc); background: #1f1a08; }
+.shop label.pk small { display: block; color: var(--muted); font-size: 12px; } .shop .price { font-weight: 900; white-space: nowrap; }
+.shop input { width: 20px; height: 20px; accent-color: var(--acc); }
+.res { display: grid; gap: 4px; font-size: 14px; } .res .new { color: var(--ok); } .res .dup { color: var(--acc); }
+.tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+.tabs button { flex: none; min-height: 34px; font-size: 13px; padding: 0 10px; } .tabs button[aria-pressed=true] { background: var(--acc); color: #1a1300; }
+.prog { height: 10px; border-radius: 5px; background: #262c3d; overflow: hidden; } .prog i { display: block; height: 100%; background: linear-gradient(90deg, var(--acc), var(--ok)); }
+.album { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 8px; }
+.mc { position: relative; aspect-ratio: 64 / 92; border-radius: 10px 10px 16px 16px; padding: 6px 5px; display: grid; grid-template-rows: auto 1fr auto; text-align: center; font-weight: 800; overflow: hidden; border: 2px solid rgba(255,255,255,.25); }
+.mc .r { font: 900 20px Outfit, sans-serif; line-height: 1; text-align: left; } .mc .p { font-size: 10px; text-align: left; }
+.mc .n { font-size: 10px; line-height: 1.15; word-break: break-word; } .mc .x { position: absolute; right: 4px; top: 4px; font-size: 10px; background: rgba(0,0,0,.55); color: #fff; padding: 1px 5px; border-radius: 8px; }
+.mc.miss { background: #1b2030; color: #59627a; border-style: dashed; border-color: #2b3246; } .mc.miss .q { font: 900 30px Outfit, sans-serif; align-self: center; }
+.mc.commune { background: linear-gradient(135deg, #eef1f5, #b9c2cc 55%, #7d8794); color: #1f2630; }
+.mc.or { background: linear-gradient(135deg, #fff3b0, #e2b93b 55%, #8a6512); color: #2b1d03; }
+.mc.totw { background: linear-gradient(135deg, #3b3b3b, #141414 55%, #000); color: #f5d77a; border-color: #f5d77a; }
+.mc.potm { background: linear-gradient(135deg, #7fd4ff, #1e4fd8 55%, #0a1f6b); color: #fff; border-color: #bfe8ff; }
+.mc.hero { background: linear-gradient(135deg, #d5a6ff, #6d28d9 55%, #22074f); color: #ffe9a8; border-color: #ffe9a8; }
+details summary { cursor: pointer; font-weight: 700; } details > div { display: grid; gap: 8px; margin-top: 10px; }
+.logos { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.logos label { display: grid; grid-template-columns: 40px 1fr; gap: 8px; align-items: center; padding: 6px; border: 1px solid var(--line); border-radius: 10px; color: var(--fg); cursor: pointer; }
+.logos .pv { width: 40px; height: 40px; border-radius: 50%; background: #fff center / contain no-repeat; display: grid; place-items: center; font-size: 10px; font-weight: 900; color: #111; }
+.prev { display: grid; gap: 10px; justify-items: center; }
+.prev canvas { width: min(100%, 400px); aspect-ratio: 9 / 16; border-radius: 18px; background: #000; box-shadow: 0 10px 40px rgba(0,0,0,.5); }
+.bar { width: min(100%, 400px); height: 8px; border-radius: 4px; background: #262c3d; overflow: hidden; } .bar[hidden] { display: none; }
+.bar i { display: block; height: 100%; width: 0; background: var(--acc); }
+.msg { width: min(100%, 400px); min-height: 20px; color: var(--muted); font-size: 14px; text-align: center; }
+.got { width: min(100%, 400px); display: grid; gap: 8px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); text-align: center; }
+.got[hidden] { display: none; } #gotName { word-break: break-all; color: var(--muted); font-size: 14px; }
+.got a.dl { display: grid; place-items: center; min-height: 48px; border-radius: 12px; text-decoration: none; font: 800 16px Figtree, sans-serif; background: var(--acc); color: #1a1300; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="side">
+    <div><h1>🃏 Packs <span>et album</span></h1><p class="sub">Une vidéo = un épisode : tes abonnés choisissent le pack en commentaire, tu l'ouvres, les nouvelles cartes vont dans l'album et les doublons sont revendus pour acheter le pack suivant.</p></div>
+
+    <div class="box">
+      <div class="row2"><label>Ta collection<select id="acc"><option value="om">💙 Team OM</option><option value="psg">❤️💙 Team PSG</option></select></label><label>Épisode<input type="text" id="epi" inputmode="numeric" readonly></label></div>
+      <div class="wallet"><div><b id="wCoins">0</b><span>🪙 pièces</span></div><div><b id="wAlbum">0</b><span>📖 album</span></div><div><b id="wFree">0</b><span>🎁 packs offerts</span></div></div>
+    </div>
+
+    <div class="box">
+      <h2>1. Le commentaire choisi</h2>
+      <div class="row2"><label>Pseudo<input type="text" id="who" placeholder="@pseudo" maxlength="30"></label><label>Club demandé (pack club)<select id="club"></select></label></div>
+      <label>Son commentaire<textarea id="com" maxlength="140" placeholder="Ouvre le pack OM !!"></textarea></label>
+      <p class="note">Il s'affiche au début de la vidéo, comme une réponse à un commentaire. Laisse vide pour ne pas l'afficher.</p>
+    </div>
+
+    <div class="box">
+      <h2>2. Le pack</h2>
+      <div class="shop" id="shop"></div>
+      <button class="main" type="button" id="open">🃏 Ouvrir le pack</button>
+      <div class="res" id="res" role="status"></div>
+    </div>
+
+    <div class="box">
+      <h2>📖 L'album</h2>
+      <div class="prog"><i id="progI"></i></div>
+      <p class="note" id="albumNote"></p>
+      <div class="tabs" id="tabs"></div>
+      <div class="album" id="album"></div>
+    </div>
+
+    <div class="box">
+      <h2>Légende TikTok</h2>
+      <textarea id="cap" rows="4"></textarea>
+      <button type="button" class="mini" id="capCopy">📋 Copier la légende</button>
+    </div>
+
+    <div class="box">
+      <details><summary>🛡️ Logos des clubs (facultatif)</summary><div><div class="logos" id="logos"></div><p class="note">Ils remplacent les écussons dessinés sur les cartes et les packs. Ils restent sur ton téléphone.</p></div></details>
+      <details><summary>💾 Sauvegarde</summary><div>
+        <p class="note">La collection est gardée sur ce téléphone. Fais une copie de secours de temps en temps (ou pour changer de téléphone).</p>
+        <div class="row2"><button type="button" id="exp">⬇️ Copie de secours</button><label class="btn" style="display:grid;place-items:center;color:var(--fg)">⬆️ Restaurer<input type="file" id="imp" accept=".json,application/json" hidden></label></div>
+        <button type="button" id="reset">🗑️ Recommencer cette collection à zéro</button>
+      </div></details>
+      <details><summary>🧑‍🤝‍🧑 Joueurs (500, effectifs 2026-2027)</summary><div>
+        <p class="note">Une ligne par joueur : <code>Nom | Club | Poste | Note</code>. Effectifs relevés sur Wikipédia en novembre 2026 ; les notes sont calculées par la page. Corrige ou ajoute des joueurs après un transfert.</p>
+        <textarea id="db" spellcheck="false"></textarea>
+        <div class="row2"><button type="button" id="dbSave">✅ Enregistrer la liste</button><button type="button" id="dbReset">↩️ Liste d'origine</button></div>
+      </div></details>
+    </div>
+  </div>
+
+  <div class="prev">
+    <canvas id="view" width="1080" height="1920" aria-label="Aperçu de la vidéo"></canvas>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><button class="mini" type="button" id="play">▶ Revoir avec le son</button><button class="mini main" type="button" id="rec">🎬 Télécharger la vidéo</button></div>
+    <div class="bar" id="bar" hidden><i id="barI"></i></div>
+    <div class="msg" id="msg" role="status"></div>
+    <div class="got" id="got" hidden>
+      <span id="gotName"></span>
+      <a class="dl" id="gotDl" href="#" download>⬇️ Télécharger</a>
+      <button id="gotShare" type="button">📤 Enregistrer dans la galerie / Partager</button>
+    </div>
+  </div>
+</div>
+<script type="text/plain" id="dbDefault">
+Alessandro Longoni | PSG | G | 77
+Lucas Chevalier | PSG | G | 90
+Matveï Safonov | PSG | G | 86
+Achraf Hakimi | PSG | DEF | 90
+Lucas Beraldo | PSG | DEF | 86
+Marquinhos | PSG | DEF | 86
+Illya Zabarnyi | PSG | DEF | 88
+Lucas Digne | PSG | DEF | 84
+Lucas Hernandez | PSG | DEF | 86
+Nuno Mendes | PSG | DEF | 91
+David Boly | PSG | DEF | 75
+Willian Pacho | PSG | DEF | 88
+Fabián Ruiz | PSG | MIL | 87
+Maghnes Akliouche | PSG | MIL | 85
+Vitinha | PSG | MIL | 92
+Senny Mayulu | PSG | MIL | 77
+Dro Fernández | PSG | MIL | 78
+Warren Zaïre-Emery | PSG | MIL | 82
+João Neves | PSG | MIL | 86
+Khvicha Kvaratskhelia | PSG | ATT | 92
+Ferran Torres | PSG | ATT | 82
+Ousmane Dembélé | PSG | ATT | 88
+Désiré Doué | PSG | ATT | 87
+Mika Godts | PSG | ATT | 82
+Quentin Ndjantou | PSG | ATT | 75
+Jeffrey de Lange | OM | G | 75
+Jelle Van Neck | OM | G | 79
+Théo Vermot | OM | G | 76
+CJ Egan-Riley | OM | DEF | 78
+Derek Cornelius | OM | DEF | 79
+Bamo Meïté | OM | DEF | 76
+Nayef Aguerd | OM | DEF | 77
+Timothy Weah | OM | DEF | 77
+Ulisses Garcia | OM | DEF | 77
+Emerson Palmieri | OM | DEF | 78
+Alexi Koum | OM | DEF | 72
+Kelyann Bezahaf | OM | DEF | 74
+Tochukwu Nnadi | OM | MIL | 79
+Angel Gomes | OM | MIL | 81
+Himad Abdelli | OM | MIL | 79
+Geoffrey Kondogbia | OM | MIL | 76
+Pierre-Emile Højbjerg | OM | MIL | 82
+Nouhoum Kamissoko | OM | MIL | 77
+Amine Harit | OM | MIL | 80
+Amine Gouiri | OM | ATT | 83
+Neal Maupay | OM | ATT | 74
+Igor Paixão | OM | ATT | 78
+Faris Moumbagna | OM | ATT | 82
+Tadjidine Mmadi | OM | ATT | 72
+Keyliane Abdallah | OM | ATT | 74
+Lukáš Hrádecký | Monaco | G | 75
+Philipp Köhn | Monaco | G | 76
+Jules Stawiecki | Monaco | G | 68
+Vanderson | Monaco | DEF | 83
+Jordan Teze | Monaco | DEF | 79
+Christian Mawissa | Monaco | DEF | 75
+Eric Dier | Monaco | DEF | 80
+Flávio Nazinho | Monaco | DEF | 74
+Mohammed Salisu | Monaco | DEF | 80
+Samuel Nibombé | Monaco | DEF | 70
+Sadibou Sané | Monaco | DEF | 77
+Denis Zakaria | Monaco | MIL | 82
+Lamine Camara | Monaco | MIL | 81
+Aleksandr Golovin | Monaco | MIL | 79
+Stanis Idumbo | Monaco | MIL | 76
+Takumi Minamino | Monaco | MIL | 82
+Pape Cabral | Monaco | MIL | 72
+Mamadou Coulibaly | Monaco | MIL | 78
+Edan Diop | Monaco | MIL | 80
+Aymen Assab | Monaco | MIL | 72
+Anis Soubeir | Monaco | MIL | 73
+Safouane Benzahra | Monaco | MIL | 69
+Ilane Touré | Monaco | MIL | 74
+Mathys Detourbet | Monaco | ATT | 71
+Folarin Balogun | Monaco | ATT | 78
+Matthis Abline | Monaco | ATT | 80
+Mika Biereth | Monaco | ATT | 79
+Paris Brunner | Monaco | ATT | 75
+Ansu Fati | Monaco | ATT | 79
+Berke Özer | Lille | G | 77
+Orlando Gill | Lille | G | 83
+Loun Srdanović | Lille | DEF | 76
+Nathan Ngoy | Lille | DEF | 78
+Alexsandro | Lille | DEF | 78
+Romain Perraud | Lille | DEF | 80
+Tiago Santos | Lille | DEF | 76
+Tanguy Nianzou | Lille | DEF | 80
+Calvin Verdonk | Lille | DEF | 79
+Isaac Cossier | Lille | DEF | 76
+Maxima Goffi | Lille | DEF | 73
+Nabil Bentaleb | Lille | MIL | 77
+Ethan Mbappé | Lille | MIL | 77
+Hákon Arnar Haraldsson | Lille | MIL | 82
+Maurits Kjærgaard | Lille | MIL | 80
+N'Gala Mukau | Lille | MIL | 83
+Benjamin André | Lille | MIL | 72
+Gaëtan Perrin | Lille | MIL | 75
+Dilane Bakwa | Lille | ATT | 74
+Olivier Giroud | Lille | ATT | 73
+Osame Sahraoui | Lille | ATT | 81
+Ayase Ueda | Lille | ATT | 77
+Başar Önal | Lille | ATT | 75
+Hamza Igamane | Lille | ATT | 77
+Soriba Diaoune | Lille | ATT | 74
+Tiago Morais | Lille | ATT | 75
+Dominik Greif | Lyon | G | 77
+Justin Bengui | Lyon | G | 74
+Rémy Descamps | Lyon | G | 80
+Lassine Diarra | Lyon | G | 79
+Nicolás Tagliafico | Lyon | DEF | 75
+Zachary Athekame | Lyon | DEF | 80
+Abner Vinícius | Lyon | DEF | 79
+Moussa Niakhaté | Lyon | DEF | 78
+Felix Bacher | Lyon | DEF | 77
+Ruben Kluivert | Lyon | DEF | 74
+Clinton Mata | Lyon | DEF | 77
+Steeve Kango | Lyon | DEF | 71
+Mohamed Ouédraogo | Lyon | DEF | 75
+Noham Kamara | Lyon | DEF | 71
+Mads Bidstrup | Lyon | MIL | 82
+Paul Akouokou | Lyon | MIL | 78
+Tanner Tessmann | Lyon | MIL | 81
+Corentin Tolisso | Lyon | MIL | 77
+Pavel Šulc | Lyon | MIL | 83
+Khalis Merah | Lyon | MIL | 72
+Tyler Morton | Lyon | MIL | 76
+Noah Nartey | Lyon | MIL | 72
+Ernest Nuamah | Lyon | ATT | 79
+Keito Nakamura | Lyon | ATT | 77
+Loïs Openda | Lyon | ATT | 83
+Julien Duranville | Lyon | ATT | 80
+Kaïl Boudache | Lyon | ATT | 72
+Alejandro Gomes Rodríguez | Lyon | ATT | 70
+Rémi Himbert | Lyon | ATT | 74
+Régis Gurtner | Lens | G | 76
+Mathieu Gorgelin | Lens | G | 74
+Robin Risser | Lens | G | 82
+Ilan Jourdren | Lens | G | 74
+Ruben Aguilar | Lens | DEF | 77
+Maik Nawrocki | Lens | DEF | 75
+Nidal Čelik | Lens | DEF | 74
+Samson Baidoo | Lens | DEF | 79
+Matthieu Udol | Lens | DEF | 74
+Jean-Clair Todibo | Lens | DEF | 81
+Saud Abdulhamid | Lens | DEF | 77
+Jonathan Gradit | Lens | DEF | 75
+Ismaëlo Ganiou | Lens | DEF | 73
+Souleymane Sagnan | Lens | DEF | 72
+Kyllian Antonio | Lens | DEF | 70
+Jhoanner Chávez | Lens | DEF | 81
+Andrija Bulatović | Lens | MIL | 77
+Yacine Titraoui | Lens | MIL | 77
+Amadou Haidara | Lens | MIL | 81
+Michał Skóraś | Lens | MIL | 79
+Michaël Cuisance | Lens | MIL | 77
+Florian Sotoca | Lens | ATT | 72
+Thorgan Hazard | Lens | ATT | 82
+Florian Thauvin | Lens | ATT | 76
+Odsonne Édouard | Lens | ATT | 80
+Abdallah Sima | Lens | ATT | 78
+Junior Kadile | Lens | ATT | 80
+Franjo Ivanović | Lens | ATT | 83
+Mezian Mesloub | Lens | ATT | 74
+Yehvann Diouf | Nice | G | 78
+Martin Ponsot | Nice | G | 72
+Teddy Boulhendi | Nice | G | 73
+Ali Abdi | Nice | DEF | 75
+Mohamed Abdelmonem | Nice | DEF | 81
+Niels Nkounkou | Nice | DEF | 74
+Antoine Mendy | Nice | DEF | 80
+Alidu Seidu | Nice | DEF | 75
+Youssouf Ndayishimiye | Nice | DEF | 77
+Moïse Bombito | Nice | DEF | 77
+Hamza Koutoune | Nice | DEF | 70
+Jonathan Clauss | Nice | DEF | 72
+Hicham Boudaoui | Nice | MIL | 80
+Gauthier Hein | Nice | MIL | 73
+Morgan Sanson | Nice | MIL | 71
+Laurent Abergel | Nice | MIL | 75
+Issiaga Camara | Nice | MIL | 72
+Axel Witsel | Nice | MIL | 73
+Nassim Lareej | Nice | MIL | 71
+Xavier Junior Mandza | Nice | MIL | 69
+Djibril Coulibaly | Nice | MIL | 70
+Everton Pereira | Nice | MIL | 70
+Salis Abdul Samed | Nice | MIL | 75
+Mohammed Amoura | Nice | ATT | 78
+Sofiane Diop | Nice | ATT | 81
+Elye Wahi | Nice | ATT | 77
+Isak Jansson | Nice | ATT | 74
+Nathan Ngoumou | Nice | ATT | 80
+Zoumana Diallo | Nice | ATT | 72
+Nicolas Lemaître | Rennes | G | 73
+Brice Samba | Rennes | G | 79
+Kilian Belazzoug | Rennes | G | 76
+Charlie Cresswell | Rennes | DEF | 73
+Gonçalo Oliveira | Rennes | DEF | 71
+Bryan Reynolds | Rennes | DEF | 77
+Mahamadou Nagida | Rennes | DEF | 76
+Anthony Rouault | Rennes | DEF | 71
+Quentin Merlin | Rennes | DEF | 74
+Abdelhamid Aït Boudlal | Rennes | DEF | 72
+Przemysław Frankowski | Rennes | DEF | 75
+Djaoui Cissé | Rennes | MIL | 73
+Ludovic Blas | Rennes | MIL | 76
+Sebastian Szymański | Rennes | MIL | 77
+Valentin Rongier | Rennes | MIL | 75
+Adrien Thomasson | Rennes | MIL | 75
+Mahdi Camara | Rennes | MIL | 72
+Henrick Do Marcolino | Rennes | MIL | 76
+Estéban Lepaul | Rennes | ATT | 75
+Mousa Al-Tamari | Rennes | ATT | 79
+Eliezer Mayenda | Rennes | ATT | 73
+Boulaye Dia | Rennes | ATT | 78
+Elías Quiñónez | Rennes | ATT | 66
+Arnaud Nordin | Rennes | ATT | 77
+Issa Soumaré | Rennes | ATT | 76
+Ayanda Sishuba | Rennes | ATT | 72
+Filip Jörgensen | Strasbourg | G | 80
+Miłosz Piekutowski | Strasbourg | G | 71
+Gabriel Kerckaert | Strasbourg | G | 67
+Jeyland Mitchell | Strasbourg | DEF | 75
+Ismaël Doukouré | Strasbourg | DEF | 78
+Mateo Del Blanco | Strasbourg | DEF | 72
+Genesis Antwi | Strasbourg | DEF | 66
+Lucas Høgsberg | Strasbourg | DEF | 73
+Karim Coulibaly | Strasbourg | DEF | 71
+Oso | Strasbourg | DEF | 78
+Yoann Becker | Strasbourg | DEF | 66
+Maxi Oyedele | Strasbourg | MIL | 81
+Giovanni Reyna | Strasbourg | MIL | 79
+Sebastian Nanasi | Strasbourg | MIL | 76
+Dário Essugo | Strasbourg | MIL | 71
+Fábio Baldé | Strasbourg | MIL | 72
+Pape Demba Diop | Strasbourg | MIL | 74
+Diogo Sousa | Strasbourg | MIL | 74
+Omari Kellyman | Strasbourg | MIL | 69
+Tyrese Noubissie | Strasbourg | MIL | 66
+Samir El Mourabet | Strasbourg | MIL | 77
+Benjamin Brantlind | Strasbourg | MIL | 69
+Samuel Amo-Ameyaw | Strasbourg | ATT | 72
+Joaquín Panichelli | Strasbourg | ATT | 78
+Sékou Mara | Strasbourg | ATT | 74
+Deivid Washington | Strasbourg | ATT | 70
+Martial Godo | Strasbourg | ATT | 78
+Jacobo Ortega | Strasbourg | ATT | 70
+Kingsley Olufadé | Strasbourg | ATT | 71
+Yaya Diémé | Strasbourg | ATT | 65
+Conrad Harder | Strasbourg | ATT | 74
+Gessime Yassine | Strasbourg | ATT | 76
+Kevin Trapp | Paris FC | G | 69
+Obed Nkambadio | Paris FC | G | 73
+Emmanuel Mbemba | Paris FC | DEF | 70
+Moustapha Mbow | Paris FC | DEF | 80
+Otávio Ataíde | Paris FC | DEF | 73
+Hamari Traoré | Paris FC | DEF | 76
+Nhoa Sangui | Paris FC | DEF | 73
+Yoan Koré | Paris FC | DEF | 77
+Thibault De Smet | Paris FC | DEF | 76
+Samir Chergui | Paris FC | DEF | 74
+Diego Coppola | Paris FC | DEF | 79
+Vincent Marchetti | Paris FC | MIL | 73
+Patrick Zabi | Paris FC | MIL | 73
+Ilan Kebbal | Paris FC | MIL | 79
+Adama Camara | Paris FC | MIL | 80
+Maxime Lopez | Paris FC | MIL | 72
+Rudy Matondo | Paris FC | MIL | 69
+Pierre Lees-Melou | Paris FC | MIL | 72
+Pablo Pagis | Paris FC | ATT | 74
+Lassine Sinayoko | Paris FC | ATT | 79
+Jean-Philippe Krasso | Paris FC | ATT | 80
+Luca Koleosho | Paris FC | ATT | 75
+Omar Sissoko | Paris FC | ATT | 70
+Moses Simon | Paris FC | ATT | 79
+Jonathan Ikoné | Paris FC | ATT | 77
+Egil Selvik | Brest | G | 73
+Noé Poillion | Brest | G | 66
+Mathieu Patouillet | Brest | G | 74
+Romain Cagnon | Brest | G | 71
+Bradley Locko | Brest | DEF | 71
+Gautier Lloris | Brest | DEF | 68
+Brendan Chardonnet | Brest | DEF | 68
+Justin Bourgault | Brest | DEF | 71
+Luck Zogbé | Brest | DEF | 71
+Kenny Lala | Brest | DEF | 71
+Raphaël Le Guen | Brest | DEF | 68
+Mamady Diambou | Brest | MIL | 75
+Joseph Nonge | Brest | MIL | 67
+Hugo Magnetti | Brest | MIL | 72
+Joris Chotard | Brest | MIL | 72
+Kamory Doumbia | Brest | MIL | 74
+Samba Diop | Brest | MIL | 63
+Lucas Tousart | Brest | MIL | 73
+Pathé Mboup | Brest | ATT | 71
+Giovani Versini | Brest | ATT | 73
+Noah Edjouma | Brest | ATT | 69
+Mama Baldé | Brest | ATT | 74
+Ludovic Ajorque | Brest | ATT | 72
+Ibrahim Kanté | Brest | ATT | 67
+Mathis Lainé | Brest | ATT | 69
+Djylian N'Guessan | Brest | ATT | 69
+Théo Collin | Toulouse | G | 73
+Guillaume Restes | Toulouse | G | 76
+Naïme Saïd Mchindra | Toulouse | G | 72
+Mathys Niflore | Toulouse | G | 64
+Rasmus Nicolaisen | Toulouse | DEF | 72
+Mark McKenzie | Toulouse | DEF | 77
+Seny Koumbassa | Toulouse | DEF | 66
+Christ Tapé | Toulouse | DEF | 73
+David Odogu | Toulouse | DEF | 69
+Rafik Messali | Toulouse | DEF | 70
+Frédéric Efuele Ngoyala | Toulouse | DEF | 71
+Thibaud Garondo | Toulouse | DEF | 71
+Gaëtan Bakhouche | Toulouse | DEF | 67
+Ismaïl Diallo | Toulouse | DEF | 71
+Alexis Vossah | Toulouse | MIL | 70
+Thomas Jørgensen | Toulouse | MIL | 75
+Niko Sigur | Toulouse | MIL | 75
+Abu Francis | Toulouse | MIL | 73
+Mathis Amougou | Toulouse | MIL | 68
+Cristian Cásseres Jr. | Toulouse | MIL | 75
+Niklas Schmidt | Toulouse | MIL | 74
+Adam El Ouali | Toulouse | MIL | 70
+Darris Zema | Toulouse | MIL | 64
+Julián Vignolo | Toulouse | ATT | 67
+Santiago Hidalgo | Toulouse | ATT | 68
+Sion Oppong | Toulouse | ATT | 67
+Jacen Russell-Rowe | Toulouse | ATT | 74
+Aron Dønnum | Toulouse | ATT | 73
+Casper Tengstedt | Toulouse | ATT | 74
+Ilyas Azizi | Toulouse | ATT | 65
+Wassim Dardake | Toulouse | ATT | 70
+Aymen Amaaouch | Toulouse | ATT | 66
+Benjamin Leroy | Lorient | G | 67
+Bingourou Kamara | Lorient | G | 72
+Yvon Mvogo | Lorient | G | 71
+Alec Georgen | Lorient | DEF | 74
+Montassar Talbi | Lorient | DEF | 77
+Formose Mendy | Lorient | DEF | 78
+Dembo Sylla | Lorient | DEF | 73
+Srđan Kuzmić | Lorient | DEF | 75
+Nathaniel Adjei | Lorient | DEF | 76
+Arsène Kouassi | Lorient | DEF | 78
+Nosa Obaretin | Lorient | DEF | 74
+Isaak Touré | Lorient | DEF | 69
+Bandiougou Fadiga | Lorient | MIL | 68
+Noah Cadiou | Lorient | MIL | 75
+Théo Le Bris | Lorient | MIL | 74
+Jean-Victor Makengo | Lorient | MIL | 72
+Gabin Bernardeau | Lorient | MIL | 67
+Arthur Avom | Lorient | MIL | 74
+Noah Mbamba | Lorient | MIL | 66
+Pános Katséris | Lorient | MIL | 73
+Mohamed Bamba | Lorient | ATT | 75
+Isak Jensen | Lorient | ATT | 69
+Aiyegun Tosin | Lorient | ATT | 78
+Ibrahima Baldé | Lorient | ATT | 74
+Souleymane Faye | Lorient | ATT | 77
+Mamadou Koné | Lorient | ATT | 70
+Paul Nardi | Auxerre | G | 73
+Mamadou Diop | Auxerre | G | 75
+Louis Mezerette | Auxerre | G | 66
+Axel Tuanzebe | Auxerre | DEF | 73
+Telli Siwe | Auxerre | DEF | 70
+Christ Makosso | Auxerre | DEF | 74
+Sinaly Diomandé | Auxerre | DEF | 73
+Fredrik Oppegård | Auxerre | DEF | 70
+Bryan Okoh | Auxerre | DEF | 74
+Lamine Sy | Auxerre | DEF | 76
+Marvin Senaya | Auxerre | DEF | 75
+Rayan Mandengue | Auxerre | DEF | 65
+Elikya Legros | Auxerre | DEF | 69
+Alvin Petit Dol | Auxerre | DEF | 71
+Mohamed Coulibaly | Auxerre | DEF | 62
+Clément Akpa | Auxerre | DEF | 73
+Sékou Fofana | Auxerre | DEF | 69
+Kévin Danois | Auxerre | MIL | 73
+Assane Dioussé | Auxerre | MIL | 74
+Naouirou Ahamada | Auxerre | MIL | 70
+Pierre Ekwah | Auxerre | MIL | 70
+Lamfia Dioubaté | Auxerre | MIL | 67
+Tidiane Devernois | Auxerre | MIL | 67
+Yvan Zaddy | Auxerre | MIL | 65
+Arthur Piedfort | Auxerre | MIL | 71
+Rémy Labeau-Lascary | Auxerre | ATT | 71
+Cameron Archer | Auxerre | ATT | 70
+Danny Namaso | Auxerre | ATT | 75
+Eros Maddy | Auxerre | ATT | 71
+Romain Faivre | Auxerre | ATT | 73
+Ryan Rodin | Auxerre | ATT | 67
+Mamoudou Cissokho | Auxerre | ATT | 63
+Xiangxin Wei | Auxerre | ATT | 68
+Aristide Zossou | Auxerre | ATT | 68
+Anthony Lopes | Angers | G | 71
+Melvin Zinga | Angers | G | 71
+Oumar Pona | Angers | G | 67
+Carlens Arcus | Angers | DEF | 75
+Ousmane Camara | Angers | DEF | 73
+Joseph Kalulu | Angers | DEF | 71
+Marius Louër | Angers | DEF | 65
+Jordan Lefort | Angers | DEF | 75
+Emmanuel Biumla | Angers | DEF | 71
+Lilian Raolisoa | Angers | DEF | 72
+Maël Gernigon | Angers | DEF | 62
+Louis Mouton | Angers | MIL | 72
+Branco van den Boomen | Angers | MIL | 72
+Yassin Belkhdim | Angers | MIL | 70
+Bané Diatta | Angers | MIL | 63
+Jules Bouffandeau | Angers | MIL | 63
+Haris Belkebla | Angers | MIL | 70
+Usman Simbakoli | Angers | ATT | 73
+Prosper Peter | Angers | ATT | 65
+Amine Sbaï | Angers | ATT | 71
+Harouna Djibirin | Angers | ATT | 71
+Jim Allevinah | Angers | ATT | 72
+Amine El Ouazzani | Angers | ATT | 70
+Anthony Bermont | Angers | ATT | 71
+Mamadou Diallo | Angers | ATT | 63
+Paul Argney | Le Havre | G | 66
+Lionel Mpasi | Le Havre | G | 75
+Gauthier Gallon | Le Havre | G | 67
+Ahmed Touba | Le Havre | DEF | 73
+Elias Jelert | Le Havre | DEF | 76
+Fodé Doucouré | Le Havre | DEF | 74
+Ayumu Seko | Le Havre | DEF | 71
+Vincent Sasso | Le Havre | DEF | 71
+Stephan Zagadou | Le Havre | DEF | 67
+Timothée Pembélé | Le Havre | DEF | 70
+Junior Mwanga | Le Havre | MIL | 70
+Amir Richardson | Le Havre | MIL | 71
+Rassoul Ndiaye | Le Havre | MIL | 72
+Kaito Mizuta | Le Havre | MIL | 72
+Guy-Noël Zohouri | Le Havre | MIL | 67
+Simon Ebonog | Le Havre | MIL | 74
+Ismail Bouneb | Le Havre | MIL | 71
+Daren Mosengo | Le Havre | MIL | 69
+Josh Maja | Le Havre | ATT | 74
+Felix Mambimbi | Le Havre | ATT | 71
+Godson Kyeremeh | Le Havre | ATT | 70
+Joan Tincres | Le Havre | ATT | 71
+Mbwana Samatta | Le Havre | ATT | 69
+Enzo Koffi | Le Havre | ATT | 66
+Sōta Nakamura | Le Havre | ATT | 77
+Rayan Fofana | Le Havre | ATT | 71
+Élysée Logbo | Le Havre | ATT | 74
+Ewan Hatfout | Le Mans | G | 67
+Augustin Delbecque | Le Mans | G | 68
+Nicolas Kocik | Le Mans | G | 67
+Harold Voyer | Le Mans | DEF | 70
+Raúl Torrente | Le Mans | DEF | 67
+Samuel Yohou | Le Mans | DEF | 66
+Lucas Buades | Le Mans | DEF | 67
+Djibril Sidibé | Le Mans | DEF | 69
+Théo Eyoum | Le Mans | DEF | 67
+Lucas Calodat | Le Mans | DEF | 69
+Rayan Bamba | Le Mans | DEF | 65
+Noa Boissé | Le Mans | DEF | 64
+Yasser Larouci | Le Mans | DEF | 69
+Joao Almeida | Le Mans | DEF | 63
+Edwin Quarshie | Le Mans | MIL | 70
+Alexandre Lauray | Le Mans | MIL | 66
+Jean Vercruysse | Le Mans | MIL | 70
+Adil Bourabaa | Le Mans | MIL | 66
+Daouda Traoré | Le Mans | MIL | 67
+Martin Rossignol | Le Mans | MIL | 65
+Lucas Bretelle | Le Mans | MIL | 68
+Billal Brahimi | Le Mans | ATT | 72
+Antoine Rabillard | Le Mans | ATT | 69
+Habib Diallo | Le Mans | ATT | 73
+Louis Mafouta | Le Mans | ATT | 71
+William Harhouz | Le Mans | ATT | 66
+Dame Gueye | Le Mans | ATT | 74
+Erwan Colas | Le Mans | ATT | 65
+Enzo Vagner | Le Mans | ATT | 64
+Zacharie Boucher | Troyes | G | 71
+Patrick Beach | Troyes | G | 75
+Hillel Konaté | Troyes | G | 69
+Lucas Maronnier | Troyes | DEF | 71
+Anis Ouzenadji | Troyes | DEF | 64
+Junior Diaz | Troyes | DEF | 69
+Paolo Gozzi | Troyes | DEF | 72
+Adrien Monfray | Troyes | DEF | 65
+Ismaël Boura | Troyes | DEF | 69
+Tom Akpakoun | Troyes | DEF | 63
+Yvann Titi | Troyes | DEF | 66
+Mouhamed Diop | Troyes | MIL | 72
+Iron Gomis | Troyes | MIL | 65
+Antoine Mille | Troyes | MIL | 65
+Hugo Picard | Troyes | MIL | 69
+Alexandre Phliponeau | Troyes | MIL | 68
+Karim Dermane | Troyes | MIL | 70
+Roman Murcy | Troyes | MIL | 66
+Kandet Diawara | Troyes | ATT | 75
+Jérémy Le Douaron | Troyes | ATT | 67
+Merwan Ifnaoui | Troyes | ATT | 67
+Elijah Odede | Troyes | ATT | 60
+Renaud Ripart | Troyes | ATT | 67
+Timothé Nkada | Troyes | ATT | 68
+Ibrahim Traoré | Troyes | ATT | 66
+Amadou Diakité | Troyes | ATT | 63
+</script>
+<script src="packs.js"></script>
+<script src="nav.js"></script>
+</body>
+</html>
