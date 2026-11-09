@@ -27,6 +27,9 @@ button.main { background: var(--acc); color: #04131c; } button.mini { min-height
 button:disabled { opacity: .5; }
 .chk { display: flex; align-items: center; gap: 8px; color: var(--fg); font-size: 14px; } .chk input { width: 20px; height: 20px; }
 .help { font-size: 13px; color: var(--muted); display: grid; gap: 4px; } .help code { color: #ffd60a; background: #0f121b; padding: 1px 6px; border-radius: 6px; }
+.logo-slot { display: grid; grid-template-columns: 64px 1fr; gap: 10px; align-items: center; padding: 8px; border: 1px solid var(--line); border-radius: 12px; }
+.logo-slot .pv { width: 64px; height: 64px; border-radius: 50%; background: #fff center / contain no-repeat; border: 2px solid var(--line); }
+.logo-slot b { display: block; font-size: 14px; }
 .imgs { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
 .imgs label { position: relative; aspect-ratio: 1; border: 1px dashed var(--line); border-radius: 10px; display: grid; place-items: center; cursor: pointer; overflow: hidden; color: var(--muted); font-weight: 800; }
 .imgs img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
@@ -51,9 +54,10 @@ button:disabled { opacity: .5; }
     <div class="box">
       <h2>Histoire</h2>
       <div class="row2">
-        <label>Histoire prête à l'emploi<select id="tpl"></select></label>
+        <label>Histoire prête à l'emploi (105)<select id="tpl"></select></label>
         <label>Ton compte<select id="side"><option value="om">💙 Team OM (« Moi » = l'OM)</option><option value="psg">❤️ Team PSG (« Moi » = le PSG)</option></select></label>
       </div>
+      <button class="mini" type="button" id="rnd">🎲 Une histoire au hasard</button>
       <textarea id="script" spellcheck="false"></textarea>
       <div class="help">
         <span><code>Moi: texte</code> ton message (il se tape au clavier) · <code>PSG: texte</code> la réponse de l'autre</span>
@@ -61,6 +65,12 @@ button:disabled { opacity: .5; }
         <span><code>[notif] Nom : texte</code> notification · <code>[photo 1] légende</code> photo de ta galerie (envoyée par l'autre) · <code>Moi: [photo 2] légende</code> photo envoyée par toi</span>
         <span><code>[journal] Titre | texte</code> article de journal · <code>@contact PSG | 💔</code> change le nom ou les emojis du contact en cours de route · <code>[pause 2]</code> 2 secondes de silence</span>
       </div>
+    </div>
+
+    <div class="box">
+      <h2>🛡️ Logos des clubs</h2>
+      <div class="row2" id="logos"></div>
+      <p class="note">Ils remplacent les écussons dessinés : photo du contact en haut, « en train d'écrire », ton avatar et l'article de journal. Ils restent sur ton téléphone.</p>
     </div>
 
     <div class="box">
@@ -101,6 +111,1118 @@ button:disabled { opacity: .5; }
     </div>
   </div>
 </div>
+<script type="text/plain" id="lib">
+### 😏 Chambrage
+=== Le réveil
+# Partie 1 : 7 h du matin
+Eux: Debout {ME} ☀️
+Eux: C'est jour de match
+Moi: Il est 7 h…
+Eux: Les champions se lèvent tôt 😎
+Moi: Alors pourquoi tu es réveillé ? 🤔
+Eux: …
+-- LE SOIR --
+# Partie 2 : Après le match
+Moi: Bien dormi finalement ? 😴
+Eux: Laisse-moi tranquille
+Moi: {MYSLOGAN}
+=== Le GPS
+# Partie 1 : Perdu
+Eux: Frère c'est où {MYSTADE} ?
+Moi: Tu viens pour la première fois ? 😂
+Eux: Mon GPS dit « vous allez perdre »
+Moi: Même ton GPS sait 💀
+-- 20 MINUTES PLUS TARD --
+# Partie 2 : Arrivé
+Eux: Je suis devant
+Eux: Pourquoi tout le monde chante contre moi 😰
+Moi: Bienvenue chez nous {MYHEART}
+=== La météo
+# Partie 1 : Le bulletin
+Moi: Météo de dimanche à {MYCITY}
+Moi: Grand soleil ☀️ pour nous
+Moi: Gros orage ⛈️ pour {LETHEM}
+Eux: T'es pas météorologue
+Moi: Non mais je sais lire un classement 😏
+-- DIMANCHE SOIR --
+# Partie 2 : Le verdict
+[notif] {MYFANS} : Il a plu sur eux 😂
+Eux: Ok ok bien joué
+=== Le dictionnaire
+# Partie 1 : Définition
+Eux: Tu connais la définition de « défaite » ?
+Moi: Non vas-y
+Eux: Regarde ton prochain match 😂
+Moi: Et tu connais celle de « jaloux » ?
+Eux: …
+Moi: Regarde-toi dans un miroir 🪞
+-- PLUS TARD --
+# Partie 2 : Le retour
+Eux: Bon on arrête les définitions
+Moi: Ah tu abandonnes ? 😌
+=== Le sondage
+# Partie 1 : Le vote
+Eux: J'ai fait un sondage dans mon quartier
+Eux: 100 % disent qu'on est meilleurs
+Moi: Ton quartier c'est ta chambre ? 😂
+Eux: …
+Eux: Et ma mère
+-- LE LENDEMAIN --
+# Partie 2 : Le vrai sondage
+[notif] {MYFANS} : Sondage national : on gagne 😎
+Moi: Ah tiens
+Eux: Truqué 😤
+=== Le karaoké
+# Partie 1 : La chanson
+Moi: Ce soir karaoké de supporters 🎤
+Eux: Vous allez chanter quoi ? Vos excuses ? 😂
+Moi: Notre chant de victoire
+Moi: Tu veux les paroles pour apprendre ?
+Eux: Non merci
+-- MINUIT --
+# Partie 2 : La vidéo
+Eux: Pourquoi tout le monde m'envoie votre vidéo
+Eux: Ça fait 3 heures que vous chantez 😭
+Moi: {MYSLOGAN}
+=== Le classement
+# Partie 1 : Le screen
+Eux: T'as vu le classement ?
+Moi: Oui
+Eux: Et ?
+Moi: Je regarde que la colonne du cœur {MYHEART}
+Eux: Ça existe pas
+Moi: Chez toi non 😌
+-- FIN DE SAISON --
+# Partie 2 : Le bilan
+Eux: Bon on se retrouve l'an prochain
+Moi: Avec plaisir, on t'attendra en haut 😏
+=== L'excuse
+# Partie 1 : Avant le match
+Moi: Tu as préparé ton excuse ?
+Eux: Quelle excuse ?
+Moi: Pour après la défaite 😂
+Eux: On n'en aura pas besoin
+Moi: Je te prépare une liste quand même
+-- APRÈS LE MATCH --
+# Partie 2 : La liste
+Moi: 1. L'arbitre
+Moi: 2. La pelouse
+Moi: 3. La lune
+Eux: …
+Eux: Je prends la 2 😑
+=== Le selfie
+# Partie 1 : La photo
+Eux: Regarde mon selfie au stade 📸
+Eux: [photo 1] Trop beau
+Moi: Pourquoi il y a que des supporters {DUME} derrière toi ?
+Eux: …
+Eux: Ils m'ont encerclé 😰
+-- 2 HEURES PLUS TARD --
+# Partie 2 : Rentré
+Eux: Je suis rentré vivant
+Moi: Ils t'ont même offert une écharpe ? 😂
+=== Le bus
+# Partie 1 : Le trajet
+Eux: On est dans le bus 🚌
+Eux: Musique à fond, on est chauds
+Moi: Profite, c'est le meilleur moment de ta soirée
+Eux: Pourquoi tu dis ça ?
+Moi: Tu comprendras à 23 h 😏
+-- 23 H --
+# Partie 2 : Le retour
+Eux: Le bus est silencieux
+Eux: Personne ne parle
+Moi: Je t'avais prévenu {MYHEART}
+=== La calculatrice
+# Partie 1 : Les maths
+Eux: J'ai calculé nos chances de gagner
+Moi: Et ?
+Eux: 99 %
+Moi: Ta calculatrice marche à l'envers 😂
+Eux: C'est une calculatrice premium
+-- APRÈS LE MATCH --
+# Partie 2 : Le recalcul
+Moi: Elle dit quoi ta calculatrice maintenant ?
+Eux: Erreur de syntaxe 🤖
+=== Le vocal
+# Partie 1 : Le message
+Eux: Je t'envoie un vocal
+Eux: Écoute bien
+Moi: C'est juste toi qui cries pendant 2 minutes 💀
+Eux: C'est de la motivation
+Moi: Ça ressemble à de la panique
+-- LE SOIR --
+# Partie 2 : La réponse
+Moi: Je te réponds en vocal aussi
+Moi: C'est {MYSTADE} qui chante 🎶
+Eux: Coupe ça 😭
+=== Les statistiques
+# Partie 1 : Les chiffres
+Eux: On a eu 70 % de possession la dernière fois 📊
+Moi: Et le score ?
+Eux: On parle de possession là
+Moi: Moi je parle de résultat 😏
+-- PLUS TARD --
+# Partie 2 : Le résumé
+[notif] {MYFANS} : L'important c'est les trois points 💪
+Eux: Ok vous avez gagné la discussion
+Moi: Comme d'habitude
+=== Le bon coin
+# Partie 1 : L'annonce
+Moi: J'ai vu ton annonce sur internet
+Eux: Quelle annonce ?
+Moi: « Vends écharpe de supporter, presque neuve, jamais célébré » 😂
+Eux: C'est pas moi
+Moi: C'est ton numéro
+-- UNE HEURE PLUS TARD --
+# Partie 2 : Vendue
+Eux: Elle est vendue
+Moi: À qui ?
+Eux: À un supporter {DUME} qui voulait la brûler 😭
+=== Le traducteur
+# Partie 1 : La langue
+Eux: Tu parles quelle langue toi ?
+Moi: Le {MYCITYADJ}
+Eux: J'ai rien compris à ton dernier message
+Moi: C'est normal, c'était « on va gagner » en langage de champion 😎
+-- LE SOIR --
+# Partie 2 : Traduction
+Eux: J'ai trouvé un traducteur
+Eux: Il dit que tu chambres trop
+Moi: Bon traducteur 👍
+=== La boule de cristal
+# Partie 1 : La prédiction
+Eux: J'ai consulté une voyante 🔮
+Eux: Elle dit qu'on gagne 3-0
+Moi: Elle t'a coûté combien ?
+Eux: 50 euros
+Moi: Rembourse-toi 😂
+-- APRÈS LE MATCH --
+# Partie 2 : La voyante
+Eux: Je l'ai rappelée
+Eux: Elle a dit qu'elle parlait du match de l'an prochain
+Moi: Malin 😂
+=== Le crampon
+# Partie 1 : L'entraînement
+Eux: Je m'entraîne pour jouer contre toi au five
+Moi: Tu t'entraînes à quoi ?
+Eux: À courir après le ballon
+Moi: Ça c'est déjà ton quotidien 😂
+-- SAMEDI --
+# Partie 2 : Le five
+Eux: Combien ça a fini ?
+Moi: 10-2
+Eux: Pour qui ?
+Moi: Pas pour toi {MYHEART}
+=== Les lunettes
+# Partie 1 : L'ophtalmo
+Eux: Je vais chez l'ophtalmo demain
+Moi: Enfin
+Moi: Tu vas peut-être voir que vous êtes derrière 😂
+Eux: Très drôle
+-- LE LENDEMAIN --
+# Partie 2 : Le verdict
+Eux: J'ai 10 sur 10 aux deux yeux
+Moi: Alors c'est le cœur qui voit mal {MYHEART}
+=== L'anniversaire du club
+# Partie 1 : Le gâteau
+Moi: C'est bientôt l'anniversaire de notre club 🎂
+Eux: Et alors ?
+Moi: Tu es invité
+Eux: Vraiment ? 🥺
+Moi: Oui, tu feras le clown 🤡
+-- LE JOUR J --
+# Partie 2 : La fête
+[notif] {MYFANS} : Joyeux anniversaire au plus beau club 🎉
+Eux: J'avoue l'ambiance est folle
+Moi: {MYSLOGAN}
+=== La photo de classe
+# Partie 1 : Le souvenir
+Eux: J'ai retrouvé une vieille photo de nous
+Eux: [photo 1] On était petits
+Moi: Pourquoi tu portais déjà mon maillot ? 😂
+Eux: C'était celui de mon cousin
+Moi: Ah oui, le cousin 😏
+-- PLUS TARD --
+# Partie 2 : L'aveu
+Eux: Bon ok j'aimais bien vos couleurs
+Moi: Je le savais {MYHEART}
+### 🤝 Paris et défis
+=== Le perdant paie
+# Partie 1 : Le deal
+Moi: Le perdant paie le kebab 🌯
+Eux: Avec frites ?
+Moi: Avec frites et boisson
+Eux: Deal 🤝
+-- APRÈS LE MATCH --
+# Partie 2 : L'addition
+Moi: J'ai faim
+Moi: Je prends un menu XXL 😋
+Eux: Pourquoi j'ai accepté ce pari
+=== La coupe de cheveux
+# Partie 1 : Le pari
+Eux: Si on perd, je me teins les cheveux en {MYCOLORS}
+Moi: Promis ?
+Eux: Promis juré
+Moi: Je capture l'écran 📸
+-- TROIS JOURS PLUS TARD --
+# Partie 2 : La preuve
+Moi: Alors ? J'attends la photo
+Eux: [photo 1] Content ? 😑
+Moi: Tu es magnifique {MYHEART}
+=== La photo de profil
+# Partie 1 : Le défi
+Moi: Le perdant met le logo de l'autre en photo de profil
+Eux: Pendant combien de temps ?
+Moi: Une semaine
+Eux: Ça marche 😏
+-- APRÈS LE MATCH --
+@contact {THEM} | 🙃
+# Partie 2 : Le changement
+[notif] {MYFANS} : Il a changé sa photo de profil 😂😂
+Eux: Une semaine c'est long
+Moi: Profite, elle te va bien
+=== Le chant
+# Partie 1 : Le défi
+Eux: Si vous gagnez, je chante votre hymne en vidéo
+Moi: Tu connais les paroles ?
+Eux: Non, je suis sûr de ne pas en avoir besoin
+Moi: Apprends-les quand même 😏
+-- APRÈS LE MATCH --
+# Partie 2 : La vidéo
+Moi: J'attends ta vidéo 🎤
+Eux: Ma voix est cassée
+Moi: Pas d'excuse !
+Eux: … ok ce soir 😭
+=== Le maillot à l'école
+# Partie 1 : Le pari
+Moi: Le perdant va au lycée avec le maillot de l'autre
+Eux: Tout le lycée ?
+Moi: Toute la journée
+Eux: Ok facile on va gagner
+-- LUNDI MATIN --
+# Partie 2 : En classe
+[notif] Groupe de la classe : Pourquoi il porte ce maillot 😂😂
+Eux: Ne dis rien
+Moi: Tu es le plus beau de la classe {MYHEART}
+=== Les pompes
+# Partie 1 : L'entraînement
+Eux: Le perdant fait 100 pompes en live
+Moi: 100 ?
+Eux: T'as peur ? 😏
+Moi: Pas du tout, je vais juste te regarder
+-- LE SOIR --
+# Partie 2 : Le live
+Eux: J'en suis à 37
+Eux: Je meurs
+Moi: Plus que 63 💪
+=== Le tatouage
+# Partie 1 : Le pari fou
+Eux: Si on perd je me tatoue votre logo
+Moi: Tu es sérieux ?
+Eux: Non 😂
+Eux: Mais un tatouage éphémère d'accord
+Moi: Deal
+-- APRÈS LE MATCH --
+# Partie 2 : La preuve
+Eux: [photo 1] Il part dans combien de jours ?
+Moi: Jamais 😈
+=== La danse
+# Partie 1 : Le pari
+Moi: Le perdant fait une danse TikTok avec le maillot de l'autre
+Eux: Quelle danse ?
+Moi: Celle que je choisis 😈
+Eux: Ok
+-- LE LENDEMAIN --
+# Partie 2 : La danse
+[notif] {MYFANS} : Sa vidéo fait 1 million de vues 😂
+Eux: Pourquoi elle est virale
+Moi: Talent naturel {MYHEART}
+=== Le message vocal
+# Partie 1 : Le pari
+Eux: Le perdant dit « {LEMECAP} est le plus grand club » en vocal
+Moi: Tu viens de te piéger tout seul
+Eux: Comment ça ?
+Moi: Relis ton message 😂
+-- APRÈS LE MATCH --
+# Partie 2 : Le vocal
+Moi: J'attends le vocal
+Eux: …
+Eux: Je vais le dire tout bas
+=== Le jour de congé
+# Partie 1 : Le défi
+Moi: Le perdant fait le ménage chez l'autre 🧹
+Eux: Toute la maison ?
+Moi: Même le garage
+Eux: Tu vas regretter
+-- SAMEDI --
+# Partie 2 : Le ménage
+Eux: Pourquoi il y a 15 posters {DUME} dans ton garage
+Moi: Dépoussière-les bien 😌
+=== Les réseaux
+# Partie 1 : Le défi
+Eux: Le perdant poste « {MYSLOGAN} » sur tous ses réseaux
+Moi: Tu es sûr ?
+Eux: Certain
+-- APRÈS LE MATCH --
+# Partie 2 : La publication
+[notif] {MYFANS} : Il a vraiment posté 😂
+Eux: Mes amis me bloquent
+Moi: Moi je t'ai liké {MYHEART}
+=== Le gâteau
+# Partie 1 : Le pari
+Eux: Le perdant fait un gâteau aux couleurs de l'autre 🎂
+Moi: Tu sais cuisiner ?
+Eux: Non mais je vais pas perdre
+-- LE LENDEMAIN --
+# Partie 2 : Le gâteau
+Eux: [photo 1] Voilà ton gâteau
+Moi: Pourquoi il est tout écrasé 😂
+Eux: Il a perdu aussi
+=== La marche
+# Partie 1 : Le pari
+Moi: Le perdant fait le tour du quartier en chantant
+Eux: Avec un micro ?
+Moi: Avec un mégaphone 📢
+-- DIMANCHE --
+# Partie 2 : Le tour
+[notif] Voisins du quartier : C'est quoi ce bruit 😭
+Eux: Les voisins appellent la police
+Moi: Continue, ils adorent
+=== Le pyjama
+# Partie 1 : Le défi
+Eux: Le perdant dort avec le pyjama de l'autre club
+Moi: Tu en as un ?
+Eux: Non mais toi tu vas en acheter un {DUTHEM} 😏
+-- LE SOIR --
+# Partie 2 : La photo
+Eux: [photo 1] Bonne nuit champion
+Moi: Tu dors vraiment avec ? 😂
+=== Le double ou rien
+# Partie 1 : La revanche
+Eux: Double ou rien pour le match retour
+Moi: Tu me dois déjà un kebab
+Eux: Alors deux kebabs
+Moi: Tu vas faire faillite 😂
+-- LE MATCH RETOUR --
+# Partie 2 : Le résultat
+[notif] {MYFANS} : On a encore gagné 🔥
+Eux: Je vais vendre ma console
+### 💔 Amour et ex
+=== Le retour de l'ex
+# Partie 1 : Le message
+Eux: Coucou {ME}
+Eux: Ça fait longtemps
+Moi: Pourquoi tu m'écris ?
+Eux: Tu me manques 🥺
+Moi: Tu manques surtout de victoires 😏
+-- UNE SEMAINE PLUS TARD --
+@contact {THEM} | 💔
+# Partie 2 : Le vu
+Eux: Tu ne réponds plus ?
+Moi: Vu
+=== Le rendez-vous
+# Partie 1 : L'invitation
+Eux: On se voit samedi ?
+Moi: Où ça ?
+Eux: Au stade {DUTHEM} 😍
+Moi: Seulement si on y va pour gagner
+Eux: Romantique 🙄
+-- SAMEDI SOIR --
+# Partie 2 : Le rendez-vous
+[notif] {MYFANS} : Quelle soirée !! 💪
+Eux: C'était pas le rendez-vous que j'imaginais
+Moi: Moi j'ai adoré {MYHEART}
+=== La Saint-Valentin
+# Partie 1 : Le cadeau
+Eux: Joyeuse Saint-Valentin ❤️
+Moi: Merci
+Eux: Je t'ai acheté un cadeau
+Moi: C'est quoi ?
+Eux: Une écharpe {DUTHEM} 🧣
+Moi: Rends-la 😂
+-- LE LENDEMAIN --
+# Partie 2 : L'échange
+Eux: Je l'ai échangée
+Eux: Contre une écharpe {DUME}
+Moi: Là tu me plais {MYHEART}
+=== Le crush
+# Partie 1 : L'aveu
+Eux: Faut que je t'avoue un truc
+Moi: Vas-y
+Eux: Je kiffe une supportrice {DUME}
+Moi: Tu es perdu 😂
+Eux: Elle m'a dit qu'elle sortirait avec moi si je change de club
+-- UN MOIS PLUS TARD --
+@contact {THEM} | {MYHEART}
+# Partie 2 : La conversion
+Eux: J'ai changé de club
+Moi: Bienvenue dans la famille {MYHEART}
+=== Les vacances
+# Partie 1 : Le départ
+Eux: Je pars en vacances à {MYCITY} cet été
+Moi: Tu vas voir ce que c'est une vraie ville de foot
+Eux: Je viens surtout pour la plage 🏖️
+-- PENDANT LES VACANCES --
+# Partie 2 : La carte postale
+Eux: [photo 1] Bisous de {MYCITY}
+Moi: Pourquoi tu portes notre maillot ? 😂
+Eux: Il faisait chaud
+=== La rupture
+# Partie 1 : Le message
+Eux: Il faut qu'on parle
+Moi: De quoi ?
+Eux: Je crois que je t'aime plus
+Moi: Tu m'as jamais aimé, tu étais jaloux 😏
+Eux: …
+-- TROIS ANS PLUS TARD --
+# Partie 2 : Le retour
+Eux: Salut… tu te souviens de moi ?
+Moi: Le jaloux ?
+Eux: Oui 😔
+=== Le mariage
+# Partie 1 : L'annonce
+Eux: Je me marie 💍
+Moi: Félicitations !
+Eux: Avec une supportrice {DUME}
+Moi: Mariage mixte 😳
+Eux: On fait le gâteau moitié-moitié
+-- LE JOUR DU MARIAGE --
+# Partie 2 : Le gâteau
+[notif] Invités du mariage : La moitié {DUME} a été mangée en premier 😂
+Moi: Normal, c'est la meilleure moitié {MYHEART}
+=== Le premier rencard
+# Partie 1 : La question
+Eux: J'ai un rencard ce soir
+Moi: Bravo
+Eux: Elle m'a demandé mon club préféré
+Moi: Et ?
+Eux: J'ai dit {LETHEM}
+Moi: Elle est partie ? 😂
+-- UNE HEURE PLUS TARD --
+# Partie 2 : La vérité
+Eux: Elle était supportrice {DUME}
+Moi: Je l'adore déjà {MYHEART}
+=== Les fiançailles
+# Partie 1 : La demande
+Moi: Je vais faire ma demande au stade 💍
+Eux: Pendant le match ?
+Moi: Sur l'écran géant
+Eux: Et si elle dit non ?
+Moi: Elle dira oui, elle est supportrice {DUME} 😌
+-- PENDANT LE MATCH --
+# Partie 2 : La réponse
+[notif] {MYFANS} : ELLE A DIT OUI 💍🎉
+Eux: Félicitations quand même 😭
+=== Le message de minuit
+# Partie 1 : Minuit
+Eux: Tu dors ?
+Moi: Il est minuit
+Eux: Je pense à toi
+Moi: Tu penses surtout au match de demain 😂
+Eux: Oui un peu
+-- LE LENDEMAIN SOIR --
+# Partie 2 : Après le match
+Eux: Je vais dormir
+Moi: Bonne nuit, fais de beaux cauchemars 😴
+=== Le cadeau d'anniversaire
+# Partie 1 : Le cadeau
+Eux: Joyeux anniversaire 🎉
+Eux: Je t'ai acheté des places pour le match
+Moi: Trop gentil 🥺
+Eux: Dans la tribune {DUTHEM} 😈
+Moi: Je savais que c'était un piège
+-- LE JOUR DU MATCH --
+# Partie 2 : En tribune
+Moi: Je suis le seul en {MYCOLORS} ici
+Eux: Profite de l'ambiance 😂
+=== Le cœur brisé
+# Partie 1 : Le constat
+Eux: J'ai le cœur brisé
+Moi: Pourquoi ?
+Eux: Tu sais pourquoi
+Moi: Le score d'hier ? 😏
+Eux: Ne prononce pas ce mot
+-- UNE SEMAINE PLUS TARD --
+@contact {THEM} | ❤️‍🩹
+# Partie 2 : La guérison
+Eux: Ça va mieux
+Moi: Prépare-toi pour le match retour
+@contact {THEM} | 💔
+=== L'appel manqué
+# Partie 1 : 3 appels
+[notif] {THEM} : 3 appels manqués
+Eux: Pourquoi tu ne réponds pas ?
+Moi: J'étais au stade
+Eux: Pendant 4 heures ?
+Moi: On fêtait la victoire 🎉
+-- PLUS TARD --
+# Partie 2 : Le rappel
+Eux: Tu peux m'appeler maintenant ?
+Moi: Non, on fête encore 😂
+=== Le souvenir
+# Partie 1 : La photo
+Eux: Tu te rappelles de cette photo ?
+Eux: [photo 1] Notre premier match ensemble
+Moi: Oui, tu pleurais à la fin
+Eux: C'était de la joie
+Moi: C'était la défaite 😂
+-- PLUS TARD --
+# Partie 2 : La vérité
+Eux: Ok c'était la défaite
+Moi: Je le savais {MYHEART}
+=== Le mauvais numéro
+# Partie 1 : L'erreur
+Eux: Mon amour tu viens ce soir ? 😘
+Moi: Euh
+Moi: Tu t'es trompé de conversation
+Eux: OH NON
+Eux: Oublie ce message 😭
+-- 5 MINUTES PLUS TARD --
+# Partie 2 : Capture d'écran
+[notif] {MYFANS} : On a vu la capture 😂😂
+Eux: Pourquoi tu as partagé ça
+### ✍️ Mercato et joueurs
+=== L'offre
+# Partie 1 : La proposition
+Eux: On veut ton gardien
+Moi: Non
+Eux: On double son salaire 💰
+Moi: Il est fidèle
+-- UNE SEMAINE PLUS TARD --
+# Partie 2 : La prolongation
+[notif] {MYFANS} : Notre gardien a prolongé !!! 🧤
+Moi: Désolé 😌
+Eux: On reviendra
+=== La signature
+# Partie 1 : La rumeur
+Eux: J'ai une info exclusive 🤫
+Eux: On va signer le meilleur jeune du championnat
+Moi: Celui qui vient de signer chez nous ?
+Eux: …
+Eux: Il a signé chez vous ???
+Moi: Ce matin 😎
+-- LE LENDEMAIN --
+# Partie 2 : La présentation
+[notif] {MYFANS} : Bienvenue au nouveau crack ⭐
+Eux: Bon on va regarder ailleurs
+=== Le prêt
+# Partie 1 : La demande
+Eux: Tu peux nous prêter ton attaquant ?
+Moi: Pour quoi faire ?
+Eux: Nos attaquants ne marquent plus 😭
+Moi: C'est pas une bibliothèque ici 😂
+-- PLUS TARD --
+# Partie 2 : La contre-offre
+Eux: Et ton entraîneur ?
+Moi: Non plus
+=== Le capitaine
+# Partie 1 : Le message
+Eux: Ton capitaine m'a suivi sur les réseaux
+Moi: N'importe quoi
+Eux: [photo 1] Regarde
+Moi: C'est un faux compte 😂
+Eux: …
+-- PLUS TARD --
+# Partie 2 : La vérification
+Eux: Bon c'était un faux compte
+Moi: Je te l'avais dit {MYHEART}
+=== Le dernier jour du mercato
+# Partie 1 : 23 h 59
+Eux: Le mercato ferme dans 1 minute
+Moi: Et ?
+Eux: On vient de signer quelqu'un 😎
+Moi: Qui ?
+Eux: Notre ancien remplaçant… qui revient de prêt
+Moi: Quel recrutement 😂
+-- MINUIT --
+# Partie 2 : Le bilan
+Moi: Mercato réussi ?
+Eux: Ne me parle plus
+=== Le jeune du centre
+# Partie 1 : Le talent
+Moi: Notre jeune de 17 ans a mis un triplé ⚽⚽⚽
+Eux: Contre qui ?
+Moi: Contre vous la dernière fois 😏
+Eux: Ah oui c'était lui
+-- UN AN PLUS TARD --
+# Partie 2 : Il a grandi
+[notif] {MYFANS} : Il est appelé en équipe de France 🇫🇷
+Eux: Bon il est fort
+=== L'entraîneur
+# Partie 1 : Le coach
+Eux: Votre entraîneur crie tout le match
+Moi: C'est de la passion
+Eux: Il a crié sur notre mascotte
+Moi: Elle était hors jeu 😂
+-- APRÈS LE MATCH --
+# Partie 2 : L'excuse
+Eux: Il s'est excusé auprès de la mascotte
+Moi: Tu vois, il est gentil
+=== Le transfert raté
+# Partie 1 : Le transfert
+Eux: On a failli signer un joueur légendaire
+Moi: Failli ?
+Eux: Il a vu notre stade et il est reparti 😭
+Moi: Il a eu raison
+-- UNE SEMAINE PLUS TARD --
+# Partie 2 : Où il signe
+Eux: Il a signé où finalement ?
+Moi: Devine 😏
+Eux: Non…
+Moi: Chez nous {MYHEART}
+=== La visite médicale
+# Partie 1 : Le test
+Eux: On fait passer une visite médicale à notre recrue
+Moi: Et ?
+Eux: Il a demandé où était {MYSTADE}
+Moi: Il a bon goût
+-- LE LENDEMAIN --
+# Partie 2 : Le choix
+Eux: Il a refusé notre contrat
+Moi: Il est en route chez nous 😎
+=== Le numéro 10
+# Partie 1 : Le maillot
+Eux: Qui va porter le 10 chez vous cette saison ?
+Moi: Une légende en devenir
+Eux: Le petit qui ne joue jamais ?
+Moi: Il a mis un doublé hier 😏
+Eux: …
+-- LE WEEK-END --
+# Partie 2 : Le match
+[notif] {MYFANS} : Encore un but du numéro 10 🔥
+Eux: Bon il est bon
+### 🏟️ Jour de match
+=== Les billets
+# Partie 1 : Les places
+Eux: Tu as des places pour le Classique ?
+Moi: Oui, tribune centrale 😎
+Eux: Tu m'en prends une ?
+Moi: Seulement si tu portes nos couleurs
+Eux: Jamais
+Moi: Alors regarde-le à la télé 😂
+-- LE JOUR DU MATCH --
+# Partie 2 : Devant la télé
+Eux: Je te vois à la télé
+Eux: Pourquoi tu cries autant
+Moi: C'est l'ambiance {MYHEART}
+=== La pluie
+# Partie 1 : Avant le match
+Eux: Il pleut des cordes 🌧️
+Moi: Parfait, on joue mieux sous la pluie
+Eux: Ça existe pas
+Moi: Regarde ce soir 😏
+-- 90 MINUTES PLUS TARD --
+# Partie 2 : Après la pluie
+[notif] {MYFANS} : Victoire sous la pluie ☔🔥
+Eux: Bon la pluie vous aime
+=== Le tifo
+# Partie 1 : Le secret
+Moi: Ce soir on prépare un tifo géant 🎨
+Eux: C'est quoi le dessin ?
+Moi: Secret
+Eux: Allez dis-moi
+Moi: Tu le verras à l'entrée des joueurs 😈
+-- LE COUP D'ENVOI --
+# Partie 2 : Le tifo
+Eux: [photo 1] C'est vous ça ???
+Moi: Magnifique non ?
+Eux: J'ai des frissons 😭
+=== La mi-temps
+# Partie 1 : 0-0
+Eux: 0-0 à la mi-temps
+Eux: Vous êtes pas si forts
+Moi: On se chauffe
+Eux: Ça fait 45 minutes que vous vous chauffez 😂
+-- 45 MINUTES PLUS TARD --
+# Partie 2 : La deuxième mi-temps
+[notif] {MYFANS} : BUUUUT 🔥🔥🔥
+Moi: Chauffés maintenant 😎
+Eux: Je coupe la télé
+=== Le VAR
+# Partie 1 : Le but
+Eux: BUUUT 🔥
+Eux: On mène !!!
+Moi: Attends la VAR 👀
+Eux: Elle va valider
+-- 3 MINUTES PLUS TARD --
+# Partie 2 : La décision
+[notif] {MYFANS} : But refusé pour hors-jeu 😂
+Eux: D'un orteil !!!
+Moi: Un orteil c'est un orteil 🦶
+=== Le penalty
+# Partie 1 : 89e minute
+Eux: Penalty pour nous à la 89e 😱
+Eux: C'est fini pour vous
+Moi: Notre gardien est un mur 🧱
+-- 1 MINUTE PLUS TARD --
+# Partie 2 : L'arrêt
+[notif] {MYFANS} : ARRÊÊÊT DU GARDIEN 🧤🔥
+Eux: Comment il a fait ça
+Moi: Un mur je t'ai dit {MYHEART}
+=== Le retard
+# Partie 1 : Les bouchons
+Eux: Je suis dans les bouchons 🚗
+Eux: Je vais rater le début
+Moi: Ce n'est pas grave
+Moi: Le début c'est quand on marque 😏
+-- 30 MINUTES PLUS TARD --
+# Partie 2 : Arrivé
+Eux: J'arrive, c'est combien ?
+Moi: Tu ne veux pas savoir
+=== Le fumigène
+# Partie 1 : L'ambiance
+Moi: Tu entends le stade ?
+Eux: Même de chez moi j'entends 😳
+Moi: Et le match n'a pas commencé
+Eux: Vous êtes fous
+Moi: Fous de notre club {MYHEART}
+-- PENDANT LE MATCH --
+# Partie 2 : L'ambiance
+[notif] {MYFANS} : Le stade tremble 🔥🔥
+Eux: Je monte le son de ma télé
+=== Le carton rouge
+# Partie 1 : L'expulsion
+Eux: Rouge pour votre défenseur 🟥
+Eux: Vous êtes à 10 maintenant
+Moi: On joue mieux à 10
+Eux: Personne ne joue mieux à 10 😂
+-- FIN DU MATCH --
+# Partie 2 : Le score
+[notif] {MYFANS} : Victoire à 10 contre 11 💪
+Moi: Tu disais ?
+Eux: Rien
+=== La prolongation
+# Partie 1 : 90e minute
+Eux: Prolongation 😰
+Moi: Mon cœur ne tient plus
+Eux: Le mien non plus
+Moi: Pour une fois on est d'accord 🤝
+-- 30 MINUTES PLUS TARD --
+# Partie 2 : Les tirs au but
+Eux: Tirs au but…
+Moi: Je ne regarde plus 🙈
+[notif] {MYFANS} : ON A GAGNÉ AUX TIRS AU BUT 🎉
+Moi: J'AI REGARDÉ EN FAIT 😭
+=== L'hymne
+# Partie 1 : Avant le coup d'envoi
+Moi: Ferme les yeux et écoute
+Eux: Quoi ?
+Moi: Notre hymne dans le stade 🎶
+Eux: J'ai des frissons
+Eux: Mais je ne te le dirai jamais
+-- PLUS TARD --
+# Partie 2 : L'aveu
+Eux: Ok il est beau votre hymne
+Moi: Je le savais {MYHEART}
+=== Le remplaçant
+# Partie 1 : 80e minute
+Eux: Pourquoi votre coach fait entrer un jeune ?
+Moi: Il sait ce qu'il fait
+Eux: C'est la panique chez vous 😂
+-- 5 MINUTES PLUS TARD --
+# Partie 2 : Le but
+[notif] {MYFANS} : But du jeune qui vient d'entrer ⚡
+Moi: Coaching gagnant 😎
+Eux: Chance
+=== La coupure de courant
+# Partie 1 : Le bug
+Eux: Ma télé vient de s'éteindre
+Eux: Il se passe quoi ???
+Moi: Je te raconte en direct
+Moi: Nos supporters chantent
+Moi: Nos joueurs attaquent
+-- 10 MINUTES PLUS TARD --
+# Partie 2 : La lumière revient
+Eux: La télé remarche
+Eux: POURQUOI C'EST 2-0
+Moi: Je t'ai tout raconté 😂
+=== Le derby du quartier
+# Partie 1 : Le défi
+Eux: Ce soir match de quartier, mon équipe contre la tienne ⚽
+Moi: Tu viens avec qui ?
+Eux: Mon cousin, mon voisin et mon chien
+Moi: Le chien joue en défense ? 😂
+-- LE SOIR --
+# Partie 2 : Le score
+Eux: 8-1
+Moi: Pour qui ?
+Eux: Le chien a marqué le seul but 🐶
+=== La dernière journée
+# Partie 1 : Tout se joue ce soir
+Moi: Dernier match de la saison
+Eux: Le plus important
+Moi: Tu stresses ?
+Eux: Je mange mes ongles depuis ce matin 😬
+-- 90 MINUTES PLUS TARD --
+# Partie 2 : La fin de saison
+[notif] {MYFANS} : Merci pour cette saison incroyable 💪
+Eux: Vivement la saison prochaine
+Moi: On sera encore là {MYHEART}
+### 👨‍👩‍👧 Supporters et famille
+=== Le grand-père
+# Partie 1 : Papi
+Eux: Ton grand-père est supporter de qui ?
+Moi: {DUMECAP} depuis 60 ans
+Eux: Le mien {DUTHEM}
+Moi: On les fait se rencontrer ? 😂
+-- DIMANCHE --
+# Partie 2 : La rencontre
+Eux: Ils regardent le match ensemble
+Eux: Ils se disputent depuis une heure
+Moi: Comme nous 😂
+=== Le petit frère
+# Partie 1 : La trahison
+Eux: Mon petit frère veut ton maillot pour Noël 😭
+Moi: Il a bon goût
+Eux: Aide-moi à le faire changer d'avis
+Moi: Jamais
+-- NOËL --
+# Partie 2 : Le cadeau
+Eux: [photo 1] Il est trop content 😭
+Moi: Bienvenue dans la famille petit {MYHEART}
+=== La maman
+# Partie 1 : Maman
+Eux: Ma mère me demande pourquoi je crie devant la télé
+Moi: Dis-lui que tu perds 😂
+Eux: Elle a vu le score
+Eux: Elle se moque de moi
+Moi: J'adore ta mère
+-- LE LENDEMAIN --
+# Partie 2 : Le petit-déjeuner
+Eux: Elle a mis vos couleurs sur la table du petit-déj
+Moi: Quelle femme {MYHEART}
+=== Le chien
+# Partie 1 : Le nouveau chien
+Moi: J'ai adopté un chien 🐶
+Eux: Comment il s'appelle ?
+Moi: Champion
+Eux: Original
+Moi: Il aboie quand {LETHEM} passe à la télé 😂
+-- LE SOIR DU MATCH --
+# Partie 2 : Le chien
+Moi: [photo 1] Il a mis son écharpe
+Eux: Même ton chien me chambre
+=== La tribune familiale
+# Partie 1 : En famille
+Moi: Je vais au stade avec toute ma famille
+Eux: Combien vous êtes ?
+Moi: 14 😂
+Eux: C'est une tribune entière
+-- LE SOIR --
+# Partie 2 : Le chant
+[notif] {MYFANS} : La famille la plus bruyante du stade 📢
+Eux: J'ai entendu ta tante d'ici
+=== Le prof
+# Partie 1 : En cours
+Eux: Mon prof est supporter {DUME}
+Moi: Ton prof a du goût
+Eux: Il m'a mis 18 parce que je lui ai parlé de votre victoire
+Moi: Tu vois, on te porte chance 😂
+-- LE LENDEMAIN --
+# Partie 2 : L'interro
+Eux: Il nous a donné un sujet sur votre stade
+Moi: Révise bien {MYHEART}
+=== Les voisins
+# Partie 1 : À côté
+Eux: Mon voisin chante votre hymne à 23 h 😤
+Moi: C'est un homme bien
+Eux: Il a mis un drapeau à sa fenêtre
+Moi: Je veux le rencontrer
+-- LE LENDEMAIN --
+# Partie 2 : Le drapeau
+Eux: Il en a mis un deuxième
+Moi: Il est en mission 😂
+=== Le cousin
+# Partie 1 : Le traître
+Eux: Mon cousin est passé chez vous 😱
+Moi: Il a ouvert les yeux
+Eux: Toute la famille est choquée
+Moi: Il est heureux maintenant {MYHEART}
+-- AU REPAS DE FAMILLE --
+# Partie 2 : Le repas
+Eux: Il est venu avec votre maillot
+Eux: Mamie l'a applaudi 😂
+=== Le bébé
+# Partie 1 : La naissance
+Moi: Je suis papa 🍼
+Eux: Félicitations !!
+Moi: [photo 1] Regarde son premier pyjama
+Eux: Aux couleurs {DUME} évidemment 😂
+Moi: Supporter depuis la naissance {MYHEART}
+-- 18 ANS PLUS TARD --
+# Partie 2 : Il a grandi
+[notif] {MYFANS} : Le petit a son premier abonnement au stade 🎟️
+Eux: La relève est là
+=== La mamie
+# Partie 1 : Mamie
+Eux: Ma mamie a regardé son premier match
+Moi: Elle a aimé ?
+Eux: Elle a dit que vos joueurs sont plus beaux 😭
+Moi: Mamie a raison
+-- LE MATCH SUIVANT --
+# Partie 2 : Elle revient
+Eux: Elle veut ton maillot pour son anniversaire
+Moi: Je lui offre {MYHEART}
+=== Le groupe WhatsApp
+# Partie 1 : Le groupe
+Eux: Tu as vu le groupe de la famille ?
+Moi: Non pourquoi ?
+Eux: Ton oncle a mis votre logo en photo du groupe 😤
+Moi: Il a fait ce qu'il fallait
+-- UNE HEURE PLUS TARD --
+# Partie 2 : Le vote
+[notif] Groupe Famille : Vote : on garde le logo ? 12 oui, 1 non
+Eux: Le non c'est moi 😭
+=== Le collègue
+# Partie 1 : Au bureau
+Eux: Mon collègue est venu au travail avec votre écharpe
+Moi: Il a du style
+Eux: Il l'a accrochée sur mon ordinateur 😤
+Moi: Il est gentil, il partage
+-- LE LENDEMAIN --
+# Partie 2 : La vengeance
+Eux: J'ai mis notre drapeau sur son bureau
+Moi: Et ?
+Eux: Il l'a utilisé comme nappe 😭
+=== Le chauffeur de taxi
+# Partie 1 : Le trajet
+Eux: Mon chauffeur de taxi parle que de votre club
+Moi: Laisse-le parler
+Eux: Ça fait 40 minutes
+Moi: Il a beaucoup à dire 😂
+-- À L'ARRIVÉE --
+# Partie 2 : Le prix
+Eux: Il m'a fait une réduction parce que j'ai dit que vous étiez meilleurs
+Moi: Tu vois, il faut dire la vérité 😌
+=== Le coiffeur
+# Partie 1 : Chez le coiffeur
+Eux: Mon coiffeur est supporter {DUME}
+Moi: Fais attention à toi
+Eux: Il m'a fait un trait dans les cheveux
+Moi: Montre
+Eux: [photo 1] Pourquoi il a la forme de votre logo 😭
+-- LE LENDEMAIN --
+# Partie 2 : Au lycée
+Eux: Tout le monde se moque de moi
+Moi: Tout le monde t'aime {MYHEART}
+=== L'abonnement
+# Partie 1 : La carte
+Moi: J'ai renouvelé mon abonnement au stade 🎟️
+Eux: Encore ?
+Moi: Depuis 10 ans
+Eux: Moi je regarde sur mon téléphone
+Moi: Avec le son coupé ? 😂
+-- LE PREMIER MATCH --
+# Partie 2 : L'ambiance
+[notif] {MYFANS} : Quel retour au stade 🔥
+Eux: Ok l'année prochaine je prends un abonnement
+### 🤪 Délires
+=== Le robot
+# Partie 1 : L'intelligence artificielle
+Eux: J'ai demandé à une IA qui est le meilleur club
+Moi: Elle a dit quoi ?
+Eux: Elle a dit {LEME} 😭
+Moi: Même les robots savent {MYHEART}
+-- LE LENDEMAIN --
+# Partie 2 : La deuxième question
+Eux: J'ai reposé la question
+Eux: Elle a répondu « déjà répondu »
+=== La machine à remonter le temps
+# Partie 1 : L'invention
+Eux: J'ai inventé une machine à remonter le temps ⏳
+Moi: Pour quoi faire ?
+Eux: Pour revoir notre dernière victoire contre vous
+Moi: Elle va devoir remonter loin 😂
+-- 10 ANS EN ARRIÈRE --
+# Partie 2 : Le voyage
+Eux: Je suis arrivé
+Eux: On perd aussi ici 😭
+=== Les extraterrestres
+# Partie 1 : L'OVNI
+Eux: J'ai vu un OVNI au-dessus de votre stade 🛸
+Moi: Ils viennent voir le meilleur club
+Eux: Ils ont atterri dans votre tribune
+Moi: Ils ont pris un abonnement 😂
+-- LE LENDEMAIN --
+# Partie 2 : Le message
+[notif] Extraterrestres : On revient la saison prochaine 👽
+Moi: Tu vois {MYHEART}
+=== Le jeu vidéo
+# Partie 1 : La manette
+Eux: Je te défie au jeu de foot 🎮
+Moi: Tu prends quelle équipe ?
+Eux: {LETHEMCAP} évidemment
+Moi: Moi {LEME} 😏
+-- UNE HEURE PLUS TARD --
+# Partie 2 : Le score
+Eux: 7-0
+Eux: Mon pouce est cassé
+Moi: C'est ton équipe qui est cassée 😂
+=== Le super-héros
+# Partie 1 : Le costume
+Eux: Je vais au stade déguisé en super-héros 🦸
+Moi: Quel héros ?
+Eux: Le défenseur qui arrête tout
+Moi: Donc pas votre défenseur 😂
+-- LE SOIR --
+# Partie 2 : La mission
+Eux: Mission échouée
+Moi: Même les super-héros perdent contre nous
+=== La téléportation
+# Partie 1 : Le pouvoir
+Eux: Si je pouvais me téléporter j'irais où ?
+Moi: Dans notre stade
+Eux: Pourquoi ?
+Moi: Pour voir un vrai match 😏
+Eux: …
+-- PLUS TARD --
+# Partie 2 : La réponse
+Eux: Ok peut-être que j'irais
+Moi: Je te garde une place {MYHEART}
+=== Le chat qui parle
+# Partie 1 : Miaou
+Eux: Mon chat miaule à chaque fois que vous marquez 🐱
+Moi: Il est supporter {DUME}
+Eux: Il a miaulé 3 fois hier soir 😭
+Moi: Bon chat
+-- LE MATCH SUIVANT --
+# Partie 2 : Le chat
+Eux: [photo 1] Il dort sur ton écharpe que tu as oubliée chez moi
+Moi: Garde-le, il est des nôtres
+=== Le rêve
+# Partie 1 : La nuit
+Eux: J'ai rêvé que vous perdiez 10-0
+Moi: C'était un rêve 😂
+Eux: Laisse-moi rêver
+-- LE MATIN --
+# Partie 2 : Le réveil
+[notif] {MYFANS} : Victoire ce soir 💪
+Eux: Pourquoi le réveil est plus dur que le rêve
+=== La fusée
+# Partie 1 : L'espace
+Moi: On va envoyer un maillot dans l'espace 🚀
+Eux: Pour quoi faire ?
+Moi: Pour que même la lune sache qui est le meilleur
+Eux: Vous êtes fous 😂
+-- UN MOIS PLUS TARD --
+# Partie 2 : En orbite
+Moi: [photo 1] Il flotte au-dessus de la Terre
+Eux: J'avoue c'est stylé
+=== La boîte aux lettres
+# Partie 1 : Le courrier
+Eux: J'ai reçu une lettre
+Moi: De qui ?
+Eux: Une lettre anonyme qui dit « {MYSLOGAN} »
+Moi: Je ne vois pas de qui ça vient 😇
+Eux: Il y a ton prénom au dos
+-- LE LENDEMAIN --
+# Partie 2 : La réponse
+Eux: Je t'ai répondu par la poste
+Moi: J'ai reçu un carton vide
+Eux: Comme votre palmarès 😂
+Moi: …
+</script>
 <script>
 (function () {
   "use strict";
@@ -140,7 +1262,26 @@ button:disabled { opacity: .5; }
         "-- LE LENDEMAIN --", "# Partie 3 : La réponse", "[notif] Supporters PSG : IL A PROLONGÉ !!! ❤️💙", "Moi: Il a prolongé 😌", "Moi: Jusqu'en 2030", "OM: …", "@contact OM | 😤", "OM: On reviendra l'été prochain", "Moi: Ici c'est Paris ❤️💙"] },
     vide: { label: "✏️ Vide : mon histoire", om: [OM_ME, PSG_CT, "# Partie 1 : …", "PSG: Salut", "Moi: Salut"], psg: [PSG_ME, OM_CT, "# Partie 1 : …", "OM: Salut", "Moi: Salut"] }
   };
-  function tplText(k, side) { return TPL[k][side === "psg" ? "psg" : "om"].join("\n"); }
+  // les 100 histoires de la bibliothèque, écrites une seule fois avec des mots qui s'adaptent au camp choisi
+  var SIDE = {
+    om: { ME: "OM", LEME: "l'OM", LEMECAP: "L'OM", DUME: "de l'OM", DUMECAP: "De l'OM", MYSTADE: "le Vélodrome", MYCITY: "Marseille", MYCITYADJ: "marseillais", MYCOLORS: "bleu ciel et blanc", MYSLOGAN: "Droit au but 💙", MYHEART: "💙", MYFANS: "Supporters OM", HEAD: OM_ME, CT: PSG_CT },
+    psg: { ME: "PSG", LEME: "le PSG", LEMECAP: "Le PSG", DUME: "du PSG", DUMECAP: "Du PSG", MYSTADE: "le Parc des Princes", MYCITY: "Paris", MYCITYADJ: "parisien", MYCOLORS: "bleu et rouge", MYSLOGAN: "Ici c'est Paris ❤️💙", MYHEART: "❤️💙", MYFANS: "Supporters PSG", HEAD: PSG_ME, CT: OM_CT }
+  };
+  var LIB = [], cat = "";
+  String(document.getElementById("lib").textContent).split("\n").forEach(function (l) {
+    var m; if ((m = l.match(/^###\s*(.+)$/))) { cat = m[1].trim(); return; }
+    if ((m = l.match(/^===\s*(.+)$/))) { LIB.push({ cat: cat, title: m[1].trim(), lines: [] }); return; }
+    if (LIB.length && l.trim()) LIB[LIB.length - 1].lines.push(l);
+  });
+  function fillTokens(text, side) {
+    var me = SIDE[side === "psg" ? "psg" : "om"], th = SIDE[side === "psg" ? "om" : "psg"];
+    var v = { ME: me.ME, THEM: th.ME, LEME: me.LEME, LEMECAP: me.LEMECAP, LETHEM: th.LEME, LETHEMCAP: th.LEMECAP, DUME: me.DUME, DUMECAP: me.DUMECAP, DUTHEM: th.DUME, MYSTADE: me.MYSTADE, THEIRSTADE: th.MYSTADE, MYCITY: me.MYCITY, MYCITYADJ: me.MYCITYADJ, MYCOLORS: me.MYCOLORS, MYSLOGAN: me.MYSLOGAN, MYHEART: me.MYHEART, MYFANS: me.MYFANS, THEIRFANS: th.MYFANS };
+    return text.replace(/\{([A-Z]+)\}/g, function (a, k) { return v[k] != null ? v[k] : a; }).replace(/^Eux\s*:/gm, th.ME + ":");
+  }
+  function tplText(k, side) {
+    if (/^lib:/.test(k)) { var st = LIB[+k.slice(4)]; if (!st) return ""; var sd = SIDE[side === "psg" ? "psg" : "om"]; return [sd.HEAD, sd.CT].concat(st.lines.map(function (l) { return fillTokens(l, side); })).join("\n"); }
+    return TPL[k][side === "psg" ? "psg" : "om"].join("\n");
+  }
 
   var S;
   try { S = JSON.parse(localStorage.getItem("histoire-set") || "null"); } catch (e) { S = null; }
@@ -190,11 +1331,32 @@ button:disabled { opacity: .5; }
     }; });
   }
 
+  /* ---------- logos des clubs (sur l'appareil) ---------- */
+  var logos = {};
+  function clubKey(name) { var k = String(name || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z]/g, ""); return k === "om" || k === "marseille" || k === "olympiquedemarseille" ? "om" : k === "psg" || k === "paris" || k === "parissaintgermain" ? "psg" : k; }
+  function loadLogo(k) { var src = ""; try { src = localStorage.getItem("histoire-logo-" + k) || ""; } catch (e) {} if (!src) { logos[k] = null; return; } var im = new Image(); im.onload = function () { logos[k] = im; }; im.src = src; }
+  function logosForm() {
+    $("#logos").innerHTML = [["om", "OM", "💙"], ["psg", "PSG", "❤️💙"]].map(function (c) { var src = ""; try { src = localStorage.getItem("histoire-logo-" + c[0]) || ""; } catch (e) {}
+      return "<div class=\"logo-slot\"><span class=\"pv\" style=\"" + (src ? "background-image:url(" + src + ")" : "") + "\"></span><div><b>" + c[2] + " Logo " + c[1] + "</b><label class=\"btn mini\" style=\"display:inline-grid;place-items:center;min-height:34px;padding:0 10px;font-size:13px\">" + (src ? "Changer" : "Ajouter") + "<input type=\"file\" accept=\"image/*\" hidden data-logo=\"" + c[0] + "\"></label>" + (src ? " <button class=\"mini\" type=\"button\" data-rmlogo=\"" + c[0] + "\">Retirer</button>" : "") + "</div></div>"; }).join("");
+    document.querySelectorAll("[data-logo]").forEach(function (inp) { inp.onchange = function () {
+      var f = this.files && this.files[0], k = inp.getAttribute("data-logo"); if (!f) return;
+      var im = new Image(); im.onload = function () { var c = document.createElement("canvas"), r = Math.min(320 / im.width, 320 / im.height); c.width = c.height = 320; c.getContext("2d").drawImage(im, (320 - im.width * r) / 2, (320 - im.height * r) / 2, im.width * r, im.height * r);
+        try { localStorage.setItem("histoire-logo-" + k, c.toDataURL("image/png")); } catch (e) { alert("Plus de place pour le logo."); } URL.revokeObjectURL(im.src); loadLogo(k); logosForm(); };
+      im.src = URL.createObjectURL(f);
+    }; });
+    document.querySelectorAll("[data-rmlogo]").forEach(function (b) { b.onclick = function () { var k = b.getAttribute("data-rmlogo"); try { localStorage.removeItem("histoire-logo-" + k); } catch (e) {} logos[k] = null; logosForm(); }; });
+  }
+
   /* ---------- dessin de l'écran de messagerie ---------- */
   var FONT = "Figtree, system-ui, sans-serif";
   function rr(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
   function lum(h) { var n = parseInt(String(h).slice(1), 16); return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255; }
   function badge(g, x, y, r, p) {
+    var lg = logos[clubKey(p.name)];
+    if (lg) { // logo importé : posé dans un rond blanc
+      g.save(); g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fillStyle = "#ffffff"; g.fill(); g.clip(); var s2 = r * 1.62; g.drawImage(lg, x - s2 / 2, y - s2 / 2, s2, s2); g.restore();
+      g.strokeStyle = "rgba(0,0,0,.1)"; g.lineWidth = 3; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.stroke(); return;
+    }
     g.save(); g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.clip();
     g.fillStyle = p.c1; g.fillRect(x - r, y - r, r * 2, r * 2); g.fillStyle = p.c2; g.fillRect(x, y - r, r, r * 2);
     g.fillStyle = "rgba(255,255,255,.92)"; g.beginPath(); g.moveTo(x - r * .5, y - r * .5); g.lineTo(x + r * .5, y - r * .5); g.lineTo(x + r * .5, y + r * .05); g.quadraticCurveTo(x + r * .5, y + r * .45, x, y + r * .65); g.quadraticCurveTo(x - r * .5, y + r * .45, x - r * .5, y + r * .05); g.closePath(); g.fill();
@@ -333,10 +1495,14 @@ button:disabled { opacity: .5; }
 
   /* ---------- formulaires ---------- */
   function fill() {
-    $("#tpl").innerHTML = Object.keys(TPL).map(function (k) { return "<option value=\"" + k + "\">" + TPL[k].label + "</option>"; }).join(""); $("#tpl").value = S.tpl;
+    var h = "<optgroup label=\"⭐ Histoires spéciales\">" + Object.keys(TPL).map(function (k) { return "<option value=\"" + k + "\">" + TPL[k].label + "</option>"; }).join("") + "</optgroup>", cur = null;
+    LIB.forEach(function (st, i) { if (st.cat !== cur) { if (cur !== null) h += "</optgroup>"; cur = st.cat; h += "<optgroup label=\"" + st.cat + "\">"; } h += "<option value=\"lib:" + i + "\">" + (i + 1) + ". " + st.title + "</option>"; });
+    $("#tpl").innerHTML = h + "</optgroup>"; $("#tpl").value = S.tpl;
     $("#side").value = S.side; $("#script").value = S.script; $("#speed").value = S.speed; $("#size").value = S.size; $("#q").value = S.q; $("#sfx").checked = !!S.sfx; $("#music").checked = !!S.music;
   }
-  function edited() { var cur = String(S.script || "").trim(); return !Object.keys(TPL).some(function (k) { return cur === tplText(k, "om").trim() || cur === tplText(k, "psg").trim(); }); }
+  function allKeys() { return Object.keys(TPL).concat(LIB.map(function (x, i) { return "lib:" + i; })); }
+  function edited() { var cur = String(S.script || "").trim(); return !allKeys().some(function (k) { return cur === tplText(k, "om").trim() || cur === tplText(k, "psg").trim(); }); }
+  $("#rnd").onclick = function () { if (edited() && !confirm("Remplacer ton histoire par une histoire au hasard ?")) return; var k = "lib:" + Math.floor(Math.random() * LIB.length); S.tpl = k; $("#tpl").value = k; applyTpl(); };
   function applyTpl() { S.script = tplText(S.tpl, S.side); $("#script").value = S.script; save(); parse(); restart(); makeCap(); }
   $("#tpl").onchange = function () { if (edited() && !confirm("Remplacer ton histoire par celle-ci ?")) { this.value = S.tpl; return; } S.tpl = this.value; applyTpl(); };
   $("#side").onchange = function () { if (edited() && !confirm("Charger la version " + (this.value === "psg" ? "Team PSG" : "Team OM") + " de l'histoire ? Ton texte modifié sera remplacé.")) { this.value = S.side; return; } S.side = this.value; applyTpl(); };
@@ -399,6 +1565,7 @@ button:disabled { opacity: .5; }
   };
 
   for (var n = 1; n <= 6; n++) loadPhoto(n);
+  loadLogo("om"); loadLogo("psg"); logosForm();
   fill(); parse(); imgsForm(); makeCap();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(restart);
   window.__histoire = { drawScene: drawScene, total: function () { return total; } };
