@@ -2,6 +2,8 @@
 
 Un quiz en plein écran au format vertical 9:16, lu par la voix de ton téléphone. Pensé pour TikTok.
 
+Toutes les pages du studio (Quiz, VS, Bataille des clubs, Duel en chiffres, Histoires) ont le même menu en haut, défini une seule fois dans `nav.js`.
+
 Le quiz tient dans un seul fichier, `index.html`, sans rien à installer. Le relais facultatif qui lit le chat TikTok est dans `relay/`.
 
 ## Deux modes
@@ -165,9 +167,10 @@ Page : https://ozentv.github.io/quiz-live/clubs.html
 ## 💬 Histoire en messages (OM contre PSG)
 Page : https://ozentv.github.io/quiz-live/histoire.html
 - Une conversation qui s'écrit toute seule sur un écran de messagerie (appli inventée, sans marque) : tes messages se tapent lettre par lettre au clavier, les réponses arrivent après « … en train d'écrire », et le fil défile tout seul.
-- **111 histoires prêtes à l'emploi**, chacune en version **Team OM** (« Moi » = l'OM) et **Team PSG** (« Moi » = le PSG) :
+- **307 histoires prêtes à l'emploi**, chacune en version **Team OM** (« Moi » = l'OM) et **Team PSG** (« Moi » = le PSG) :
   - 5 histoires spéciales : Le Classique, Le pari, Les ex, Le mercato, et une vide ;
-  - 100 conversations de 35 à 45 secondes chacune, en 3 parties, avec un vrai dialogue, en 7 catégories : 😏 Chambrage, 🤝 Paris et défis, 💔 Amour et ex, ✍️ Mercato et joueurs, 🏟️ Jour de match, 👨‍👩‍👧 Supporters et famille, 🤪 Délires.
+  - 302 conversations de 31 à 56 secondes, en 3 parties, avec un vrai dialogue, en 15 catégories : 😏 Chambrage, 🤝 Paris et défis, 💔 Amour et ex, ✍️ Mercato et joueurs, 🏟️ Jour de match, 👨‍👩‍👧 Supporters et famille, 🤪 Délires, 👥 Groupes de supporters, 👻 Snap et réseaux, 🏆 Coupes et soirées européennes, 🎮 Console, five et foot entre potes, 🏫 École, boulot et vie de tous les jours, 🔥 Chambrage (saison 2), 💞 Amour, famille et rivalité, 😂 Délires (saison 2), 👥 Groupes de supporters (saison 2).
+  - Les nouvelles histoires utilisent les snaps, la carte, les sondages, les autocollants, les effets `[choc]`, les captures d'écran, les appels vidéo et les vocaux.
   - Les noms, stades, villes, couleurs, slogans et emojis s'adaptent tout seuls au camp choisi. « 🎲 Une histoire au hasard » en tire une.
 - **Réalisme** : « ✓ Envoyé » puis « ✓✓ Lu » sous ton dernier message ; réponse à un message avec la citation au-dessus (`[répond: …]`) ; réactions qui se posent sur une bulle (`[réaction 😂]`) ; message supprimé (`[supprimé]`) ; hésitations (`Moi: [hésite: Je t'aime] Bonne nuit` : tu tapes, tu effaces, tu retapes ; `[hésite]` : l'autre écrit puis n'envoie rien).
 - **📞 Appels** : écran d'appel entrant plein écran avec sonnerie (`[appel] PSG`), puis « Appel manqué » dans le fil, ou appel décroché avec chrono (`[appel] PSG | accepté`).
