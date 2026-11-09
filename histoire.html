@@ -73,6 +73,8 @@ button:disabled { opacity: .5; }
         <span><code>[vocal] texte</code> message vocal lu par une voix · <code>[position] Devant le Vélodrome</code> position partagée · <code>[photo 1 éphémère]</code> photo qui s'efface après 5 secondes · <code>-- TROIS HEURES PLUS TARD --</code> fait aussi avancer l'heure</span>
         <span><code>[choc]</code> l'écran tremble avec un flash rouge · <code>[zoom]</code> zoom sur le dernier message · <code>[flash]</code> flash blanc (aussi en début de message : <code>PSG: [choc] Quoi ???</code>)</span>
         <span><code>[capture]</code> « 📸 PSG a fait une capture d'écran » · <code>Moi: [capture]</code> c'est toi qui captures · <code>PSG: 😂😂😂</code> un message fait seulement d'emojis s'affiche en grand</span>
+        <span><code>[snap 1] légende</code> « Nouveau Snap » qui s'ouvre en plein écran avec le compte à rebours (photo 1) · <code>Moi: [snap 2]</code> tu envoies un snap · <code>[snapmap] PSG est au Vélodrome 👀</code> carte avec l'avatar</span>
+        <span><code>@flammes 247</code> nombre de flammes à côté du nom (0 = aucune) · <code>[flamme perdue]</code> « ⌛ Votre série va expirer » · <code>[parti]</code> l'autre quitte la conversation (son avatar en bas disparaît)</span>
         <span><code>[sondage] Qui gagne dimanche ? | OM | PSG | Nul</code> sondage avec les votes qui arrivent (<code>| OM 12</code> pour fixer le nombre de votes) · <code>[appel vidéo] PSG | accepté</code> appel vidéo</span>
         <span><code>[sticker chevre]</code> autocollant de l'autre · <code>Moi: [sticker coupe]</code> le tien : ballon, coupe, chevre, but, pleure, rire, feu, clown, mur, dodo, coeur, bus</span>
         <span><code>@groupe Supporters OM | 💙</code> groupe de discussion : chaque nom (<code>Lucas: …</code>, <code>Inès: …</code>) a sa couleur · « Envoyé » et « Lu » s'affichent tout seuls sous ton dernier message</span>
@@ -2849,7 +2851,7 @@ Moi: Si, un peu 😂
 
   /* ---------- lecture du script : chaque ligne devient un événement daté ---------- */
   var items, total, header0;
-  var LOCK_T = 4.4, INBOX_T = 2.4, clockJumps = [], lockNotifs = [], hookText = "", inboxPrev = null;
+  var FLAMES = 0, HOURG = null, PRES = [], LOCK_T = 4.4, INBOX_T = 2.4, clockJumps = [], lockNotifs = [], hookText = "", inboxPrev = null;
   function inboxStart() { return S.lock ? LOCK_T : 0; }
   function inboxEnd() { return inboxStart() + INBOX_T; }
   function hashS(x) { var h = 7; x = String(x); for (var i = 0; i < x.length; i++) h = (h * 31 + x.charCodeAt(i)) % 100003; return h; }
@@ -2894,9 +2896,12 @@ Moi: Si, un peu 😂
     var me = { name: "OM", c1: "#2faee0", c2: "#ffffff" }, other = { name: "PSG", emo: "", c1: "#004170", c2: "#da291c" }, first = true, lastMsg = null, start = 21 * 60;
     var m0 = String(S.clock || "21:00").match(/^(\d{1,2}):(\d{2})$/); if (m0) start = (+m0[1]) * 60 + (+m0[2]);
     clockJumps = [{ at: 0, min: start }]; lockNotifs = [];
-    var lockFrom = null, firstOther = !!(S.lock || S.inbox), fxNext = null;
+    var lockFrom = null, firstOther = !!(S.lock || S.inbox), fxNext = null, flames = null, hourg = null, pres = [], presOn = true, firstKind = null;
+    function presence(on, at) { if (presOn === on) return; presOn = on; pres.push({ on: on, at: at }); }
     function fx(kind, at) { list.push({ k: "fx", fx: kind, at: at }); }
     function addOther(from, it, wait, rec) {
+      if (!firstKind) firstKind = it.k === "snap" ? "📸 Snap" : it.k === "vocal" ? "🎤 Vocal" : "💬 Discussion";
+      presence(true, t);
       if (firstOther) { firstOther = false; it.at = t; it.who = "other"; it.from = from; list.push(it); lastMsg = it; return t; } // déjà annoncé sur l'écran verrouillé : visible dès l'ouverture
       var a = t + wait * sp; list.push({ k: "typing", from: from, at: t, end: a, rec: rec }); it.at = a; it.who = "other"; it.from = from; list.push(it); lastMsg = it; return a; }
     function lockN(from) { if (S.lock && !lockFrom) lockFrom = from; }
@@ -2913,10 +2918,15 @@ Moi: Si, un peu 😂
       if ((m = l.match(/^@(contact|groupe)\s+(.+)$/i))) { var p = m[2].split("|").map(function (x) { return x.trim(); }), o = { name: p[0] || other.name, emo: p[1] != null ? p[1] : other.emo, c1: p[2] || other.c1, c2: p[3] || other.c2, group: /groupe/i.test(m[1]) || (other.group && !/contact/i.test(m[1])) };
         if (first) { other = o; header0 = o; } else list.push({ k: "head", o: o, at: t }); return; }
       if ((m = l.match(/^@moi\s+(.+)$/i))) { var q = m[1].split("|").map(function (x) { return x.trim(); }); me = { name: q[0] || "Moi", c1: q[1] || me.c1, c2: q[2] || me.c2 }; return; }
+      if ((m = l.match(/^@flammes?\s+(\d+)$/i))) { flames = +m[1]; return; }
       if ((m = l.match(/^@heure\s+(\d{1,2}):(\d{2})$/i))) { clockJumps[0].min = (+m[1]) * 60 + (+m[2]); return; }
       first = false;
       if ((m = l.match(/^#\s*(.+)$/))) { list.push({ k: "chap", text: m[1], at: t }); t += .2; return; }
-      if ((m = l.match(/^--\s*(.+?)\s*--$/))) { list.push({ k: "sep", text: m[1], at: t }); clockJumps.push({ at: t + .3, min: jumpClock(m[1], clockAt(t)) }); t += 1.3 * sp; lastMsg = null; return; }
+      if ((m = l.match(/^\[flammes? perdues?\]$/i))) { hourg = t + .2; list.push({ k: "sys", text: "⌛ Votre série de flammes va expirer !", hour: true, at: t + .2 }); t += 1.6 * sp; lastMsg = null; return; }
+      if ((m = l.match(/^\[(parti|partie|quitte)\]$/i))) { presence(false, t + .2); list.push({ k: "sys", text: other.name + " est parti 👋", at: t + .3 }); t += 1.5 * sp; lastMsg = null; return; }
+      if ((m = l.match(/^\[snapmap\]\s*(.*)$/i))) l = other.name + ": [snapmap] " + m[1];
+      if ((m = l.match(/^\[snap\s*\d/i))) l = other.name + ": " + l;
+      if ((m = l.match(/^--\s*(.+?)\s*--$/))) { presence(false, t); list.push({ k: "sep", text: m[1], at: t }); clockJumps.push({ at: t + .3, min: jumpClock(m[1], clockAt(t)) }); t += 1.3 * sp; lastMsg = null; return; }
       if ((m = l.match(/^\[pause\s*([\d.,]+)?\]$/i))) { t += parseFloat((m[1] || "1").replace(",", ".")) || 1; return; }
       if ((m = l.match(/^\[h[ée]site\]$/i))) { list.push({ k: "typing", from: other.name, at: t, end: t + 1.7 * sp }); t += 2.3 * sp; return; }
       if ((m = l.match(/^\[r[ée]action\s*(.+?)\]$/i))) { if (lastMsg) lastMsg.react = { emo: m[1].trim(), at: t + .3 }; t += .9 * sp; return; }
@@ -2936,6 +2946,13 @@ Moi: Si, un peu 😂
         var ph = text.match(/^\[photo\s*(\d)(\s+(?:[ée]ph[ée]m[èe]re|vue unique|unique))?\]\s*(.*)$/i);
         if (ph) { var pit = { k: "photo", n: +ph[1], eph: !!ph[2], text: ph[3] };
           if (isMe) { pit.who = "me"; pit.from = "Moi"; pit.at = t + .3; list.push(pit); lastMsg = pit; t += (pit.eph ? 6 : 2.4) * sp; } else { lockN(from, pit.eph ? "📸 Photo éphémère" : "📷 Photo"); t = addOther(from, pit, .9) + (pit.eph ? 6 : 2.3) * sp; } return; }
+        var sn = text.match(/^\[snap\s*(\d)\]\s*(.*)$/i);
+        if (sn) { var snp = { k: "snap", n: +sn[1], text: sn[2] };
+          if (isMe) { snp.who = "me"; snp.from = "Moi"; snp.prev = t + .1; snp.at = t + 2.1 * sp; snp.opened = snp.at + 2.2 * sp; list.push(snp); lastMsg = snp; t = snp.at + 1.2 * sp; }
+          else { lockN(from); var sa = addOther(from, snp, .9); snp.open = sa + 1.2 * sp; snp.close = snp.open + 4.5; t = snp.close + .8 * sp; } return; }
+        var smp = text.match(/^\[snapmap\]\s*(.*)$/i);
+        if (smp) { var mp = { k: "smap", text: smp[1] || (isMe ? "Je suis là 👀" : from + " est là 👀") };
+          if (isMe) { mp.who = "me"; mp.from = "Moi"; mp.at = t + .3; list.push(mp); lastMsg = mp; t += 2.8 * sp; } else { lockN(from); t = addOther(from, mp, .9) + 2.8 * sp; } return; }
         var so = text.match(/^\[sondage\]\s*(.+)$/i);
         if (so) { var sp2 = so[1].split("|").map(function (x) { return x.trim(); }).filter(Boolean), pq = { k: "poll", q: sp2[0] || "Qui gagne ?", opts: [] };
           (sp2.length > 1 ? sp2.slice(1) : [me.name, other.name, "Match nul"]).slice(0, 4).forEach(function (o, i) { var mn = o.match(/^(.*?)\s+(\d+)$/); pq.opts.push({ l: mn ? mn[1] : o, n: mn ? +mn[2] : 3 + hashS(o + i + pq.q) % 18 }); });
@@ -2967,7 +2984,8 @@ Moi: Si, un peu 😂
       }
     }
     if (S.lock) { var lf = lockFrom || other.name, grp = (header0 || other).group, who = grp ? (header0 || other).name : lf, pre = grp ? lf + " " : "";
-      lockNotifs = [{ from: who, text: pre + "est en train d'écrire", typing: true, at: .5 }, { from: who, text: pre + (grp ? "a envoyé un message" : "t'a envoyé un message"), at: 2.1 }]; }
+      lockNotifs = [{ from: who, text: pre + "est en train d'écrire", typing: true, at: .5 }, { from: who, text: (firstKind || "💬 Discussion") + (grp ? " de " + lf : ""), at: 2.1 }]; }
+    FLAMES = flames != null ? flames : 40 + hashS((other.name || "") + (me.name || "")) % 360; HOURG = hourg; PRES = pres;
     hookText = String(S.hook || "").trim() ? fillTokens(String(S.hook).trim(), S.side) : "";
     inboxPrev = null; list.forEach(function (it) { if (!inboxPrev && it.who === "other") inboxPrev = it; });
     items = list; total = t + 2.5; ME = me; header0 = header0 || other; OTHER0 = other;
@@ -3043,6 +3061,8 @@ Moi: Si, un peu 😂
       else if (it.k === "journal") { var hd = prevKey !== key; out.push({ it: it, head: hd, h: (hd ? 40 : 0) + 470 }); prevKey = key; }
       else if (it.k === "photo") { var hd2 = prevKey !== key, gone = it.eph && t > it.at + 5.4; out.push({ it: it, head: hd2, gone: gone, h: (hd2 ? 40 : 0) + (gone ? 84 : photoSize(it)[1] + 30) }); prevKey = key; if (it.who === "me") lastMe = out.length - 1; }
       else if (it.k === "vocal") { var hd3 = prevKey !== key; out.push({ it: it, head: hd3, h: (hd3 ? 40 : 0) + 118 + (it.react && t >= it.react.at ? 18 : 0) }); prevKey = key; if (it.who === "me") lastMe = out.length - 1; }
+      else if (it.k === "snap") { var hd7 = prevKey !== key; out.push({ it: it, head: hd7, h: (hd7 ? 40 : 0) + 92 }); prevKey = key; }
+      else if (it.k === "smap") { var hd8 = prevKey !== key; out.push({ it: it, head: hd8, h: (hd8 ? 40 : 0) + 600 }); prevKey = key; if (it.who === "me") lastMe = out.length - 1; }
       else if (it.k === "poll") { var hd6 = prevKey !== key; out.push({ it: it, head: hd6, h: (hd6 ? 40 : 0) + pollH(g, it) + 24 }); prevKey = key; if (it.who === "me") lastMe = out.length - 1; }
       else if (it.k === "sticker") { var hd5 = prevKey !== key; out.push({ it: it, head: hd5, h: (hd5 ? 40 : 0) + 300 }); prevKey = key; if (it.who === "me") lastMe = out.length - 1; }
       else if (it.k === "pos") { var hd4 = prevKey !== key; out.push({ it: it, head: hd4, h: (hd4 ? 40 : 0) + 430 }); prevKey = key; if (it.who === "me") lastMe = out.length - 1; }
@@ -3098,7 +3118,7 @@ Moi: Si, un peu 😂
     g.strokeStyle = P.icon; g.lineWidth = 5; rr(g, 966, 222, 56, 56, 12); g.stroke(); g.beginPath(); g.moveTo(984, 262); g.lineTo(1010, 236); g.stroke();
     g.fillStyle = P.inBg; rr(g, 40, 320, W - 80, 80, 40); g.fill(); g.fillStyle = P.hint; g.font = "500 34px " + FONT; g.fillText("🔍  Rechercher", 76, 361);
     var prev = "t'a envoyé un message", ip = inboxPrev;
-    if (ip) prev = ip.k === "msg" ? ip.text : ip.k === "photo" ? "📷 Photo" : ip.k === "vocal" ? "🎤 Message vocal" : ip.k === "pos" ? "📍 Position partagée" : ip.k === "sticker" ? "Autocollant" : ip.k === "journal" ? "📰 Article" : prev;
+    if (ip) prev = ip.k === "msg" ? ip.text : ip.k === "photo" ? "📷 Photo" : ip.k === "vocal" ? "🎤 Message vocal" : ip.k === "pos" ? "📍 Position partagée" : ip.k === "sticker" ? "Autocollant" : ip.k === "snap" ? "📸 Nouveau Snap" : ip.k === "smap" ? "🗺️ Carte" : ip.k === "journal" ? "📰 Article" : prev;
     if (ip && o.group && ip.from) prev = ip.from + " : " + prev;
     var fake = [["Maman ❤️", "Tu rentres à quelle heure ?", "12 min", "#db2777"], [o.group ? "Karim" : ((ck && ck.MYFANS) || "Supporters") + " 👥", o.group ? "T'as vu le match hier ?? 😂" : "Lucas : vous avez vu ça ???", "25 min", "#16a34a"], ["Le coach", "Entraînement demain 9h, soyez à l'heure", "1 h", "#ea580c"], ["Mamie", "Bisous mon grand 😘", "hier", "#9333ea"], ["Inès", "ok", "hier", "#0891b2"], ["Karim", "Tu viens au foot dimanche ?", "lun.", "#ca8a04"], ["Lucas", "Vocal (0:12)", "dim.", "#2563eb"]];
     var tapT = inboxEnd() - .8, y0 = 440, rh = 170, ap = Math.min(1, Math.max(0, (t - inboxStart() - .25) / .35));
@@ -3147,6 +3167,54 @@ Moi: Si, un peu 😂
     });
     g.textAlign = "left"; g.fillStyle = P.sub; g.font = "600 26px " + FONT; g.fillText(tot + " vote" + (tot > 1 ? "s" : "") + (v < 1 && v > 0 ? " · en cours…" : ""), x + 30, y + h - 30);
   }
+  function presAt(t) { var on = true, at = -9; PRES.forEach(function (p) { if (p.at <= t) { on = p.on; at = p.at; } }); var q = Math.min(1, (t - at) / .3); if (!on) return { v: Math.max(0, 1 - q) }; if (at < 0) return { v: 1 }; return { v: q < 1 ? q + .25 * Math.sin(q * Math.PI) : 1 }; }
+  var SNAP_RED = "#f23c57";
+  function snapRow(g, x, y, it, t, P) { // « Nouveau Snap » à ouvrir, puis « Ouvert »
+    var me = it.who === "me", done = me ? t >= it.opened : t >= it.open, cy = y + 36;
+    g.fillStyle = P.pill; rr(g, x, y, 520, 72, 16); g.fill();
+    if (!me && t >= it.open - .35 && t < it.open + .1) { var q = (t - it.open + .35) / .45; g.fillStyle = "rgba(120,120,130," + (.3 * (1 - q)) + ")"; g.beginPath(); g.arc(x + 200, cy, 30 + 120 * q, 0, Math.PI * 2); g.fill(); }
+    g.strokeStyle = SNAP_RED; g.fillStyle = SNAP_RED; g.lineWidth = 5;
+    if (me) { g.beginPath(); g.moveTo(x + 26, cy - 16); g.lineTo(x + 58, cy); g.lineTo(x + 26, cy + 16); g.lineTo(x + 34, cy); g.closePath(); if (done) g.stroke(); else g.fill(); }
+    else { rr(g, x + 24, cy - 17, 34, 34, 7); if (done) g.stroke(); else g.fill(); }
+    g.textAlign = "left"; g.font = "800 34px " + FONT; g.fillStyle = done ? P.sub : SNAP_RED;
+    g.fillText(me ? (done ? "Ouvert" : "Envoyé") : (done ? "Ouvert" : "Nouveau Snap"), x + 80, cy + 1);
+    if (!me && !done) { g.font = "500 26px " + FONT; g.fillStyle = P.sub; g.fillText("Appuie pour voir", x + 320, cy + 2); }
+  }
+  function snapView(g, t, it) { // le snap en plein écran, avec le compte à rebours
+    var me = it.who === "me", a0 = me ? it.prev : it.open, a1 = me ? it.at : it.close, fin = Math.max(0, Math.min(1, (t - a0) / .2)) * (t > a1 ? Math.max(0, 1 - (t - a1) / .3) : 1), im = photos[it.n];
+    g.save(); g.globalAlpha = fin; g.fillStyle = "#000"; g.fillRect(0, 0, W, H);
+    g.save(); var zs = 1 + .04 * (1 - Math.min(1, (t - a0) / .3)); g.translate(W / 2, H / 2); g.scale(zs, zs); g.translate(-W / 2, -H / 2);
+    if (im) { var r = Math.max(W / im.width, H / im.height); g.drawImage(im, (W - im.width * r) / 2, (H - im.height * r) / 2, im.width * r, im.height * r); }
+    else { var gr = g.createLinearGradient(0, 0, W, H); gr.addColorStop(0, "#334155"); gr.addColorStop(1, "#0f172a"); g.fillStyle = gr; g.fillRect(0, 0, W, H); g.fillStyle = "rgba(255,255,255,.6)"; g.font = "700 60px " + FONT; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("📸 Photo " + it.n, W / 2, H / 2); }
+    g.restore();
+    var tg = g.createLinearGradient(0, 0, 0, 300); tg.addColorStop(0, "rgba(0,0,0,.5)"); tg.addColorStop(1, "rgba(0,0,0,0)"); g.fillStyle = tg; g.fillRect(0, 0, W, 300);
+    if (it.text) { g.fillStyle = "rgba(0,0,0,.5)"; g.fillRect(0, 1180, W, 92); g.fillStyle = "#fff"; g.font = "600 44px " + FONT; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(wrap(g, it.text, W - 80)[0], W / 2, 1227); }
+    g.textAlign = "left"; g.textBaseline = "middle";
+    if (me) { g.fillStyle = "#fff"; g.font = "700 48px " + FONT; g.fillText("✕", 50, 110); var bx = W - 380, by = H - 200; g.fillStyle = "#0fadff"; rr(g, bx, by, 330, 110, 55); g.fill(); g.fillStyle = "#fff"; g.font = "800 40px " + FONT; g.fillText("Envoyer ➤", bx + 50, by + 57);
+      var hd = headerAt(it.at); g.fillStyle = "rgba(255,255,255,.92)"; rr(g, 50, by + 10, 470, 90, 45); g.fill(); badge(g, 100, by + 55, 32, hd); g.fillStyle = "#111"; g.font = "700 34px " + FONT; g.fillText("À " + hd.name, 150, by + 56); }
+    else { var hw = headerAt(it.at), left = Math.max(0, it.close - t), tot = it.close - it.open; badge(g, 90, 110, 44, hw.group ? { name: it.from, c1: "#475569", c2: "#94a3b8" } : hw); g.fillStyle = "#fff"; g.font = "800 40px " + FONT; g.fillText(it.from, 150, 96); g.font = "500 28px " + FONT; g.fillStyle = "rgba(255,255,255,.85)"; g.fillText("maintenant", 150, 134);
+      g.strokeStyle = "rgba(255,255,255,.35)"; g.lineWidth = 8; g.beginPath(); g.arc(W - 90, 110, 34, 0, Math.PI * 2); g.stroke(); g.strokeStyle = "#fff"; g.beginPath(); g.arc(W - 90, 110, 34, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * left / tot); g.stroke();
+      g.fillStyle = "#fff"; g.font = "800 30px " + FONT; g.textAlign = "center"; g.fillText(String(Math.ceil(left)), W - 90, 111); g.textAlign = "left"; }
+    g.restore(); g.textAlign = "left";
+  }
+  function snapMap(g, x, y, it, t, P) { // carte avec l'avatar posé dessus
+    var w = 880, h = 560, d = S.dark, hd = headerAt(it.at), who = it.who === "me" ? (ME || hd) : (hd.group ? { name: it.from, c1: "#475569", c2: "#94a3b8" } : hd);
+    g.save(); rr(g, x, y, w, h, 26); g.clip();
+    g.fillStyle = d ? "#2b3138" : "#eef0e6"; g.fillRect(x, y, w, h);
+    g.fillStyle = d ? "#1d3a52" : "#a9d3f0"; g.beginPath(); g.moveTo(x, y + h * .72); g.bezierCurveTo(x + 220, y + h * .6, x + 380, y + h * .95, x + w * .55, y + h); g.lineTo(x, y + h); g.closePath(); g.fill();
+    g.fillStyle = d ? "#2f4733" : "#cfe6c2"; rr(g, x + 600, y + 70, 200, 140, 30); g.fill(); rr(g, x + 90, y + 90, 150, 110, 24); g.fill();
+    g.strokeStyle = d ? "#444b55" : "#ffffff"; g.lineWidth = 16; [[0, 250, w, 210], [0, 120, w, 160], [330, 0, 360, h], [640, 0, 560, h], [120, 0, 200, h]].forEach(function (r) { g.beginPath(); g.moveTo(x + r[0], y + r[1]); g.lineTo(x + r[2], y + r[3]); g.stroke(); });
+    var cx = x + w / 2, cy = y + 230, pul = (t * .8) % 1;
+    [[cx, cy, 230, .32], [x + 180, y + 400, 140, .22], [x + 720, y + 380, 120, .18]].forEach(function (z) { var rg = g.createRadialGradient(z[0], z[1], 0, z[0], z[1], z[2]); rg.addColorStop(0, "rgba(255,60,40," + z[3] * 1.6 + ")"); rg.addColorStop(.5, "rgba(255,170,40," + z[3] + ")"); rg.addColorStop(1, "rgba(255,200,60,0)"); g.fillStyle = rg; g.fillRect(z[0] - z[2], z[1] - z[2], z[2] * 2, z[2] * 2); });
+    [[x + 170, y + 390, "#9333ea", "L"], [x + 740, y + 360, "#16a34a", "I"], [x + 560, y + 420, "#ea580c", "K"]].forEach(function (f) { g.fillStyle = "#fff"; g.beginPath(); g.arc(f[0], f[1], 30, 0, Math.PI * 2); g.fill(); initials(g, f[0], f[1], 25, f[3], f[2]); });
+    g.fillStyle = "rgba(255,255,255," + (.5 * (1 - pul)) + ")"; g.beginPath(); g.arc(cx, cy, 80 + pul * 60, 0, Math.PI * 2); g.fill();
+    var bob = Math.sin(t * 3) * 6; g.save(); g.shadowColor = "rgba(0,0,0,.35)"; g.shadowBlur = 20; g.fillStyle = "#fff"; g.beginPath(); g.arc(cx, cy + bob, 78, 0, Math.PI * 2); g.fill(); g.restore(); badge(g, cx, cy + bob, 70, who);
+    g.font = "800 32px " + FONT; var nm = it.who === "me" ? "Moi" : who.name, nw2 = g.measureText(nm).width + 40; g.fillStyle = "#fff"; rr(g, cx - nw2 / 2, cy + 92, nw2, 50, 25); g.fill(); g.fillStyle = "#111"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(nm, cx, cy + 118);
+    g.fillStyle = d ? "rgba(20,21,24,.92)" : "rgba(255,255,255,.95)"; rr(g, x + 20, y + h - 96, w - 40, 76, 20); g.fill();
+    g.fillStyle = P.text; g.font = "700 34px " + FONT; g.textAlign = "left"; var tx = it.text; while (g.measureText(tx).width > w - 120 && tx.length > 6) tx = tx.slice(0, -2); g.fillText(tx, x + 46, y + h - 57);
+    g.fillStyle = d ? "rgba(20,21,24,.85)" : "rgba(255,255,255,.9)"; rr(g, x + 20, y + 20, 250, 54, 27); g.fill(); g.fillStyle = P.text; g.font = "800 26px " + FONT; g.fillText("🗺️ Carte · direct", x + 38, y + 48);
+    g.restore();
+  }
   function drawBase(g, t) {
     var other = headerAt(t), k = fs(), lh = Math.round(50 * k), P = TH();
     g.fillStyle = P.bg; g.fillRect(0, 0, W, H);
@@ -3155,6 +3223,7 @@ Moi: Si, un peu 😂
     g.strokeStyle = P.icon; g.lineWidth = 6; g.lineCap = "round"; g.beginPath(); g.moveTo(58, 104); g.lineTo(38, 128); g.lineTo(58, 152); g.stroke();
     badge(g, 132, 128, 46, other);
     g.textAlign = "left"; g.textBaseline = "middle"; g.fillStyle = P.text; g.font = "800 46px " + FONT; var hn = other.name; while (g.measureText(hn).width > 560 && hn.length > 4) hn = hn.slice(0, -1); g.fillText(hn, 196, other.group ? 116 : 128); var nw = g.measureText(hn).width; g.font = "38px " + FONT; g.fillText(other.emo || "", 206 + nw, other.group ? 118 : 130);
+    if (!other.group && FLAMES > 0) { var ex = 206 + nw + (other.emo ? g.measureText(other.emo).width + 14 : 0); g.font = "700 34px " + FONT; g.fillStyle = P.text; g.fillText("🔥 " + FLAMES + (HOURG != null && t >= HOURG ? " ⌛" : ""), ex, 131); }
     if (other.group) { g.fillStyle = P.sub; g.font = "600 26px " + FONT; var names = []; items.forEach(function (it) { if (it.who === "other" && it.from && names.indexOf(it.from) < 0) names.push(it.from); }); g.fillText((names.slice(0, 4).join(", ") + (names.length ? ", toi" : "")).slice(0, 44), 198, 156); }
     g.strokeStyle = P.icon; g.lineWidth = 5; g.beginPath(); g.arc(902, 128, 20, Math.PI * .6, Math.PI * 1.9); g.stroke();
     rr(g, 966, 110, 48, 36, 8); g.stroke(); g.beginPath(); g.moveTo(1016, 128); g.lineTo(1040, 114); g.lineTo(1040, 142); g.closePath(); g.stroke();
@@ -3162,19 +3231,20 @@ Moi: Si, un peu 😂
     // fil de discussion qui défile tout seul
     var bl = blocks(g, t), typingIt = items.filter(function (it) { return it.k === "typing" && t >= it.at && t < it.end; })[0];
     var heights = bl.map(function (x) { var p = Math.min(1, (t - x.it.at) / .22); return x.h * (1 - Math.pow(1 - p, 3)); });
-    var content = heights.reduce(function (a, b2) { return a + b2; }, 0) + (typingIt ? 90 : 0) + 30, view = CHAT_BOT - CHAT_TOP, scroll = Math.max(0, content - view);
+    var pr = presAt(t), showPres = pr.v > 0 && !typingIt && !other.group;
+    var content = heights.reduce(function (a, b2) { return a + b2; }, 0) + (typingIt ? 90 : showPres ? 84 * Math.min(1, pr.v) : 0) + 30, view = CHAT_BOT - CHAT_TOP, scroll = Math.max(0, content - view);
     g.save(); g.beginPath(); g.rect(0, CHAT_TOP, W, view); g.clip();
     var y = CHAT_TOP + 20 - scroll;
     bl.forEach(function (x, i) {
       var it = x.it, a = Math.min(1, (t - it.at) / .22); g.globalAlpha = a; g.textBaseline = "middle";
-      if (it.k === "msg" || it.k === "journal" || it.k === "photo" || it.k === "vocal" || it.k === "pos" || it.k === "sticker" || it.k === "poll") {
+      if (it.k === "msg" || it.k === "journal" || it.k === "photo" || it.k === "vocal" || it.k === "pos" || it.k === "sticker" || it.k === "poll" || it.k === "snap" || it.k === "smap") {
         var col = colOf(it), yy = y;
         if (x.head) { g.fillStyle = col; g.font = "800 27px " + FONT; g.textAlign = "left"; g.fillText(it.who === "me" ? "MOI" : (other.group ? it.from : headerAt(it.at).name).toUpperCase(), 30, yy + 16); yy += 40; }
         if (it.reply) { // message cité
           g.fillStyle = P.quote; rr(g, 56, yy + 4, 860, 58, 12); g.fill(); g.fillStyle = it.replyFrom === "Moi" ? ME_COL : OT_COL; g.fillRect(56, yy + 4, 6, 58);
           g.font = "700 26px " + FONT; g.fillText(it.replyFrom === "Moi" ? "Toi" : (it.replyFrom || ""), 76, yy + 20); g.fillStyle = P.sub; g.font = "500 29px " + FONT; var rq = it.reply; while (g.measureText(rq).width > 800 && rq.length > 4) rq = rq.slice(0, -2); g.fillText(rq + (rq !== it.reply ? "…" : ""), 76, yy + 46); yy += 70;
         }
-        var bodyH = it.k === "msg" ? (x.big ? 150 : x.lines.length * lh) : it.k === "sticker" ? 280 : it.k === "poll" ? pollH(g, it) : it.k === "journal" ? 440 : it.k === "vocal" ? 100 : it.k === "pos" ? 400 : x.gone ? 60 : photoSize(it)[1] + 10;
+        var bodyH = it.k === "msg" ? (x.big ? 150 : x.lines.length * lh) : it.k === "sticker" ? 280 : it.k === "poll" ? pollH(g, it) : it.k === "snap" ? 72 : it.k === "smap" ? 570 : it.k === "journal" ? 440 : it.k === "vocal" ? 100 : it.k === "pos" ? 400 : x.gone ? 60 : photoSize(it)[1] + 10;
         g.fillStyle = col; g.globalAlpha = a * .55; g.fillRect(30, yy, 6, bodyH); g.globalAlpha = a;
         if (it.k === "msg") {
           var dl = delText(it, t); g.fillStyle = dl ? "#8a8f99" : P.text; g.font = (dl ? "italic 500 " : "500 ") + Math.round(40 * k) + "px " + FONT;
@@ -3191,6 +3261,8 @@ Moi: Si, un peu 😂
         else if (it.k === "pos") posCard(g, 56, yy + 6, it, t, P);
         else if (it.k === "sticker") sticker(g, 56, yy, it, t);
         else if (it.k === "poll") poll(g, 56, yy + 4, it, t, P);
+        else if (it.k === "snap") snapRow(g, 56, yy, it, t, P);
+        else if (it.k === "smap") snapMap(g, 56, yy + 6, it, t, P);
         else if (x.gone) { g.fillStyle = P.pill; rr(g, 56, yy + 4, 470, 60, 30); g.fill(); g.fillStyle = P.sub; g.font = "600 30px " + FONT; g.fillText("📸 Photo éphémère · ouverte", 80, yy + 35); }
         else photo(g, 56, yy + 6, it, t);
         if (x.status) { g.fillStyle = x.status === "Lu" ? "#2b5fd9" : "#9aa0aa"; g.font = "600 24px " + FONT; g.textAlign = "left"; g.fillText(x.status === "Lu" ? "✓✓ Lu" : "✓ Envoyé", 56, yy + bodyH + (it.react && t >= it.react.at ? 40 : 22)); }
@@ -3199,10 +3271,14 @@ Moi: Si, un peu 😂
         g.fillText(it.text.toUpperCase(), W / 2, y + 43); g.fillRect(60, y + 42, W / 2 - tw / 2 - 90, 3); g.fillRect(W / 2 + tw / 2 + 30, y + 42, W / 2 - tw / 2 - 90, 3); g.textAlign = "left";
       } else if (it.k === "sys") {
         g.font = "700 28px " + FONT; var sw = g.measureText(it.text).width + 50; g.fillStyle = P.pill; rr(g, W / 2 - sw / 2, y + 14, sw, 52, 26); g.fill();
-        g.fillStyle = /manqué/.test(it.text) ? "#e11d48" : it.cap ? "#d97706" : P.text; g.textAlign = "center"; g.fillText(it.text, W / 2, y + 41); g.textAlign = "left";
+        g.fillStyle = /manqué/.test(it.text) ? "#e11d48" : it.cap || it.hour ? "#d97706" : P.text; g.textAlign = "center"; g.fillText(it.text, W / 2, y + 41); g.textAlign = "left";
       }
       g.globalAlpha = 1; y += heights[i];
     });
+    if (showPres) { // l'autre est dans la conversation : son avatar en bas, qui regarde
+      var ps = pr.v, bob = Math.sin(t * 2.4) * 3; g.save(); g.translate(70, y + 42 + bob); g.scale(ps, ps); g.fillStyle = "#fff"; g.shadowColor = "rgba(0,0,0,.25)"; g.shadowBlur = 12; g.beginPath(); g.arc(0, 0, 36, 0, Math.PI * 2); g.fill(); g.shadowColor = "transparent"; badge(g, 0, 0, 31, other); g.restore();
+      if (ps > .9) { g.fillStyle = P.sub; g.font = "600 24px " + FONT; g.textAlign = "left"; g.fillText("👀 regarde la conversation", 120, y + 44); }
+    }
     if (typingIt) {
       if (other.group && typingIt.from && typingIt.from !== other.name) initials(g, 66, y + 40, 30, typingIt.from, colOf({ who: "other", from: typingIt.from, at: typingIt.at })); else badge(g, 66, y + 40, 30, other);
       if (typingIt.rec) { g.fillStyle = P.typing; rr(g, 108, y + 14, 420, 54, 27); g.fill(); g.fillStyle = "rgba(225,29,72," + (.5 + .5 * Math.sin(t * 8)) + ")"; g.beginPath(); g.arc(138, y + 41, 9, 0, Math.PI * 2); g.fill(); g.fillStyle = P.sub; g.font = "600 28px " + FONT; g.textAlign = "left"; g.fillText("🎤 enregistre un vocal…", 158, y + 42); }
@@ -3243,6 +3319,7 @@ Moi: Si, un peu 😂
       g.textAlign = "left"; g.fillStyle = "#6b7280"; g.font = "700 26px " + FONT; g.fillText("MESSAGES", 118, ny + 48); g.textAlign = "right"; g.fillText("maintenant", W - 66, ny + 48); g.textAlign = "left";
       g.fillStyle = P.text; g.font = "800 34px " + FONT; g.fillText(it.from, 60, ny + 98); g.font = "500 32px " + FONT; g.fillText(wrap(g, it.text, W - 140)[0], 60, ny + 140);
     });
+    items.forEach(function (it) { if (it.k === "snap" && (it.who === "me" ? t >= it.prev && t < it.at + .3 : t >= it.open && t < it.close + .3)) snapView(g, t, it); });
     items.forEach(function (it) { if (it.k === "call" && t >= it.at && t < it.end + .35) callScreen(g, t, it); });
     if (S.inbox && t < inboxEnd() + .45) inboxScreen(g, t);
     if (S.lock && t < LOCK_T + .5) lockScreen(g, t);
@@ -3338,9 +3415,9 @@ Moi: Si, un peu 😂
     [cur].forEach(function (n) {
       if (!n) return; var a = Math.min(1, (t - n.at) / .3), yy = 640 + (1 - a) * 40;
       g.save(); g.globalAlpha = a; g.fillStyle = "rgba(255,255,255,.88)"; rr(g, 40, yy, W - 80, 170, 34); g.fill();
-      g.fillStyle = "#ffd60a"; rr(g, 70, yy + 26, 42, 42, 10); g.fill(); g.font = "900 26px " + FONT; g.fillText("💬", 91, yy + 48);
-      g.textAlign = "left"; g.fillStyle = "#6b7280"; g.font = "700 26px " + FONT; g.fillText("MESSAGES", 128, yy + 48); g.textAlign = "right"; g.fillText("maintenant", W - 76, yy + 48); g.textAlign = "left";
-      g.fillStyle = "#111"; g.font = "800 34px " + FONT; g.fillText(n.from, 70, yy + 98); g.font = "500 32px " + FONT; var tx = n.typing ? n.text + ".".repeat(1 + Math.floor(t * 3) % 3) : n.text; while (g.measureText(tx).width > W - 160 && tx.length > 4) tx = tx.slice(0, -2); g.fillText(tx + (tx !== n.text ? "…" : ""), 70, yy + 140);
+      g.fillStyle = "#fffc00"; rr(g, 70, yy + 24, 46, 46, 12); g.fill(); g.font = "28px " + FONT; g.fillText("👻", 93, yy + 48);
+      g.textAlign = "left"; g.fillStyle = "#6b7280"; g.font = "700 26px " + FONT; g.fillText("DISCUSSION", 132, yy + 48); g.textAlign = "right"; g.fillText("maintenant", W - 76, yy + 48); g.textAlign = "left";
+      g.fillStyle = "#111"; g.font = "800 34px " + FONT; g.fillText(n.typing ? n.from : "de " + n.from, 70, yy + 98); g.font = "500 32px " + FONT; var tx = n.typing ? n.text + ".".repeat(1 + Math.floor(t * 3) % 3) : n.text; while (g.measureText(tx).width > W - 160 && tx.length > 4) tx = tx.slice(0, -2); g.fillText(tx + (tx !== n.text ? "…" : ""), 70, yy + 140);
       g.restore(); g.textAlign = "center";
     });
     g.fillStyle = "rgba(255,255,255,.18)"; g.beginPath(); g.arc(150, 1760, 60, 0, Math.PI * 2); g.arc(W - 150, 1760, 60, 0, Math.PI * 2); g.fill();
@@ -3396,19 +3473,27 @@ Moi: Si, un peu 😂
   /* ---------- sons et musique d'ambiance (créés par la page) ---------- */
   function sounds(ac, dest, t0) {
     // son de touche de clavier de téléphone : petit « tic » sec (bruit très court filtré + léger corps)
-    var tapBuf = null;
+    // touche de clavier de téléphone : un « toc » très court et boisé (attaque sèche + petite résonance du verre + corps grave)
+    var tapBufs = {}, tapN = 0;
+    function mkTap(f, dec, body, nz) { var sr = ac.sampleRate, n = Math.round(sr * .045), b = ac.createBuffer(1, n, sr), d = b.getChannelData(0), seed = 1;
+      function rnd() { seed = (seed * 16807) % 2147483647; return seed / 2147483647 * 2 - 1; }
+      for (var i = 0; i < n; i++) { var x = i / sr; d[i] = rnd() * Math.exp(-x / .0009) * nz + Math.sin(2 * Math.PI * f * x) * Math.exp(-x / dec) * .55 + Math.sin(2 * Math.PI * f * 1.62 * x) * Math.exp(-x / (dec * .6)) * .2 + Math.sin(2 * Math.PI * body * x) * Math.exp(-x / .007) * .45; }
+      var pk = 0; for (var j = 0; j < n; j++) pk = Math.max(pk, Math.abs(d[j])); for (var k2 = 0; k2 < n; k2++) d[k2] /= pk; return b; }
     function tap(t, kind) {
-      if (!tapBuf) { var n = Math.round(ac.sampleRate * .03); tapBuf = ac.createBuffer(1, n, ac.sampleRate); var d = tapBuf.getChannelData(0); for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ac.sampleRate * .0025)); }
-      var src = ac.createBufferSource(), bp = ac.createBiquadFilter(), g = ac.createGain(), f = kind === "space" ? 1900 : kind === "del" ? 2400 : 3300 + Math.random() * 500;
-      src.buffer = tapBuf; bp.type = "bandpass"; bp.frequency.value = f; bp.Q.value = kind === "space" ? 1.2 : 1.8;
-      g.gain.setValueAtTime(kind === "space" ? .5 : .42, t); src.connect(bp); bp.connect(g); g.connect(dest); src.start(t); src.stop(t + .04);
-      var o = ac.createOscillator(), og = ac.createGain(); o.type = "sine"; o.frequency.setValueAtTime(kind === "space" ? 180 : 240, t); o.frequency.exponentialRampToValueAtTime(90, t + .02);
-      og.gain.setValueAtTime(.05, t); og.gain.exponentialRampToValueAtTime(.001, t + .025); o.connect(og); og.connect(dest); o.start(t); o.stop(t + .03);
+      if (!tapBufs.key) { tapBufs.key = mkTap(1850, .0035, 420, .9); tapBufs.space = mkTap(1250, .0045, 300, .8); tapBufs.del = mkTap(1500, .005, 360, .7); }
+      tapN++; var src = ac.createBufferSource(), hp = ac.createBiquadFilter(), g = ac.createGain(), j = ((tapN * 37) % 11) / 11;
+      src.buffer = tapBufs[kind] || tapBufs.key; src.playbackRate.value = .95 + j * .1; hp.type = "highpass"; hp.frequency.value = 160;
+      g.gain.value = (kind === "space" ? .34 : kind === "del" ? .3 : .28) * (.85 + j * .3); src.connect(hp); hp.connect(g); g.connect(dest);
+      var tt = t + (j - .5) * .03; src.start(tt); src.stop(tt + .05);
     }
     var nBuf = null;
     function noise(t, d, f, v) { if (!nBuf) { var n = ac.sampleRate; nBuf = ac.createBuffer(1, n, n); var dd = nBuf.getChannelData(0); for (var i = 0; i < n; i++) dd[i] = Math.random() * 2 - 1; }
       var src = ac.createBufferSource(), bp = ac.createBiquadFilter(), g = ac.createGain(); src.buffer = nBuf; bp.type = "bandpass"; bp.frequency.value = f; bp.Q.value = .8; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.001, t + d); src.connect(bp); bp.connect(g); g.connect(dest); src.start(t); src.stop(t + d + .02); }
     function boom(t, v) { var o = ac.createOscillator(), g = ac.createGain(); o.type = "sine"; o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(38, t + .45); g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.001, t + .55); o.connect(g); g.connect(dest); o.start(t); o.stop(t + .6); }
+    function glide(t, f1, f2, d, v, type) { var o = ac.createOscillator(), g = ac.createGain(); o.type = type || "sine"; o.frequency.setValueAtTime(f1, t); o.frequency.exponentialRampToValueAtTime(f2, t + d * .7); g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + .008); g.gain.exponentialRampToValueAtTime(.001, t + d); o.connect(g); g.connect(dest); o.start(t); o.stop(t + d + .02); }
+    function sendS(t) { glide(t, 480, 1050, .12, .13); glide(t + .005, 960, 2100, .08, .03, "triangle"); } // « bloup » qui monte
+    function recvS(t) { glide(t, 760, 560, .09, .1); click(t + .06, 1245, .06, .3, "sine"); click(t + .06, 1865, .025, .25, "sine"); } // « pop » + petite cloche
+    function snapS(t) { noise(t, .22, 2600, .12); glide(t + .08, 300, 900, .14, .12); click(t + .2, 1568, .05, .25, "sine"); } // ouverture d'un snap
     function click(t, f, v, d, type) { var o = ac.createOscillator(), g = ac.createGain(); o.type = type || "square"; o.frequency.value = f; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.001, t + d); o.connect(g); g.connect(dest); o.start(t); o.stop(t + d + .02); }
     if (S.sfx) items.forEach(function (it) {
       if (it.k === "type") {
@@ -3425,19 +3510,22 @@ Moi: Si, un peu 😂
       else if (it.k === "sys" && it.cap) { noise(t0 + it.at, .05, 2200, .35); noise(t0 + it.at + .08, .06, 1600, .3); }
       else if (it.k === "sticker") { var po = ac.createOscillator(), pg = ac.createGain(), pt = t0 + it.at; po.type = "sine"; po.frequency.setValueAtTime(420, pt); po.frequency.exponentialRampToValueAtTime(1300, pt + .09); pg.gain.setValueAtTime(.16, pt); pg.gain.exponentialRampToValueAtTime(.001, pt + .14); po.connect(pg); pg.connect(dest); po.start(pt); po.stop(pt + .16); click(pt + .12, 1760, .05, .1, "sine"); }
       else if (it.k === "msg" || it.k === "photo" || it.k === "journal") {
-        if (it.who === "me") { click(t0 + it.at, 880, .09, .12, "sine"); click(t0 + it.at + .06, 1320, .07, .14, "sine"); } else { click(t0 + it.at, 660, .08, .18, "sine"); click(t0 + it.at + .08, 990, .07, .2, "sine"); }
+        if (it.who === "me") sendS(t0 + it.at); else recvS(t0 + it.at);
         if (it.react) { click(t0 + it.react.at, 1500, .07, .1, "sine"); click(t0 + it.react.at + .05, 2000, .05, .12, "sine"); }
         if (it.del != null) click(t0 + it.del, 400, .06, .25, "triangle");
       }
       else if (it.k === "notif") { click(t0 + it.at, 1047, .1, .3, "sine"); click(t0 + it.at + .12, 1568, .09, .4, "sine"); }
       else if (it.k === "sep") click(t0 + it.at, 330, .06, .6, "sine");
       else if (it.k === "vocal") { click(t0 + it.at, it.who === "me" ? 880 : 660, .08, .15, "sine"); }
+      else if (it.k === "snap") { if (it.who === "me") { noise(t0 + it.prev + .05, .08, 1800, .25); sendS(t0 + it.at); click(t0 + it.opened, 1320, .04, .15, "sine"); } else { recvS(t0 + it.at); click(t0 + it.open - .1, 1800, .05, .04, "sine"); snapS(t0 + it.open); } }
+      else if (it.k === "smap") { if (it.who === "me") sendS(t0 + it.at); else recvS(t0 + it.at); glide(t0 + it.at + .25, 600, 1200, .2, .05); }
+      else if (it.k === "sys" && it.hour) { click(t0 + it.at, 880, .07, .2, "triangle"); click(t0 + it.at + .18, 698, .07, .35, "triangle"); }
       else if (it.k === "poll") { click(t0 + it.at, 660, .08, .18, "sine"); for (var pv = 0; pv < 9; pv++) click(t0 + it.at + .5 + pv * .36, 1400 + pv * 60, .03, .06, "sine"); }
       else if (it.k === "call") { for (var rt = it.at + .2; rt < it.ring - .1; rt += 1.2) { click(t0 + rt, 784, .09, .35, "sine"); click(t0 + rt + .38, 659, .09, .35, "sine"); } if (!it.acc) { click(t0 + it.end, 440, .08, .2, "sine"); click(t0 + it.end + .2, 330, .08, .3, "sine"); } }
     });
     if (S.sfx && hookText) { boom(t0 + .02, .35); noise(t0 + .02, .4, 1200, .12); }
     if (S.sfx && S.inbox) click(t0 + inboxEnd() - .8, 1800, .05, .04, "sine");
-    if (S.sfx) lockNotifs.forEach(function (n) { click(t0 + n.at, 1047, .09, .3, "sine"); click(t0 + n.at + .12, 1568, .08, .4, "sine"); });
+    if (S.sfx) lockNotifs.forEach(function (n) { click(t0 + n.at, 1175, .07, .25, "triangle"); click(t0 + n.at + .1, 1760, .06, .35, "sine"); });
     items.forEach(function (it) { if (it.k !== "vocal") return; var c = clips[clipKey(it.voice, it.text)]; if (!c || !c.buf) return; var src = ac.createBufferSource(), vg = ac.createGain(); vg.gain.value = 1.2; src.buffer = c.buf; src.connect(vg); vg.connect(dest); src.start(t0 + it.play); });
     music(ac, dest, t0, true);
   }

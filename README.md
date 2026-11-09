@@ -188,6 +188,13 @@ Page : https://ozentv.github.io/quiz-live/histoire.html
 - **📊 Sondage** : `[sondage] Qui gagne dimanche ? | OM | PSG | Nul` affiche un sondage où les votes arrivent et les barres bougent (`| OM 41` pour choisir le nombre de votes, ✓ sur l'option de ton club). `Moi: [sondage] …` pour le tien.
 - **📹 Appel vidéo** : `[appel vidéo] PSG | accepté` montre la « caméra » de l'autre (son logo qui bouge comme filmé à la main), ta petite fenêtre avec ton logo et les boutons ; sans « accepté », appel vidéo manqué.
 - **🖼️ Fond de conversation** aux couleurs du club de « Moi », avec le logo en filigrane (case à cocher).
+- **👻 Comme sur Snap** :
+  - `[snap 1] légende` : « Nouveau Snap » (carré rouge) que le doigt ouvre, la photo s'affiche en plein écran avec le compte à rebours, puis « Ouvert » ; `Moi: [snap 2]` : aperçu plein écran avec « Envoyer ➤ », puis « Envoyé » et « Ouvert » ;
+  - `[snapmap] PSG est devant le Vélodrome 👀` : carte avec l'avatar posé dessus, les zones chaudes et des amis autour ;
+  - 🔥 flammes à côté du nom (`@flammes 247`, `@flammes 0` pour les cacher), `[flamme perdue]` affiche « ⌛ Votre série de flammes va expirer ! » et un ⌛ dans l'en-tête ;
+  - l'avatar de l'autre apparaît en bas quand il regarde la conversation (« 👀 regarde la conversation »), `[parti]` affiche « PSG est parti 👋 » et le fait disparaître ;
+  - notifications de l'écran verrouillé façon Snap : « PSG est en train d'écrire… » puis « de PSG · 💬 Discussion » (ou « 📸 Snap »).
+- **Sons plus réalistes** : vrai « toc » de clavier de téléphone (attaque sèche, petite résonance, rythme irrégulier comme un humain), « bloup » à l'envoi, « pop » à la réception, son d'ouverture de snap (sons recréés par la page).
 - **🌙 Mode sombre** pour toute l'appli de messagerie.
 - **🛡️ Logos des clubs** : importe le logo de l'OM et celui du PSG. Ils remplacent les écussons dessinés (photo du contact, « en train d'écrire », ton avatar, article de journal) et restent sur le téléphone.
 - Pour écrire ta propre histoire, une ligne par message :
