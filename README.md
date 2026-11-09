@@ -162,6 +162,21 @@ Page : https://ozentv.github.io/quiz-live/clubs.html
 - « 📥 Importer toutes les images d'un coup » : sélectionne jusqu'à 12 images en une fois ; chacune va sur la bonne carte si son nom de fichier est la lettre (A.jpg) ou le nom du club (psg.jpg, real madrid.png), sinon dans l'ordre A, B, C… Un fichier dont le nom contient « logo », « écusson » ou « blason » (psg logo.png) devient le logo du club, les autres deviennent la photo.
 - Utilise les mêmes réglages de relais que le quiz. Mode démo pour tester sans live.
 
+## 💬 Histoire en messages (OM contre PSG)
+Page : https://ozentv.github.io/quiz-live/histoire.html
+- Une conversation qui s'écrit toute seule sur un écran de messagerie (appli inventée, sans marque) : tes messages se tapent lettre par lettre au clavier, les réponses arrivent après « … en train d'écrire », et le fil défile tout seul.
+- **5 histoires prêtes à l'emploi**, chacune en version **Team OM** (« Moi » = l'OM) et **Team PSG** (« Moi » = le PSG) : Le Classique, Le pari, Les ex, Le mercato, et une vide.
+- Pour écrire ta propre histoire, une ligne par message :
+  - `Moi: texte` pour ton message, `PSG: texte` pour l'autre ;
+  - `# Partie 1 : …` pour un chapitre (affiché au-dessus du clavier) ;
+  - `-- TROIS HEURES PLUS TARD --` pour un saut dans le temps ;
+  - `[notif] Nom : texte` pour une notification qui tombe du haut ;
+  - `[photo 1] légende` pour une photo de ta galerie, et `[journal] Titre | texte` pour un article d'un journal inventé ;
+  - `@contact PSG | 💔` pour changer les emojis du contact en cours d'histoire, et `[pause 2]` pour un silence.
+- 6 emplacements pour tes photos (gardées sur le téléphone), vitesse lente, normale ou rapide, texte normal ou grand.
+- Sons (clavier, envoi, réception, notification) et musique d'ambiance douce, créés par la page.
+- Vidéo en 720p ou 1080p, encadré « Télécharger » et « Partager », et légende TikTok avec hashtags prête à copier.
+
 ## 📊 Duel en chiffres (vidéos « Clasico en chiffres »)
 Page : https://ozentv.github.io/quiz-live/duel.html
 - Deux clubs face à face, chacun avec son nom, ses couleurs et son logo (importé, gardé sur le téléphone ; sinon un écusson aux couleurs du club).

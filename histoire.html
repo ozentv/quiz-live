@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Histoire en messages</title>
+<meta name="description" content="Crée des vidéos « histoire en messages » entre l'OM et le PSG : la conversation s'écrit toute seule, avec le clavier, les chapitres et les notifications.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&family=Figtree:wght@400;500;600;700;800;900&display=swap">
+<style>
+:root { --bg: #0b0d14; --card: #151925; --line: #262c3d; --fg: #f2f4fa; --muted: #9aa3b8; --acc: #2faee0; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.4 Figtree, system-ui, sans-serif; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 16px max(16px, env(safe-area-inset-left)) 40px; display: grid; gap: 18px; }
+@media (min-width: 900px) { .wrap { grid-template-columns: 1fr 420px; align-items: start; } .prev { position: sticky; top: 16px; } }
+@media (max-width: 899px) { .prev { order: -1; } .prev canvas { width: min(62vw, 340px) !important; } }
+h1 { margin: 0; font: 900 26px Outfit, sans-serif; } h1 span { color: var(--acc); }
+.sub, .note { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+.side { display: grid; gap: 14px; }
+.box { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: grid; gap: 10px; }
+.box h2 { margin: 0; font: 800 17px Outfit, sans-serif; }
+label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+select, input[type=text], textarea { width: 100%; min-height: 42px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: #0f121b; color: var(--fg); font: 16px Figtree, sans-serif; }
+textarea#script { min-height: 420px; font: 14px/1.55 ui-monospace, Menlo, Consolas, monospace; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+button, .btn { min-height: 44px; border: 0; border-radius: 12px; padding: 0 14px; font: 700 15px Figtree, sans-serif; cursor: pointer; background: #262c3d; color: var(--fg); }
+button.main { background: var(--acc); color: #04131c; } button.mini { min-height: 34px; font-size: 13px; padding: 0 10px; }
+button:disabled { opacity: .5; }
+.chk { display: flex; align-items: center; gap: 8px; color: var(--fg); font-size: 14px; } .chk input { width: 20px; height: 20px; }
+.help { font-size: 13px; color: var(--muted); display: grid; gap: 4px; } .help code { color: #ffd60a; background: #0f121b; padding: 1px 6px; border-radius: 6px; }
+.imgs { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.imgs label { position: relative; aspect-ratio: 1; border: 1px dashed var(--line); border-radius: 10px; display: grid; place-items: center; cursor: pointer; overflow: hidden; color: var(--muted); font-weight: 800; }
+.imgs img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.imgs b { position: absolute; left: 4px; top: 2px; font-size: 12px; color: #fff; text-shadow: 0 1px 3px #000; z-index: 1; }
+.prev { display: grid; gap: 10px; justify-items: center; }
+.prev canvas { width: min(100%, 400px); aspect-ratio: 9 / 16; border-radius: 18px; background: #fff; box-shadow: 0 10px 40px rgba(0,0,0,.5); }
+.bar { width: min(100%, 400px); height: 8px; border-radius: 4px; background: #262c3d; overflow: hidden; } .bar[hidden] { display: none; }
+.bar i { display: block; height: 100%; width: 0; background: var(--acc); }
+.msg { width: min(100%, 400px); min-height: 20px; color: var(--muted); font-size: 14px; text-align: center; }
+.got { width: min(100%, 400px); display: grid; gap: 8px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); text-align: center; }
+.got[hidden] { display: none; } .got .nm { font-size: 14px; color: var(--muted); } #gotName { word-break: break-all; color: var(--fg); }
+.got a.dl { display: grid; place-items: center; min-height: 48px; border-radius: 12px; text-decoration: none; font: 800 16px Figtree, sans-serif; background: var(--acc); color: #04131c; }
+.links { display: flex; gap: 10px; flex-wrap: wrap; font-size: 14px; } .links a { color: var(--acc); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="side">
+    <div><h1>💬 Histoire <span>en messages</span></h1><p class="sub">La conversation s'écrit toute seule : clavier qui tape, réponses, chapitres, sauts dans le temps, notifications. Tu télécharges la vidéo prête pour TikTok.</p>
+      <div class="links"><a href="./">Quiz</a><a href="vs.html">Générateur VS</a><a href="duel.html">Duel en chiffres</a><a href="clubs.html">Bataille des clubs</a></div></div>
+
+    <div class="box">
+      <h2>Histoire</h2>
+      <div class="row2">
+        <label>Histoire prête à l'emploi<select id="tpl"></select></label>
+        <label>Ton compte<select id="side"><option value="om">💙 Team OM (« Moi » = l'OM)</option><option value="psg">❤️ Team PSG (« Moi » = le PSG)</option></select></label>
+      </div>
+      <textarea id="script" spellcheck="false"></textarea>
+      <div class="help">
+        <span><code>Moi: texte</code> ton message (il se tape au clavier) · <code>PSG: texte</code> la réponse de l'autre</span>
+        <span><code># Partie 1 : …</code> chapitre · <code>-- TROIS HEURES PLUS TARD --</code> saut dans le temps</span>
+        <span><code>[notif] Nom : texte</code> notification · <code>[photo 1] légende</code> photo de ta galerie (envoyée par l'autre) · <code>Moi: [photo 2] légende</code> photo envoyée par toi</span>
+        <span><code>[journal] Titre | texte</code> article de journal · <code>@contact PSG | 💔</code> change le nom ou les emojis du contact en cours de route · <code>[pause 2]</code> 2 secondes de silence</span>
+      </div>
+    </div>
+
+    <div class="box">
+      <h2>Tes photos (pour [photo 1] à [photo 6])</h2>
+      <div class="imgs" id="imgs"></div>
+      <p class="note">Elles restent sur ton téléphone. Utilise des images que tu as le droit d'utiliser.</p>
+    </div>
+
+    <div class="box">
+      <h2>Vidéo</h2>
+      <div class="row3">
+        <label>Vitesse<select id="speed"><option value="1.3">Lente</option><option value="1">Normale</option><option value="0.75">Rapide</option></select></label>
+        <label>Texte<select id="size"><option value="1">Normal</option><option value="1.18">Grand</option></select></label>
+        <label>Qualité<select id="q"><option value="720">720p</option><option value="1080">1080p</option></select></label>
+      </div>
+      <label class="chk"><input type="checkbox" id="sfx"> 🔊 Sons (clavier, envoi, notifications)</label>
+      <label class="chk"><input type="checkbox" id="music"> 🎵 Musique d'ambiance douce (créée par la page, sans droits)</label>
+      <button class="main" type="button" id="dlVideo">🎬 Télécharger la vidéo</button>
+      <p class="note" id="durNote"></p>
+    </div>
+
+    <div class="box">
+      <h2>📋 Légende TikTok</h2>
+      <textarea id="cap" style="min-height:100px"></textarea>
+      <div class="row2"><button class="mini" type="button" id="capNew">🎲 Autre idée</button><button class="mini main" type="button" id="capCopy">📋 Copier la légende</button></div>
+    </div>
+  </div>
+
+  <div class="prev">
+    <canvas id="view" width="1080" height="1920" aria-label="Aperçu"></canvas>
+    <div style="display:flex;gap:8px"><button class="mini" type="button" id="play">▶ Lire depuis le début (avec le son)</button></div>
+    <div class="bar" id="bar" hidden><i id="barI"></i></div>
+    <div class="msg" id="msg" role="status"></div>
+    <div class="got" id="got" hidden>
+      <span class="nm" id="gotName"></span>
+      <a class="dl" id="gotDl" href="#" download>⬇️ Télécharger</a>
+      <button id="gotShare" type="button">📤 Enregistrer dans la galerie / Partager</button>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  "use strict";
+  var $ = function (s) { return document.querySelector(s); };
+  var W = 1080, H = 1920;
+
+  /* ---------- histoires prêtes à l'emploi : une version Team OM et une version Team PSG ---------- */
+  var OM_ME = "@moi OM | #2faee0 | #ffffff", PSG_CT = "@contact PSG | ❤️💙 | #004170 | #da291c", PSG_ME = "@moi PSG | #004170 | #da291c", OM_CT = "@contact OM | 💙 | #2faee0 | #ffffff";
+  var TPL = {
+    classique: { label: "⚽ Le Classique (chambrage avant le match)",
+      om: [OM_ME, PSG_CT, "# Partie 1 : Le message…", "PSG: Salut l'OM 😏", "PSG: Prêt pour dimanche ?", "Moi: Toujours prêt 💙", "Moi: Le Vélodrome va trembler", "PSG: Trembler ? Comme vos défenseurs ? 😂", "Moi: Mdr", "Moi: On a gagné la Ligue des champions en 1993", "Moi: Les premiers en France 🏆", "PSG: Et nous en 2025… 5-0 en finale 😎", "Moi: …",
+        "-- LE JOUR DU MATCH --", "# Partie 2 : Le Classique", "[notif] Supporters OM : On est tous derrière vous !! 💙🔥", "Moi: Le stade est plein", "Moi: Ça chante depuis 3 heures", "PSG: On arrive 🚌", "PSG: Préparez les mouchoirs",
+        "-- 90 MINUTES PLUS TARD --", "# Partie 3 : Le verdict…", "[journal] LE CLASSIQUE | Quelle soirée au Vélodrome ! Revivez le match minute par minute", "PSG: …", "Moi: Alors ? On fait moins le malin ? 😏", "PSG: On en reparle au match retour", "Moi: Droit au but 💙", "[notif] Supporters PSG : On reviendra plus forts 😤"],
+      psg: [PSG_ME, OM_CT, "# Partie 1 : Le message…", "OM: Salut le PSG 😏", "OM: Prêts pour dimanche ?", "Moi: Toujours prêts ❤️💙", "Moi: On vient gagner chez vous", "OM: Gagner ? Au Vélodrome ? 😂", "Moi: Mdr même pas peur", "Moi: Champions d'Europe 2025, 5-0 en finale 😎", "OM: Nous c'était en 1993, les premiers en France 🏆", "Moi: Ça date un peu non ? 👴", "OM: …",
+        "-- LE JOUR DU MATCH --", "# Partie 2 : Le Classique", "[notif] Supporters PSG : On est tous derrière vous !! ❤️💙🔥", "Moi: Le bus arrive à Marseille", "Moi: Ça siffle déjà 😅", "OM: Bienvenue au Vélodrome 😈", "OM: Préparez les mouchoirs",
+        "-- 90 MINUTES PLUS TARD --", "# Partie 3 : Le verdict…", "[journal] LE CLASSIQUE | Quelle soirée au Vélodrome ! Revivez le match minute par minute", "OM: …", "Moi: Alors ? On fait moins le malin ? 😏", "OM: On en reparle au match retour", "Moi: Ici c'est Paris ❤️💙", "[notif] Supporters OM : On reviendra plus forts 😤"] },
+    pari: { label: "🤝 Le pari (le perdant porte le maillot de l'autre)",
+      om: [OM_ME, PSG_CT, "# Partie 1 : Le pari", "Moi: J'ai une idée 😈", "PSG: Dis toujours", "Moi: Le perdant du Classique porte le maillot de l'autre", "Moi: Une journée entière", "PSG: Deal 🤝", "PSG: Prépare-toi à être en bleu et rouge 😂", "Moi: On verra bien",
+        "-- TROIS JOURS PLUS TARD --", "# Partie 2 : Le match", "[notif] Supporters OM : Ce soir on gagne !! 💙", "PSG: Dernière chance pour annuler 😏", "Moi: Jamais", "Moi: Droit au but",
+        "-- APRÈS LE MATCH --", "# Partie 3 : La photo", "Moi: Alors…", "Moi: J'attends ma photo 📸", "PSG: Attends", "PSG: …", "PSG: Je cherche le maillot", "@contact PSG | 🙈", "PSG: [photo 1] Content ? 😑", "Moi: MDRRRR", "Moi: Je l'encadre 🖼️", "[notif] Supporters OM : 😂😂😂"],
+      psg: [PSG_ME, OM_CT, "# Partie 1 : Le pari", "Moi: J'ai une idée 😈", "OM: Dis toujours", "Moi: Le perdant du Classique porte le maillot de l'autre", "Moi: Une journée entière", "OM: Deal 🤝", "OM: Prépare-toi à être en bleu ciel 😂", "Moi: On verra bien",
+        "-- TROIS JOURS PLUS TARD --", "# Partie 2 : Le match", "[notif] Supporters PSG : Ce soir on gagne !! ❤️💙", "OM: Dernière chance pour annuler 😏", "Moi: Jamais", "Moi: Ici c'est Paris",
+        "-- APRÈS LE MATCH --", "# Partie 3 : La photo", "Moi: Alors…", "Moi: J'attends ma photo 📸", "OM: Attends", "OM: …", "OM: Je cherche le maillot", "@contact OM | 🙈", "OM: [photo 1] Content ? 😑", "Moi: MDRRRR", "Moi: Je l'encadre 🖼️", "[notif] Supporters PSG : 😂😂😂"] },
+    ex: { label: "💔 Les ex (l'autre revient)",
+      om: [OM_ME, "@contact Paris | 🖤 | #004170 | #da291c", "# Partie 1 : Il revient…", "Paris: Coucou Marseille", "Paris: Ça fait longtemps", "Moi: Tu as du culot", "Moi: Après tout ce que tu m'as fait en championnat", "Paris: J'ai changé 🥺", "Moi: Tu dis ça chaque saison",
+        "-- UNE SEMAINE PLUS TARD --", "# Partie 2 : La surprise", "Paris: Tu fais quoi dimanche ?", "Moi: Je reçois quelqu'un au Vélodrome", "Paris: …", "Paris: C'est qui ?", "Moi: Toi 😏", "Paris: 😳", "@contact Paris | 😰",
+        "-- LE DIMANCHE SOIR --", "# Partie 3 : La fin", "[notif] Supporters OM : Quelle ambiance ce soir 🔥", "Paris: Tu m'as manqué quand même", "Moi: Pas toi 😌", "Moi: À la prochaine", "@contact Paris | 💔", "Paris: Vu"],
+      psg: [PSG_ME, "@contact Marseille | 🖤 | #2faee0 | #ffffff", "# Partie 1 : Il revient…", "Marseille: Coucou Paris", "Marseille: Ça fait longtemps", "Moi: Tu as du culot", "Moi: Après tous tes messages d'avant-match", "Marseille: J'ai changé 🥺", "Moi: Tu dis ça chaque saison",
+        "-- UNE SEMAINE PLUS TARD --", "# Partie 2 : La surprise", "Marseille: Tu fais quoi dimanche ?", "Moi: Je reçois quelqu'un au Parc des Princes", "Marseille: …", "Marseille: C'est qui ?", "Moi: Toi 😏", "Marseille: 😳", "@contact Marseille | 😰",
+        "-- LE DIMANCHE SOIR --", "# Partie 3 : La fin", "[notif] Supporters PSG : Quelle ambiance ce soir 🔥", "Marseille: Tu m'as manqué quand même", "Moi: Pas toi 😌", "Moi: À la prochaine", "@contact Marseille | 💔", "Marseille: Vu"] },
+    mercato: { label: "✍️ Le mercato (le numéro 10)",
+      om: [OM_ME, PSG_CT, "# Partie 1 : L'offre", "PSG: J'ai entendu dire que ton numéro 10 est libre cet été", "Moi: Même pas en rêve", "PSG: On propose le double de son salaire 💰", "Moi: Il est marseillais dans le cœur", "PSG: On va voir ça 😏",
+        "-- DEUX SEMAINES PLUS TARD --", "# Partie 2 : La rumeur", "[journal] MERCATO | Le numéro 10 aperçu à Paris ? Les supporters inquiets", "Moi: C'est quoi ça ???", "PSG: Je t'avais dit 😎", "Moi: Attends", "Moi: …",
+        "-- LE LENDEMAIN --", "# Partie 3 : La réponse", "[notif] Supporters OM : IL A PROLONGÉ !!! 💙💙💙", "Moi: Il a prolongé 😌", "Moi: Jusqu'en 2030", "PSG: …", "@contact PSG | 😤", "PSG: On reviendra l'été prochain", "Moi: Droit au but 💙"],
+      psg: [PSG_ME, OM_CT, "# Partie 1 : L'offre", "OM: J'ai entendu dire que ton numéro 10 veut partir", "Moi: Même pas en rêve", "OM: Chez nous il serait le roi du Vélodrome 👑", "Moi: Il est parisien dans le cœur", "OM: On va voir ça 😏",
+        "-- DEUX SEMAINES PLUS TARD --", "# Partie 2 : La rumeur", "[journal] MERCATO | Le numéro 10 aperçu à Marseille ? Les supporters inquiets", "Moi: C'est quoi ça ???", "OM: Je t'avais dit 😎", "Moi: Attends", "Moi: …",
+        "-- LE LENDEMAIN --", "# Partie 3 : La réponse", "[notif] Supporters PSG : IL A PROLONGÉ !!! ❤️💙", "Moi: Il a prolongé 😌", "Moi: Jusqu'en 2030", "OM: …", "@contact OM | 😤", "OM: On reviendra l'été prochain", "Moi: Ici c'est Paris ❤️💙"] },
+    vide: { label: "✏️ Vide : mon histoire", om: [OM_ME, PSG_CT, "# Partie 1 : …", "PSG: Salut", "Moi: Salut"], psg: [PSG_ME, OM_CT, "# Partie 1 : …", "OM: Salut", "Moi: Salut"] }
+  };
+  function tplText(k, side) { return TPL[k][side === "psg" ? "psg" : "om"].join("\n"); }
+
+  var S;
+  try { S = JSON.parse(localStorage.getItem("histoire-set") || "null"); } catch (e) { S = null; }
+  if (!S) S = { tpl: "classique", side: "om", script: tplText("classique", "om"), speed: "1", size: "1", q: "720", sfx: true, music: true };
+  function save() { try { localStorage.setItem("histoire-set", JSON.stringify(S)); } catch (e) {} }
+
+  /* ---------- lecture du script : chaque ligne devient un événement daté ---------- */
+  var items, total, header0;
+  function parse() {
+    var raw = String(S.script || "").split(/\n/), list = [], sp = +S.speed || 1, t = .8;
+    var me = { name: "OM", c1: "#2faee0", c2: "#ffffff" }, other = { name: "PSG", emo: "", c1: "#004170", c2: "#da291c" }, first = true;
+    raw.forEach(function (l) {
+      l = l.trim(); if (!l) return; var m;
+      if ((m = l.match(/^@contact\s+(.+)$/i))) { var p = m[1].split("|").map(function (x) { return x.trim(); }), o = { name: p[0] || other.name, emo: p[1] != null ? p[1] : other.emo, c1: p[2] || other.c1, c2: p[3] || other.c2 };
+        if (first) { other = o; header0 = o; } else list.push({ k: "head", o: o, at: t }); return; }
+      if ((m = l.match(/^@moi\s+(.+)$/i))) { var q = m[1].split("|").map(function (x) { return x.trim(); }); me = { name: q[0] || "Moi", c1: q[1] || me.c1, c2: q[2] || me.c2 }; return; }
+      first = false;
+      if ((m = l.match(/^#\s*(.+)$/))) { list.push({ k: "chap", text: m[1], at: t }); t += .2; return; }
+      if ((m = l.match(/^--\s*(.+?)\s*--$/))) { list.push({ k: "sep", text: m[1], at: t }); t += 1.3 * sp; return; }
+      if ((m = l.match(/^\[pause\s*([\d.,]+)?\]$/i))) { t += parseFloat((m[1] || "1").replace(",", ".")) || 1; return; }
+      if ((m = l.match(/^\[notif\]\s*(.+?)\s*:\s*(.+)$/i))) { list.push({ k: "notif", from: m[1], text: m[2], at: t }); t += 1.7 * sp; return; }
+      if ((m = l.match(/^\[journal\]\s*(.+?)\s*\|\s*(.+)$/i))) { var a = t + .9 * sp; list.push({ k: "typing", at: t, end: a }); list.push({ k: "journal", who: "other", title: m[1], text: m[2], at: a }); t = a + 2.3 * sp; return; }
+      if ((m = l.match(/^\[photo\s*(\d)\]\s*(.*)$/i))) { var a2 = t + .9 * sp; list.push({ k: "typing", at: t, end: a2 }); list.push({ k: "photo", who: "other", n: +m[1], text: m[2], at: a2 }); t = a2 + 2.3 * sp; return; }
+      if ((m = l.match(/^(.+?)\s*:\s*(.+)$/))) {
+        var isMe = /^moi$/i.test(m[1]), text = m[2], ph = text.match(/^\[photo\s*(\d)\]\s*(.*)$/i);
+        if (ph) { if (isMe) { list.push({ k: "photo", who: "me", n: +ph[1], text: ph[2], at: t + .3 }); t += 2.4 * sp; } else { var a3 = t + .9 * sp; list.push({ k: "typing", at: t, end: a3 }); list.push({ k: "photo", who: "other", n: +ph[1], text: ph[2], at: a3 }); t = a3 + 2.3 * sp; } return; }
+        if (isMe) { var dur = Math.min(3.4, .35 + text.length * .06) * sp; list.push({ k: "type", text: text, at: t, end: t + dur }); list.push({ k: "msg", who: "me", text: text, at: t + dur + .2 }); t += dur + .8 * sp; }
+        else { var td = Math.min(1.9, .6 + text.length * .022) * sp; list.push({ k: "typing", at: t, end: t + td }); list.push({ k: "msg", who: "other", text: text, at: t + td }); t += td + .7 * sp; }
+      }
+    });
+    items = list; total = t + 2.5; ME = me; header0 = header0 || other; OTHER0 = other;
+    $("#durNote").textContent = "Durée de la vidéo : " + Math.round(total) + " secondes.";
+  }
+  var ME, OTHER0;
+
+  /* ---------- photos de la galerie ---------- */
+  var photos = {};
+  function loadPhoto(n) { var src = ""; try { src = localStorage.getItem("histoire-img-" + n) || ""; } catch (e) {} if (!src) { photos[n] = null; return; } var im = new Image(); im.onload = function () { photos[n] = im; }; im.src = src; }
+  function imgsForm() {
+    var h = ""; for (var n = 1; n <= 6; n++) { var src = ""; try { src = localStorage.getItem("histoire-img-" + n) || ""; } catch (e) {} h += "<label><b>" + n + "</b>" + (src ? "<img alt=\"\" src=\"" + src + "\">" : "＋") + "<input type=\"file\" accept=\"image/*\" hidden data-n=\"" + n + "\"></label>"; }
+    $("#imgs").innerHTML = h;
+    document.querySelectorAll("#imgs input").forEach(function (inp) { inp.onchange = function () {
+      var f = this.files && this.files[0], n = +inp.getAttribute("data-n"); if (!f) return;
+      var im = new Image(); im.onload = function () { var r = Math.min(1, 720 / Math.max(im.width, im.height)), c = document.createElement("canvas"); c.width = Math.round(im.width * r); c.height = Math.round(im.height * r); c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+        try { localStorage.setItem("histoire-img-" + n, c.toDataURL("image/jpeg", .82)); } catch (e) { alert("Plus de place pour les photos : remplace-en une."); } URL.revokeObjectURL(im.src); loadPhoto(n); imgsForm(); };
+      im.src = URL.createObjectURL(f);
+    }; });
+  }
+
+  /* ---------- dessin de l'écran de messagerie ---------- */
+  var FONT = "Figtree, system-ui, sans-serif";
+  function rr(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+  function lum(h) { var n = parseInt(String(h).slice(1), 16); return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255; }
+  function badge(g, x, y, r, p) {
+    g.save(); g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.clip();
+    g.fillStyle = p.c1; g.fillRect(x - r, y - r, r * 2, r * 2); g.fillStyle = p.c2; g.fillRect(x, y - r, r, r * 2);
+    g.fillStyle = "rgba(255,255,255,.92)"; g.beginPath(); g.moveTo(x - r * .5, y - r * .5); g.lineTo(x + r * .5, y - r * .5); g.lineTo(x + r * .5, y + r * .05); g.quadraticCurveTo(x + r * .5, y + r * .45, x, y + r * .65); g.quadraticCurveTo(x - r * .5, y + r * .45, x - r * .5, y + r * .05); g.closePath(); g.fill();
+    var ab = p.name.length <= 3 ? p.name : p.name.slice(0, 3);
+    g.fillStyle = lum(p.c1) > .8 ? p.c2 : p.c1; g.font = "900 " + Math.round(r * (ab.length > 2 ? .38 : .5)) + "px " + FONT; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(ab.toUpperCase(), x, y + r * .02);
+    g.restore(); g.strokeStyle = "rgba(0,0,0,.08)"; g.lineWidth = 3; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.stroke();
+  }
+  function wrap(g, text, max) { var words = String(text).split(" "), lines = [], cur = ""; words.forEach(function (w) { var t = cur ? cur + " " + w : w; if (g.measureText(t).width > max && cur) { lines.push(cur); cur = w; } else cur = t; }); if (cur) lines.push(cur); return lines; }
+  var CHAT_TOP = 196, CHAT_BOT = 1188, ME_COL = "#f23c57", OT_COL = "#2c9cf0";
+  function fs() { return +S.size || 1; }
+  function photoSize(it) { var im = photos[it.n], w = 560, h = 560; if (im) { h = Math.round(w * im.height / im.width); if (h > 700) { h = 700; w = Math.round(h * im.width / im.height); } } return [w, h]; }
+  function blocks(g, t) {
+    var out = [], prevWho = null, k = fs(), lh = Math.round(50 * k);
+    items.forEach(function (it) {
+      if (it.at > t) return;
+      if (it.k === "msg") { g.font = "500 " + Math.round(40 * k) + "px " + FONT; var lines = wrap(g, it.text, 940), head = prevWho !== it.who; out.push({ it: it, lines: lines, head: head, h: (head ? 40 : 0) + lines.length * lh + 14 }); prevWho = it.who; }
+      else if (it.k === "sep") { out.push({ it: it, h: 86 }); prevWho = null; }
+      else if (it.k === "journal") { var hd = prevWho !== "other"; out.push({ it: it, head: hd, h: (hd ? 40 : 0) + 470 }); prevWho = "other"; }
+      else if (it.k === "photo") { var hd2 = prevWho !== it.who; out.push({ it: it, head: hd2, h: (hd2 ? 40 : 0) + photoSize(it)[1] + 30 }); prevWho = it.who; }
+    });
+    return out;
+  }
+  function headerAt(t) { var o = header0; items.forEach(function (it) { if (it.k === "head" && it.at <= t) o = it.o; }); return o; }
+  function drawScene(g, t) {
+    var other = headerAt(t), k = fs(), lh = Math.round(50 * k);
+    g.fillStyle = "#ffffff"; g.fillRect(0, 0, W, H);
+    g.fillStyle = "#111"; g.font = "700 34px " + FONT; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("21:00", W / 2, 34);
+    g.fillRect(940, 24, 70, 26); g.fillStyle = "#fff"; g.fillRect(944, 28, 50, 18); g.fillStyle = "#111"; g.fillRect(946, 30, 46, 14); g.fillRect(1012, 31, 6, 12);
+    for (var b = 0; b < 4; b++) g.fillRect(40 + b * 14, 46 - b * 7, 10, 8 + b * 7);
+    g.strokeStyle = "#111"; g.lineWidth = 6; g.lineCap = "round"; g.beginPath(); g.moveTo(58, 104); g.lineTo(38, 128); g.lineTo(58, 152); g.stroke();
+    badge(g, 132, 128, 46, other);
+    g.textAlign = "left"; g.fillStyle = "#111"; g.font = "800 46px " + FONT; g.fillText(other.name, 196, 128); var nw = g.measureText(other.name).width; g.font = "38px " + FONT; g.fillText(other.emo || "", 206 + nw, 130);
+    g.strokeStyle = "#111"; g.lineWidth = 5; g.beginPath(); g.arc(902, 128, 20, Math.PI * .6, Math.PI * 1.9); g.stroke();
+    rr(g, 966, 110, 48, 36, 8); g.stroke(); g.beginPath(); g.moveTo(1016, 128); g.lineTo(1040, 114); g.lineTo(1040, 142); g.closePath(); g.stroke();
+    g.fillStyle = "#eceef2"; g.fillRect(0, 186, W, 3);
+    // fil de discussion qui défile tout seul
+    var bl = blocks(g, t), typingNow = items.some(function (it) { return it.k === "typing" && t >= it.at && t < it.end; });
+    var heights = bl.map(function (x) { var p = Math.min(1, (t - x.it.at) / .22); return x.h * (1 - Math.pow(1 - p, 3)); });
+    var content = heights.reduce(function (a, b2) { return a + b2; }, 0) + (typingNow ? 90 : 0) + 30, view = CHAT_BOT - CHAT_TOP, scroll = Math.max(0, content - view);
+    g.save(); g.beginPath(); g.rect(0, CHAT_TOP, W, view); g.clip();
+    var y = CHAT_TOP + 20 - scroll;
+    bl.forEach(function (x, i) {
+      var it = x.it, a = Math.min(1, (t - it.at) / .22); g.globalAlpha = a;
+      if (it.k === "msg" || it.k === "journal" || it.k === "photo") {
+        var col = it.who === "me" ? ME_COL : OT_COL, yy = y;
+        if (x.head) { g.fillStyle = col; g.font = "800 27px " + FONT; g.textAlign = "left"; g.fillText(it.who === "me" ? "MOI" : headerAt(it.at).name.toUpperCase(), 30, yy + 16); yy += 40; }
+        var bodyH = it.k === "msg" ? x.lines.length * lh : it.k === "journal" ? 440 : photoSize(it)[1] + 10;
+        g.fillStyle = col; g.globalAlpha = a * .55; g.fillRect(30, yy, 6, bodyH); g.globalAlpha = a;
+        if (it.k === "msg") { g.fillStyle = "#16181d"; g.font = "500 " + Math.round(40 * k) + "px " + FONT; x.lines.forEach(function (ln, j) { g.fillText(ln, 56, yy + lh / 2 + j * lh); }); }
+        else if (it.k === "journal") journal(g, 56, yy + 6, it);
+        else photo(g, 56, yy + 6, it);
+      } else if (it.k === "sep") {
+        g.fillStyle = "#2b5fd9"; g.font = "800 24px " + FONT; g.textAlign = "center"; var tw = g.measureText(it.text.toUpperCase()).width;
+        g.fillText(it.text.toUpperCase(), W / 2, y + 43); g.fillRect(60, y + 42, W / 2 - tw / 2 - 90, 3); g.fillRect(W / 2 + tw / 2 + 30, y + 42, W / 2 - tw / 2 - 90, 3); g.textAlign = "left";
+      }
+      g.globalAlpha = 1; y += heights[i];
+    });
+    if (typingNow) {
+      badge(g, 66, y + 40, 30, other);
+      g.fillStyle = "#eef0f4"; rr(g, 108, y + 14, 120, 54, 27); g.fill();
+      for (var d = 0; d < 3; d++) { g.fillStyle = "rgba(60,64,72," + (.35 + .55 * Math.max(0, Math.sin(t * 8 - d * .9))) + ")"; g.beginPath(); g.arc(142 + d * 26, y + 41, 8, 0, Math.PI * 2); g.fill(); }
+    }
+    g.restore();
+    // barre d'écriture
+    var typing = items.filter(function (it) { return it.k === "type" && t >= it.at && t < it.end + .2; })[0], typed = "";
+    if (typing) typed = typing.text.slice(0, Math.max(0, Math.min(typing.text.length, Math.floor((t - typing.at) / (typing.end - typing.at) * typing.text.length))));
+    g.fillStyle = "#fff"; g.fillRect(0, CHAT_BOT, W, 112);
+    g.strokeStyle = "#111"; g.lineWidth = 5; g.beginPath(); g.arc(64, CHAT_BOT + 56, 30, 0, Math.PI * 2); g.stroke(); g.beginPath(); g.arc(64, CHAT_BOT + 56, 12, 0, Math.PI * 2); g.stroke();
+    g.fillStyle = "#f1f2f5"; rr(g, 112, CHAT_BOT + 20, 800, 72, 36); g.fill();
+    g.font = "500 36px " + FONT; g.textAlign = "left";
+    if (typed) { var shown = typed; while (g.measureText(shown).width > 740) shown = shown.slice(1); g.fillStyle = "#111"; g.fillText(shown, 140, CHAT_BOT + 57); if ((t * 2) % 1 < .6) g.fillRect(142 + g.measureText(shown).width, CHAT_BOT + 36, 4, 42); }
+    else { g.fillStyle = "#9aa0aa"; g.fillText("Envoyer un message", 140, CHAT_BOT + 57); }
+    badge(g, 990, CHAT_BOT + 56, 34, ME);
+    var chap = ""; items.forEach(function (it) { if (it.k === "chap" && it.at <= t) chap = it.text; });
+    g.fillStyle = "#d3d6dc"; g.fillRect(0, CHAT_BOT + 112, W, 76); g.fillStyle = "#111"; g.font = "800 34px " + FONT; g.textAlign = "center"; g.fillText(chap, W / 2, CHAT_BOT + 152);
+    keyboard(g, CHAT_BOT + 188, typing ? typing.text.charAt(Math.max(0, typed.length - 1)) : "", typing && t < typing.end);
+    items.forEach(function (it) {
+      if (it.k !== "notif" || t < it.at || t > it.at + 3) return;
+      var p = t - it.at, s = p < .35 ? 1 - Math.pow(1 - p / .35, 3) : p > 2.6 ? 1 - (p - 2.6) / .4 : 1, ny = -190 + s * 230;
+      g.save(); g.shadowColor = "rgba(0,0,0,.25)"; g.shadowBlur = 30; g.fillStyle = "rgba(250,250,252,.98)"; rr(g, 30, ny, W - 60, 170, 34); g.fill(); g.restore();
+      g.fillStyle = "#ffd60a"; rr(g, 60, ny + 26, 42, 42, 10); g.fill(); g.font = "900 26px " + FONT; g.textAlign = "center"; g.fillText("💬", 81, ny + 48);
+      g.textAlign = "left"; g.fillStyle = "#6b7280"; g.font = "700 26px " + FONT; g.fillText("MESSAGES", 118, ny + 48); g.textAlign = "right"; g.fillText("maintenant", W - 66, ny + 48); g.textAlign = "left";
+      g.fillStyle = "#111"; g.font = "800 34px " + FONT; g.fillText(it.from, 60, ny + 98); g.font = "500 32px " + FONT; g.fillText(wrap(g, it.text, W - 140)[0], 60, ny + 140);
+    });
+  }
+  function journal(g, x, y, it) { // article d'un journal inventé
+    g.save(); g.shadowColor = "rgba(0,0,0,.18)"; g.shadowBlur = 18; g.fillStyle = "#fbfaf6"; rr(g, x, y, 560, 430, 16); g.fill(); g.restore();
+    g.fillStyle = "#1b3a8a"; rr(g, x, y, 560, 86, 16); g.fill(); g.fillRect(x, y + 50, 560, 36);
+    g.fillStyle = "#fff"; g.font = "900 italic 46px Georgia, serif"; g.textAlign = "center"; g.fillText("Le Journal du Foot", x + 280, y + 46);
+    g.fillStyle = "#111"; g.font = "900 40px Georgia, serif"; var tl = it.title; while (g.measureText(tl).width > 520 && tl.length > 4) tl = tl.slice(0, -1); g.fillText(tl, x + 280, y + 136);
+    var gr = g.createLinearGradient(x + 30, y + 170, x + 530, y + 330); gr.addColorStop(0, ME.c1); gr.addColorStop(.5, "#0d1426"); gr.addColorStop(1, OTHER0.c1); g.fillStyle = gr; rr(g, x + 30, y + 168, 500, 170, 10); g.fill();
+    badge(g, x + 170, y + 253, 56, ME); badge(g, x + 390, y + 253, 56, OTHER0); g.fillStyle = "#fff"; g.font = "900 44px " + FONT; g.fillText("VS", x + 280, y + 256);
+    g.fillStyle = "#333"; g.font = "500 24px Georgia, serif"; wrap(g, it.text, 500).slice(0, 2).forEach(function (l, j) { g.fillText(l, x + 280, y + 372 + j * 30); }); g.textAlign = "left";
+  }
+  function photo(g, x, y, it) { // photo de la galerie, avec la légende posée dessus
+    var sz = photoSize(it), w = sz[0], h = sz[1], im = photos[it.n];
+    g.save(); rr(g, x, y, w, h, 18); g.clip();
+    if (im) g.drawImage(im, x, y, w, h); else { g.fillStyle = "#e3e6ec"; g.fillRect(x, y, w, h); g.fillStyle = "#9aa0aa"; g.font = "700 40px " + FONT; g.textAlign = "center"; g.fillText("📷 Photo " + it.n, x + w / 2, y + h / 2); }
+    if (it.text) { g.fillStyle = "rgba(0,0,0,.45)"; g.fillRect(x, y + h * .62, w, 70); g.fillStyle = "#fff"; g.font = "600 36px " + FONT; g.textAlign = "center"; g.fillText(wrap(g, it.text, w - 40)[0], x + w / 2, y + h * .62 + 37); }
+    g.restore(); g.textAlign = "left";
+  }
+  var ROWS = ["azertyuiop", "qsdfghjklm", "wxcvbn"];
+  function keyOf(ch) { ch = String(ch || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, ""); return ch === " " ? " " : /[a-z]/.test(ch) ? ch : ""; }
+  function keyboard(g, y0, ch, active) {
+    g.fillStyle = "#d3d6dc"; g.fillRect(0, y0, W, H - y0);
+    var kk = active ? keyOf(ch) : "", kw = 96, gap = 12, pop = null;
+    ROWS.forEach(function (row, r) {
+      var n = row.length, x0 = r === 2 ? 168 : (W - (n * kw + (n - 1) * gap)) / 2, y = y0 + 30 + r * 134;
+      if (r === 2) { key(g, 24, y, 132, 112, "⇧", false, true); key(g, W - 156, y, 132, 112, "⌫", false, true); }
+      for (var i = 0; i < n; i++) { var x = x0 + i * (kw + gap), on = row[i] === kk; key(g, x, y, kw, 112, row[i], on); if (on) pop = [x, y, row[i]]; }
+    });
+    var by = y0 + 30 + 3 * 134; key(g, 24, by, 190, 112, "123", false, true); key(g, 230, by, 610, 112, "espace", kk === " "); key(g, 856, by, 200, 112, "retour", false, true);
+    if (pop) { g.save(); g.shadowColor = "rgba(0,0,0,.3)"; g.shadowBlur = 16; g.fillStyle = "#fff"; rr(g, pop[0] - 20, pop[1] - 130, kw + 40, 150, 22); g.fill(); g.restore(); g.fillStyle = "#111"; g.font = "500 76px " + FONT; g.textAlign = "center"; g.fillText(pop[2], pop[0] + kw / 2, pop[1] - 58); }
+  }
+  function key(g, x, y, w, h, label, on, dark) {
+    g.fillStyle = "rgba(0,0,0,.25)"; rr(g, x, y + 4, w, h, 14); g.fill();
+    g.fillStyle = on ? "#b9bec7" : dark ? "#adb3bd" : "#fff"; rr(g, x, y, w, h, 14); g.fill();
+    g.fillStyle = "#111"; g.font = (label.length > 1 ? "500 36px " : "500 54px ") + FONT; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(label, x + w / 2, y + h / 2 + 2);
+  }
+
+  /* ---------- sons et musique d'ambiance (créés par la page) ---------- */
+  function sounds(ac, dest, t0) {
+    function click(t, f, v, d, type) { var o = ac.createOscillator(), g = ac.createGain(); o.type = type || "square"; o.frequency.value = f; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.001, t + d); o.connect(g); g.connect(dest); o.start(t); o.stop(t + d + .02); }
+    if (S.sfx) items.forEach(function (it) {
+      if (it.k === "type") { var n = it.text.length; for (var i = 0; i < n; i++) click(t0 + it.at + (it.end - it.at) * i / n, 1800 + Math.random() * 400, .025, .03); }
+      else if (it.k === "msg" || it.k === "photo" || it.k === "journal") { if (it.who === "me") { click(t0 + it.at, 880, .09, .12, "sine"); click(t0 + it.at + .06, 1320, .07, .14, "sine"); } else { click(t0 + it.at, 660, .08, .18, "sine"); click(t0 + it.at + .08, 990, .07, .2, "sine"); } }
+      else if (it.k === "notif") { click(t0 + it.at, 1047, .1, .3, "sine"); click(t0 + it.at + .12, 1568, .09, .4, "sine"); }
+      else if (it.k === "sep") click(t0 + it.at, 330, .06, .6, "sine");
+    });
+    if (S.music) { // nappe douce : 4 accords qui tournent
+      var CH = [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]], bar = 3.2, master = ac.createGain(), lp = ac.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 1200; master.gain.value = .05; lp.connect(master); master.connect(dest);
+      for (var b = 0; b * bar < total; b++) { var tt = t0 + b * bar; CH[b % 4].forEach(function (nn) { var o = ac.createOscillator(), g = ac.createGain(); o.type = "triangle"; o.frequency.value = 440 * Math.pow(2, (nn - 69) / 12); g.gain.setValueAtTime(0, tt); g.gain.linearRampToValueAtTime(.5, tt + .8); g.gain.linearRampToValueAtTime(0, tt + bar + .4); o.connect(g); g.connect(lp); o.start(tt); o.stop(tt + bar + .5); });
+        var o2 = ac.createOscillator(), g2 = ac.createGain(); o2.type = "sine"; o2.frequency.value = 440 * Math.pow(2, (CH[b % 4][0] - 12 - 69) / 12); g2.gain.setValueAtTime(.6, tt); g2.gain.exponentialRampToValueAtTime(.01, tt + bar); o2.connect(g2); g2.connect(lp); o2.start(tt); o2.stop(tt + bar + .1); }
+    }
+  }
+
+  /* ---------- formulaires ---------- */
+  function fill() {
+    $("#tpl").innerHTML = Object.keys(TPL).map(function (k) { return "<option value=\"" + k + "\">" + TPL[k].label + "</option>"; }).join(""); $("#tpl").value = S.tpl;
+    $("#side").value = S.side; $("#script").value = S.script; $("#speed").value = S.speed; $("#size").value = S.size; $("#q").value = S.q; $("#sfx").checked = !!S.sfx; $("#music").checked = !!S.music;
+  }
+  function edited() { var cur = String(S.script || "").trim(); return !Object.keys(TPL).some(function (k) { return cur === tplText(k, "om").trim() || cur === tplText(k, "psg").trim(); }); }
+  function applyTpl() { S.script = tplText(S.tpl, S.side); $("#script").value = S.script; save(); parse(); restart(); makeCap(); }
+  $("#tpl").onchange = function () { if (edited() && !confirm("Remplacer ton histoire par celle-ci ?")) { this.value = S.tpl; return; } S.tpl = this.value; applyTpl(); };
+  $("#side").onchange = function () { if (edited() && !confirm("Charger la version " + (this.value === "psg" ? "Team PSG" : "Team OM") + " de l'histoire ? Ton texte modifié sera remplacé.")) { this.value = S.side; return; } S.side = this.value; applyTpl(); };
+  $("#script").oninput = function () { S.script = this.value; save(); parse(); };
+  ["speed", "size", "q"].forEach(function (k) { $("#" + k).onchange = function () { S[k] = this.value; save(); parse(); restart(); }; });
+  $("#sfx").onchange = function () { S.sfx = this.checked; save(); }; $("#music").onchange = function () { S.music = this.checked; save(); };
+
+  /* ---------- légende TikTok ---------- */
+  var capK = 0;
+  function makeCap() {
+    var me = (ME && ME.name) || "OM", ot = (OTHER0 && OTHER0.name) || "PSG";
+    var ideas = ["Quand " + me + " et " + ot + " s'écrivent avant le match 😂💬", "La conversation que personne ne devait voir 👀 " + me + " x " + ot, "Ça part en clash entre " + me + " et " + ot + " 😭 Partie 1", "Imagine les messages entre " + me + " et " + ot + "… 💬 Team qui ?"];
+    function tg(n) { var k = String(n).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]/g, ""); return k === "om" || k === "marseille" ? "#om #teamom" : k === "psg" || k === "paris" ? "#psg #teampsg" : "#" + k; }
+    $("#cap").value = ideas[capK % ideas.length] + "\n\n" + [tg(me), tg(ot), "#leclassique #histoire #conversation #foot #fyp #pourtoi"].join(" ");
+  }
+  $("#capNew").onclick = function () { capK++; makeCap(); };
+  $("#capCopy").onclick = function () { var c = $("#cap"); c.select(); var ok = false; try { if (navigator.clipboard) { navigator.clipboard.writeText(c.value); ok = true; } } catch (e) {} if (!ok) try { document.execCommand("copy"); } catch (e) {} msg("Légende copiée ✅"); };
+
+  /* ---------- aperçu, lecture et vidéo ---------- */
+  var cv = $("#view"), g = cv.getContext("2d"), t0 = performance.now(), busy = false, ac = null;
+  function restart() { t0 = performance.now(); }
+  function msg(t) { $("#msg").textContent = t; }
+  function audio() { if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === "suspended") ac.resume(); return ac; }
+  parse();
+  (function loop(now) { if (!busy) { var t = (now - t0) / 1000; if (t > total + 1) { t0 = now; t = 0; } drawScene(g, t); } requestAnimationFrame(loop); })(performance.now());
+  var prevGain = null;
+  $("#play").onclick = function () { parse(); var a = audio(); if (prevGain) try { prevGain.disconnect(); } catch (e) {} prevGain = a.createGain(); prevGain.connect(a.destination); t0 = performance.now(); sounds(a, prevGain, a.currentTime); };
+  var lastURL = null, lastFile = null;
+  function download(blob, name) {
+    if (lastURL) URL.revokeObjectURL(lastURL); lastURL = URL.createObjectURL(blob);
+    try { lastFile = new File([blob], name, { type: blob.type }); } catch (e) { lastFile = null; }
+    var a = document.createElement("a"); a.href = lastURL; a.download = name; document.body.appendChild(a); try { a.click(); } catch (e) {} a.remove();
+    var mo = blob.size / 1048576; $("#gotName").textContent = "✅ " + name + " · " + (mo >= 1 ? mo.toFixed(1) + " Mo" : Math.max(1, Math.round(blob.size / 1024)) + " Ko");
+    $("#gotDl").href = lastURL; $("#gotDl").setAttribute("download", name);
+    var can = false; try { can = !!(lastFile && navigator.canShare && navigator.canShare({ files: [lastFile] })); } catch (e) {} $("#gotShare").hidden = !can; $("#got").hidden = false;
+  }
+  $("#gotShare").onclick = function () { if (lastFile) navigator.share({ files: [lastFile] }).catch(function () {}); };
+  function stamp() { var d = new Date(); return d.getFullYear() + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0") + "-" + String(d.getHours()).padStart(2, "0") + String(d.getMinutes()).padStart(2, "0"); }
+  $("#dlVideo").onclick = function () {
+    if (busy) return;
+    if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) { msg("Ce navigateur ne sait pas créer de vidéo. Utilise Chrome."); return; }
+    parse(); if (prevGain) try { prevGain.disconnect(); } catch (e) {}
+    var a = audio(), dest = a.createMediaStreamDestination(), hq = S.q === "1080", cw = hq ? 1080 : 720, ch = hq ? 1920 : 1280;
+    var c = document.createElement("canvas"); c.width = cw; c.height = ch; var cg = c.getContext("2d"), tmp = document.createElement("canvas"); tmp.width = W; tmp.height = H; var tg = tmp.getContext("2d");
+    var stream = c.captureStream(30); dest.stream.getAudioTracks().forEach(function (tr) { stream.addTrack(tr); });
+    var type = ["video/mp4;codecs=avc1.42E01E,mp4a.40.2", "video/mp4;codecs=avc1,mp4a.40.2", "video/mp4", "video/webm;codecs=vp9,opus", "video/webm"].filter(function (x) { return MediaRecorder.isTypeSupported(x); })[0] || "";
+    var rec, chunks = []; try { rec = new MediaRecorder(stream, type ? { mimeType: type, videoBitsPerSecond: hq ? 10e6 : 6e6 } : {}); } catch (e) { msg("Impossible de démarrer l'enregistrement."); return; }
+    rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
+    busy = true; $("#dlVideo").disabled = true; $("#bar").hidden = false; msg("Création de la vidéo (" + Math.round(total) + " s)… garde la page ouverte.");
+    sounds(a, dest, a.currentTime + .2); var start = performance.now() + 200; rec.start(500);
+    (function frame() {
+      var t = Math.max(0, (performance.now() - start) / 1000); drawScene(tg, t); cg.drawImage(tmp, 0, 0, cw, ch); g.drawImage(tmp, 0, 0);
+      $("#barI").style.width = Math.round(Math.min(1, t / total) * 100) + "%";
+      if (t >= total) {
+        rec.onstop = function () { var ext = /mp4/.test(rec.mimeType || type) ? "mp4" : "webm"; download(new Blob(chunks, { type: rec.mimeType || type || "video/webm" }), "histoire-" + stamp() + "." + ext); msg(ext === "mp4" ? "Vidéo téléchargée ✅" : "Vidéo téléchargée ✅ (format WEBM) : si ta galerie ne la voit pas, ouvre-la dans CapCut et réexporte-la."); busy = false; $("#dlVideo").disabled = false; $("#bar").hidden = true; restart(); };
+        try { rec.stop(); } catch (e) { rec.onstop(); } return;
+      }
+      requestAnimationFrame(frame);
+    })();
+  };
+
+  for (var n = 1; n <= 6; n++) loadPhoto(n);
+  fill(); parse(); imgsForm(); makeCap();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(restart);
+  window.__histoire = { drawScene: drawScene, total: function () { return total; } };
+})();
+</script>
+</body>
+</html>
