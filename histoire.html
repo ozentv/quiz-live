@@ -71,6 +71,9 @@ button:disabled { opacity: .5; }
         <span><code>PSG: [répond: Le Vélodrome va trembler] Trembler ?</code> répond à un message · <code>[réaction 😂]</code> réaction sur le dernier message · <code>[supprimé]</code> le dernier message est supprimé</span>
         <span><code>Moi: [hésite: Je t'aime] Bonne nuit</code> tu tapes, tu effaces, tu retapes · <code>[hésite]</code> l'autre écrit… puis n'envoie rien · <code>[appel] PSG</code> appel manqué · <code>[appel] PSG | accepté</code> appel décroché</span>
         <span><code>[vocal] texte</code> message vocal lu par une voix · <code>[position] Devant le Vélodrome</code> position partagée · <code>[photo 1 éphémère]</code> photo qui s'efface après 5 secondes · <code>-- TROIS HEURES PLUS TARD --</code> fait aussi avancer l'heure</span>
+        <span><code>[choc]</code> l'écran tremble avec un flash rouge · <code>[zoom]</code> zoom sur le dernier message · <code>[flash]</code> flash blanc (aussi en début de message : <code>PSG: [choc] Quoi ???</code>)</span>
+        <span><code>[capture]</code> « 📸 PSG a fait une capture d'écran » · <code>Moi: [capture]</code> c'est toi qui captures · <code>PSG: 😂😂😂</code> un message fait seulement d'emojis s'affiche en grand</span>
+        <span><code>[sticker chevre]</code> autocollant de l'autre · <code>Moi: [sticker coupe]</code> le tien : ballon, coupe, chevre, but, pleure, rire, feu, clown, mur, dodo, coeur, bus</span>
         <span><code>@groupe Supporters OM | 💙</code> groupe de discussion : chaque nom (<code>Lucas: …</code>, <code>Inès: …</code>) a sa couleur · « Envoyé » et « Lu » s'affichent tout seuls sous ton dernier message</span>
       </div>
     </div>
@@ -95,7 +98,10 @@ button:disabled { opacity: .5; }
         <label>Qualité<select id="q"><option value="720">720p</option><option value="1080">1080p</option></select></label>
       </div>
       <label class="chk"><input type="checkbox" id="lock"> 🔒 Commencer sur l'écran verrouillé, avec les notifications</label>
+      <label class="chk"><input type="checkbox" id="inbox"> 📥 Ouvrir l'appli sur la liste des conversations</label>
+      <label class="chk"><input type="checkbox" id="typos"> 🔤 Fautes de frappe corrigées (on tape, on efface, on corrige)</label>
       <label class="chk"><input type="checkbox" id="dark"> 🌙 Mode sombre</label>
+      <label>💥 Phrase d'accroche (2 secondes au début, vide = aucune)<span style="display:grid;grid-template-columns:1fr auto;gap:6px"><input type="text" id="hook" maxlength="90" placeholder="Ils se sont écrit avant le Classique… 😳"><button class="mini" type="button" id="hookIdea">💡 Idée</button></span></label>
       <label>🕐 Heure au début de l'histoire<input type="text" id="clock" placeholder="21:00" maxlength="5"></label>
       <label class="chk"><input type="checkbox" id="sfx"> 🔊 Sons (clavier, envoi, notifications)</label>
       <label>🎵 Musique (créée par la page, sans droits)<select id="mstyle"><option value="auto">Auto : change selon les chapitres</option><option value="drole">Drôle</option><option value="tension">Tension</option><option value="romantique">Romantique</option><option value="triste">Triste</option><option value="douce">Douce</option><option value="none">Sans musique</option></select></label>
@@ -2729,12 +2735,12 @@ Moi: Si, un peu 😂
   var OM_ME = "@moi OM | #2faee0 | #ffffff", PSG_CT = "@contact PSG | ❤️💙 | #004170 | #da291c", PSG_ME = "@moi PSG | #004170 | #da291c", OM_CT = "@contact OM | 💙 | #2faee0 | #ffffff";
   var TPL = {
     classique: { label: "⚽ Le Classique (chambrage avant le match)",
-      om: [OM_ME, PSG_CT, "# Partie 1 : Le message…", "PSG: Salut l'OM 😏", "PSG: Prêt pour dimanche ?", "Moi: Toujours prêt 💙", "Moi: Le Vélodrome va trembler", "PSG: [répond: Le Vélodrome va trembler] Trembler ? Comme vos défenseurs ? 😂", "[réaction 😡]", "Moi: Mdr", "Moi: On a gagné la Ligue des champions en 1993", "Moi: Les premiers en France 🏆", "PSG: Et nous en 2025… 5-0 en finale 😎", "Moi: [hésite: Vous avez eu de la chance] …",
+      om: [OM_ME, PSG_CT, "# Partie 1 : Le message…", "PSG: Salut l'OM 😏", "PSG: Prêt pour dimanche ?", "Moi: Toujours prêt 💙", "Moi: [sticker chevre]", "Moi: Le Vélodrome va trembler", "PSG: [répond: Le Vélodrome va trembler] Trembler ? Comme vos défenseurs ? 😂", "[réaction 😡]", "Moi: Mdr", "Moi: On a gagné la Ligue des champions en 1993", "Moi: Les premiers en France 🏆", "PSG: Et nous en 2025… 5-0 en finale 😎", "Moi: [hésite: Vous avez eu de la chance] …",
         "-- LE JOUR DU MATCH --", "# Partie 2 : Le Classique", "[notif] Supporters OM : On est tous derrière vous !! 💙🔥", "Moi: Le stade est plein", "Moi: Ça chante depuis 3 heures", "PSG: On arrive 🚌", "PSG: Préparez les mouchoirs",
-        "-- 90 MINUTES PLUS TARD --", "# Partie 3 : Le verdict…", "[journal] LE CLASSIQUE | Quelle soirée au Vélodrome ! Revivez le match minute par minute", "[appel] PSG", "PSG: …", "Moi: Alors ? On fait moins le malin ? 😏", "PSG: On en reparle au match retour", "[réaction 😂]", "Moi: Droit au but 💙", "[notif] Supporters PSG : On reviendra plus forts 😤"],
-      psg: [PSG_ME, OM_CT, "# Partie 1 : Le message…", "OM: Salut le PSG 😏", "OM: Prêts pour dimanche ?", "Moi: Toujours prêts ❤️💙", "Moi: On vient gagner chez vous", "OM: [répond: On vient gagner chez vous] Gagner ? Au Vélodrome ? 😂", "[réaction 😡]", "Moi: Mdr même pas peur", "Moi: Champions d'Europe 2025, 5-0 en finale 😎", "OM: Nous c'était en 1993, les premiers en France 🏆", "Moi: Ça date un peu non ? 👴", "OM: …",
+        "-- 90 MINUTES PLUS TARD --", "# Partie 3 : Le verdict…", "[journal] LE CLASSIQUE | Quelle soirée au Vélodrome ! Revivez le match minute par minute", "[appel] PSG", "PSG: …", "[capture]", "Moi: Alors ? On fait moins le malin ? 😏", "PSG: On en reparle au match retour", "[réaction 😂]", "Moi: Droit au but 💙", "[notif] Supporters PSG : On reviendra plus forts 😤"],
+      psg: [PSG_ME, OM_CT, "# Partie 1 : Le message…", "OM: Salut le PSG 😏", "OM: Prêts pour dimanche ?", "Moi: Toujours prêts ❤️💙", "Moi: [sticker coupe]", "Moi: On vient gagner chez vous", "OM: [répond: On vient gagner chez vous] Gagner ? Au Vélodrome ? 😂", "[réaction 😡]", "Moi: Mdr même pas peur", "Moi: Champions d'Europe 2025, 5-0 en finale 😎", "OM: Nous c'était en 1993, les premiers en France 🏆", "Moi: Ça date un peu non ? 👴", "OM: …",
         "-- LE JOUR DU MATCH --", "# Partie 2 : Le Classique", "[notif] Supporters PSG : On est tous derrière vous !! ❤️💙🔥", "Moi: Le bus arrive à Marseille", "Moi: Ça siffle déjà 😅", "OM: Bienvenue au Vélodrome 😈", "OM: Préparez les mouchoirs",
-        "-- 90 MINUTES PLUS TARD --", "# Partie 3 : Le verdict…", "[journal] LE CLASSIQUE | Quelle soirée au Vélodrome ! Revivez le match minute par minute", "[appel] OM", "OM: …", "Moi: Alors ? On fait moins le malin ? 😏", "OM: On en reparle au match retour", "[réaction 😂]", "Moi: Ici c'est Paris ❤️💙", "[notif] Supporters OM : On reviendra plus forts 😤"] },
+        "-- 90 MINUTES PLUS TARD --", "# Partie 3 : Le verdict…", "[journal] LE CLASSIQUE | Quelle soirée au Vélodrome ! Revivez le match minute par minute", "[appel] OM", "OM: …", "[capture]", "Moi: Alors ? On fait moins le malin ? 😏", "OM: On en reparle au match retour", "[réaction 😂]", "Moi: Ici c'est Paris ❤️💙", "[notif] Supporters OM : On reviendra plus forts 😤"] },
     pari: { label: "🤝 Le pari (le perdant porte le maillot de l'autre)",
       om: [OM_ME, PSG_CT, "# Partie 1 : Le pari", "Moi: J'ai une idée 😈", "PSG: Dis toujours", "Moi: Le perdant du Classique porte le maillot de l'autre", "Moi: Une journée entière", "PSG: Deal 🤝", "PSG: Prépare-toi à être en bleu et rouge 😂", "Moi: On verra bien",
         "-- TROIS JOURS PLUS TARD --", "# Partie 2 : Le match", "[notif] Supporters OM : Ce soir on gagne !! 💙", "PSG: Dernière chance pour annuler 😏", "Moi: Jamais", "Moi: Droit au but",
@@ -2833,13 +2839,28 @@ Moi: Si, un peu 😂
   if (!S) S = { tpl: "classique", side: "om", script: tplText("classique", "om"), speed: "1", size: "1", q: "720", sfx: true, mstyle: "auto" };
   if (!S.mstyle) S.mstyle = S.music === false ? "none" : "auto";
   if (!S.duel) S.duel = "om-psg"; if (S.lock == null) S.lock = true; if (S.dark == null) S.dark = false; if (!S.clock) S.clock = "21:00";
+  var HOOKS = ["Ils se sont écrit avant {DERBY}… 😳", "La conversation qui a fuité 👀", "Personne ne devait voir ces messages 🤫", "{LEMECAP} n'aurait jamais dû envoyer ça 💀", "Attends la fin… 😭", "POV : {LETHEM} t'écrit la veille du match 📱", "Ça a très mal fini… 💔", "Les messages que {LETHEM} veut effacer 😂", "Je n'en reviens toujours pas… 😳"];
+  if (S.hook == null) S.hook = HOOKS[0]; if (S.typos == null) S.typos = true; if (S.inbox == null) S.inbox = true;
   var QS = {}; try { QS = JSON.parse(localStorage.getItem("sq-set") || "{}"); } catch (e) {}
   if (!S.relay) S.relay = QS.relay || "studio-quiz-relais.onrender.com"; if (S.key == null) S.key = QS.lbKey || "";
   function save() { try { localStorage.setItem("histoire-set", JSON.stringify(S)); } catch (e) {} }
 
   /* ---------- lecture du script : chaque ligne devient un événement daté ---------- */
   var items, total, header0;
-  var LOCK_T = 4.4, clockJumps = [], lockNotifs = [];
+  var LOCK_T = 4.4, INBOX_T = 2.4, clockJumps = [], lockNotifs = [], hookText = "", inboxPrev = null;
+  function inboxStart() { return S.lock ? LOCK_T : 0; }
+  function inboxEnd() { return inboxStart() + INBOX_T; }
+  function hashS(x) { var h = 7; x = String(x); for (var i = 0; i < x.length; i++) h = (h * 31 + x.charCodeAt(i)) % 100003; return h; }
+  function makeTypo(text) { // une faute « humaine » : touche voisine sur le clavier
+    if (text.length < 10 || hashS(text) % 10 >= 4) return null;
+    var cand = []; for (var i = 3; i < text.length - 3; i++) if (/[a-z]/.test(text.charAt(i))) cand.push(i); if (!cand.length) return null;
+    var pos = cand[hashS(text + "#") % cand.length], ch = text.charAt(pos), nb = "";
+    ROWS.forEach(function (row) { var j = row.indexOf(ch); if (j >= 0) nb = row.charAt(j + 1) || row.charAt(j - 1); });
+    if (!nb || nb === ch) return null; return { pos: pos, wrong: text.slice(0, pos) + nb + text.slice(pos + 1, pos + 3) };
+  }
+  var STICK = { ballon: ["⚽", "#16a34a", "ALLEZ !"], coupe: ["🏆", "#ca8a04", "CHAMPIONS"], chevre: ["🐐", "#7c3aed", "GOAT"], but: ["⚽", "#e11d48", "BUUUT !"], pleure: ["😭", "#2563eb", "SNIF"], rire: ["😂", "#f59e0b", "MDRRR"], feu: ["🔥", "#ea580c", "EN FEU"], clown: ["🤡", "#db2777", "CLOWN"], mur: ["🧱", "#78716c", "LE MUR"], dodo: ["😴", "#0891b2", "ZZZ"], coeur: ["❤️", "#e11d48", "LOVE"], bus: ["🚌", "#475569", "BUS GARÉ"] };
+  function stickKey(n) { return String(n || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z]/g, ""); }
+  var EMO_ONLY = /^(?:\p{Extended_Pictographic}(?:\uFE0F|\u200D\p{Extended_Pictographic}|\p{Emoji_Modifier})*\s*){1,3}$/u;
   var VOICES_G = ["fr-FR-DeniseNeural", "fr-FR-VivienneMultilingualNeural", "fr-CA-AntoineNeural", "fr-BE-GerardNeural", "fr-FR-EloiseNeural", "fr-CH-FabriceNeural"];
   function voiceFor(who, from, headName) {
     if (who === "me") return S.vMe || "fr-FR-RemyMultilingualNeural";
@@ -2867,17 +2888,26 @@ Moi: Si, un peu 😂
   function fmtClock(m) { return String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0"); }
   function batteryAt(t) { var n = 0; clockJumps.forEach(function (c, i) { if (i && c.at <= t) n++; }); return Math.max(4, Math.round(87 - t * .12 - n * 4)); }
   function parse() {
-    var raw = String(S.script || "").split(/\n/), list = [], sp = +S.speed || 1, t = S.lock ? LOCK_T - .2 : .8;
+    var raw = String(S.script || "").split(/\n/), list = [], sp = +S.speed || 1, t = (S.lock || S.inbox) ? inboxStart() + (S.inbox ? INBOX_T : 0) - .2 : .8;
     var me = { name: "OM", c1: "#2faee0", c2: "#ffffff" }, other = { name: "PSG", emo: "", c1: "#004170", c2: "#da291c" }, first = true, lastMsg = null, start = 21 * 60;
     var m0 = String(S.clock || "21:00").match(/^(\d{1,2}):(\d{2})$/); if (m0) start = (+m0[1]) * 60 + (+m0[2]);
     clockJumps = [{ at: 0, min: start }]; lockNotifs = [];
-    var lockFrom = null, firstOther = !!S.lock;
+    var lockFrom = null, firstOther = !!(S.lock || S.inbox), fxNext = null;
+    function fx(kind, at) { list.push({ k: "fx", fx: kind, at: at }); }
     function addOther(from, it, wait, rec) {
       if (firstOther) { firstOther = false; it.at = t; it.who = "other"; it.from = from; list.push(it); lastMsg = it; return t; } // déjà annoncé sur l'écran verrouillé : visible dès l'ouverture
       var a = t + wait * sp; list.push({ k: "typing", from: from, at: t, end: a, rec: rec }); it.at = a; it.who = "other"; it.from = from; list.push(it); lastMsg = it; return a; }
     function lockN(from) { if (S.lock && !lockFrom) lockFrom = from; }
     raw.forEach(function (l) {
-      l = l.trim(); if (!l) return; var m;
+      l = l.trim(); if (!l) return; var m, ifx = l.match(/^([^:\[\]]+:\s*)\[(choc|zoom|flash)\]\s*(.+)$/i);
+      if (ifx) { var before = lastMsg; line(ifx[1] + ifx[3]); if (lastMsg && lastMsg !== before) fx(ifx[2].toLowerCase(), lastMsg.at + .05); return; }
+      line(l);
+    });
+    function line(l) {
+      var m;
+      if ((m = l.match(/^\[(choc|zoom|flash)\]$/i))) { fx(m[1].toLowerCase(), lastMsg ? Math.max(lastMsg.at + .05, t - .5) : t); t += .5 * sp; return; }
+      if ((m = l.match(/^\[capture\]$/i))) l = other.name + ": [capture]";
+      if ((m = l.match(/^\[sticker\s+(.+?)\]$/i))) l = other.name + ": [sticker " + m[1] + "]";
       if ((m = l.match(/^@(contact|groupe)\s+(.+)$/i))) { var p = m[2].split("|").map(function (x) { return x.trim(); }), o = { name: p[0] || other.name, emo: p[1] != null ? p[1] : other.emo, c1: p[2] || other.c1, c2: p[3] || other.c2, group: /groupe/i.test(m[1]) || (other.group && !/contact/i.test(m[1])) };
         if (first) { other = o; header0 = o; } else list.push({ k: "head", o: o, at: t }); return; }
       if ((m = l.match(/^@moi\s+(.+)$/i))) { var q = m[1].split("|").map(function (x) { return x.trim(); }); me = { name: q[0] || "Moi", c1: q[1] || me.c1, c2: q[2] || me.c2 }; return; }
@@ -2906,6 +2936,11 @@ Moi: Si, un peu 😂
           if (isMe) { pit.who = "me"; pit.from = "Moi"; pit.at = t + .3; list.push(pit); lastMsg = pit; t += (pit.eph ? 6 : 2.4) * sp; } else { lockN(from, pit.eph ? "📸 Photo éphémère" : "📷 Photo"); t = addOther(from, pit, .9) + (pit.eph ? 6 : 2.3) * sp; } return; }
         var po = text.match(/^\[position\]\s*(.*)$/i);
         if (po) { var pp = { k: "pos", text: po[1] || "Position partagée" }; if (isMe) { pp.who = "me"; pp.from = "Moi"; pp.at = t + .3; list.push(pp); lastMsg = pp; t += 2.6 * sp; } else { lockN(from, "📍 Position partagée"); t = addOther(from, pp, .9) + 2.5 * sp; } return; }
+        if (/^\[capture\]$/i.test(text)) { var ca = isMe ? t + .3 : t + .2;
+          list.push({ k: "sys", cap: true, text: isMe ? "📸 Tu as fait une capture d'écran" : "📸 " + (from === other.name || other.group ? from : other.name) + " a fait une capture d'écran !", at: ca }); if (isMe) fx("flash", ca - .05); t = ca + 1.4 * sp; lastMsg = null; return; }
+        var sk = text.match(/^\[sticker\s+(.+?)\]$/i);
+        if (sk) { var si = { k: "sticker", name: STICK[stickKey(sk[1])] ? stickKey(sk[1]) : "ballon" };
+          if (isMe) { si.who = "me"; si.from = "Moi"; si.at = t + .3; list.push(si); lastMsg = si; t += 1.9 * sp; } else { lockN(from); t = addOther(from, si, .8) + 1.8 * sp; } return; }
         var vo = text.match(/^\[vocal\]\s*(.+)$/i);
         if (vo) { var vt = vo[1], vv = voiceFor(isMe ? "me" : "other", from, other.name), vd = vocalDur(vv, vt), vi = { k: "vocal", text: vt, voice: vv, dur: vd };
           if (isMe) { list.push({ k: "rec", at: t, end: t + vd }); vi.who = "me"; vi.from = "Moi"; vi.at = t + vd + .2; vi.play = t; list.push(vi); lastMsg = vi; t = vi.at + .8 * sp; }
@@ -2914,7 +2949,9 @@ Moi: Si, un peu 😂
         var replyFrom = null; if (reply) { for (var j = list.length - 1; j >= 0; j--) if (list[j].k === "msg" && list[j].text.indexOf(reply) === 0) { replyFrom = list[j].who === "me" ? "Moi" : list[j].from; break; } }
         if (isMe) {
           var d1 = pre ? Math.min(2.6, .3 + pre.length * .06) * sp : 0, d2 = pre ? Math.min(1.2, pre.length * .03) * sp + .5 : 0, d3 = Math.min(3.4, .35 + text.length * .06) * sp;
-          var ty = { k: "type", text: text, pre: pre, at: t, t1: t + d1, t2: t + d1 + d2, end: t + d1 + d2 + d3 }; list.push(ty);
+          var ty = { k: "type", text: text, pre: pre, at: t, t1: t + d1, t2: t + d1 + d2, end: t + d1 + d2 + d3 }, tp = !pre && S.typos ? makeTypo(text) : null;
+          if (tp) { var r = d3 / text.length, nd = tp.wrong.length - tp.pos; tp.tA = t + tp.wrong.length * r; tp.tB = tp.tA + .35 + nd * .09; ty.end = tp.tB + (text.length - tp.pos) * r; ty.typo = tp; }
+          list.push(ty);
           var mi = { k: "msg", who: "me", from: "Moi", text: text, reply: reply, replyFrom: replyFrom, at: ty.end + .2 }; list.push(mi); lastMsg = mi; t = ty.end + .8 * sp;
         } else {
           lockN(from, text);
@@ -2922,9 +2959,11 @@ Moi: Si, un peu 😂
           t = addOther(from, { k: "msg", text: text, reply: reply, replyFrom: replyFrom }, td) + .7 * sp;
         }
       }
-    });
+    }
     if (S.lock) { var lf = lockFrom || other.name, grp = (header0 || other).group, who = grp ? (header0 || other).name : lf, pre = grp ? lf + " " : "";
       lockNotifs = [{ from: who, text: pre + "est en train d'écrire", typing: true, at: .5 }, { from: who, text: pre + (grp ? "a envoyé un message" : "t'a envoyé un message"), at: 2.1 }]; }
+    hookText = String(S.hook || "").trim() ? fillTokens(String(S.hook).trim(), S.side) : "";
+    inboxPrev = null; list.forEach(function (it) { if (!inboxPrev && it.who === "other") inboxPrev = it; });
     items = list; total = t + 2.5; ME = me; header0 = header0 || other; OTHER0 = other;
     $("#durNote").textContent = "Durée de la vidéo : " + Math.round(total) + " secondes.";
   }
@@ -2991,13 +3030,14 @@ Moi: Si, un peu 😂
     items.forEach(function (it) {
       if (it.at > t) return;
       var key = it.who + "|" + it.from;
-      if (it.k === "msg") { g.font = (delText(it, t) ? "italic 500 " : "500 ") + Math.round(40 * k) + "px " + FONT; var lines = wrap(g, delText(it, t) ? "🚫 Ce message a été supprimé" : it.text, 900), head = prevKey !== key;
-        out.push({ it: it, lines: lines, head: head, h: (head ? 40 : 0) + (it.reply ? 70 : 0) + lines.length * lh + 14 + (it.react && t >= it.react.at ? 18 : 0) }); prevKey = key; if (it.who === "me") lastMe = out.length - 1; }
+      if (it.k === "msg") { g.font = (delText(it, t) ? "italic 500 " : "500 ") + Math.round(40 * k) + "px " + FONT; var big = !delText(it, t) && EMO_ONLY.test(it.text.trim()), lines = big ? [it.text.trim()] : wrap(g, delText(it, t) ? "🚫 Ce message a été supprimé" : it.text, 900), head = prevKey !== key;
+        out.push({ it: it, lines: lines, big: big, head: head, h: (head ? 40 : 0) + (it.reply ? 70 : 0) + (big ? 150 : lines.length * lh) + 14 + (it.react && t >= it.react.at ? 18 : 0) }); prevKey = key; if (it.who === "me") lastMe = out.length - 1; }
       else if (it.k === "sep") { out.push({ it: it, h: 86 }); prevKey = null; }
       else if (it.k === "sys") { out.push({ it: it, h: 80 }); prevKey = null; }
       else if (it.k === "journal") { var hd = prevKey !== key; out.push({ it: it, head: hd, h: (hd ? 40 : 0) + 470 }); prevKey = key; }
       else if (it.k === "photo") { var hd2 = prevKey !== key, gone = it.eph && t > it.at + 5.4; out.push({ it: it, head: hd2, gone: gone, h: (hd2 ? 40 : 0) + (gone ? 84 : photoSize(it)[1] + 30) }); prevKey = key; if (it.who === "me") lastMe = out.length - 1; }
       else if (it.k === "vocal") { var hd3 = prevKey !== key; out.push({ it: it, head: hd3, h: (hd3 ? 40 : 0) + 118 + (it.react && t >= it.react.at ? 18 : 0) }); prevKey = key; if (it.who === "me") lastMe = out.length - 1; }
+      else if (it.k === "sticker") { var hd5 = prevKey !== key; out.push({ it: it, head: hd5, h: (hd5 ? 40 : 0) + 300 }); prevKey = key; if (it.who === "me") lastMe = out.length - 1; }
       else if (it.k === "pos") { var hd4 = prevKey !== key; out.push({ it: it, head: hd4, h: (hd4 ? 40 : 0) + 430 }); prevKey = key; if (it.who === "me") lastMe = out.length - 1; }
     });
     if (lastMe >= 0) { out[lastMe].status = readState(out[lastMe].it, t); out[lastMe].h += 36; }
@@ -3009,7 +3049,71 @@ Moi: Si, un peu 😂
   }
   function headerAt(t) { var o = header0; items.forEach(function (it) { if (it.k === "head" && it.at <= t) o = it.o; }); return o; }
   function initials(g, x, y, r, name, col) { g.fillStyle = col; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill(); g.fillStyle = "#fff"; g.font = "800 " + Math.round(r) + "px " + FONT; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(String(name || "?").charAt(0).toUpperCase(), x, y + 1); g.textAlign = "left"; }
-  function drawScene(g, t) {
+  function drawScene(g, t) { // écran + effets ([choc], [zoom], [flash]) + phrase d'accroche
+    var dx = 0, dy = 0, sc = 1, red = 0, white = 0, zx = 540, zy = 1000;
+    items.forEach(function (it) {
+      if (it.k !== "fx" || t < it.at) return; var d = t - it.at;
+      if (it.fx === "choc" && d < .65) { var amp = 30 * (1 - d / .65); dx += Math.sin(d * 95) * amp; dy += Math.cos(d * 71) * amp * .7; sc = Math.max(sc, 1.05); red = Math.max(red, d < .5 ? .4 * (1 - d / .5) : 0); }
+      if (it.fx === "zoom" && d < 1.7) { if (it.zy == null) { var bl = blocks(g, it.at), hs = bl.reduce(function (a, b2) { return a + b2.h; }, 0), lb = bl[bl.length - 1]; it.zy = Math.max(CHAT_TOP + 200, Math.min(CHAT_BOT - 120, CHAT_TOP + 20 + Math.min(hs, CHAT_BOT - CHAT_TOP - 30) - (lb ? lb.h / 2 : 0))); } zx = 400; zy = it.zy; var e = d < .25 ? d / .25 : d > 1.35 ? 1 - (d - 1.35) / .35 : 1; e = e * e * (3 - 2 * e); sc = Math.max(sc, 1 + .32 * e); }
+      if (it.fx === "flash" && d < .45) white = Math.max(white, .9 * (1 - d / .45));
+    });
+    if (sc !== 1 || dx || dy) { g.save(); g.fillStyle = "#000"; g.fillRect(0, 0, W, H); g.translate(zx + dx, zy + dy); g.scale(sc, sc); g.translate(-zx, -zy); drawBase(g, t); g.restore(); } else drawBase(g, t);
+    if (red > 0) { var rg = g.createRadialGradient(W / 2, H / 2, 300, W / 2, H / 2, 1200); rg.addColorStop(0, "rgba(255,0,40," + red * .35 + ")"); rg.addColorStop(1, "rgba(255,0,40," + red + ")"); g.fillStyle = rg; g.fillRect(0, 0, W, H); }
+    if (white > 0) { g.fillStyle = "rgba(255,255,255," + white + ")"; g.fillRect(0, 0, W, H); }
+    hookOverlay(g, t);
+  }
+  function hookOverlay(g, t) {
+    if (!hookText || t > 2.9) return;
+    var a = t < .12 ? t / .12 : t > 2.5 ? Math.max(0, 1 - (t - 2.5) / .4) : 1, p = Math.min(1, t / .32), c1 = 1.70158, sc = 1 + (c1 + 1) * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2);
+    g.save(); g.globalAlpha = a; g.fillStyle = "rgba(0,0,0,.42)"; g.fillRect(0, 0, W, H);
+    g.font = "900 74px " + FONT; var lines = wrap(g, hookText, 860), lh = 108;
+    g.translate(W / 2, 1010); g.scale(.6 + .4 * sc, .6 + .4 * sc); g.rotate(-.025); g.textAlign = "center"; g.textBaseline = "middle";
+    lines.forEach(function (ln, i) { var y = (i - (lines.length - 1) / 2) * lh, w = g.measureText(ln).width + 60; g.fillStyle = "#ffffff"; rr(g, -w / 2, y - 50, w, 100, 24); g.fill(); g.fillStyle = "#111111"; g.fillText(ln, 0, y + 3); });
+    g.restore(); g.textAlign = "left";
+  }
+  function sticker(g, x, y, it, t) { // autocollant dessiné : disque coloré, gros emoji et bandeau
+    var st = STICK[it.name] || STICK.ballon, p = Math.min(1, (t - it.at) / .4), c1 = 1.70158, sc = p < 1 ? 1 + (c1 + 1) * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2) : 1, cx = x + 150, cy = y + 138;
+    g.save(); g.translate(cx, cy); g.rotate((it.who === "me" ? 1 : -1) * .14 + (p < 1 ? (1 - p) * .5 : 0)); g.scale(Math.max(.01, sc), Math.max(.01, sc));
+    g.shadowColor = "rgba(0,0,0,.28)"; g.shadowBlur = 22; g.shadowOffsetY = 8; g.fillStyle = "#ffffff"; g.beginPath(); g.arc(0, 0, 128, 0, Math.PI * 2); g.fill(); g.shadowColor = "transparent";
+    var rg = g.createRadialGradient(-40, -50, 10, 0, 0, 118); rg.addColorStop(0, "#ffffff"); rg.addColorStop(.25, st[1]); rg.addColorStop(1, st[1]); g.fillStyle = rg; g.beginPath(); g.arc(0, 0, 116, 0, Math.PI * 2); g.fill();
+    g.globalAlpha = .18; g.fillStyle = "#000"; g.beginPath(); g.arc(0, 0, 116, .2, Math.PI - .2); g.fill(); g.globalAlpha = 1;
+    g.textAlign = "center"; g.textBaseline = "middle"; g.font = "130px " + FONT; g.fillText(st[0], 0, -14);
+    g.font = "900 38px " + FONT; var w = g.measureText(st[2]).width + 44; g.fillStyle = "#111"; rr(g, -w / 2, 62, w, 58, 16); g.fill(); g.strokeStyle = "#fff"; g.lineWidth = 6; rr(g, -w / 2, 62, w, 58, 16); g.stroke();
+    g.fillStyle = "#ffd60a"; g.fillText(st[2], 0, 93);
+    g.restore(); g.textAlign = "left";
+  }
+  function inboxScreen(g, t) { // liste des conversations, puis on ouvre la bonne
+    var P = TH(), p = Math.min(1, Math.max(0, (t - inboxEnd()) / .45)), e = p * p * (3 - 2 * p), o = header0 || OTHER0, me = ME || { name: "OM" }, ck = CL[clubKey(me.name)];
+    g.save(); g.translate(-W * e, 0); if (e > 0) { g.shadowColor = "rgba(0,0,0,.35)"; g.shadowBlur = 40; }
+    g.fillStyle = P.bg; g.fillRect(0, 0, W, H); g.shadowColor = "transparent";
+    statusBar(g, t, P.icon, P.bg);
+    g.fillStyle = P.text; g.textAlign = "left"; g.textBaseline = "middle"; g.font = "800 76px " + FONT; g.fillText("Messages", 44, 250);
+    g.strokeStyle = P.icon; g.lineWidth = 5; rr(g, 966, 222, 56, 56, 12); g.stroke(); g.beginPath(); g.moveTo(984, 262); g.lineTo(1010, 236); g.stroke();
+    g.fillStyle = P.inBg; rr(g, 40, 320, W - 80, 80, 40); g.fill(); g.fillStyle = P.hint; g.font = "500 34px " + FONT; g.fillText("🔍  Rechercher", 76, 361);
+    var prev = "t'a envoyé un message", ip = inboxPrev;
+    if (ip) prev = ip.k === "msg" ? ip.text : ip.k === "photo" ? "📷 Photo" : ip.k === "vocal" ? "🎤 Message vocal" : ip.k === "pos" ? "📍 Position partagée" : ip.k === "sticker" ? "Autocollant" : ip.k === "journal" ? "📰 Article" : prev;
+    if (ip && o.group && ip.from) prev = ip.from + " : " + prev;
+    var fake = [["Maman ❤️", "Tu rentres à quelle heure ?", "12 min", "#db2777"], [o.group ? "Karim" : ((ck && ck.MYFANS) || "Supporters") + " 👥", o.group ? "T'as vu le match hier ?? 😂" : "Lucas : vous avez vu ça ???", "25 min", "#16a34a"], ["Le coach", "Entraînement demain 9h, soyez à l'heure", "1 h", "#ea580c"], ["Mamie", "Bisous mon grand 😘", "hier", "#9333ea"], ["Inès", "ok", "hier", "#0891b2"], ["Karim", "Tu viens au foot dimanche ?", "lun.", "#ca8a04"], ["Lucas", "Vocal (0:12)", "dim.", "#2563eb"]];
+    var tapT = inboxEnd() - .8, y0 = 440, rh = 170, ap = Math.min(1, Math.max(0, (t - inboxStart() - .25) / .35));
+    if (t >= tapT) { g.fillStyle = P.line; g.fillRect(0, y0, W, rh); }
+    // la conversation qui vient d'arriver, tout en haut
+    g.save(); g.globalAlpha = .4 + .6 * ap; g.translate(0, (1 - ap) * -30);
+    badge(g, 116, y0 + rh / 2, 62, o);
+    g.fillStyle = P.text; g.font = "800 42px " + FONT; var nm = o.name + (o.emo ? " " + o.emo : ""); while (g.measureText(nm).width > 640 && nm.length > 4) nm = nm.slice(0, -1); g.fillText(nm, 206, y0 + rh / 2 - 26);
+    g.font = "700 34px " + FONT; var pv = prev; while (g.measureText(pv).width > 640 && pv.length > 4) pv = pv.slice(0, -2); g.fillText(pv + (pv !== prev ? "…" : ""), 206, y0 + rh / 2 + 28);
+    g.fillStyle = "#2b5fd9"; g.font = "700 28px " + FONT; g.textAlign = "right"; g.fillText("maintenant", W - 44, y0 + rh / 2 - 26);
+    g.beginPath(); g.arc(W - 70, y0 + rh / 2 + 28, 24, 0, Math.PI * 2); g.fill(); g.fillStyle = "#fff"; g.font = "800 28px " + FONT; g.textAlign = "center"; g.fillText("1", W - 70, y0 + rh / 2 + 29);
+    g.restore(); g.textAlign = "left";
+    fake.forEach(function (f, i) { var yy = y0 + (i + 1) * rh, cy = yy + rh / 2 + (1 - ap) * 30 * 0;
+      g.fillStyle = P.line; g.fillRect(206, yy, W - 206, 2);
+      initials(g, 116, cy, 62, f[0], f[3]);
+      g.fillStyle = P.text; g.font = "600 42px " + FONT; g.textAlign = "left"; g.fillText(f[0], 206, cy - 26);
+      g.fillStyle = P.sub; g.font = "500 34px " + FONT; g.fillText(f[1], 206, cy + 28);
+      g.font = "500 28px " + FONT; g.textAlign = "right"; g.fillText(f[2], W - 44, cy - 26); g.textAlign = "left"; });
+    if (t >= tapT && t < tapT + .6) { var q = (t - tapT) / .6; g.fillStyle = "rgba(120,120,130," + (.35 * (1 - q)) + ")"; g.beginPath(); g.arc(560, y0 + rh / 2, 40 + 90 * q, 0, Math.PI * 2); g.fill(); }
+    g.restore(); g.textAlign = "left";
+  }
+  function drawBase(g, t) {
     var other = headerAt(t), k = fs(), lh = Math.round(50 * k), P = TH();
     g.fillStyle = P.bg; g.fillRect(0, 0, W, H);
     statusBar(g, t, P.icon, P.bg);
@@ -3028,26 +3132,29 @@ Moi: Si, un peu 😂
     var y = CHAT_TOP + 20 - scroll;
     bl.forEach(function (x, i) {
       var it = x.it, a = Math.min(1, (t - it.at) / .22); g.globalAlpha = a; g.textBaseline = "middle";
-      if (it.k === "msg" || it.k === "journal" || it.k === "photo" || it.k === "vocal" || it.k === "pos") {
+      if (it.k === "msg" || it.k === "journal" || it.k === "photo" || it.k === "vocal" || it.k === "pos" || it.k === "sticker") {
         var col = colOf(it), yy = y;
         if (x.head) { g.fillStyle = col; g.font = "800 27px " + FONT; g.textAlign = "left"; g.fillText(it.who === "me" ? "MOI" : (other.group ? it.from : headerAt(it.at).name).toUpperCase(), 30, yy + 16); yy += 40; }
         if (it.reply) { // message cité
           g.fillStyle = P.quote; rr(g, 56, yy + 4, 860, 58, 12); g.fill(); g.fillStyle = it.replyFrom === "Moi" ? ME_COL : OT_COL; g.fillRect(56, yy + 4, 6, 58);
           g.font = "700 26px " + FONT; g.fillText(it.replyFrom === "Moi" ? "Toi" : (it.replyFrom || ""), 76, yy + 20); g.fillStyle = P.sub; g.font = "500 29px " + FONT; var rq = it.reply; while (g.measureText(rq).width > 800 && rq.length > 4) rq = rq.slice(0, -2); g.fillText(rq + (rq !== it.reply ? "…" : ""), 76, yy + 46); yy += 70;
         }
-        var bodyH = it.k === "msg" ? x.lines.length * lh : it.k === "journal" ? 440 : it.k === "vocal" ? 100 : it.k === "pos" ? 400 : x.gone ? 60 : photoSize(it)[1] + 10;
+        var bodyH = it.k === "msg" ? (x.big ? 150 : x.lines.length * lh) : it.k === "sticker" ? 280 : it.k === "journal" ? 440 : it.k === "vocal" ? 100 : it.k === "pos" ? 400 : x.gone ? 60 : photoSize(it)[1] + 10;
         g.fillStyle = col; g.globalAlpha = a * .55; g.fillRect(30, yy, 6, bodyH); g.globalAlpha = a;
         if (it.k === "msg") {
           var dl = delText(it, t); g.fillStyle = dl ? "#8a8f99" : P.text; g.font = (dl ? "italic 500 " : "500 ") + Math.round(40 * k) + "px " + FONT;
-          x.lines.forEach(function (ln, j) { g.fillText(ln, 56, yy + lh / 2 + j * lh); });
+          if (x.big) { var bp = Math.min(1, (t - it.at) / .4), bs = bp < 1 ? .3 + 1.25 * bp - .55 * bp * bp + .25 * Math.sin(bp * Math.PI) : 1; // gros emoji qui « saute »
+            g.save(); g.translate(56, yy + 75); g.scale(bs, bs); g.font = "120px " + FONT; g.textAlign = "left"; g.fillText(x.lines[0], 0, 4); g.restore(); }
+          else x.lines.forEach(function (ln, j) { g.fillText(ln, 56, yy + lh / 2 + j * lh); });
           if (it.react && t >= it.react.at && !dl) { // réaction posée sur le message
-            var lw = g.measureText(x.lines[x.lines.length - 1]).width, rx = Math.min(1000, 56 + lw + 44), ry = yy + (x.lines.length - .5) * lh + 14, pp = Math.min(1, (t - it.react.at) / .25), sc = pp < 1 ? .4 + .9 * pp - .3 * pp * pp : 1;
+            if (x.big) g.font = "120px " + FONT; var lw = g.measureText(x.lines[x.lines.length - 1]).width; rx = Math.min(1000, 56 + lw + 44), ry = x.big ? yy + 140 : yy + (x.lines.length - .5) * lh + 14, pp = Math.min(1, (t - it.react.at) / .25), sc = pp < 1 ? .4 + .9 * pp - .3 * pp * pp : 1;
             g.save(); g.translate(rx, ry); g.scale(sc, sc); g.shadowColor = "rgba(0,0,0,.2)"; g.shadowBlur = 10; g.fillStyle = "#fff"; g.beginPath(); g.arc(0, 0, 28, 0, Math.PI * 2); g.fill(); g.shadowBlur = 0; g.font = "30px " + FONT; g.textAlign = "center"; g.fillText(it.react.emo, 0, 2); g.restore(); g.textAlign = "left";
           }
         }
         else if (it.k === "journal") journal(g, 56, yy + 6, it);
         else if (it.k === "vocal") vocalBubble(g, 56, yy + 4, it, t, col, P);
         else if (it.k === "pos") posCard(g, 56, yy + 6, it, t, P);
+        else if (it.k === "sticker") sticker(g, 56, yy, it, t);
         else if (x.gone) { g.fillStyle = P.pill; rr(g, 56, yy + 4, 470, 60, 30); g.fill(); g.fillStyle = P.sub; g.font = "600 30px " + FONT; g.fillText("📸 Photo éphémère · ouverte", 80, yy + 35); }
         else photo(g, 56, yy + 6, it, t);
         if (x.status) { g.fillStyle = x.status === "Lu" ? "#2b5fd9" : "#9aa0aa"; g.font = "600 24px " + FONT; g.textAlign = "left"; g.fillText(x.status === "Lu" ? "✓✓ Lu" : "✓ Envoyé", 56, yy + bodyH + (it.react && t >= it.react.at ? 40 : 22)); }
@@ -3056,7 +3163,7 @@ Moi: Si, un peu 😂
         g.fillText(it.text.toUpperCase(), W / 2, y + 43); g.fillRect(60, y + 42, W / 2 - tw / 2 - 90, 3); g.fillRect(W / 2 + tw / 2 + 30, y + 42, W / 2 - tw / 2 - 90, 3); g.textAlign = "left";
       } else if (it.k === "sys") {
         g.font = "700 28px " + FONT; var sw = g.measureText(it.text).width + 50; g.fillStyle = P.pill; rr(g, W / 2 - sw / 2, y + 14, sw, 52, 26); g.fill();
-        g.fillStyle = /manqué/.test(it.text) ? "#e11d48" : P.text; g.textAlign = "center"; g.fillText(it.text, W / 2, y + 41); g.textAlign = "left";
+        g.fillStyle = /manqué/.test(it.text) ? "#e11d48" : it.cap ? "#d97706" : P.text; g.textAlign = "center"; g.fillText(it.text, W / 2, y + 41); g.textAlign = "left";
       }
       g.globalAlpha = 1; y += heights[i];
     });
@@ -3069,7 +3176,12 @@ Moi: Si, un peu 😂
     g.restore();
     // barre d'écriture (avec les hésitations : on tape, on efface, on retape)
     var typing = items.filter(function (it) { return it.k === "type" && t >= it.at && t < it.end + .2; })[0], typed = "", lastCh = "";
-    if (typing) {
+    if (typing && typing.typo) { var tq = typing.typo, wl = tq.wrong.length;
+      if (t < tq.tA) { typed = tq.wrong.slice(0, Math.floor((t - typing.at) / (tq.tA - typing.at) * wl)); lastCh = typed.slice(-1); }
+      else if (t < tq.tA + .35) { typed = tq.wrong; lastCh = ""; }
+      else if (t < tq.tB) { typed = tq.wrong.slice(0, wl - Math.ceil((t - tq.tA - .35) / (tq.tB - tq.tA - .35) * (wl - tq.pos))); lastCh = "⌫"; }
+      else { typed = typing.text.slice(0, tq.pos + Math.max(0, Math.min(typing.text.length - tq.pos, Math.floor((t - tq.tB) / (typing.end - tq.tB) * (typing.text.length - tq.pos))))); lastCh = typed.slice(-1); }
+    } else if (typing) {
       if (typing.pre && t < typing.t1) { typed = typing.pre.slice(0, Math.floor((t - typing.at) / (typing.t1 - typing.at) * typing.pre.length)); lastCh = typed.slice(-1); }
       else if (typing.pre && t < typing.t2) { var er = Math.max(0, (t - typing.t1 - .5) / (typing.t2 - typing.t1 - .5)); typed = typing.pre.slice(0, Math.ceil(typing.pre.length * (1 - Math.min(1, er)))); lastCh = er > 0 ? "⌫" : ""; }
       else { var s0 = typing.pre ? typing.t2 : typing.at; typed = typing.text.slice(0, Math.max(0, Math.min(typing.text.length, Math.floor((t - s0) / (typing.end - s0) * typing.text.length)))); lastCh = typed.slice(-1); }
@@ -3096,6 +3208,7 @@ Moi: Si, un peu 😂
       g.fillStyle = P.text; g.font = "800 34px " + FONT; g.fillText(it.from, 60, ny + 98); g.font = "500 32px " + FONT; g.fillText(wrap(g, it.text, W - 140)[0], 60, ny + 140);
     });
     items.forEach(function (it) { if (it.k === "call" && t >= it.at && t < it.end + .35) callScreen(g, t, it); });
+    if (S.inbox && t < inboxEnd() + .45) inboxScreen(g, t);
     if (S.lock && t < LOCK_T + .5) lockScreen(g, t);
   }
   function callScreen(g, t, it) { // appel entrant en plein écran
@@ -3233,13 +3346,25 @@ Moi: Si, un peu 😂
       var o = ac.createOscillator(), og = ac.createGain(); o.type = "sine"; o.frequency.setValueAtTime(kind === "space" ? 180 : 240, t); o.frequency.exponentialRampToValueAtTime(90, t + .02);
       og.gain.setValueAtTime(.05, t); og.gain.exponentialRampToValueAtTime(.001, t + .025); o.connect(og); og.connect(dest); o.start(t); o.stop(t + .03);
     }
+    var nBuf = null;
+    function noise(t, d, f, v) { if (!nBuf) { var n = ac.sampleRate; nBuf = ac.createBuffer(1, n, n); var dd = nBuf.getChannelData(0); for (var i = 0; i < n; i++) dd[i] = Math.random() * 2 - 1; }
+      var src = ac.createBufferSource(), bp = ac.createBiquadFilter(), g = ac.createGain(); src.buffer = nBuf; bp.type = "bandpass"; bp.frequency.value = f; bp.Q.value = .8; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.001, t + d); src.connect(bp); bp.connect(g); g.connect(dest); src.start(t); src.stop(t + d + .02); }
+    function boom(t, v) { var o = ac.createOscillator(), g = ac.createGain(); o.type = "sine"; o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(38, t + .45); g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.001, t + .55); o.connect(g); g.connect(dest); o.start(t); o.stop(t + .6); }
     function click(t, f, v, d, type) { var o = ac.createOscillator(), g = ac.createGain(); o.type = type || "square"; o.frequency.value = f; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.001, t + d); o.connect(g); g.connect(dest); o.start(t); o.stop(t + d + .02); }
     if (S.sfx) items.forEach(function (it) {
       if (it.k === "type") {
-        var segs = it.pre ? [[it.pre, it.at, it.t1], [it.text, it.t2, it.end]] : [[it.text, it.at, it.end]];
+        var tq = it.typo, segs = tq ? [[tq.wrong, it.at, tq.tA], [it.text.slice(tq.pos), tq.tB, it.end]] : it.pre ? [[it.pre, it.at, it.t1], [it.text, it.t2, it.end]] : [[it.text, it.at, it.end]];
+        if (tq) { var nd = tq.wrong.length - tq.pos; for (var e2 = 0; e2 < nd; e2++) tap(t0 + tq.tA + .35 + (tq.tB - tq.tA - .35) * e2 / nd, "del"); }
         segs.forEach(function (sg) { var n = sg[0].length; for (var i = 0; i < n; i++) tap(t0 + sg[1] + (sg[2] - sg[1]) * i / n, sg[0].charAt(i) === " " ? "space" : "key"); });
         if (it.pre) { var ne = Math.min(12, it.pre.length); for (var e = 0; e < ne; e++) tap(t0 + it.t1 + .5 + (it.t2 - it.t1 - .5) * e / ne, "del"); }
       }
+      else if (it.k === "fx") {
+        if (it.fx === "choc") { boom(t0 + it.at, .5); noise(t0 + it.at, .25, 900, .25); }
+        else if (it.fx === "flash") noise(t0 + it.at, .3, 3500, .14);
+        else { click(t0 + it.at, 220, .09, .25, "triangle"); click(t0 + it.at + .3, 208, .09, .25, "triangle"); click(t0 + it.at + .6, 175, .11, .8, "triangle"); }
+      }
+      else if (it.k === "sys" && it.cap) { noise(t0 + it.at, .05, 2200, .35); noise(t0 + it.at + .08, .06, 1600, .3); }
+      else if (it.k === "sticker") { var po = ac.createOscillator(), pg = ac.createGain(), pt = t0 + it.at; po.type = "sine"; po.frequency.setValueAtTime(420, pt); po.frequency.exponentialRampToValueAtTime(1300, pt + .09); pg.gain.setValueAtTime(.16, pt); pg.gain.exponentialRampToValueAtTime(.001, pt + .14); po.connect(pg); pg.connect(dest); po.start(pt); po.stop(pt + .16); click(pt + .12, 1760, .05, .1, "sine"); }
       else if (it.k === "msg" || it.k === "photo" || it.k === "journal") {
         if (it.who === "me") { click(t0 + it.at, 880, .09, .12, "sine"); click(t0 + it.at + .06, 1320, .07, .14, "sine"); } else { click(t0 + it.at, 660, .08, .18, "sine"); click(t0 + it.at + .08, 990, .07, .2, "sine"); }
         if (it.react) { click(t0 + it.react.at, 1500, .07, .1, "sine"); click(t0 + it.react.at + .05, 2000, .05, .12, "sine"); }
@@ -3250,6 +3375,8 @@ Moi: Si, un peu 😂
       else if (it.k === "vocal") { click(t0 + it.at, it.who === "me" ? 880 : 660, .08, .15, "sine"); }
       else if (it.k === "call") { for (var rt = it.at + .2; rt < it.ring - .1; rt += 1.2) { click(t0 + rt, 784, .09, .35, "sine"); click(t0 + rt + .38, 659, .09, .35, "sine"); } if (!it.acc) { click(t0 + it.end, 440, .08, .2, "sine"); click(t0 + it.end + .2, 330, .08, .3, "sine"); } }
     });
+    if (S.sfx && hookText) { boom(t0 + .02, .35); noise(t0 + .02, .4, 1200, .12); }
+    if (S.sfx && S.inbox) click(t0 + inboxEnd() - .8, 1800, .05, .04, "sine");
     if (S.sfx) lockNotifs.forEach(function (n) { click(t0 + n.at, 1047, .09, .3, "sine"); click(t0 + n.at + .12, 1568, .08, .4, "sine"); });
     items.forEach(function (it) { if (it.k !== "vocal") return; var c = clips[clipKey(it.voice, it.text)]; if (!c || !c.buf) return; var src = ac.createBufferSource(), vg = ac.createGain(); vg.gain.value = 1.2; src.buffer = c.buf; src.connect(vg); vg.connect(dest); src.start(t0 + it.play); });
     music(ac, dest, t0, true);
@@ -3316,6 +3443,7 @@ Moi: Si, un peu 😂
     var dd = duel(), A = CL[dd.a], B = CL[dd.b];
     $("#side").innerHTML = "<option value=\"om\">" + A.MYHEART + " Team " + A.ME + " (« Moi » = " + A.LEME + ")</option><option value=\"psg\">" + B.MYHEART + " Team " + B.ME + " (« Moi » = " + B.LEME + ")</option>";
     $("#genTheme").innerHTML = Object.keys(GEN).map(function (k) { return "<option value=\"" + k + "\">" + GEN[k].label + "</option>"; }).join("");
+    $("#inbox").checked = !!S.inbox; $("#typos").checked = !!S.typos; $("#hook").value = S.hook ? fillTokens(S.hook, S.side) : "";
     $("#lock").checked = !!S.lock; $("#dark").checked = !!S.dark; $("#clock").value = S.clock;
     var VO = [["fr-FR-RemyMultilingualNeural", "Rémy (homme)"], ["fr-FR-HenriNeural", "Henri (homme)"], ["fr-BE-GerardNeural", "Gérard (homme)"], ["fr-CA-AntoineNeural", "Antoine (homme)"], ["fr-FR-DeniseNeural", "Denise (femme)"], ["fr-FR-VivienneMultilingualNeural", "Vivienne (femme)"], ["fr-FR-EloiseNeural", "Éloïse (jeune)"]].map(function (v) { return "<option value=\"" + v[0] + "\">" + v[1] + "</option>"; }).join("");
     $("#vMe").innerHTML = VO; $("#vOther").innerHTML = VO; $("#vMe").value = S.vMe || "fr-FR-RemyMultilingualNeural"; $("#vOther").value = S.vOther || "fr-FR-HenriNeural";
@@ -3334,6 +3462,10 @@ Moi: Si, un peu 😂
   $("#genGo").onclick = function () { if (edited() && !confirm("Remplacer ton histoire par une histoire inventée ?")) return; genNew(); };
   $("#lock").onchange = function () { S.lock = this.checked; save(); parse(); restart(); };
   $("#dark").onchange = function () { S.dark = this.checked; save(); };
+  $("#inbox").onchange = function () { S.inbox = this.checked; save(); parse(); restart(); };
+  $("#typos").onchange = function () { S.typos = this.checked; save(); parse(); };
+  $("#hook").oninput = function () { S.hook = this.value; save(); parse(); };
+  var hookK = 0; $("#hookIdea").onclick = function () { hookK = (hookK + 1) % HOOKS.length; S.hook = fillTokens(HOOKS[hookK], S.side); $("#hook").value = S.hook; save(); parse(); restart(); };
   $("#clock").oninput = function () { if (/^\d{1,2}:\d{2}$/.test(this.value)) { S.clock = this.value; save(); parse(); } };
   $("#vMe").onchange = function () { S.vMe = this.value; save(); parse(); }; $("#vOther").onchange = function () { S.vOther = this.value; save(); parse(); };
   $("#relay").oninput = function () { S.relay = this.value.trim(); save(); }; $("#key").oninput = function () { S.key = this.value.trim(); save(); };
