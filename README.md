@@ -173,6 +173,13 @@ Page : https://ozentv.github.io/quiz-live/histoire.html
 - **📞 Appels** : écran d'appel entrant plein écran avec sonnerie (`[appel] PSG`), puis « Appel manqué » dans le fil, ou appel décroché avec chrono (`[appel] PSG | accepté`).
 - **👥 Groupes de discussion** (`@groupe Supporters OM | 💙`) : chaque personne (Lucas, Inès, Karim…) a son nom et sa couleur, et les membres s'affichent sous le nom du groupe. 6 histoires de groupe prêtes : le match, le spoiler, le billet en trop, la photo floue, le traître, le capitaine.
 - **🎵 Musiques** : Auto (change selon les chapitres : drôle, tension, romantique ou triste), Drôle, Tension, Romantique, Triste, Douce, ou sans musique.
+- **⚽ 5 duels** : OM contre PSG, OL contre ASSE, Real contre Barça, Lens contre Lille, Liverpool contre Man United. Les 100 conversations s'adaptent à chaque duel (noms, stades, villes, couleurs, slogans, nom du derby, hashtags).
+- **✨ Inventer une histoire** : choisis un thème (chambrage, pari, amour, jour de match) et la page assemble une nouvelle histoire en 3 parties à chaque clic (50 à 60 secondes), avec un gage tiré au hasard pour les paris.
+- **🎤 Messages vocaux** (`[vocal] texte`) : bulle avec forme d'onde et durée, « enregistre un vocal… » chez l'autre, enregistrement en rouge dans ta barre d'écriture, et la voix (voix pro gratuites du relais) dans la vidéo. Tu choisis ta voix et celle de l'autre.
+- **📍 Position partagée** (`[position] Devant le Vélodrome`), **📸 photo éphémère** qui s'efface après 5 secondes (`[photo 1 éphémère]`).
+- **🕐 Heure qui avance** pendant l'histoire et saute avec les sauts dans le temps (« TROIS HEURES PLUS TARD », « LE LENDEMAIN MATIN »…), batterie qui baisse. Heure de départ réglable (ou `@heure 23:40`).
+- **🔒 Écran verrouillé** au début (activé par défaut) : grande horloge, date et les premières notifications qui arrivent, puis l'écran glisse vers la conversation.
+- **🌙 Mode sombre** pour toute l'appli de messagerie.
 - **🛡️ Logos des clubs** : importe le logo de l'OM et celui du PSG. Ils remplacent les écussons dessinés (photo du contact, « en train d'écrire », ton avatar, article de journal) et restent sur le téléphone.
 - Pour écrire ta propre histoire, une ligne par message :
   - `Moi: texte` pour ton message, `PSG: texte` pour l'autre ;

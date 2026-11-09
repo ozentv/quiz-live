@@ -54,8 +54,12 @@ button:disabled { opacity: .5; }
     <div class="box">
       <h2>Histoire</h2>
       <div class="row2">
+        <label>Duel<select id="duel"></select></label>
+        <label>Ton compte<select id="side"></select></label>
+      </div>
+      <div class="row2">
         <label>Histoire prête à l'emploi (111)<select id="tpl"></select></label>
-        <label>Ton compte<select id="side"><option value="om">💙 Team OM (« Moi » = l'OM)</option><option value="psg">❤️ Team PSG (« Moi » = le PSG)</option></select></label>
+        <label>✨ Inventer une histoire<span style="display:grid;grid-template-columns:1fr auto;gap:6px"><select id="genTheme"></select><button class="mini main" type="button" id="genGo">Inventer</button></span></label>
       </div>
       <button class="mini" type="button" id="rnd">🎲 Une histoire au hasard</button>
       <textarea id="script" spellcheck="false"></textarea>
@@ -66,6 +70,7 @@ button:disabled { opacity: .5; }
         <span><code>[journal] Titre | texte</code> article de journal · <code>@contact PSG | 💔</code> change le nom ou les emojis du contact en cours de route · <code>[pause 2]</code> 2 secondes de silence</span>
         <span><code>PSG: [répond: Le Vélodrome va trembler] Trembler ?</code> répond à un message · <code>[réaction 😂]</code> réaction sur le dernier message · <code>[supprimé]</code> le dernier message est supprimé</span>
         <span><code>Moi: [hésite: Je t'aime] Bonne nuit</code> tu tapes, tu effaces, tu retapes · <code>[hésite]</code> l'autre écrit… puis n'envoie rien · <code>[appel] PSG</code> appel manqué · <code>[appel] PSG | accepté</code> appel décroché</span>
+        <span><code>[vocal] texte</code> message vocal lu par une voix · <code>[position] Devant le Vélodrome</code> position partagée · <code>[photo 1 éphémère]</code> photo qui s'efface après 5 secondes · <code>-- TROIS HEURES PLUS TARD --</code> fait aussi avancer l'heure</span>
         <span><code>@groupe Supporters OM | 💙</code> groupe de discussion : chaque nom (<code>Lucas: …</code>, <code>Inès: …</code>) a sa couleur · « Envoyé » et « Lu » s'affichent tout seuls sous ton dernier message</span>
       </div>
     </div>
@@ -89,10 +94,20 @@ button:disabled { opacity: .5; }
         <label>Texte<select id="size"><option value="1">Normal</option><option value="1.18">Grand</option></select></label>
         <label>Qualité<select id="q"><option value="720">720p</option><option value="1080">1080p</option></select></label>
       </div>
+      <label class="chk"><input type="checkbox" id="lock"> 🔒 Commencer sur l'écran verrouillé, avec les notifications</label>
+      <label class="chk"><input type="checkbox" id="dark"> 🌙 Mode sombre</label>
+      <label>🕐 Heure au début de l'histoire<input type="text" id="clock" placeholder="21:00" maxlength="5"></label>
       <label class="chk"><input type="checkbox" id="sfx"> 🔊 Sons (clavier, envoi, notifications)</label>
       <label>🎵 Musique (créée par la page, sans droits)<select id="mstyle"><option value="auto">Auto : change selon les chapitres</option><option value="drole">Drôle</option><option value="tension">Tension</option><option value="romantique">Romantique</option><option value="triste">Triste</option><option value="douce">Douce</option><option value="none">Sans musique</option></select></label>
       <button class="main" type="button" id="dlVideo">🎬 Télécharger la vidéo</button>
       <p class="note" id="durNote"></p>
+    </div>
+
+    <div class="box">
+      <h2>🎤 Voix des messages vocaux</h2>
+      <div class="row2"><label>Ta voix (« Moi »)<select id="vMe"></select></label><label>La voix de l'autre<select id="vOther"></select></label></div>
+      <div class="row2"><label>Adresse du relais<input type="text" id="relay" autocapitalize="off"></label><label>Clé (ADMIN_KEY)<input type="text" id="key" autocomplete="off" style="-webkit-text-security:disc"></label></div>
+      <p class="note">Les vocaux (<code>[vocal] texte</code>) sont lus par les voix pro gratuites de ton relais, comme dans le quiz. Sans relais, la bulle s'affiche sans le son.</p>
     </div>
 
     <div class="box">
@@ -1399,7 +1414,7 @@ Moi: Trop tard, il est déjà en route {MYHEART}
 ### 🏟️ Jour de match
 === Les billets
 # Partie 1 : Les places
-Eux: Tu as des places pour le Classique ?
+Eux: Tu as des places pour {DERBY} ?
 Moi: Oui, tribune centrale 😎
 Eux: Tu m'en prends une ?
 Moi: Seulement si tu portes nos couleurs
@@ -2020,7 +2035,7 @@ Moi: C'est déjà bien
 Eux: L'ambiance n'est pas la même
 Moi: Personne n'est parfait 😂
 Eux: Tu viendras me voir ?
-Moi: Seulement pour le Classique {MYHEART}
+Moi: Seulement pour {DERBY} {MYHEART}
 ### 🤪 Délires
 === Le robot
 # Partie 1 : L'intelligence artificielle
@@ -2230,7 +2245,7 @@ Eux: Bon… j'arrive 🤝
 === Le groupe du match
 @groupe {MYFANS} | {MYHEART} | {MYC1} | {MYC2}
 # Partie 1 : Le rendez-vous
-Lucas: Les gars, rendez-vous à quelle heure pour le Classique ?
+Lucas: Les gars, rendez-vous à quelle heure pour {DERBY} ?
 Inès: 17 h devant le stade 🏟️
 Karim: Moi j'amène le drapeau géant
 Moi: Et moi les fumigènes… en papier 😂
@@ -2376,6 +2391,334 @@ Sarah: Il n'y a plus de chips 😭
 Moi: Meilleur déplacement de l'histoire {MYHEART}
 [réaction 🔥]
 </script>
+<script type="text/plain" id="gen">
+%% chambrage | 😏 Chambrage
+@t1 Le message… | Ça commence | Le premier pique | La provocation
+@t2 La tension monte | Le jour J | Avant le coup d'envoi | L'attente
+@t3 Le verdict… | Après le match | La fin de soirée | La réponse
+@s1 LE JOUR DU MATCH | DEUX JOURS PLUS TARD | LE LENDEMAIN | TROIS HEURES PLUS TARD
+@s2 90 MINUTES PLUS TARD | APRÈS LE MATCH | LE SOIR | MINUIT
+@a
+Eux: Tu as vu le classement ce matin ? 😏
+Moi: Je regarde que le haut, désolé
+Eux: Ah donc tu ne te vois pas ?
+[réaction 😂]
+@a
+Eux: Prépare tes excuses pour ce week-end
+Moi: Mes excuses ? Pour quoi ?
+Eux: Pour la défaite que tu vas prendre 😂
+@a
+Moi: Salut, tu as bien dormi ?
+Eux: Pourquoi tu demandes ?
+Moi: Parce que ce week-end tu ne vas plus dormir 😈
+@a
+Eux: J'ai rêvé de toi cette nuit
+Moi: Ah bon ?
+Eux: Tu pleurais en tribune 😂
+Moi: C'était un cauchemar alors, le tien
+@a2
+Moi: Tu parles beaucoup pour quelqu'un qui n'a rien gagné cette année
+Eux: L'année n'est pas finie
+Moi: Pour vous si 😏
+@a2
+Eux: Notre stade va être plein à craquer
+Moi: Le nôtre l'est tous les week-ends {MYHEART}
+Eux: On verra bien dimanche
+@a2
+Moi: Je te propose un truc
+Eux: Quoi ?
+Moi: On en reparle après le match… si tu oses
+@b
+Eux: On est dans le bus, ça chante fort 🚌
+Moi: Profite, c'est le meilleur moment de ta soirée
+Eux: Pourquoi tu dis toujours ça ?
+@b
+[notif] {MYFANS} : On est tous derrière vous ce soir 🔥
+Moi: Tu as vu nos supporters ?
+Eux: On les entend depuis la gare 😳
+@b
+Eux: 0-0 à la pause, vous êtes pas si forts
+Moi: On se chauffe
+Eux: [répond: On se chauffe] Depuis 45 minutes ? 😂
+@b
+[appel] {THEM}
+Moi: Pourquoi tu m'appelles en plein match ?
+Eux: Je voulais entendre ta voix avant ta défaite
+@b
+Moi: Tu stresses ?
+[hésite]
+Eux: Non pas du tout
+Moi: Tu as mis 30 secondes à répondre 😂
+@c
+[notif] {MYFANS} : BUUUUT 🔥🔥🔥
+Moi: Tu as vu ? 😎
+Eux: Je n'ai rien vu
+Moi: Tout le pays a vu {MYHEART}
+@c
+Eux: L'arbitre était contre nous
+Moi: L'arbitre, la pelouse, la lune…
+Eux: Tu te moques de moi ?
+[réaction 😂]
+@c
+Eux: Bon… bien joué
+Moi: Pardon ? Je n'ai pas bien lu
+Eux: Bien joué. Ne me le fais pas répéter 😑
+@c2
+Moi: On se revoit au match retour ?
+Eux: Avec plaisir, on prendra notre revanche
+Moi: {MYSLOGAN}
+@c2
+Eux: Je vais me coucher
+Moi: Fais de beaux cauchemars 😴
+Eux: Très drôle
+@c2
+Moi: Tu me dois un respect éternel maintenant
+Eux: Jamais
+Moi: Je prends ça pour un oui {MYHEART}
+%% pari | 🤝 Pari
+@t1 Le pari | Le deal | La promesse | Le défi
+@t2 Le match | Tout se joue ce soir | La tension | L'heure de vérité
+@t3 Le gage | La preuve | Promis juré | Pas d'excuse
+@s1 TROIS JOURS PLUS TARD | LE JOUR DU MATCH | LE WEEK-END | DEUX JOURS PLUS TARD
+@s2 APRÈS LE MATCH | LE LENDEMAIN | LE SOIR | 90 MINUTES PLUS TARD
+@a
+Moi: J'ai une idée de pari 😈
+Eux: Je t'écoute
+Moi: Le perdant doit {GAGE}
+Eux: Deal 🤝
+@a
+Eux: On parie ?
+Moi: Sur quoi ?
+Eux: Le perdant doit {GAGE}
+Moi: Tu vas le regretter 😏
+@a
+Moi: Tu es sûr de ton équipe ?
+Eux: À 100 %
+Moi: Alors le perdant doit {GAGE}
+Eux: Accepté, je capture l'écran 📸
+@a2
+Eux: Pas de retour en arrière possible
+Moi: Promis juré
+[réaction 🤝]
+@a2
+Moi: Et pas d'excuse cette fois
+Eux: Pas d'excuse, de toute façon c'est toi qui vas perdre
+Moi: On verra 😏
+@a2
+Eux: Je préviens déjà ma famille que tu vas perdre
+Moi: Préviens-les que c'est toi plutôt
+Eux: Mdr
+@b
+Eux: Dernière chance pour annuler 😏
+Moi: Jamais
+Moi: {MYSLOGAN}
+@b
+[notif] {MYFANS} : Ce soir on gagne !! 🔥
+Moi: Tu entends l'ambiance ?
+Eux: J'entends surtout ton pari que tu vas perdre
+@b
+Moi: Il reste 10 minutes
+Eux: Tout peut arriver
+Moi: [hésite: C'est déjà fini] On verra bien 😇
+@b
+[appel] {THEM}
+Eux: Pourquoi tu ne réponds pas ???
+Moi: Je regarde le match, je suis occupé à gagner
+@c
+[notif] {MYFANS} : VICTOIRE !!! 🎉
+Moi: Alors…
+Moi: Tu te souviens de notre pari ? 😈
+Eux: Quel pari ?
+@c
+Eux: Je ne me souviens plus du pari
+Moi: [répond: Je ne me souviens plus du pari] J'ai la capture d'écran 📸
+Eux: … 😭
+@c
+Moi: Le match est fini
+Eux: Je sais
+Moi: Et tu sais ce que ça veut dire
+Eux: Oui… je dois {GAGE}
+@c2
+Moi: {GAGEWAIT}
+Eux: {GAGEPROOF}
+Moi: Magnifique {MYHEART}
+[réaction 😂]
+@c2
+Moi: {GAGEWAIT}
+[hésite]
+Eux: {GAGEPROOF}
+Moi: Je garde ça pour toujours 😂
+@c2
+Moi: {GAGEWAIT}
+Eux: Laisse-moi encore une heure
+Eux: {GAGEPROOF}
+Moi: Un homme de parole 🤝
+%% amour | 💔 Amour et ex
+@t1 Le message de minuit | Le retour | Il réécrit… | Le souvenir
+@t2 La surprise | Le rendez-vous | La vérité | L'aveu
+@t3 La fin | La réponse | Vu | Tourner la page
+@s1 UNE SEMAINE PLUS TARD | LE LENDEMAIN | TROIS JOURS PLUS TARD | UN MOIS PLUS TARD
+@s2 LE SOIR | DIMANCHE SOIR | APRÈS LE MATCH | DEUX ANS PLUS TARD
+@a
+Eux: Coucou {ME}… tu dors ?
+Moi: Il est minuit, pourquoi tu m'écris ?
+Eux: Tu me manques 🥺
+@a
+Eux: Ça fait longtemps…
+Moi: Tu as du culot de m'écrire
+Eux: J'ai changé, je te jure
+@a
+Moi: J'ai retrouvé une vieille photo de nous
+Moi: [photo 1] Tu te souviens ?
+Eux: Notre premier match ensemble 🥹
+@a
+Eux: Je pense encore à toi
+[hésite]
+Moi: [hésite: Moi aussi] Ah bon ?
+@a2
+Moi: Tu dis ça chaque saison
+Eux: Cette fois c'est différent
+Moi: Tu disais déjà ça l'an dernier 😏
+@a2
+Eux: On peut se voir ?
+Moi: Seulement à {MYSTADE}
+Eux: Ce n'est pas romantique ça
+@a2
+Moi: Pourquoi maintenant ?
+Eux: Parce que vous gagnez tout et que ça me rend jaloux 😔
+[réaction 🙄]
+@b
+Eux: Tu fais quoi dimanche ?
+Moi: Je reçois quelqu'un au stade
+Eux: C'est qui ?
+Moi: Toi 😏
+@b
+[appel] {THEM}
+Eux: Pourquoi tu ne réponds jamais ?
+Moi: Je suis occupé à être heureux sans toi 😌
+@b
+Eux: [vocal] Écoute, je voulais juste te dire que tu comptes encore pour moi…
+Moi: Tu fais des vocaux maintenant ?
+Eux: J'avais trop de choses à dire
+@b
+Moi: Je suis devant le stade
+Moi: [position] Devant {MYSTADE}
+Eux: J'arrive, attends-moi 🏃
+@b
+Eux: Je t'ai acheté un cadeau
+Moi: C'est quoi ?
+Eux: Une écharpe {DUTHEM} 🧣
+Moi: Rends-la 😂
+@c
+Eux: Tu m'aimes encore ?
+[hésite]
+Moi: J'aime surtout {LEME} {MYHEART}
+@c
+Eux: Tu me laisses une chance ?
+Moi: Une seule
+Eux: Promis je ne te décevrai pas
+[réaction 🤨]
+@c
+Moi: Je dois te dire un truc
+Eux: Vas-y…
+Moi: J'ai pris un abonnement au stade
+Eux: Et nous ?
+@c2
+@contact {THEM} | 💔
+Moi: À la prochaine
+Eux: Vu
+@c2
+Moi: On reste amis ?
+Eux: Amis… et rivaux 🤝
+Moi: Ça me va {MYHEART}
+@c2
+Eux: Je t'attendrai
+Moi: Attends-moi devant {MYSTADE} alors 😏
+[réaction ❤️]
+%% match | 🏟️ Jour de match
+@t1 Avant le match | Le réveil | Les billets | L'avant-match
+@t2 Le match | La deuxième mi-temps | La 89e minute | Le suspense
+@t3 Le coup de sifflet final | La fête | Le bilan | Après le match
+@s1 LE JOUR DU MATCH | 3 HEURES PLUS TARD | LE SOIR | 20 MINUTES PLUS TARD
+@s2 90 MINUTES PLUS TARD | APRÈS LE MATCH | MINUIT | LE LENDEMAIN MATIN
+@a
+Eux: Tu as des places pour ce soir ?
+Moi: Tribune centrale 😎
+Eux: Tu m'en prends une ?
+Moi: Seulement si tu portes nos couleurs
+@a
+Moi: Je suis devant le stade
+Moi: [position] Devant {MYSTADE}
+Eux: Il y a déjà autant de monde ?
+Moi: Depuis 3 heures 🔥
+@a
+Eux: Il pleut des cordes ici 🌧️
+Moi: Parfait, on joue mieux sous la pluie
+Eux: Ça n'existe pas
+@a
+Moi: J'ai acheté le nouveau maillot
+Moi: [photo 1] Il est beau non ?
+Eux: Pas mal… pour un maillot de perdant 😂
+@a2
+Eux: Je suis dans les bouchons 🚗
+Moi: Tu vas rater le début
+Eux: Le début c'est pas important
+Moi: Si, c'est là qu'on marque 😏
+@a2
+[notif] {MYFANS} : Le stade est plein à craquer 🔥
+Eux: Vous êtes combien ???
+Moi: Assez pour qu'on t'entende pleurer d'ici
+@a2
+Moi: Tu as vu le tifo ?
+Eux: J'ai des frissons
+Eux: Mais je ne te le dirai jamais
+[réaction 😏]
+@b
+Eux: BUUUT 🔥 On mène !!!
+Moi: Attends la VAR 👀
+Eux: Elle va valider
+[notif] {MYFANS} : But refusé pour hors-jeu 😂
+@b
+Eux: Penalty pour nous à la 89e 😱
+Moi: Notre gardien est un mur 🧱
+[notif] {MYFANS} : ARRÊÊÊT DU GARDIEN 🧤🔥
+@b
+Moi: [vocal] Ça chante de partout, écoute ça, c'est magnifique !
+Eux: Coupe ça 😭
+@b
+Eux: Ma télé vient de s'éteindre !!!
+Moi: Je te raconte en direct
+Moi: Nos joueurs attaquent… attaquent…
+@b
+Eux: Rouge pour votre défenseur 🟥
+Moi: On joue mieux à 10
+Eux: Personne ne joue mieux à 10 😂
+@c
+[notif] {MYFANS} : VICTOIRE !!! 🎉🎉
+Moi: Tu disais ?
+Eux: Rien
+[réaction 😂]
+@c
+Eux: L'arbitre était contre nous
+Moi: Et la pelouse aussi ?
+Eux: Exactement
+@c
+Moi: Quel match !
+Eux: J'avoue, c'était fou
+Moi: Pour une fois on est d'accord 🤝
+@c2
+Moi: Je n'ai plus de voix
+Eux: Tant mieux, je n'entendrai plus tes chants
+Moi: {MYSLOGAN}
+@c2
+Eux: Vivement le match retour
+Moi: On sera prêts {MYHEART}
+Eux: Nous aussi
+@c2
+Moi: Bonne nuit champion 😴
+Eux: Tu n'es pas drôle
+Moi: Si, un peu 😂
+</script>
 <script>
 (function () {
   "use strict";
@@ -2415,47 +2758,130 @@ Moi: Meilleur déplacement de l'histoire {MYHEART}
         "-- LE LENDEMAIN --", "# Partie 3 : La réponse", "[notif] Supporters PSG : IL A PROLONGÉ !!! ❤️💙", "Moi: Il a prolongé 😌", "Moi: Jusqu'en 2030", "OM: …", "@contact OM | 😤", "OM: On reviendra l'été prochain", "Moi: Ici c'est Paris ❤️💙"] },
     vide: { label: "✏️ Vide : mon histoire", om: [OM_ME, PSG_CT, "# Partie 1 : …", "PSG: Salut", "Moi: Salut"], psg: [PSG_ME, OM_CT, "# Partie 1 : …", "OM: Salut", "Moi: Salut"] }
   };
-  // les 100 histoires de la bibliothèque, écrites une seule fois avec des mots qui s'adaptent au camp choisi
-  var SIDE = {
-    om: { ME: "OM", LEME: "l'OM", LEMECAP: "L'OM", DUME: "de l'OM", DUMECAP: "De l'OM", MYSTADE: "le Vélodrome", MYCITY: "Marseille", MYCITYADJ: "marseillais", MYCOLORS: "bleu ciel et blanc", MYSLOGAN: "Droit au but 💙", MYHEART: "💙", MYFANS: "Supporters OM", MYC1: "#2faee0", MYC2: "#ffffff", HEAD: OM_ME, CT: PSG_CT },
-    psg: { ME: "PSG", LEME: "le PSG", LEMECAP: "Le PSG", DUME: "du PSG", DUMECAP: "Du PSG", MYSTADE: "le Parc des Princes", MYCITY: "Paris", MYCITYADJ: "parisien", MYCOLORS: "bleu et rouge", MYSLOGAN: "Ici c'est Paris ❤️💙", MYHEART: "❤️💙", MYFANS: "Supporters PSG", MYC1: "#004170", MYC2: "#da291c", HEAD: PSG_ME, CT: OM_CT }
+  /* ---------- clubs et duels : les histoires s'adaptent au duel choisi ---------- */
+  function C(ME, LEME, DUME, stade, city, adj, colors, slogan, heart, fans, c1, c2, tags, alias) { return { ME: ME, LEME: LEME, LEMECAP: LEME.charAt(0).toUpperCase() + LEME.slice(1), DUME: DUME, DUMECAP: DUME.charAt(0).toUpperCase() + DUME.slice(1), MYSTADE: stade, MYCITY: city, MYCITYADJ: adj, MYCOLORS: colors, MYSLOGAN: slogan, MYHEART: heart, MYFANS: fans, c1: c1, c2: c2, tags: tags, alias: alias }; }
+  var CL = {
+    om: C("OM", "l'OM", "de l'OM", "le Vélodrome", "Marseille", "marseillais", "bleu ciel et blanc", "Droit au but 💙", "💙", "Supporters OM", "#2faee0", "#ffffff", "#om #teamom", ["marseille", "olympiquedemarseille"]),
+    psg: C("PSG", "le PSG", "du PSG", "le Parc des Princes", "Paris", "parisien", "bleu et rouge", "Ici c'est Paris ❤️💙", "❤️💙", "Supporters PSG", "#004170", "#da291c", "#psg #teampsg", ["paris", "parissaintgermain"]),
+    ol: C("OL", "l'OL", "de l'OL", "le Groupama Stadium", "Lyon", "lyonnais", "rouge, bleu et blanc", "Allez l'OL 🦁", "🦁", "Supporters OL", "#ffffff", "#1c3e8c", "#ol #teamol", ["lyon", "olympiquelyonnais"]),
+    asse: C("ASSE", "l'ASSE", "de l'ASSE", "Geoffroy-Guichard", "Saint-Étienne", "stéphanois", "vert et blanc", "Allez les Verts 💚", "💚", "Supporters ASSE", "#00843d", "#ffffff", "#asse #allezlesverts", ["saintetienne", "stetienne", "verts"]),
+    real: C("Real", "le Real", "du Real", "le Bernabéu", "Madrid", "madrilène", "blanc", "¡Hala Madrid! 🤍", "🤍", "Supporters du Real", "#ffffff", "#febe10", "#realmadrid #halamadrid", ["realmadrid", "madrid"]),
+    barca: C("Barça", "le Barça", "du Barça", "le Camp Nou", "Barcelone", "catalan", "bleu et grenat", "Visca el Barça 💙❤️", "💙❤️", "Supporters du Barça", "#a50044", "#004d98", "#fcbarcelona #barca", ["barcelone", "fcbarcelone", "fcbarcelona"]),
+    lens: C("Lens", "Lens", "de Lens", "Bollaert", "Lens", "lensois", "sang et or", "Allez Lens 💛❤️", "💛❤️", "Supporters de Lens", "#ffd100", "#e30613", "#rclens #sangetor", ["rclens"]),
+    lille: C("LOSC", "le LOSC", "du LOSC", "le stade Pierre-Mauroy", "Lille", "lillois", "rouge et bleu", "Allez le LOSC ❤️", "❤️", "Supporters du LOSC", "#e01e13", "#1a2b4c", "#losc #lille", ["lille"]),
+    liv: C("Liverpool", "Liverpool", "de Liverpool", "Anfield", "Liverpool", "scouse", "rouge", "You'll Never Walk Alone ❤️", "❤️", "Supporters de Liverpool", "#c8102e", "#f6eb61", "#liverpool #ynwa", ["lfc"]),
+    mu: C("Man United", "Man United", "de Man United", "Old Trafford", "Manchester", "mancunien", "rouge et noir", "Glory Glory Man United ❤️", "❤️🖤", "Supporters de Man United", "#da291c", "#fbe122", "#manutd #manchesterunited", ["manunited", "manchesterunited", "manchester", "mufc"])
   };
+  var DUELS = {
+    "om-psg": { a: "om", b: "psg", derby: "le Classique", tag: "#leclassique", label: "⚽ OM contre PSG" },
+    "ol-asse": { a: "ol", b: "asse", derby: "le derby", tag: "#derby", label: "🦁 OL contre ASSE" },
+    "real-barca": { a: "real", b: "barca", derby: "le Clásico", tag: "#elclasico", label: "🇪🇸 Real contre Barça" },
+    "lens-lille": { a: "lens", b: "lille", derby: "le derby du Nord", tag: "#derbydunord", label: "💛 Lens contre Lille" },
+    "liv-mu": { a: "liv", b: "mu", derby: "le North West Derby", tag: "#northwestderby", label: "🏴 Liverpool contre Man United" }
+  };
+  function duel() { return DUELS[(typeof S !== "undefined" && S && S.duel) || "om-psg"] || DUELS["om-psg"]; }
+  function sideClubs(side) { var d = duel(); return side === "psg" ? [CL[d.b], CL[d.a]] : [CL[d.a], CL[d.b]]; }
+  function headLines(side) { var c = sideClubs(side); return ["@moi " + c[0].ME + " | " + c[0].c1 + " | " + c[0].c2, "@contact " + c[1].ME + " | " + c[1].MYHEART + " | " + c[1].c1 + " | " + c[1].c2]; }
   var LIB = [], cat = "";
   String(document.getElementById("lib").textContent).split("\n").forEach(function (l) {
     var m; if ((m = l.match(/^###\s*(.+)$/))) { cat = m[1].trim(); return; }
     if ((m = l.match(/^===\s*(.+)$/))) { LIB.push({ cat: cat, title: m[1].trim(), lines: [] }); return; }
     if (LIB.length && l.trim()) LIB[LIB.length - 1].lines.push(l);
   });
-  function fillTokens(text, side) {
-    var me = SIDE[side === "psg" ? "psg" : "om"], th = SIDE[side === "psg" ? "om" : "psg"];
-    var v = { ME: me.ME, THEM: th.ME, LEME: me.LEME, LEMECAP: me.LEMECAP, LETHEM: th.LEME, LETHEMCAP: th.LEMECAP, DUME: me.DUME, DUMECAP: me.DUMECAP, DUTHEM: th.DUME, MYSTADE: me.MYSTADE, THEIRSTADE: th.MYSTADE, MYCITY: me.MYCITY, MYCITYADJ: me.MYCITYADJ, MYCOLORS: me.MYCOLORS, MYSLOGAN: me.MYSLOGAN, MYHEART: me.MYHEART, MYFANS: me.MYFANS, THEIRFANS: th.MYFANS, THEIRHEART: th.MYHEART, MYC1: me.MYC1, MYC2: me.MYC2 };
+  function fillTokens(text, side, extra) {
+    var c = sideClubs(side), me = c[0], th = c[1];
+    var v = { ME: me.ME, THEM: th.ME, LEME: me.LEME, LEMECAP: me.LEMECAP, LETHEM: th.LEME, LETHEMCAP: th.LEMECAP, DUME: me.DUME, DUMECAP: me.DUMECAP, DUTHEM: th.DUME, MYSTADE: me.MYSTADE, THEIRSTADE: th.MYSTADE, MYCITY: me.MYCITY, MYCITYADJ: me.MYCITYADJ, MYCOLORS: me.MYCOLORS, MYSLOGAN: me.MYSLOGAN, MYHEART: me.MYHEART, MYFANS: me.MYFANS, THEIRFANS: th.MYFANS, THEIRHEART: th.MYHEART, MYC1: me.c1, MYC2: me.c2, DERBY: duel().derby };
+    if (extra) for (var kx in extra) v[kx] = extra[kx];
     return text.replace(/\{([A-Z0-9]+)\}/g, function (a, k) { return v[k] != null ? v[k] : a; }).replace(/^Eux\s*:/gm, th.ME + ":");
   }
   function tplText(k, side) {
-    if (/^lib:/.test(k)) { var st = LIB[+k.slice(4)]; if (!st) return ""; var sd = SIDE[side === "psg" ? "psg" : "om"]; return [sd.HEAD, sd.CT].concat(st.lines.map(function (l) { return fillTokens(l, side); })).join("\n"); }
-    return TPL[k][side === "psg" ? "psg" : "om"].join("\n");
+    if (/^lib:/.test(k)) { var st = LIB[+k.slice(4)]; if (!st) return ""; return headLines(side).concat(st.lines.map(function (l) { return fillTokens(l, side); })).join("\n"); }
+    if (duel() !== DUELS["om-psg"]) { var th = sideClubs(side)[1]; return headLines(side).concat(["# Partie 1 : …", th.ME + ": Salut", "Moi: Salut"]).join("\n"); }
+    return TPL[k] ? TPL[k][side === "psg" ? "psg" : "om"].join("\n") : "";
+  }
+  /* ---------- générateur : une nouvelle histoire à chaque clic ---------- */
+  var GEN = {}, gcur = null, gsec = null;
+  String(document.getElementById("gen").textContent).split("\n").forEach(function (l) {
+    var m; if ((m = l.match(/^%%\s*(\w+)\s*\|\s*(.+)$/))) { gcur = GEN[m[1]] = { label: m[2].trim(), t1: [], t2: [], t3: [], s1: [], s2: [], a: [], a2: [], b: [], c: [], c2: [] }; gsec = null; return; }
+    if (!gcur) return;
+    if ((m = l.match(/^@(t1|t2|t3|s1|s2)\s+(.+)$/))) { gcur[m[1]] = m[2].split("|").map(function (x) { return x.trim(); }); return; }
+    if ((m = l.match(/^@(a2|a|b|c2|c)\s*$/))) { gsec = m[1]; gcur[gsec].push([]); return; }
+    if (gsec && l.trim()) gcur[gsec][gcur[gsec].length - 1].push(l);
+  });
+  var GAGES = [
+    { GAGE: "payer le kebab avec frites et boisson", GAGEWAIT: "J'attends mon kebab 🌯", GAGEPROOF: "Je suis au kebab… menu XXL pour toi 😑" },
+    { GAGE: "porter le maillot de l'autre toute une journée", GAGEWAIT: "J'attends la photo avec mon maillot 📸", GAGEPROOF: "[photo 1] Content ? 😑" },
+    { GAGE: "chanter l'hymne de l'autre en vocal", GAGEWAIT: "J'attends ton vocal 🎤", GAGEPROOF: "[vocal] Allez… allez… bon voilà, t'es content ?" },
+    { GAGE: "mettre le logo de l'autre en photo de profil une semaine", GAGEWAIT: "Change ta photo de profil 😏", GAGEPROOF: "C'est fait… une semaine, pas un jour de plus 😭" },
+    { GAGE: "faire 50 pompes en live", GAGEWAIT: "Le live commence quand ? 💪", GAGEPROOF: "J'en suis à 12… je meurs 😵" },
+    { GAGE: "dire « {LEMECAP} est le plus grand club » en vocal", GAGEWAIT: "J'attends ton vocal 😈", GAGEPROOF: "[vocal] {LEMECAP} est le plus grand club… voilà." }
+  ];
+  function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+  function genStory(theme, side) {
+    var T = GEN[theme] || GEN[pick(Object.keys(GEN))], gage = pick(GAGES), out = [];
+    function ex(sec) { return pick(T[sec]); }
+    var b1 = ex("b"), b2 = ex("b"); for (var tries = 0; b2 === b1 && tries < 10; tries++) b2 = ex("b");
+    out.push("# Partie 1 : " + pick(T.t1)); out = out.concat(ex("a"), ex("a2"));
+    out.push("-- " + pick(T.s1) + " --", "# Partie 2 : " + pick(T.t2)); out = out.concat(b1, b2);
+    out.push("-- " + pick(T.s2) + " --", "# Partie 3 : " + pick(T.t3)); out = out.concat(ex("c"), ex("c2"));
+    var g2 = {}; for (var k in gage) g2[k] = fillTokens(gage[k], side);
+    return headLines(side).concat(out.map(function (l) { return fillTokens(l, side, g2); })).join("\n");
   }
 
   var S;
   try { S = JSON.parse(localStorage.getItem("histoire-set") || "null"); } catch (e) { S = null; }
   if (!S) S = { tpl: "classique", side: "om", script: tplText("classique", "om"), speed: "1", size: "1", q: "720", sfx: true, mstyle: "auto" };
   if (!S.mstyle) S.mstyle = S.music === false ? "none" : "auto";
+  if (!S.duel) S.duel = "om-psg"; if (S.lock == null) S.lock = true; if (S.dark == null) S.dark = false; if (!S.clock) S.clock = "21:00";
+  var QS = {}; try { QS = JSON.parse(localStorage.getItem("sq-set") || "{}"); } catch (e) {}
+  if (!S.relay) S.relay = QS.relay || "studio-quiz-relais.onrender.com"; if (S.key == null) S.key = QS.lbKey || "";
   function save() { try { localStorage.setItem("histoire-set", JSON.stringify(S)); } catch (e) {} }
 
   /* ---------- lecture du script : chaque ligne devient un événement daté ---------- */
   var items, total, header0;
+  var LOCK_T = 4.4, clockJumps = [], lockNotifs = [];
+  var VOICES_G = ["fr-FR-DeniseNeural", "fr-FR-VivienneMultilingualNeural", "fr-CA-AntoineNeural", "fr-BE-GerardNeural", "fr-FR-EloiseNeural", "fr-CH-FabriceNeural"];
+  function voiceFor(who, from, headName) {
+    if (who === "me") return S.vMe || "fr-FR-RemyMultilingualNeural";
+    if (from === headName) return S.vOther || "fr-FR-HenriNeural";
+    var s = 0; for (var i = 0; i < from.length; i++) s = (s * 31 + from.charCodeAt(i)) % 997; return VOICES_G[s % VOICES_G.length];
+  }
+  function clipKey(v, text) { return v + "|" + text; }
+  var clips = {};
+  function vocalDur(v, text) { var c = clips[clipKey(v, text)]; return c && c.buf ? c.buf.duration : Math.max(2.2, text.length * .068); }
+  // heure qui avance : 1 minute toutes les 4 secondes, et les sauts dans le temps changent l'heure
+  var NUM = { un: 1, une: 1, deux: 2, trois: 3, quatre: 4, cinq: 5, six: 6, sept: 7, huit: 8, neuf: 9, dix: 10, quinze: 15, vingt: 20, trente: 30 };
+  function jumpClock(text, cur) {
+    var x = String(text).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase(), m;
+    if (/minuit/.test(x)) return 0;
+    if (/lendemain/.test(x)) return /matin/.test(x) ? 8 * 60 + 12 : /midi/.test(x) ? 12 * 60 + 30 : /soir/.test(x) ? 20 * 60 + 40 : 10 * 60 + 24;
+    if ((m = x.match(/(\d+|un|une|deux|trois|quatre|cinq|six|sept|huit|neuf|dix|quinze|vingt|trente)\s+(minute|heure)/))) { var n = /\d/.test(m[1]) ? +m[1] : NUM[m[1]] || 1; return (cur + (m[2] === "heure" ? n * 60 : n)) % 1440; }
+    if (/jour du match/.test(x)) return 17 * 60 + 30;
+    if (/apres le match|90 minutes/.test(x)) return (cur + 95) % 1440;
+    if (/soir/.test(x)) return 20 * 60 + 45;
+    if (/matin/.test(x)) return 8 * 60 + 5;
+    if (/nuit/.test(x)) return 2 * 60 + 13;
+    return (cur + 47 + Math.round(Math.random() * 0)) % 1440;
+  }
+  function clockAt(t) { var j = clockJumps[0] || { at: 0, min: 21 * 60 }; clockJumps.forEach(function (c) { if (c.at <= t) j = c; }); return Math.floor(j.min + Math.max(0, t - j.at) / 4) % 1440; }
+  function fmtClock(m) { return String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0"); }
+  function batteryAt(t) { var n = 0; clockJumps.forEach(function (c, i) { if (i && c.at <= t) n++; }); return Math.max(4, Math.round(87 - t * .12 - n * 4)); }
   function parse() {
-    var raw = String(S.script || "").split(/\n/), list = [], sp = +S.speed || 1, t = .8;
-    var me = { name: "OM", c1: "#2faee0", c2: "#ffffff" }, other = { name: "PSG", emo: "", c1: "#004170", c2: "#da291c" }, first = true, lastMsg = null;
-    function addOther(from, it, wait) { var a = t + wait * sp; list.push({ k: "typing", from: from, at: t, end: a }); it.at = a; it.who = "other"; it.from = from; list.push(it); lastMsg = it; return a; }
+    var raw = String(S.script || "").split(/\n/), list = [], sp = +S.speed || 1, t = .8 + (S.lock ? LOCK_T : 0);
+    var me = { name: "OM", c1: "#2faee0", c2: "#ffffff" }, other = { name: "PSG", emo: "", c1: "#004170", c2: "#da291c" }, first = true, lastMsg = null, start = 21 * 60;
+    var m0 = String(S.clock || "21:00").match(/^(\d{1,2}):(\d{2})$/); if (m0) start = (+m0[1]) * 60 + (+m0[2]);
+    clockJumps = [{ at: 0, min: start }]; lockNotifs = [];
+    function addOther(from, it, wait, rec) { var a = t + wait * sp; list.push({ k: "typing", from: from, at: t, end: a, rec: rec }); it.at = a; it.who = "other"; it.from = from; list.push(it); lastMsg = it; return a; }
+    function lockN(from, text) { if (S.lock && lockNotifs.length < 3) lockNotifs.push({ from: from, text: text, at: .5 + lockNotifs.length * .75 }); }
     raw.forEach(function (l) {
       l = l.trim(); if (!l) return; var m;
       if ((m = l.match(/^@(contact|groupe)\s+(.+)$/i))) { var p = m[2].split("|").map(function (x) { return x.trim(); }), o = { name: p[0] || other.name, emo: p[1] != null ? p[1] : other.emo, c1: p[2] || other.c1, c2: p[3] || other.c2, group: /groupe/i.test(m[1]) || (other.group && !/contact/i.test(m[1])) };
         if (first) { other = o; header0 = o; } else list.push({ k: "head", o: o, at: t }); return; }
       if ((m = l.match(/^@moi\s+(.+)$/i))) { var q = m[1].split("|").map(function (x) { return x.trim(); }); me = { name: q[0] || "Moi", c1: q[1] || me.c1, c2: q[2] || me.c2 }; return; }
+      if ((m = l.match(/^@heure\s+(\d{1,2}):(\d{2})$/i))) { clockJumps[0].min = (+m[1]) * 60 + (+m[2]); return; }
       first = false;
       if ((m = l.match(/^#\s*(.+)$/))) { list.push({ k: "chap", text: m[1], at: t }); t += .2; return; }
-      if ((m = l.match(/^--\s*(.+?)\s*--$/))) { list.push({ k: "sep", text: m[1], at: t }); t += 1.3 * sp; lastMsg = null; return; }
+      if ((m = l.match(/^--\s*(.+?)\s*--$/))) { list.push({ k: "sep", text: m[1], at: t }); clockJumps.push({ at: t + .3, min: jumpClock(m[1], clockAt(t)) }); t += 1.3 * sp; lastMsg = null; return; }
       if ((m = l.match(/^\[pause\s*([\d.,]+)?\]$/i))) { t += parseFloat((m[1] || "1").replace(",", ".")) || 1; return; }
       if ((m = l.match(/^\[h[ée]site\]$/i))) { list.push({ k: "typing", from: other.name, at: t, end: t + 1.7 * sp }); t += 2.3 * sp; return; }
       if ((m = l.match(/^\[r[ée]action\s*(.+?)\]$/i))) { if (lastMsg) lastMsg.react = { emo: m[1].trim(), at: t + .3 }; t += .9 * sp; return; }
@@ -2466,20 +2892,29 @@ Moi: Meilleur déplacement de l'histoire {MYHEART}
         list.push({ k: "sys", text: acc ? "📞 Appel vocal · 0:" + String(Math.round(talk * 3)).padStart(2, "0") : "📞 Appel manqué de " + m[1], at: end + .2 });
         t = end + 1.2 * sp; lastMsg = null; return; }
       if ((m = l.match(/^\[notif\]\s*(.+?)\s*:\s*(.+)$/i))) { list.push({ k: "notif", from: m[1], text: m[2], at: t }); t += 1.7 * sp; return; }
-      if ((m = l.match(/^\[journal\]\s*(.+?)\s*\|\s*(.+)$/i))) { t = addOther(other.name, { k: "journal", title: m[1], text: m[2] }, .9) + 2.3 * sp; return; }
-      if ((m = l.match(/^\[photo\s*(\d)\]\s*(.*)$/i))) { t = addOther(other.name, { k: "photo", n: +m[1], text: m[2] }, .9) + 2.3 * sp; return; }
+      if ((m = l.match(/^\[journal\]\s*(.+?)\s*\|\s*(.+)$/i))) { lockN(other.name, "📰 Article"); t = addOther(other.name, { k: "journal", title: m[1], text: m[2] }, .9) + 2.3 * sp; return; }
+      if (/^\[(photo|vocal|position)/i.test(l)) l = other.name + ": " + l;
       if ((m = l.match(/^(.+?)\s*:\s*(.+)$/))) {
         var isMe = /^moi$/i.test(m[1]), from = isMe ? "Moi" : m[1].trim(), text = m[2], reply = null, pre = null, mm;
         if ((mm = text.match(/^\[r[ée]pond\s*:\s*(.+?)\]\s*(.+)$/i))) { reply = mm[1]; text = mm[2]; }
         if ((mm = text.match(/^\[h[ée]site\s*:\s*(.+?)\]\s*(.+)$/i))) { pre = mm[1]; text = mm[2]; }
-        var ph = text.match(/^\[photo\s*(\d)\]\s*(.*)$/i);
-        if (ph) { if (isMe) { var pm = { k: "photo", who: "me", from: "Moi", n: +ph[1], text: ph[2], at: t + .3 }; list.push(pm); lastMsg = pm; t += 2.4 * sp; } else t = addOther(from, { k: "photo", n: +ph[1], text: ph[2] }, .9) + 2.3 * sp; return; }
+        var ph = text.match(/^\[photo\s*(\d)(\s+(?:[ée]ph[ée]m[èe]re|vue unique|unique))?\]\s*(.*)$/i);
+        if (ph) { var pit = { k: "photo", n: +ph[1], eph: !!ph[2], text: ph[3] };
+          if (isMe) { pit.who = "me"; pit.from = "Moi"; pit.at = t + .3; list.push(pit); lastMsg = pit; t += (pit.eph ? 6 : 2.4) * sp; } else { lockN(from, pit.eph ? "📸 Photo éphémère" : "📷 Photo"); t = addOther(from, pit, .9) + (pit.eph ? 6 : 2.3) * sp; } return; }
+        var po = text.match(/^\[position\]\s*(.*)$/i);
+        if (po) { var pp = { k: "pos", text: po[1] || "Position partagée" }; if (isMe) { pp.who = "me"; pp.from = "Moi"; pp.at = t + .3; list.push(pp); lastMsg = pp; t += 2.6 * sp; } else { lockN(from, "📍 Position partagée"); t = addOther(from, pp, .9) + 2.5 * sp; } return; }
+        var vo = text.match(/^\[vocal\]\s*(.+)$/i);
+        if (vo) { var vt = vo[1], vv = voiceFor(isMe ? "me" : "other", from, other.name), vd = vocalDur(vv, vt), vi = { k: "vocal", text: vt, voice: vv, dur: vd };
+          if (isMe) { list.push({ k: "rec", at: t, end: t + vd }); vi.who = "me"; vi.from = "Moi"; vi.at = t + vd + .2; vi.play = t; list.push(vi); lastMsg = vi; t = vi.at + .8 * sp; }
+          else { lockN(from, "🎤 Message vocal (0:" + String(Math.round(vd)).padStart(2, "0") + ")"); var va = addOther(from, vi, 1.3, true); vi.play = va + .3; t = va + .3 + vd + .7 * sp; }
+          return; }
         var replyFrom = null; if (reply) { for (var j = list.length - 1; j >= 0; j--) if (list[j].k === "msg" && list[j].text.indexOf(reply) === 0) { replyFrom = list[j].who === "me" ? "Moi" : list[j].from; break; } }
         if (isMe) {
           var d1 = pre ? Math.min(2.6, .3 + pre.length * .06) * sp : 0, d2 = pre ? Math.min(1.2, pre.length * .03) * sp + .5 : 0, d3 = Math.min(3.4, .35 + text.length * .06) * sp;
           var ty = { k: "type", text: text, pre: pre, at: t, t1: t + d1, t2: t + d1 + d2, end: t + d1 + d2 + d3 }; list.push(ty);
           var mi = { k: "msg", who: "me", from: "Moi", text: text, reply: reply, replyFrom: replyFrom, at: ty.end + .2 }; list.push(mi); lastMsg = mi; t = ty.end + .8 * sp;
         } else {
+          lockN(from, text);
           var td = Math.min(1.9, .6 + text.length * .022);
           t = addOther(from, { k: "msg", text: text, reply: reply, replyFrom: replyFrom }, td) + .7 * sp;
         }
@@ -2506,10 +2941,10 @@ Moi: Meilleur déplacement de l'histoire {MYHEART}
 
   /* ---------- logos des clubs (sur l'appareil) ---------- */
   var logos = {};
-  function clubKey(name) { var k = String(name || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z]/g, ""); return k === "om" || k === "marseille" || k === "olympiquedemarseille" ? "om" : k === "psg" || k === "paris" || k === "parissaintgermain" ? "psg" : k; }
+  function clubKey(name) { var k = String(name || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z]/g, ""); for (var c in CL) { if (k === c || k === CL[c].ME.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z]/g, "") || CL[c].alias.indexOf(k) >= 0) return c; } return k; }
   function loadLogo(k) { var src = ""; try { src = localStorage.getItem("histoire-logo-" + k) || ""; } catch (e) {} if (!src) { logos[k] = null; return; } var im = new Image(); im.onload = function () { logos[k] = im; }; im.src = src; }
   function logosForm() {
-    $("#logos").innerHTML = [["om", "OM", "💙"], ["psg", "PSG", "❤️💙"]].map(function (c) { var src = ""; try { src = localStorage.getItem("histoire-logo-" + c[0]) || ""; } catch (e) {}
+    var dd = duel(); $("#logos").innerHTML = [[dd.a, CL[dd.a].ME, CL[dd.a].MYHEART], [dd.b, CL[dd.b].ME, CL[dd.b].MYHEART]].map(function (c) { var src = ""; try { src = localStorage.getItem("histoire-logo-" + c[0]) || ""; } catch (e) {}
       return "<div class=\"logo-slot\"><span class=\"pv\" style=\"" + (src ? "background-image:url(" + src + ")" : "") + "\"></span><div><b>" + c[2] + " Logo " + c[1] + "</b><label class=\"btn mini\" style=\"display:inline-grid;place-items:center;min-height:34px;padding:0 10px;font-size:13px\">" + (src ? "Changer" : "Ajouter") + "<input type=\"file\" accept=\"image/*\" hidden data-logo=\"" + c[0] + "\"></label>" + (src ? " <button class=\"mini\" type=\"button\" data-rmlogo=\"" + c[0] + "\">Retirer</button>" : "") + "</div></div>"; }).join("");
     document.querySelectorAll("[data-logo]").forEach(function (inp) { inp.onchange = function () {
       var f = this.files && this.files[0], k = inp.getAttribute("data-logo"); if (!f) return;
@@ -2541,6 +2976,8 @@ Moi: Meilleur déplacement de l'histoire {MYHEART}
   var CHAT_TOP = 196, CHAT_BOT = 1188, ME_COL = "#f23c57", OT_COL = "#2c9cf0";
   function fs() { return +S.size || 1; }
   function photoSize(it) { var im = photos[it.n], w = 560, h = 560; if (im) { h = Math.round(w * im.height / im.width); if (h > 700) { h = 700; w = Math.round(h * im.width / im.height); } } return [w, h]; }
+  function TH() { return S.dark ? { bg: "#000000", text: "#f2f3f5", sub: "#8e939c", line: "#1f2126", inBg: "#1c1d21", inTxt: "#f2f3f5", hint: "#7d828b", kbBg: "#202124", key: "#46474b", keyDark: "#303134", keyOn: "#6b6c70", keyTxt: "#ffffff", chapBg: "#18191c", chapTxt: "#f2f3f5", pill: "#1c1d21", quote: "#1c1d21", icon: "#f2f3f5", typing: "#26272b", dot: "200,204,212" }
+    : { bg: "#ffffff", text: "#16181d", sub: "#6b7280", line: "#eceef2", inBg: "#f1f2f5", inTxt: "#111111", hint: "#9aa0aa", kbBg: "#d3d6dc", key: "#ffffff", keyDark: "#adb3bd", keyOn: "#b9bec7", keyTxt: "#111111", chapBg: "#d3d6dc", chapTxt: "#111111", pill: "#f1f2f5", quote: "#f1f2f5", icon: "#111111", typing: "#eef0f4", dot: "60,64,72" }; }
   var PAL = ["#16a34a", "#9333ea", "#ea580c", "#0891b2", "#db2777", "#ca8a04"];
   function colOf(it) { if (it.who === "me") return ME_COL; var h = headerAt(it.at); if (!h.group && it.from === h.name) return OT_COL; var s = 0, n = String(it.from || ""); for (var i = 0; i < n.length; i++) s = (s * 31 + n.charCodeAt(i)) % 997; return h.group ? PAL[s % PAL.length] : OT_COL; }
   function delText(it, t) { return it.del != null && t >= it.del; }
@@ -2554,7 +2991,9 @@ Moi: Meilleur déplacement de l'histoire {MYHEART}
       else if (it.k === "sep") { out.push({ it: it, h: 86 }); prevKey = null; }
       else if (it.k === "sys") { out.push({ it: it, h: 80 }); prevKey = null; }
       else if (it.k === "journal") { var hd = prevKey !== key; out.push({ it: it, head: hd, h: (hd ? 40 : 0) + 470 }); prevKey = key; }
-      else if (it.k === "photo") { var hd2 = prevKey !== key; out.push({ it: it, head: hd2, h: (hd2 ? 40 : 0) + photoSize(it)[1] + 30 }); prevKey = key; if (it.who === "me") lastMe = out.length - 1; }
+      else if (it.k === "photo") { var hd2 = prevKey !== key, gone = it.eph && t > it.at + 5.4; out.push({ it: it, head: hd2, gone: gone, h: (hd2 ? 40 : 0) + (gone ? 84 : photoSize(it)[1] + 30) }); prevKey = key; if (it.who === "me") lastMe = out.length - 1; }
+      else if (it.k === "vocal") { var hd3 = prevKey !== key; out.push({ it: it, head: hd3, h: (hd3 ? 40 : 0) + 118 + (it.react && t >= it.react.at ? 18 : 0) }); prevKey = key; if (it.who === "me") lastMe = out.length - 1; }
+      else if (it.k === "pos") { var hd4 = prevKey !== key; out.push({ it: it, head: hd4, h: (hd4 ? 40 : 0) + 430 }); prevKey = key; if (it.who === "me") lastMe = out.length - 1; }
     });
     if (lastMe >= 0) { out[lastMe].status = readState(out[lastMe].it, t); out[lastMe].h += 36; }
     return out;
@@ -2566,18 +3005,16 @@ Moi: Meilleur déplacement de l'histoire {MYHEART}
   function headerAt(t) { var o = header0; items.forEach(function (it) { if (it.k === "head" && it.at <= t) o = it.o; }); return o; }
   function initials(g, x, y, r, name, col) { g.fillStyle = col; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill(); g.fillStyle = "#fff"; g.font = "800 " + Math.round(r) + "px " + FONT; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(String(name || "?").charAt(0).toUpperCase(), x, y + 1); g.textAlign = "left"; }
   function drawScene(g, t) {
-    var other = headerAt(t), k = fs(), lh = Math.round(50 * k);
-    g.fillStyle = "#ffffff"; g.fillRect(0, 0, W, H);
-    g.fillStyle = "#111"; g.font = "700 34px " + FONT; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("21:00", W / 2, 34);
-    g.fillRect(940, 24, 70, 26); g.fillStyle = "#fff"; g.fillRect(944, 28, 50, 18); g.fillStyle = "#111"; g.fillRect(946, 30, 46, 14); g.fillRect(1012, 31, 6, 12);
-    for (var b = 0; b < 4; b++) g.fillRect(40 + b * 14, 46 - b * 7, 10, 8 + b * 7);
-    g.strokeStyle = "#111"; g.lineWidth = 6; g.lineCap = "round"; g.beginPath(); g.moveTo(58, 104); g.lineTo(38, 128); g.lineTo(58, 152); g.stroke();
+    var other = headerAt(t), k = fs(), lh = Math.round(50 * k), P = TH();
+    g.fillStyle = P.bg; g.fillRect(0, 0, W, H);
+    statusBar(g, t, P.icon, P.bg);
+    g.strokeStyle = P.icon; g.lineWidth = 6; g.lineCap = "round"; g.beginPath(); g.moveTo(58, 104); g.lineTo(38, 128); g.lineTo(58, 152); g.stroke();
     badge(g, 132, 128, 46, other);
-    g.textAlign = "left"; g.textBaseline = "middle"; g.fillStyle = "#111"; g.font = "800 46px " + FONT; var hn = other.name; while (g.measureText(hn).width > 560 && hn.length > 4) hn = hn.slice(0, -1); g.fillText(hn, 196, other.group ? 116 : 128); var nw = g.measureText(hn).width; g.font = "38px " + FONT; g.fillText(other.emo || "", 206 + nw, other.group ? 118 : 130);
-    if (other.group) { g.fillStyle = "#6b7280"; g.font = "600 26px " + FONT; var names = []; items.forEach(function (it) { if (it.who === "other" && it.from && names.indexOf(it.from) < 0) names.push(it.from); }); g.fillText((names.slice(0, 4).join(", ") + (names.length ? ", toi" : "")).slice(0, 44), 198, 156); }
-    g.strokeStyle = "#111"; g.lineWidth = 5; g.beginPath(); g.arc(902, 128, 20, Math.PI * .6, Math.PI * 1.9); g.stroke();
+    g.textAlign = "left"; g.textBaseline = "middle"; g.fillStyle = P.text; g.font = "800 46px " + FONT; var hn = other.name; while (g.measureText(hn).width > 560 && hn.length > 4) hn = hn.slice(0, -1); g.fillText(hn, 196, other.group ? 116 : 128); var nw = g.measureText(hn).width; g.font = "38px " + FONT; g.fillText(other.emo || "", 206 + nw, other.group ? 118 : 130);
+    if (other.group) { g.fillStyle = P.sub; g.font = "600 26px " + FONT; var names = []; items.forEach(function (it) { if (it.who === "other" && it.from && names.indexOf(it.from) < 0) names.push(it.from); }); g.fillText((names.slice(0, 4).join(", ") + (names.length ? ", toi" : "")).slice(0, 44), 198, 156); }
+    g.strokeStyle = P.icon; g.lineWidth = 5; g.beginPath(); g.arc(902, 128, 20, Math.PI * .6, Math.PI * 1.9); g.stroke();
     rr(g, 966, 110, 48, 36, 8); g.stroke(); g.beginPath(); g.moveTo(1016, 128); g.lineTo(1040, 114); g.lineTo(1040, 142); g.closePath(); g.stroke();
-    g.fillStyle = "#eceef2"; g.fillRect(0, 186, W, 3);
+    g.fillStyle = P.line; g.fillRect(0, 186, W, 3);
     // fil de discussion qui défile tout seul
     var bl = blocks(g, t), typingIt = items.filter(function (it) { return it.k === "typing" && t >= it.at && t < it.end; })[0];
     var heights = bl.map(function (x) { var p = Math.min(1, (t - x.it.at) / .22); return x.h * (1 - Math.pow(1 - p, 3)); });
@@ -2586,17 +3023,17 @@ Moi: Meilleur déplacement de l'histoire {MYHEART}
     var y = CHAT_TOP + 20 - scroll;
     bl.forEach(function (x, i) {
       var it = x.it, a = Math.min(1, (t - it.at) / .22); g.globalAlpha = a; g.textBaseline = "middle";
-      if (it.k === "msg" || it.k === "journal" || it.k === "photo") {
+      if (it.k === "msg" || it.k === "journal" || it.k === "photo" || it.k === "vocal" || it.k === "pos") {
         var col = colOf(it), yy = y;
         if (x.head) { g.fillStyle = col; g.font = "800 27px " + FONT; g.textAlign = "left"; g.fillText(it.who === "me" ? "MOI" : (other.group ? it.from : headerAt(it.at).name).toUpperCase(), 30, yy + 16); yy += 40; }
         if (it.reply) { // message cité
-          g.fillStyle = "#f1f2f5"; rr(g, 56, yy + 4, 860, 58, 12); g.fill(); g.fillStyle = it.replyFrom === "Moi" ? ME_COL : OT_COL; g.fillRect(56, yy + 4, 6, 58);
-          g.font = "700 26px " + FONT; g.fillText(it.replyFrom === "Moi" ? "Toi" : (it.replyFrom || ""), 76, yy + 20); g.fillStyle = "#6b7280"; g.font = "500 29px " + FONT; var rq = it.reply; while (g.measureText(rq).width > 800 && rq.length > 4) rq = rq.slice(0, -2); g.fillText(rq + (rq !== it.reply ? "…" : ""), 76, yy + 46); yy += 70;
+          g.fillStyle = P.quote; rr(g, 56, yy + 4, 860, 58, 12); g.fill(); g.fillStyle = it.replyFrom === "Moi" ? ME_COL : OT_COL; g.fillRect(56, yy + 4, 6, 58);
+          g.font = "700 26px " + FONT; g.fillText(it.replyFrom === "Moi" ? "Toi" : (it.replyFrom || ""), 76, yy + 20); g.fillStyle = P.sub; g.font = "500 29px " + FONT; var rq = it.reply; while (g.measureText(rq).width > 800 && rq.length > 4) rq = rq.slice(0, -2); g.fillText(rq + (rq !== it.reply ? "…" : ""), 76, yy + 46); yy += 70;
         }
-        var bodyH = it.k === "msg" ? x.lines.length * lh : it.k === "journal" ? 440 : photoSize(it)[1] + 10;
+        var bodyH = it.k === "msg" ? x.lines.length * lh : it.k === "journal" ? 440 : it.k === "vocal" ? 100 : it.k === "pos" ? 400 : x.gone ? 60 : photoSize(it)[1] + 10;
         g.fillStyle = col; g.globalAlpha = a * .55; g.fillRect(30, yy, 6, bodyH); g.globalAlpha = a;
         if (it.k === "msg") {
-          var dl = delText(it, t); g.fillStyle = dl ? "#8a8f99" : "#16181d"; g.font = (dl ? "italic 500 " : "500 ") + Math.round(40 * k) + "px " + FONT;
+          var dl = delText(it, t); g.fillStyle = dl ? "#8a8f99" : P.text; g.font = (dl ? "italic 500 " : "500 ") + Math.round(40 * k) + "px " + FONT;
           x.lines.forEach(function (ln, j) { g.fillText(ln, 56, yy + lh / 2 + j * lh); });
           if (it.react && t >= it.react.at && !dl) { // réaction posée sur le message
             var lw = g.measureText(x.lines[x.lines.length - 1]).width, rx = Math.min(1000, 56 + lw + 44), ry = yy + (x.lines.length - .5) * lh + 14, pp = Math.min(1, (t - it.react.at) / .25), sc = pp < 1 ? .4 + .9 * pp - .3 * pp * pp : 1;
@@ -2604,21 +3041,25 @@ Moi: Meilleur déplacement de l'histoire {MYHEART}
           }
         }
         else if (it.k === "journal") journal(g, 56, yy + 6, it);
-        else photo(g, 56, yy + 6, it);
+        else if (it.k === "vocal") vocalBubble(g, 56, yy + 4, it, t, col, P);
+        else if (it.k === "pos") posCard(g, 56, yy + 6, it, t, P);
+        else if (x.gone) { g.fillStyle = P.pill; rr(g, 56, yy + 4, 470, 60, 30); g.fill(); g.fillStyle = P.sub; g.font = "600 30px " + FONT; g.fillText("📸 Photo éphémère · ouverte", 80, yy + 35); }
+        else photo(g, 56, yy + 6, it, t);
         if (x.status) { g.fillStyle = x.status === "Lu" ? "#2b5fd9" : "#9aa0aa"; g.font = "600 24px " + FONT; g.textAlign = "left"; g.fillText(x.status === "Lu" ? "✓✓ Lu" : "✓ Envoyé", 56, yy + bodyH + (it.react && t >= it.react.at ? 40 : 22)); }
       } else if (it.k === "sep") {
         g.fillStyle = "#2b5fd9"; g.font = "800 24px " + FONT; g.textAlign = "center"; var tw = g.measureText(it.text.toUpperCase()).width;
         g.fillText(it.text.toUpperCase(), W / 2, y + 43); g.fillRect(60, y + 42, W / 2 - tw / 2 - 90, 3); g.fillRect(W / 2 + tw / 2 + 30, y + 42, W / 2 - tw / 2 - 90, 3); g.textAlign = "left";
       } else if (it.k === "sys") {
-        g.font = "700 28px " + FONT; var sw = g.measureText(it.text).width + 50; g.fillStyle = "#f1f2f5"; rr(g, W / 2 - sw / 2, y + 14, sw, 52, 26); g.fill();
-        g.fillStyle = /manqué/.test(it.text) ? "#e11d48" : "#16181d"; g.textAlign = "center"; g.fillText(it.text, W / 2, y + 41); g.textAlign = "left";
+        g.font = "700 28px " + FONT; var sw = g.measureText(it.text).width + 50; g.fillStyle = P.pill; rr(g, W / 2 - sw / 2, y + 14, sw, 52, 26); g.fill();
+        g.fillStyle = /manqué/.test(it.text) ? "#e11d48" : P.text; g.textAlign = "center"; g.fillText(it.text, W / 2, y + 41); g.textAlign = "left";
       }
       g.globalAlpha = 1; y += heights[i];
     });
     if (typingIt) {
       if (other.group && typingIt.from && typingIt.from !== other.name) initials(g, 66, y + 40, 30, typingIt.from, colOf({ who: "other", from: typingIt.from, at: typingIt.at })); else badge(g, 66, y + 40, 30, other);
-      g.fillStyle = "#eef0f4"; rr(g, 108, y + 14, 120, 54, 27); g.fill();
-      for (var d = 0; d < 3; d++) { g.fillStyle = "rgba(60,64,72," + (.35 + .55 * Math.max(0, Math.sin(t * 8 - d * .9))) + ")"; g.beginPath(); g.arc(142 + d * 26, y + 41, 8, 0, Math.PI * 2); g.fill(); }
+      if (typingIt.rec) { g.fillStyle = P.typing; rr(g, 108, y + 14, 420, 54, 27); g.fill(); g.fillStyle = "rgba(225,29,72," + (.5 + .5 * Math.sin(t * 8)) + ")"; g.beginPath(); g.arc(138, y + 41, 9, 0, Math.PI * 2); g.fill(); g.fillStyle = P.sub; g.font = "600 28px " + FONT; g.textAlign = "left"; g.fillText("🎤 enregistre un vocal…", 158, y + 42); }
+      else { g.fillStyle = P.typing; rr(g, 108, y + 14, 120, 54, 27); g.fill();
+      for (var d = 0; d < 3; d++) { g.fillStyle = "rgba(" + P.dot + "," + (.35 + .55 * Math.max(0, Math.sin(t * 8 - d * .9))) + ")"; g.beginPath(); g.arc(142 + d * 26, y + 41, 8, 0, Math.PI * 2); g.fill(); } }
     }
     g.restore();
     // barre d'écriture (avec les hésitations : on tape, on efface, on retape)
@@ -2628,25 +3069,29 @@ Moi: Meilleur déplacement de l'histoire {MYHEART}
       else if (typing.pre && t < typing.t2) { var er = Math.max(0, (t - typing.t1 - .5) / (typing.t2 - typing.t1 - .5)); typed = typing.pre.slice(0, Math.ceil(typing.pre.length * (1 - Math.min(1, er)))); lastCh = er > 0 ? "⌫" : ""; }
       else { var s0 = typing.pre ? typing.t2 : typing.at; typed = typing.text.slice(0, Math.max(0, Math.min(typing.text.length, Math.floor((t - s0) / (typing.end - s0) * typing.text.length)))); lastCh = typed.slice(-1); }
     }
-    g.fillStyle = "#fff"; g.fillRect(0, CHAT_BOT, W, 112);
-    g.strokeStyle = "#111"; g.lineWidth = 5; g.beginPath(); g.arc(64, CHAT_BOT + 56, 30, 0, Math.PI * 2); g.stroke(); g.beginPath(); g.arc(64, CHAT_BOT + 56, 12, 0, Math.PI * 2); g.stroke();
-    g.fillStyle = "#f1f2f5"; rr(g, 112, CHAT_BOT + 20, 800, 72, 36); g.fill();
+    g.fillStyle = P.bg; g.fillRect(0, CHAT_BOT, W, 112);
+    g.strokeStyle = P.icon; g.lineWidth = 5; g.beginPath(); g.arc(64, CHAT_BOT + 56, 30, 0, Math.PI * 2); g.stroke(); g.beginPath(); g.arc(64, CHAT_BOT + 56, 12, 0, Math.PI * 2); g.stroke();
+    g.fillStyle = P.inBg; rr(g, 112, CHAT_BOT + 20, 800, 72, 36); g.fill();
     g.font = "500 36px " + FONT; g.textAlign = "left"; g.textBaseline = "middle";
-    if (typed) { var shown = typed; while (g.measureText(shown).width > 740) shown = shown.slice(1); g.fillStyle = "#111"; g.fillText(shown, 140, CHAT_BOT + 57); if ((t * 2) % 1 < .6) g.fillRect(142 + g.measureText(shown).width, CHAT_BOT + 36, 4, 42); }
-    else { g.fillStyle = "#9aa0aa"; g.fillText("Envoyer un message", 140, CHAT_BOT + 57); }
+    var recIt = items.filter(function (it) { return it.k === "rec" && t >= it.at && t < it.end + .1; })[0];
+    if (recIt) { var rs = Math.floor(t - recIt.at); g.fillStyle = "rgba(225,29,72," + (.55 + .45 * Math.sin(t * 7)) + ")"; g.beginPath(); g.arc(150, CHAT_BOT + 56, 12, 0, Math.PI * 2); g.fill(); g.fillStyle = P.inTxt; g.fillText("0:" + String(rs).padStart(2, "0"), 176, CHAT_BOT + 57); g.fillStyle = P.hint; g.font = "500 30px " + FONT; g.fillText("‹ Glisser pour annuler", 480, CHAT_BOT + 57);
+      for (var bb = 0; bb < 16; bb++) { var bh2 = 8 + Math.abs(Math.sin(t * 9 + bb * 1.7)) * 26; g.fillStyle = "#e11d48"; g.fillRect(290 + bb * 11, CHAT_BOT + 56 - bh2 / 2, 6, bh2); } }
+    else if (typed) { var shown = typed; while (g.measureText(shown).width > 740) shown = shown.slice(1); g.fillStyle = P.inTxt; g.fillText(shown, 140, CHAT_BOT + 57); if ((t * 2) % 1 < .6) g.fillRect(142 + g.measureText(shown).width, CHAT_BOT + 36, 4, 42); }
+    else { g.fillStyle = P.hint; g.fillText("Envoyer un message", 140, CHAT_BOT + 57); }
     badge(g, 990, CHAT_BOT + 56, 34, ME);
     var chap = ""; items.forEach(function (it) { if (it.k === "chap" && it.at <= t) chap = it.text; });
-    g.fillStyle = "#d3d6dc"; g.fillRect(0, CHAT_BOT + 112, W, 76); g.fillStyle = "#111"; g.font = "800 34px " + FONT; g.textAlign = "center"; g.fillText(chap, W / 2, CHAT_BOT + 152);
-    keyboard(g, CHAT_BOT + 188, lastCh, !!typing && t < typing.end);
+    g.fillStyle = P.chapBg; g.fillRect(0, CHAT_BOT + 112, W, 76); g.fillStyle = P.chapTxt; g.font = "800 34px " + FONT; g.textAlign = "center"; g.fillText(chap, W / 2, CHAT_BOT + 152);
+    keyboard(g, CHAT_BOT + 188, lastCh, !!typing && t < typing.end, P);
     items.forEach(function (it) {
       if (it.k !== "notif" || t < it.at || t > it.at + 3) return;
       var p = t - it.at, s = p < .35 ? 1 - Math.pow(1 - p / .35, 3) : p > 2.6 ? 1 - (p - 2.6) / .4 : 1, ny = -190 + s * 230;
-      g.save(); g.shadowColor = "rgba(0,0,0,.25)"; g.shadowBlur = 30; g.fillStyle = "rgba(250,250,252,.98)"; rr(g, 30, ny, W - 60, 170, 34); g.fill(); g.restore();
+      g.save(); g.shadowColor = "rgba(0,0,0,.25)"; g.shadowBlur = 30; g.fillStyle = S.dark ? "rgba(40,41,45,.98)" : "rgba(250,250,252,.98)"; rr(g, 30, ny, W - 60, 170, 34); g.fill(); g.restore();
       g.fillStyle = "#ffd60a"; rr(g, 60, ny + 26, 42, 42, 10); g.fill(); g.font = "900 26px " + FONT; g.textAlign = "center"; g.fillText("💬", 81, ny + 48);
       g.textAlign = "left"; g.fillStyle = "#6b7280"; g.font = "700 26px " + FONT; g.fillText("MESSAGES", 118, ny + 48); g.textAlign = "right"; g.fillText("maintenant", W - 66, ny + 48); g.textAlign = "left";
-      g.fillStyle = "#111"; g.font = "800 34px " + FONT; g.fillText(it.from, 60, ny + 98); g.font = "500 32px " + FONT; g.fillText(wrap(g, it.text, W - 140)[0], 60, ny + 140);
+      g.fillStyle = P.text; g.font = "800 34px " + FONT; g.fillText(it.from, 60, ny + 98); g.font = "500 32px " + FONT; g.fillText(wrap(g, it.text, W - 140)[0], 60, ny + 140);
     });
     items.forEach(function (it) { if (it.k === "call" && t >= it.at && t < it.end + .35) callScreen(g, t, it); });
+    if (S.lock && t < LOCK_T + .5) lockScreen(g, t);
   }
   function callScreen(g, t, it) { // appel entrant en plein écran
     var p = t - it.at, fade = Math.min(1, p / .3) * (t > it.end ? Math.max(0, 1 - (t - it.end) / .35) : 1), who = headerAt(it.at);
@@ -2664,6 +3109,71 @@ Moi: Meilleur déplacement de l'histoire {MYHEART}
     } else { g.fillStyle = "#e11d48"; g.beginPath(); g.arc(W / 2, 1520, 80, 0, Math.PI * 2); g.fill(); g.fillStyle = "#fff"; g.font = "800 64px " + FONT; g.fillText("✕", W / 2, 1522); }
     g.restore(); g.textAlign = "left";
   }
+  function statusBar(g, t, ink, bg) { // heure qui avance, réseau et batterie qui baisse
+    g.fillStyle = ink; g.font = "700 34px " + FONT; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(fmtClock(clockAt(t)), W / 2, 34);
+    var bat = batteryAt(t); g.strokeStyle = ink; g.lineWidth = 3; rr(g, 940, 22, 70, 30, 7); g.stroke(); g.fillRect(1013, 31, 5, 12);
+    g.fillStyle = bat <= 20 ? "#e11d48" : ink; g.fillRect(945, 27, 60 * bat / 100, 20);
+    g.fillStyle = ink; g.font = "600 24px " + FONT; g.textAlign = "right"; g.fillText(bat + " %", 928, 37); g.textAlign = "left";
+    for (var b = 0; b < 4; b++) g.fillRect(40 + b * 14, 46 - b * 7, 10, 8 + b * 7);
+  }
+  function waveH(text, i) { var s = 0; for (var k = 0; k < text.length; k++) s = (s * 33 + text.charCodeAt(k) + i * 7) % 1009; return .25 + (s % 100) / 140; }
+  function vocalBubble(g, x, y, it, t, col, P) { // message vocal : bouton lecture, forme d'onde, durée
+    var w = 600, h = 96, playing = t >= it.play && t < it.play + it.dur, prog = Math.max(0, Math.min(1, (t - it.play) / it.dur));
+    g.fillStyle = P.pill; rr(g, x, y, w, h, 48); g.fill();
+    g.fillStyle = col; g.beginPath(); g.arc(x + 50, y + h / 2, 32, 0, Math.PI * 2); g.fill(); g.fillStyle = "#fff";
+    if (playing) { g.fillRect(x + 39, y + h / 2 - 13, 8, 26); g.fillRect(x + 53, y + h / 2 - 13, 8, 26); }
+    else { g.beginPath(); g.moveTo(x + 42, y + h / 2 - 15); g.lineTo(x + 64, y + h / 2); g.lineTo(x + 42, y + h / 2 + 15); g.closePath(); g.fill(); }
+    var n = 34; for (var i = 0; i < n; i++) { var bh = 10 + waveH(it.text, i) * 46 * (playing ? .75 + .25 * Math.abs(Math.sin(t * 12 + i)) : 1), bx = x + 100 + i * 12; g.fillStyle = i / n <= prog ? col : P.sub; g.globalAlpha = i / n <= prog ? 1 : .5; g.fillRect(bx, y + h / 2 - bh / 2, 6, bh); g.globalAlpha = 1; }
+    var shown = playing ? Math.floor(t - it.play) : Math.round(it.dur); g.fillStyle = P.sub; g.font = "600 28px " + FONT; g.textAlign = "right"; g.fillText("0:" + String(shown).padStart(2, "0"), x + w - 26, y + h / 2 + 1); g.textAlign = "left";
+  }
+  function posCard(g, x, y, it, t, P) { // position partagée : petite carte dessinée
+    var w = 600, h = 390;
+    g.save(); rr(g, x, y, w, h, 20); g.clip();
+    g.fillStyle = S.dark ? "#26313a" : "#e7eef2"; g.fillRect(x, y, w, h);
+    g.fillStyle = S.dark ? "#2e4a35" : "#cfe8c9"; rr(g, x + 360, y + 30, 180, 120, 16); g.fill(); rr(g, x + 40, y + 190, 140, 90, 14); g.fill();
+    g.strokeStyle = S.dark ? "#2a5d84" : "#9cc8ea"; g.lineWidth = 26; g.beginPath(); g.moveTo(x - 20, y + 120); g.bezierCurveTo(x + 150, y + 60, x + 260, y + 220, x + w + 20, y + 170); g.stroke();
+    g.strokeStyle = S.dark ? "#4a4f57" : "#ffffff"; g.lineWidth = 14;
+    [[0, 70, w, 90], [0, 250, w, 230], [150, 0, 190, 300], [430, 0, 400, 300], [280, 0, 300, 300]].forEach(function (r) { g.beginPath(); g.moveTo(x + r[0], y + r[1]); g.lineTo(x + r[2], y + r[3]); g.stroke(); });
+    var px = x + 300, py = y + 150, pul = (t * 1.2) % 1;
+    g.fillStyle = "rgba(225,29,72," + (.35 * (1 - pul)) + ")"; g.beginPath(); g.arc(px, py + 30, 16 + pul * 40, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#e11d48"; g.beginPath(); g.arc(px, py - 10, 26, Math.PI, 0); g.lineTo(px, py + 30); g.closePath(); g.fill(); g.fillStyle = "#fff"; g.beginPath(); g.arc(px, py - 10, 10, 0, Math.PI * 2); g.fill();
+    g.fillStyle = S.dark ? "#1c1d21" : "#ffffff"; g.fillRect(x, y + 300, w, 90);
+    g.fillStyle = P.text; g.font = "700 32px " + FONT; g.textAlign = "left"; var tx = "📍 " + it.text; while (g.measureText(tx).width > w - 40 && tx.length > 6) tx = tx.slice(0, -2); g.fillText(tx, x + 22, y + 330);
+    g.fillStyle = "#16a34a"; g.font = "600 24px " + FONT; g.fillText("● Position en direct", x + 22, y + 366);
+    g.restore();
+  }
+  function lockScreen(g, t) { // écran verrouillé du début, avec les notifications qui arrivent
+    var p = Math.max(0, (t - LOCK_T) / .5), off = -H * (p * p);
+    g.save(); g.translate(0, off);
+    var c1 = (OTHER0 && OTHER0.c1) || "#004170", c2 = (ME && ME.c1) || "#2faee0";
+    var bg = g.createLinearGradient(0, 0, W, H); bg.addColorStop(0, c1); bg.addColorStop(.55, "#0b1020"); bg.addColorStop(1, c2); g.fillStyle = bg; g.fillRect(0, 0, W, H);
+    g.fillStyle = "rgba(0,0,0,.25)"; g.fillRect(0, 0, W, H);
+    g.fillStyle = "#fff"; g.textAlign = "center"; g.textBaseline = "middle";
+    g.font = "600 40px " + FONT; var days = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"], months = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"], d = new Date();
+    g.fillText(days[d.getDay()] + " " + d.getDate() + " " + months[d.getMonth()], W / 2, 250);
+    g.font = "800 230px " + FONT; g.fillText(fmtClock(clockAt(0)), W / 2, 420);
+    g.font = "700 30px " + FONT; g.fillText("🔒", W / 2, 120);
+    lockNotifs.forEach(function (n, i) {
+      if (t < n.at) return; var a = Math.min(1, (t - n.at) / .3), yy = 640 + i * 190 + (1 - a) * 40;
+      g.save(); g.globalAlpha = a; g.fillStyle = "rgba(255,255,255,.88)"; rr(g, 40, yy, W - 80, 170, 34); g.fill();
+      g.fillStyle = "#ffd60a"; rr(g, 70, yy + 26, 42, 42, 10); g.fill(); g.font = "900 26px " + FONT; g.fillText("💬", 91, yy + 48);
+      g.textAlign = "left"; g.fillStyle = "#6b7280"; g.font = "700 26px " + FONT; g.fillText("MESSAGES", 128, yy + 48); g.textAlign = "right"; g.fillText("maintenant", W - 76, yy + 48); g.textAlign = "left";
+      g.fillStyle = "#111"; g.font = "800 34px " + FONT; g.fillText(n.from, 70, yy + 98); g.font = "500 32px " + FONT; var tx = n.text; while (g.measureText(tx).width > W - 160 && tx.length > 4) tx = tx.slice(0, -2); g.fillText(tx + (tx !== n.text ? "…" : ""), 70, yy + 140);
+      g.restore(); g.textAlign = "center";
+    });
+    g.fillStyle = "rgba(255,255,255,.18)"; g.beginPath(); g.arc(150, 1760, 60, 0, Math.PI * 2); g.arc(W - 150, 1760, 60, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#fff"; g.font = "40px " + FONT; g.fillText("🔦", 150, 1762); g.fillText("📷", W - 150, 1762);
+    var sw = .5 + .5 * Math.sin(t * 4); g.globalAlpha = .6 + .4 * sw; g.font = "600 32px " + FONT; g.fillText("Glisser vers le haut pour ouvrir", W / 2, 1640); g.globalAlpha = 1;
+    g.fillStyle = "#fff"; rr(g, W / 2 - 140, 1880, 280, 10, 5); g.fill();
+    g.restore(); g.textAlign = "left";
+  }
+  function photoE(g, x, y, it, t) { // compte à rebours de la photo éphémère
+    var sz = photoSize(it), w = sz[0], left = Math.max(0, 5 - (t - it.at)), cx = x + w - 54, cy = y + 54;
+    g.fillStyle = "rgba(0,0,0,.55)"; g.beginPath(); g.arc(cx, cy, 36, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = "#ffd60a"; g.lineWidth = 6; g.beginPath(); g.arc(cx, cy, 30, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * left / 5); g.stroke();
+    g.fillStyle = "#fff"; g.font = "800 30px " + FONT; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(String(Math.ceil(left)), cx, cy + 1);
+    g.fillStyle = "rgba(0,0,0,.55)"; rr(g, x + 16, y + 16, 220, 46, 23); g.fill(); g.fillStyle = "#fff"; g.font = "700 24px " + FONT; g.fillText("👁 Vue unique", x + 126, y + 40); g.textAlign = "left";
+  }
   function journal(g, x, y, it) { // article d'un journal inventé
     g.save(); g.shadowColor = "rgba(0,0,0,.18)"; g.shadowBlur = 18; g.fillStyle = "#fbfaf6"; rr(g, x, y, 560, 430, 16); g.fill(); g.restore();
     g.fillStyle = "#1b3a8a"; rr(g, x, y, 560, 86, 16); g.fill(); g.fillRect(x, y + 50, 560, 36);
@@ -2673,17 +3183,18 @@ Moi: Meilleur déplacement de l'histoire {MYHEART}
     badge(g, x + 170, y + 253, 56, ME); badge(g, x + 390, y + 253, 56, OTHER0); g.fillStyle = "#fff"; g.font = "900 44px " + FONT; g.fillText("VS", x + 280, y + 256);
     g.fillStyle = "#333"; g.font = "500 24px Georgia, serif"; wrap(g, it.text, 500).slice(0, 2).forEach(function (l, j) { g.fillText(l, x + 280, y + 372 + j * 30); }); g.textAlign = "left";
   }
-  function photo(g, x, y, it) { // photo de la galerie, avec la légende posée dessus
+  function photo(g, x, y, it, t) { // photo de la galerie, avec la légende posée dessus
     var sz = photoSize(it), w = sz[0], h = sz[1], im = photos[it.n];
     g.save(); rr(g, x, y, w, h, 18); g.clip();
     if (im) g.drawImage(im, x, y, w, h); else { g.fillStyle = "#e3e6ec"; g.fillRect(x, y, w, h); g.fillStyle = "#9aa0aa"; g.font = "700 40px " + FONT; g.textAlign = "center"; g.fillText("📷 Photo " + it.n, x + w / 2, y + h / 2); }
     if (it.text) { g.fillStyle = "rgba(0,0,0,.45)"; g.fillRect(x, y + h * .62, w, 70); g.fillStyle = "#fff"; g.font = "600 36px " + FONT; g.textAlign = "center"; g.fillText(wrap(g, it.text, w - 40)[0], x + w / 2, y + h * .62 + 37); }
     g.restore(); g.textAlign = "left";
+    if (it.eph && t != null && t < it.at + 5.4) photoE(g, x, y, it, t);
   }
   var ROWS = ["azertyuiop", "qsdfghjklm", "wxcvbn"];
   function keyOf(ch) { ch = String(ch || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, ""); return ch === " " ? " " : /[a-z]/.test(ch) ? ch : ""; }
-  function keyboard(g, y0, ch, active) {
-    g.fillStyle = "#d3d6dc"; g.fillRect(0, y0, W, H - y0);
+  function keyboard(g, y0, ch, active, P) {
+    P = P || TH(); KP = P; g.fillStyle = P.kbBg; g.fillRect(0, y0, W, H - y0);
     var kk = active ? keyOf(ch) : "", kw = 96, gap = 12, pop = null;
     ROWS.forEach(function (row, r) {
       var n = row.length, x0 = r === 2 ? 168 : (W - (n * kw + (n - 1) * gap)) / 2, y = y0 + 30 + r * 134;
@@ -2691,12 +3202,13 @@ Moi: Meilleur déplacement de l'histoire {MYHEART}
       for (var i = 0; i < n; i++) { var x = x0 + i * (kw + gap), on = row[i] === kk; key(g, x, y, kw, 112, row[i], on); if (on) pop = [x, y, row[i]]; }
     });
     var by = y0 + 30 + 3 * 134; key(g, 24, by, 190, 112, "123", false, true); key(g, 230, by, 610, 112, "espace", kk === " "); key(g, 856, by, 200, 112, "retour", false, true);
-    if (pop) { g.save(); g.shadowColor = "rgba(0,0,0,.3)"; g.shadowBlur = 16; g.fillStyle = "#fff"; rr(g, pop[0] - 20, pop[1] - 130, kw + 40, 150, 22); g.fill(); g.restore(); g.fillStyle = "#111"; g.font = "500 76px " + FONT; g.textAlign = "center"; g.fillText(pop[2], pop[0] + kw / 2, pop[1] - 58); }
+    if (pop) { g.save(); g.shadowColor = "rgba(0,0,0,.3)"; g.shadowBlur = 16; g.fillStyle = P.key; rr(g, pop[0] - 20, pop[1] - 130, kw + 40, 150, 22); g.fill(); g.restore(); g.fillStyle = P.keyTxt; g.font = "500 76px " + FONT; g.textAlign = "center"; g.fillText(pop[2], pop[0] + kw / 2, pop[1] - 58); }
   }
+  var KP = null;
   function key(g, x, y, w, h, label, on, dark) {
-    g.fillStyle = "rgba(0,0,0,.25)"; rr(g, x, y + 4, w, h, 14); g.fill();
-    g.fillStyle = on ? "#b9bec7" : dark ? "#adb3bd" : "#fff"; rr(g, x, y, w, h, 14); g.fill();
-    g.fillStyle = "#111"; g.font = (label.length > 1 ? "500 36px " : "500 54px ") + FONT; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(label, x + w / 2, y + h / 2 + 2);
+    var P = KP || TH(); g.fillStyle = "rgba(0,0,0,.25)"; rr(g, x, y + 4, w, h, 14); g.fill();
+    g.fillStyle = on ? P.keyOn : dark ? P.keyDark : P.key; rr(g, x, y, w, h, 14); g.fill();
+    g.fillStyle = P.keyTxt; g.font = (label.length > 1 ? "500 36px " : "500 54px ") + FONT; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(label, x + w / 2, y + h / 2 + 2);
   }
 
   /* ---------- sons et musique d'ambiance (créés par la page) ---------- */
@@ -2715,9 +3227,27 @@ Moi: Meilleur déplacement de l'histoire {MYHEART}
       }
       else if (it.k === "notif") { click(t0 + it.at, 1047, .1, .3, "sine"); click(t0 + it.at + .12, 1568, .09, .4, "sine"); }
       else if (it.k === "sep") click(t0 + it.at, 330, .06, .6, "sine");
+      else if (it.k === "vocal") { click(t0 + it.at, it.who === "me" ? 880 : 660, .08, .15, "sine"); }
       else if (it.k === "call") { for (var rt = it.at + .2; rt < it.ring - .1; rt += 1.2) { click(t0 + rt, 784, .09, .35, "sine"); click(t0 + rt + .38, 659, .09, .35, "sine"); } if (!it.acc) { click(t0 + it.end, 440, .08, .2, "sine"); click(t0 + it.end + .2, 330, .08, .3, "sine"); } }
     });
-    music(ac, dest, t0);
+    if (S.sfx) lockNotifs.forEach(function (n) { click(t0 + n.at, 1047, .09, .3, "sine"); click(t0 + n.at + .12, 1568, .08, .4, "sine"); });
+    items.forEach(function (it) { if (it.k !== "vocal") return; var c = clips[clipKey(it.voice, it.text)]; if (!c || !c.buf) return; var src = ac.createBufferSource(), vg = ac.createGain(); vg.gain.value = 1.2; src.buffer = c.buf; src.connect(vg); vg.connect(dest); src.start(t0 + it.play); });
+    music(ac, dest, t0, true);
+  }
+  // voix des messages vocaux : fabriquées par le relais (voix pro gratuites), puis gardées en mémoire
+  function relayBase() { var u = String(S.relay || "studio-quiz-relais.onrender.com").trim().replace(/\/+$/, ""); if (!/^[a-z]+:\/\//i.test(u)) u = "https://" + u; return u.replace(/^ws/i, "http"); }
+  function trimBuf(a, buf) { var d = buf.getChannelData(0), n = d.length, s0 = 0, e0 = n - 1, th = .012, pad = Math.round(buf.sampleRate * .05); while (s0 < n && Math.abs(d[s0]) < th) s0++; while (e0 > s0 && Math.abs(d[e0]) < th) e0--; s0 = Math.max(0, s0 - pad); e0 = Math.min(n - 1, e0 + pad); if (e0 - s0 < buf.sampleRate * .2) return buf; var out = a.createBuffer(buf.numberOfChannels, e0 - s0 + 1, buf.sampleRate); for (var c = 0; c < buf.numberOfChannels; c++) out.getChannelData(c).set(buf.getChannelData(c).subarray(s0, e0 + 1)); return out; }
+  function ensureVocals() {
+    var need = items.filter(function (it) { return it.k === "vocal" && !(clips[clipKey(it.voice, it.text)] || {}).buf; });
+    if (!need.length) return Promise.resolve(true);
+    var a = audio(); msg("🎤 Préparation des messages vocaux…");
+    return Promise.all(need.map(function (it) { var k = clipKey(it.voice, it.text); if (clips[k] && clips[k].p) return clips[k].p;
+      var p = fetch(relayBase() + "/tts?engine=edge&rate=" + encodeURIComponent("+6%") + "&voice=" + encodeURIComponent(it.voice) + "&key=" + encodeURIComponent(S.key || "") + "&text=" + encodeURIComponent(it.text))
+        .then(function (r) { if (r.ok) return r.arrayBuffer(); return r.json().then(function (j) { throw new Error(j.error || "Erreur " + r.status); }, function () { throw new Error("Le relais ne répond pas (erreur " + r.status + ")."); }); })
+        .then(function (ab) { return new Promise(function (res, rej) { a.decodeAudioData(ab, res, rej); }); })
+        .then(function (buf) { clips[k].buf = trimBuf(a, buf); });
+      clips[k] = { p: p }; p.catch(function () { delete clips[k]; }); return p; }))
+      .then(function () { msg("✅ Vocaux prêts"); parse(); return true; }, function (e) { msg("⚠️ Vocaux sans voix : " + (e && e.message || "relais indisponible") + " (règle le relais et la clé dans « Voix des vocaux »)."); return false; });
   }
   /* musiques d'ambiance créées par la page (sans droits) ; « auto » change selon le chapitre */
   function hz(n) { return 440 * Math.pow(2, (n - 69) / 12); }
@@ -2758,17 +3288,35 @@ Moi: Meilleur déplacement de l'histoire {MYHEART}
 
   /* ---------- formulaires ---------- */
   function fill() {
-    var h = "<optgroup label=\"⭐ Histoires spéciales\">" + Object.keys(TPL).map(function (k) { return "<option value=\"" + k + "\">" + TPL[k].label + "</option>"; }).join("") + "</optgroup>", cur = null;
-    LIB.forEach(function (st, i) { if (st.cat !== cur) { if (cur !== null) h += "</optgroup>"; cur = st.cat; h += "<optgroup label=\"" + st.cat + "\">"; } h += "<option value=\"lib:" + i + "\">" + (i + 1) + ". " + st.title + "</option>"; });
-    $("#tpl").innerHTML = h + "</optgroup>"; $("#tpl").value = S.tpl;
+    var h = "<optgroup label=\"⭐ Histoires spéciales\">" + Object.keys(TPL).map(function (k) { return "<option value=\"" + k + "\">" + TPL[k].label + "</option>"; }).join("") + "</optgroup>" + libOpts().replace(/<\/optgroup>$/, "");
+    if (S.duel !== "om-psg") h = "<optgroup label=\"⭐\"><option value=\"vide\">✏️ Vide : mon histoire</option></optgroup>";
+    LIB.forEach(function (st, i) { });
+    $("#tpl").innerHTML = (S.duel !== "om-psg" ? h + libOpts() : h + "</optgroup>"); if (S.tpl === "gen") $("#tpl").insertAdjacentHTML("afterbegin", "<option value=\"gen\">✨ Histoire inventée</option>"); $("#tpl").value = S.tpl;
+    $("#duel").innerHTML = Object.keys(DUELS).map(function (k) { return "<option value=\"" + k + "\">" + DUELS[k].label + "</option>"; }).join(""); $("#duel").value = S.duel;
+    var dd = duel(), A = CL[dd.a], B = CL[dd.b];
+    $("#side").innerHTML = "<option value=\"om\">" + A.MYHEART + " Team " + A.ME + " (« Moi » = " + A.LEME + ")</option><option value=\"psg\">" + B.MYHEART + " Team " + B.ME + " (« Moi » = " + B.LEME + ")</option>";
+    $("#genTheme").innerHTML = Object.keys(GEN).map(function (k) { return "<option value=\"" + k + "\">" + GEN[k].label + "</option>"; }).join("");
+    $("#lock").checked = !!S.lock; $("#dark").checked = !!S.dark; $("#clock").value = S.clock;
+    var VO = [["fr-FR-RemyMultilingualNeural", "Rémy (homme)"], ["fr-FR-HenriNeural", "Henri (homme)"], ["fr-BE-GerardNeural", "Gérard (homme)"], ["fr-CA-AntoineNeural", "Antoine (homme)"], ["fr-FR-DeniseNeural", "Denise (femme)"], ["fr-FR-VivienneMultilingualNeural", "Vivienne (femme)"], ["fr-FR-EloiseNeural", "Éloïse (jeune)"]].map(function (v) { return "<option value=\"" + v[0] + "\">" + v[1] + "</option>"; }).join("");
+    $("#vMe").innerHTML = VO; $("#vOther").innerHTML = VO; $("#vMe").value = S.vMe || "fr-FR-RemyMultilingualNeural"; $("#vOther").value = S.vOther || "fr-FR-HenriNeural";
+    $("#relay").value = S.relay; $("#key").value = S.key;
     $("#side").value = S.side; $("#script").value = S.script; $("#speed").value = S.speed; $("#size").value = S.size; $("#q").value = S.q; $("#sfx").checked = !!S.sfx; $("#mstyle").value = S.mstyle;
   }
+  function libOpts() { var h = "", cur = null; LIB.forEach(function (st, i) { if (st.cat !== cur) { if (cur !== null) h += "</optgroup>"; cur = st.cat; h += "<optgroup label=\"" + st.cat + "\">"; } h += "<option value=\"lib:" + i + "\">" + (i + 1) + ". " + st.title + "</option>"; }); return h + "</optgroup>"; }
   function allKeys() { return Object.keys(TPL).concat(LIB.map(function (x, i) { return "lib:" + i; })); }
-  function edited() { var cur = String(S.script || "").trim(); return !allKeys().some(function (k) { return cur === tplText(k, "om").trim() || cur === tplText(k, "psg").trim(); }); }
+  function edited() { var cur = String(S.script || "").trim(); if (S.genScript && cur === S.genScript.trim()) return false; return !allKeys().some(function (k) { return cur === tplText(k, "om").trim() || cur === tplText(k, "psg").trim(); }); }
   $("#rnd").onclick = function () { if (edited() && !confirm("Remplacer ton histoire par une histoire au hasard ?")) return; var k = "lib:" + Math.floor(Math.random() * LIB.length); S.tpl = k; $("#tpl").value = k; applyTpl(); };
   function applyTpl() { S.script = tplText(S.tpl, S.side); $("#script").value = S.script; save(); parse(); restart(); makeCap(); }
   $("#tpl").onchange = function () { if (edited() && !confirm("Remplacer ton histoire par celle-ci ?")) { this.value = S.tpl; return; } S.tpl = this.value; applyTpl(); };
-  $("#side").onchange = function () { if (edited() && !confirm("Charger la version " + (this.value === "psg" ? "Team PSG" : "Team OM") + " de l'histoire ? Ton texte modifié sera remplacé.")) { this.value = S.side; return; } S.side = this.value; applyTpl(); };
+  $("#side").onchange = function () { if (edited() && !confirm("Charger l'histoire pour l'autre camp ? Ton texte modifié sera remplacé.")) { this.value = S.side; return; } S.side = this.value; if (S.tpl === "gen") { genNew(); return; } applyTpl(); };
+  $("#duel").onchange = function () { if (edited() && !confirm("Changer de duel ? Ton texte modifié sera remplacé.")) { this.value = S.duel; return; } S.duel = this.value; if (S.duel !== "om-psg" && !/^lib:|^gen$/.test(S.tpl)) S.tpl = "lib:0"; fill(); logosForm(); if (S.tpl === "gen") genNew(); else applyTpl(); };
+  function genNew() { S.tpl = "gen"; S.script = genStory($("#genTheme").value, S.side); S.genScript = S.script; fill(); $("#script").value = S.script; save(); parse(); restart(); makeCap(); }
+  $("#genGo").onclick = function () { if (edited() && !confirm("Remplacer ton histoire par une histoire inventée ?")) return; genNew(); };
+  $("#lock").onchange = function () { S.lock = this.checked; save(); parse(); restart(); };
+  $("#dark").onchange = function () { S.dark = this.checked; save(); };
+  $("#clock").oninput = function () { if (/^\d{1,2}:\d{2}$/.test(this.value)) { S.clock = this.value; save(); parse(); } };
+  $("#vMe").onchange = function () { S.vMe = this.value; save(); parse(); }; $("#vOther").onchange = function () { S.vOther = this.value; save(); parse(); };
+  $("#relay").oninput = function () { S.relay = this.value.trim(); save(); }; $("#key").oninput = function () { S.key = this.value.trim(); save(); };
   $("#script").oninput = function () { S.script = this.value; save(); parse(); };
   ["speed", "size", "q"].forEach(function (k) { $("#" + k).onchange = function () { S[k] = this.value; save(); parse(); restart(); }; });
   $("#sfx").onchange = function () { S.sfx = this.checked; save(); }; $("#mstyle").onchange = function () { S.mstyle = this.value; save(); };
@@ -2778,8 +3326,8 @@ Moi: Meilleur déplacement de l'histoire {MYHEART}
   function makeCap() {
     var me = (ME && ME.name) || "OM", ot = (OTHER0 && OTHER0.name) || "PSG";
     var ideas = ["Quand " + me + " et " + ot + " s'écrivent avant le match 😂💬", "La conversation que personne ne devait voir 👀 " + me + " x " + ot, "Ça part en clash entre " + me + " et " + ot + " 😭 Partie 1", "Imagine les messages entre " + me + " et " + ot + "… 💬 Team qui ?"];
-    function tg(n) { var k = String(n).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]/g, ""); return k === "om" || k === "marseille" ? "#om #teamom" : k === "psg" || k === "paris" ? "#psg #teampsg" : "#" + k; }
-    $("#cap").value = ideas[capK % ideas.length] + "\n\n" + [tg(me), tg(ot), "#leclassique #histoire #conversation #foot #fyp #pourtoi"].join(" ");
+    function tg(n) { var c = CL[clubKey(n)]; return c ? c.tags : "#" + String(n).toLowerCase().replace(/[^a-z0-9]/g, ""); }
+    $("#cap").value = ideas[capK % ideas.length] + "\n\n" + [tg(me), tg(ot), duel().tag + " #histoire #conversation #foot #fyp #pourtoi"].join(" ");
   }
   $("#capNew").onclick = function () { capK++; makeCap(); };
   $("#capCopy").onclick = function () { var c = $("#cap"); c.select(); var ok = false; try { if (navigator.clipboard) { navigator.clipboard.writeText(c.value); ok = true; } } catch (e) {} if (!ok) try { document.execCommand("copy"); } catch (e) {} msg("Légende copiée ✅"); };
@@ -2792,7 +3340,8 @@ Moi: Meilleur déplacement de l'histoire {MYHEART}
   parse();
   (function loop(now) { if (!busy) { var t = (now - t0) / 1000; if (t > total + 1) { t0 = now; t = 0; } drawScene(g, t); } requestAnimationFrame(loop); })(performance.now());
   var prevGain = null;
-  $("#play").onclick = function () { parse(); var a = audio(); if (prevGain) try { prevGain.disconnect(); } catch (e) {} prevGain = a.createGain(); prevGain.connect(a.destination); t0 = performance.now(); sounds(a, prevGain, a.currentTime); };
+  $("#play").onclick = function () { parse(); audio(); ensureVocals().then(playNow); };
+  function playNow() { parse(); var a = audio(); if (prevGain) try { prevGain.disconnect(); } catch (e) {} prevGain = a.createGain(); prevGain.connect(a.destination); t0 = performance.now(); sounds(a, prevGain, a.currentTime); }
   var lastURL = null, lastFile = null;
   function download(blob, name) {
     if (lastURL) URL.revokeObjectURL(lastURL); lastURL = URL.createObjectURL(blob);
@@ -2804,7 +3353,8 @@ Moi: Meilleur déplacement de l'histoire {MYHEART}
   }
   $("#gotShare").onclick = function () { if (lastFile) navigator.share({ files: [lastFile] }).catch(function () {}); };
   function stamp() { var d = new Date(); return d.getFullYear() + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0") + "-" + String(d.getHours()).padStart(2, "0") + String(d.getMinutes()).padStart(2, "0"); }
-  $("#dlVideo").onclick = function () {
+  $("#dlVideo").onclick = function () { if (busy) return; parse(); audio(); ensureVocals().then(recordNow); };
+  function recordNow() {
     if (busy) return;
     if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) { msg("Ce navigateur ne sait pas créer de vidéo. Utilise Chrome."); return; }
     parse(); if (prevGain) try { prevGain.disconnect(); } catch (e) {}
@@ -2825,10 +3375,10 @@ Moi: Meilleur déplacement de l'histoire {MYHEART}
       }
       requestAnimationFrame(frame);
     })();
-  };
+  }
 
   for (var n = 1; n <= 6; n++) loadPhoto(n);
-  loadLogo("om"); loadLogo("psg"); logosForm();
+  Object.keys(CL).forEach(loadLogo); logosForm();
   fill(); parse(); imgsForm(); makeCap();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(restart);
   window.__histoire = { drawScene: drawScene, total: function () { return total; }, items: function () { return items; } };
