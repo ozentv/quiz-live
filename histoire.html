@@ -54,7 +54,7 @@ button:disabled { opacity: .5; }
     <div class="box">
       <h2>Histoire</h2>
       <div class="row2">
-        <label>Histoire prête à l'emploi (105)<select id="tpl"></select></label>
+        <label>Histoire prête à l'emploi (111)<select id="tpl"></select></label>
         <label>Ton compte<select id="side"><option value="om">💙 Team OM (« Moi » = l'OM)</option><option value="psg">❤️ Team PSG (« Moi » = le PSG)</option></select></label>
       </div>
       <button class="mini" type="button" id="rnd">🎲 Une histoire au hasard</button>
@@ -64,6 +64,9 @@ button:disabled { opacity: .5; }
         <span><code># Partie 1 : …</code> chapitre · <code>-- TROIS HEURES PLUS TARD --</code> saut dans le temps</span>
         <span><code>[notif] Nom : texte</code> notification · <code>[photo 1] légende</code> photo de ta galerie (envoyée par l'autre) · <code>Moi: [photo 2] légende</code> photo envoyée par toi</span>
         <span><code>[journal] Titre | texte</code> article de journal · <code>@contact PSG | 💔</code> change le nom ou les emojis du contact en cours de route · <code>[pause 2]</code> 2 secondes de silence</span>
+        <span><code>PSG: [répond: Le Vélodrome va trembler] Trembler ?</code> répond à un message · <code>[réaction 😂]</code> réaction sur le dernier message · <code>[supprimé]</code> le dernier message est supprimé</span>
+        <span><code>Moi: [hésite: Je t'aime] Bonne nuit</code> tu tapes, tu effaces, tu retapes · <code>[hésite]</code> l'autre écrit… puis n'envoie rien · <code>[appel] PSG</code> appel manqué · <code>[appel] PSG | accepté</code> appel décroché</span>
+        <span><code>@groupe Supporters OM | 💙</code> groupe de discussion : chaque nom (<code>Lucas: …</code>, <code>Inès: …</code>) a sa couleur · « Envoyé » et « Lu » s'affichent tout seuls sous ton dernier message</span>
       </div>
     </div>
 
@@ -87,7 +90,7 @@ button:disabled { opacity: .5; }
         <label>Qualité<select id="q"><option value="720">720p</option><option value="1080">1080p</option></select></label>
       </div>
       <label class="chk"><input type="checkbox" id="sfx"> 🔊 Sons (clavier, envoi, notifications)</label>
-      <label class="chk"><input type="checkbox" id="music"> 🎵 Musique d'ambiance douce (créée par la page, sans droits)</label>
+      <label>🎵 Musique (créée par la page, sans droits)<select id="mstyle"><option value="auto">Auto : change selon les chapitres</option><option value="drole">Drôle</option><option value="tension">Tension</option><option value="romantique">Romantique</option><option value="triste">Triste</option><option value="douce">Douce</option><option value="none">Sans musique</option></select></label>
       <button class="main" type="button" id="dlVideo">🎬 Télécharger la vidéo</button>
       <p class="note" id="durNote"></p>
     </div>
@@ -2223,6 +2226,155 @@ Moi: Pas cette fois, promis
 Eux: Dans quelle tribune ?
 Moi: À côté de moi {MYHEART}
 Eux: Bon… j'arrive 🤝
+### 👥 Groupes de supporters
+=== Le groupe du match
+@groupe {MYFANS} | {MYHEART} | {MYC1} | {MYC2}
+# Partie 1 : Le rendez-vous
+Lucas: Les gars, rendez-vous à quelle heure pour le Classique ?
+Inès: 17 h devant le stade 🏟️
+Karim: Moi j'amène le drapeau géant
+Moi: Et moi les fumigènes… en papier 😂
+[réaction 😂]
+Lucas: On sera combien ?
+Inès: 12 pour l'instant
+Karim: 13 avec mon cousin qui est supporter {DUTHEM} 😬
+Moi: [répond: 13 avec mon cousin qui est supporter {DUTHEM} 😬] Il vient en espion ?
+Karim: Il dit qu'il veut « voir l'ambiance »
+Inès: On va le convertir
+-- LE JOUR DU MATCH --
+# Partie 2 : Au stade
+Lucas: Je suis devant la porte B
+Moi: J'arrive, je suis dans les bouchons 🚗
+Karim: Mon cousin chante déjà nos chants 😂
+[réaction ❤️]
+Inès: La conversion a commencé
+-- APRÈS LE MATCH --
+# Partie 3 : La fête
+Lucas: QUELLE SOIRÉE 🔥🔥🔥
+Inès: J'ai plus de voix
+Karim: Mon cousin veut prendre un abonnement
+Moi: {MYSLOGAN}
+[réaction 🔥]
+=== Le spoiler
+@groupe {MYFANS} | {MYHEART} | {MYC1} | {MYC2}
+# Partie 1 : En différé
+Sarah: Ne me spoilez pas, je regarde le match en différé !
+Yanis: Ok promis 🤐
+Mehdi: Personne ne dit rien
+Moi: Bouche cousue
+-- 20 MINUTES PLUS TARD --
+# Partie 2 : L'accident
+Mehdi: QUEL BUT INCROYABLE À LA 89e 😱
+[supprimé]
+Sarah: …
+Sarah: Mehdi.
+Yanis: Il a supprimé trop tard 😂
+Moi: [répond: QUEL BUT INCROYABLE À LA 89e 😱] On a tous vu Mehdi
+Mehdi: Je me suis trompé de groupe 😭
+-- PLUS TARD --
+# Partie 3 : La vengeance
+Sarah: J'ai fini le match
+Sarah: Il était incroyable quand même
+Yanis: Tu vois, le spoiler n'a rien gâché
+Sarah: Mehdi tu me dois un kebab
+Mehdi: Encore un kebab… 🌯
+[réaction 😂]
+=== Le billet en trop
+@groupe {MYFANS} | {MYHEART} | {MYC1} | {MYC2}
+# Partie 1 : La place libre
+Inès: J'ai une place en trop pour samedi 🎟️
+Lucas: MOI
+Karim: MOI MOI MOI
+Moi: Moi aussi !!!
+Inès: Calmez-vous 😂
+Inès: Celui qui trouve le plus beau chant gagne la place
+-- 10 MINUTES PLUS TARD --
+# Partie 2 : Le concours
+Lucas: « Allez allez allez, on est toujours là ! »
+Karim: « Même sous la pluie, on chante pour toi ! »
+Moi: [hésite: Euh…] « Notre club, notre fierté, pour l'éternité ! » {MYHEART}
+[réaction 🥹]
+Inès: Les trois sont trop beaux
+[hésite]
+Inès: Bon… je prends Moi
+Lucas: Pas juste 😤
+-- SAMEDI --
+# Partie 3 : Au stade
+Moi: Merci Inès, la place est parfaite
+Inès: On chante ton chant ensemble ?
+Moi: Évidemment
+Karim: Envoyez une vidéo au moins
+=== La photo floue
+@groupe {MYFANS} | {MYHEART} | {MYC1} | {MYC2}
+# Partie 1 : Le souvenir
+Yanis: Regardez la photo d'hier soir
+Yanis: [photo 1] On est tous dessus
+Sarah: Pourquoi elle est floue 😂
+Yanis: J'ai sauté au moment du but
+Mehdi: On dirait un tableau
+[réaction 😂]
+Moi: Elle est parfaite, ça montre l'émotion
+-- LE LENDEMAIN --
+# Partie 2 : Le fond d'écran
+Sarah: Je l'ai mise en fond d'écran
+Mehdi: Moi aussi
+Moi: Pareil {MYHEART}
+Yanis: C'est la photo la plus floue de l'histoire et vous l'adorez
+Sarah: C'est notre photo floue à nous
+-- UNE SEMAINE PLUS TARD --
+# Partie 3 : Le tableau
+Mehdi: J'ai fait imprimer la photo en grand
+Yanis: Tu es sérieux ?
+Mehdi: Elle est encadrée dans mon salon
+Moi: Je veux la même
+[réaction ❤️]
+=== Le traître
+@groupe {MYFANS} | {MYHEART} | {MYC1} | {MYC2}
+# Partie 1 : L'alerte
+Karim: ALERTE 🚨
+Karim: Lucas a liké une publication {DUTHEM}
+Inès: QUOI
+Moi: Lucas explique-toi
+[hésite]
+Lucas: C'était une erreur de pouce 😭
+Inès: Une erreur de pouce sur une vidéo de 3 minutes ?
+[réaction 🤨]
+-- 5 MINUTES PLUS TARD --
+# Partie 2 : Le procès
+Moi: Le tribunal du groupe est ouvert ⚖️
+Karim: Je demande la peine maximale
+Inès: Il doit changer sa photo de profil avec notre logo pendant un mois
+Lucas: Ok ok j'accepte
+[appel] Lucas
+-- PLUS TARD --
+# Partie 3 : La rédemption
+Lucas: J'ai changé ma photo
+Lucas: Et j'ai pris un abonnement pour la saison 🎟️
+Inès: Le traître est pardonné
+Moi: Bienvenue de retour {MYHEART}
+=== Le capitaine du groupe
+@groupe {MYFANS} | {MYHEART} | {MYC1} | {MYC2}
+# Partie 1 : L'élection
+Sarah: Il faut élire le capitaine du groupe
+Mehdi: Je propose Moi
+Yanis: D'accord
+Sarah: Moi aussi
+Moi: Merci les amis 🥹
+[réaction 👑]
+-- LE LENDEMAIN --
+# Partie 2 : La première mission
+Moi: Première mission du capitaine : organiser le déplacement
+Mehdi: Car, train ou à pied ?
+Yanis: À pied c'est 800 km 😂
+Moi: [répond: Car, train ou à pied ?] Car, avec musique à fond
+Sarah: Je ramène les chips
+-- LE JOUR DU DÉPLACEMENT --
+# Partie 3 : Le voyage
+Mehdi: On est 50 dans le car !
+Yanis: Ça chante depuis 3 heures
+Sarah: Il n'y a plus de chips 😭
+Moi: Meilleur déplacement de l'histoire {MYHEART}
+[réaction 🔥]
 </script>
 <script>
 (function () {
@@ -2234,12 +2386,12 @@ Eux: Bon… j'arrive 🤝
   var OM_ME = "@moi OM | #2faee0 | #ffffff", PSG_CT = "@contact PSG | ❤️💙 | #004170 | #da291c", PSG_ME = "@moi PSG | #004170 | #da291c", OM_CT = "@contact OM | 💙 | #2faee0 | #ffffff";
   var TPL = {
     classique: { label: "⚽ Le Classique (chambrage avant le match)",
-      om: [OM_ME, PSG_CT, "# Partie 1 : Le message…", "PSG: Salut l'OM 😏", "PSG: Prêt pour dimanche ?", "Moi: Toujours prêt 💙", "Moi: Le Vélodrome va trembler", "PSG: Trembler ? Comme vos défenseurs ? 😂", "Moi: Mdr", "Moi: On a gagné la Ligue des champions en 1993", "Moi: Les premiers en France 🏆", "PSG: Et nous en 2025… 5-0 en finale 😎", "Moi: …",
+      om: [OM_ME, PSG_CT, "# Partie 1 : Le message…", "PSG: Salut l'OM 😏", "PSG: Prêt pour dimanche ?", "Moi: Toujours prêt 💙", "Moi: Le Vélodrome va trembler", "PSG: [répond: Le Vélodrome va trembler] Trembler ? Comme vos défenseurs ? 😂", "[réaction 😡]", "Moi: Mdr", "Moi: On a gagné la Ligue des champions en 1993", "Moi: Les premiers en France 🏆", "PSG: Et nous en 2025… 5-0 en finale 😎", "Moi: [hésite: Vous avez eu de la chance] …",
         "-- LE JOUR DU MATCH --", "# Partie 2 : Le Classique", "[notif] Supporters OM : On est tous derrière vous !! 💙🔥", "Moi: Le stade est plein", "Moi: Ça chante depuis 3 heures", "PSG: On arrive 🚌", "PSG: Préparez les mouchoirs",
-        "-- 90 MINUTES PLUS TARD --", "# Partie 3 : Le verdict…", "[journal] LE CLASSIQUE | Quelle soirée au Vélodrome ! Revivez le match minute par minute", "PSG: …", "Moi: Alors ? On fait moins le malin ? 😏", "PSG: On en reparle au match retour", "Moi: Droit au but 💙", "[notif] Supporters PSG : On reviendra plus forts 😤"],
-      psg: [PSG_ME, OM_CT, "# Partie 1 : Le message…", "OM: Salut le PSG 😏", "OM: Prêts pour dimanche ?", "Moi: Toujours prêts ❤️💙", "Moi: On vient gagner chez vous", "OM: Gagner ? Au Vélodrome ? 😂", "Moi: Mdr même pas peur", "Moi: Champions d'Europe 2025, 5-0 en finale 😎", "OM: Nous c'était en 1993, les premiers en France 🏆", "Moi: Ça date un peu non ? 👴", "OM: …",
+        "-- 90 MINUTES PLUS TARD --", "# Partie 3 : Le verdict…", "[journal] LE CLASSIQUE | Quelle soirée au Vélodrome ! Revivez le match minute par minute", "[appel] PSG", "PSG: …", "Moi: Alors ? On fait moins le malin ? 😏", "PSG: On en reparle au match retour", "[réaction 😂]", "Moi: Droit au but 💙", "[notif] Supporters PSG : On reviendra plus forts 😤"],
+      psg: [PSG_ME, OM_CT, "# Partie 1 : Le message…", "OM: Salut le PSG 😏", "OM: Prêts pour dimanche ?", "Moi: Toujours prêts ❤️💙", "Moi: On vient gagner chez vous", "OM: [répond: On vient gagner chez vous] Gagner ? Au Vélodrome ? 😂", "[réaction 😡]", "Moi: Mdr même pas peur", "Moi: Champions d'Europe 2025, 5-0 en finale 😎", "OM: Nous c'était en 1993, les premiers en France 🏆", "Moi: Ça date un peu non ? 👴", "OM: …",
         "-- LE JOUR DU MATCH --", "# Partie 2 : Le Classique", "[notif] Supporters PSG : On est tous derrière vous !! ❤️💙🔥", "Moi: Le bus arrive à Marseille", "Moi: Ça siffle déjà 😅", "OM: Bienvenue au Vélodrome 😈", "OM: Préparez les mouchoirs",
-        "-- 90 MINUTES PLUS TARD --", "# Partie 3 : Le verdict…", "[journal] LE CLASSIQUE | Quelle soirée au Vélodrome ! Revivez le match minute par minute", "OM: …", "Moi: Alors ? On fait moins le malin ? 😏", "OM: On en reparle au match retour", "Moi: Ici c'est Paris ❤️💙", "[notif] Supporters OM : On reviendra plus forts 😤"] },
+        "-- 90 MINUTES PLUS TARD --", "# Partie 3 : Le verdict…", "[journal] LE CLASSIQUE | Quelle soirée au Vélodrome ! Revivez le match minute par minute", "[appel] OM", "OM: …", "Moi: Alors ? On fait moins le malin ? 😏", "OM: On en reparle au match retour", "[réaction 😂]", "Moi: Ici c'est Paris ❤️💙", "[notif] Supporters OM : On reviendra plus forts 😤"] },
     pari: { label: "🤝 Le pari (le perdant porte le maillot de l'autre)",
       om: [OM_ME, PSG_CT, "# Partie 1 : Le pari", "Moi: J'ai une idée 😈", "PSG: Dis toujours", "Moi: Le perdant du Classique porte le maillot de l'autre", "Moi: Une journée entière", "PSG: Deal 🤝", "PSG: Prépare-toi à être en bleu et rouge 😂", "Moi: On verra bien",
         "-- TROIS JOURS PLUS TARD --", "# Partie 2 : Le match", "[notif] Supporters OM : Ce soir on gagne !! 💙", "PSG: Dernière chance pour annuler 😏", "Moi: Jamais", "Moi: Droit au but",
@@ -2265,8 +2417,8 @@ Eux: Bon… j'arrive 🤝
   };
   // les 100 histoires de la bibliothèque, écrites une seule fois avec des mots qui s'adaptent au camp choisi
   var SIDE = {
-    om: { ME: "OM", LEME: "l'OM", LEMECAP: "L'OM", DUME: "de l'OM", DUMECAP: "De l'OM", MYSTADE: "le Vélodrome", MYCITY: "Marseille", MYCITYADJ: "marseillais", MYCOLORS: "bleu ciel et blanc", MYSLOGAN: "Droit au but 💙", MYHEART: "💙", MYFANS: "Supporters OM", HEAD: OM_ME, CT: PSG_CT },
-    psg: { ME: "PSG", LEME: "le PSG", LEMECAP: "Le PSG", DUME: "du PSG", DUMECAP: "Du PSG", MYSTADE: "le Parc des Princes", MYCITY: "Paris", MYCITYADJ: "parisien", MYCOLORS: "bleu et rouge", MYSLOGAN: "Ici c'est Paris ❤️💙", MYHEART: "❤️💙", MYFANS: "Supporters PSG", HEAD: PSG_ME, CT: OM_CT }
+    om: { ME: "OM", LEME: "l'OM", LEMECAP: "L'OM", DUME: "de l'OM", DUMECAP: "De l'OM", MYSTADE: "le Vélodrome", MYCITY: "Marseille", MYCITYADJ: "marseillais", MYCOLORS: "bleu ciel et blanc", MYSLOGAN: "Droit au but 💙", MYHEART: "💙", MYFANS: "Supporters OM", MYC1: "#2faee0", MYC2: "#ffffff", HEAD: OM_ME, CT: PSG_CT },
+    psg: { ME: "PSG", LEME: "le PSG", LEMECAP: "Le PSG", DUME: "du PSG", DUMECAP: "Du PSG", MYSTADE: "le Parc des Princes", MYCITY: "Paris", MYCITYADJ: "parisien", MYCOLORS: "bleu et rouge", MYSLOGAN: "Ici c'est Paris ❤️💙", MYHEART: "❤️💙", MYFANS: "Supporters PSG", MYC1: "#004170", MYC2: "#da291c", HEAD: PSG_ME, CT: OM_CT }
   };
   var LIB = [], cat = "";
   String(document.getElementById("lib").textContent).split("\n").forEach(function (l) {
@@ -2276,8 +2428,8 @@ Eux: Bon… j'arrive 🤝
   });
   function fillTokens(text, side) {
     var me = SIDE[side === "psg" ? "psg" : "om"], th = SIDE[side === "psg" ? "om" : "psg"];
-    var v = { ME: me.ME, THEM: th.ME, LEME: me.LEME, LEMECAP: me.LEMECAP, LETHEM: th.LEME, LETHEMCAP: th.LEMECAP, DUME: me.DUME, DUMECAP: me.DUMECAP, DUTHEM: th.DUME, MYSTADE: me.MYSTADE, THEIRSTADE: th.MYSTADE, MYCITY: me.MYCITY, MYCITYADJ: me.MYCITYADJ, MYCOLORS: me.MYCOLORS, MYSLOGAN: me.MYSLOGAN, MYHEART: me.MYHEART, MYFANS: me.MYFANS, THEIRFANS: th.MYFANS, THEIRHEART: th.MYHEART };
-    return text.replace(/\{([A-Z]+)\}/g, function (a, k) { return v[k] != null ? v[k] : a; }).replace(/^Eux\s*:/gm, th.ME + ":");
+    var v = { ME: me.ME, THEM: th.ME, LEME: me.LEME, LEMECAP: me.LEMECAP, LETHEM: th.LEME, LETHEMCAP: th.LEMECAP, DUME: me.DUME, DUMECAP: me.DUMECAP, DUTHEM: th.DUME, MYSTADE: me.MYSTADE, THEIRSTADE: th.MYSTADE, MYCITY: me.MYCITY, MYCITYADJ: me.MYCITYADJ, MYCOLORS: me.MYCOLORS, MYSLOGAN: me.MYSLOGAN, MYHEART: me.MYHEART, MYFANS: me.MYFANS, THEIRFANS: th.MYFANS, THEIRHEART: th.MYHEART, MYC1: me.MYC1, MYC2: me.MYC2 };
+    return text.replace(/\{([A-Z0-9]+)\}/g, function (a, k) { return v[k] != null ? v[k] : a; }).replace(/^Eux\s*:/gm, th.ME + ":");
   }
   function tplText(k, side) {
     if (/^lib:/.test(k)) { var st = LIB[+k.slice(4)]; if (!st) return ""; var sd = SIDE[side === "psg" ? "psg" : "om"]; return [sd.HEAD, sd.CT].concat(st.lines.map(function (l) { return fillTokens(l, side); })).join("\n"); }
@@ -2286,31 +2438,51 @@ Eux: Bon… j'arrive 🤝
 
   var S;
   try { S = JSON.parse(localStorage.getItem("histoire-set") || "null"); } catch (e) { S = null; }
-  if (!S) S = { tpl: "classique", side: "om", script: tplText("classique", "om"), speed: "1", size: "1", q: "720", sfx: true, music: true };
+  if (!S) S = { tpl: "classique", side: "om", script: tplText("classique", "om"), speed: "1", size: "1", q: "720", sfx: true, mstyle: "auto" };
+  if (!S.mstyle) S.mstyle = S.music === false ? "none" : "auto";
   function save() { try { localStorage.setItem("histoire-set", JSON.stringify(S)); } catch (e) {} }
 
   /* ---------- lecture du script : chaque ligne devient un événement daté ---------- */
   var items, total, header0;
   function parse() {
     var raw = String(S.script || "").split(/\n/), list = [], sp = +S.speed || 1, t = .8;
-    var me = { name: "OM", c1: "#2faee0", c2: "#ffffff" }, other = { name: "PSG", emo: "", c1: "#004170", c2: "#da291c" }, first = true;
+    var me = { name: "OM", c1: "#2faee0", c2: "#ffffff" }, other = { name: "PSG", emo: "", c1: "#004170", c2: "#da291c" }, first = true, lastMsg = null;
+    function addOther(from, it, wait) { var a = t + wait * sp; list.push({ k: "typing", from: from, at: t, end: a }); it.at = a; it.who = "other"; it.from = from; list.push(it); lastMsg = it; return a; }
     raw.forEach(function (l) {
       l = l.trim(); if (!l) return; var m;
-      if ((m = l.match(/^@contact\s+(.+)$/i))) { var p = m[1].split("|").map(function (x) { return x.trim(); }), o = { name: p[0] || other.name, emo: p[1] != null ? p[1] : other.emo, c1: p[2] || other.c1, c2: p[3] || other.c2 };
+      if ((m = l.match(/^@(contact|groupe)\s+(.+)$/i))) { var p = m[2].split("|").map(function (x) { return x.trim(); }), o = { name: p[0] || other.name, emo: p[1] != null ? p[1] : other.emo, c1: p[2] || other.c1, c2: p[3] || other.c2, group: /groupe/i.test(m[1]) || (other.group && !/contact/i.test(m[1])) };
         if (first) { other = o; header0 = o; } else list.push({ k: "head", o: o, at: t }); return; }
       if ((m = l.match(/^@moi\s+(.+)$/i))) { var q = m[1].split("|").map(function (x) { return x.trim(); }); me = { name: q[0] || "Moi", c1: q[1] || me.c1, c2: q[2] || me.c2 }; return; }
       first = false;
       if ((m = l.match(/^#\s*(.+)$/))) { list.push({ k: "chap", text: m[1], at: t }); t += .2; return; }
-      if ((m = l.match(/^--\s*(.+?)\s*--$/))) { list.push({ k: "sep", text: m[1], at: t }); t += 1.3 * sp; return; }
+      if ((m = l.match(/^--\s*(.+?)\s*--$/))) { list.push({ k: "sep", text: m[1], at: t }); t += 1.3 * sp; lastMsg = null; return; }
       if ((m = l.match(/^\[pause\s*([\d.,]+)?\]$/i))) { t += parseFloat((m[1] || "1").replace(",", ".")) || 1; return; }
+      if ((m = l.match(/^\[h[ée]site\]$/i))) { list.push({ k: "typing", from: other.name, at: t, end: t + 1.7 * sp }); t += 2.3 * sp; return; }
+      if ((m = l.match(/^\[r[ée]action\s*(.+?)\]$/i))) { if (lastMsg) lastMsg.react = { emo: m[1].trim(), at: t + .3 }; t += .9 * sp; return; }
+      if ((m = l.match(/^\[supprim[ée]\]$/i))) { if (lastMsg) lastMsg.del = t + .3; t += 1.2 * sp; return; }
+      if ((m = l.match(/^\[appel\]\s*(.+?)(?:\s*\|\s*(accept[ée]))?$/i))) {
+        var acc = !!m[2], ring = acc ? 2 : 3.2, talk = acc ? 4 : 0, end = t + (ring + talk) * sp;
+        list.push({ k: "call", from: m[1], at: t, ring: t + ring * sp, end: end, acc: acc });
+        list.push({ k: "sys", text: acc ? "📞 Appel vocal · 0:" + String(Math.round(talk * 3)).padStart(2, "0") : "📞 Appel manqué de " + m[1], at: end + .2 });
+        t = end + 1.2 * sp; lastMsg = null; return; }
       if ((m = l.match(/^\[notif\]\s*(.+?)\s*:\s*(.+)$/i))) { list.push({ k: "notif", from: m[1], text: m[2], at: t }); t += 1.7 * sp; return; }
-      if ((m = l.match(/^\[journal\]\s*(.+?)\s*\|\s*(.+)$/i))) { var a = t + .9 * sp; list.push({ k: "typing", at: t, end: a }); list.push({ k: "journal", who: "other", title: m[1], text: m[2], at: a }); t = a + 2.3 * sp; return; }
-      if ((m = l.match(/^\[photo\s*(\d)\]\s*(.*)$/i))) { var a2 = t + .9 * sp; list.push({ k: "typing", at: t, end: a2 }); list.push({ k: "photo", who: "other", n: +m[1], text: m[2], at: a2 }); t = a2 + 2.3 * sp; return; }
+      if ((m = l.match(/^\[journal\]\s*(.+?)\s*\|\s*(.+)$/i))) { t = addOther(other.name, { k: "journal", title: m[1], text: m[2] }, .9) + 2.3 * sp; return; }
+      if ((m = l.match(/^\[photo\s*(\d)\]\s*(.*)$/i))) { t = addOther(other.name, { k: "photo", n: +m[1], text: m[2] }, .9) + 2.3 * sp; return; }
       if ((m = l.match(/^(.+?)\s*:\s*(.+)$/))) {
-        var isMe = /^moi$/i.test(m[1]), text = m[2], ph = text.match(/^\[photo\s*(\d)\]\s*(.*)$/i);
-        if (ph) { if (isMe) { list.push({ k: "photo", who: "me", n: +ph[1], text: ph[2], at: t + .3 }); t += 2.4 * sp; } else { var a3 = t + .9 * sp; list.push({ k: "typing", at: t, end: a3 }); list.push({ k: "photo", who: "other", n: +ph[1], text: ph[2], at: a3 }); t = a3 + 2.3 * sp; } return; }
-        if (isMe) { var dur = Math.min(3.4, .35 + text.length * .06) * sp; list.push({ k: "type", text: text, at: t, end: t + dur }); list.push({ k: "msg", who: "me", text: text, at: t + dur + .2 }); t += dur + .8 * sp; }
-        else { var td = Math.min(1.9, .6 + text.length * .022) * sp; list.push({ k: "typing", at: t, end: t + td }); list.push({ k: "msg", who: "other", text: text, at: t + td }); t += td + .7 * sp; }
+        var isMe = /^moi$/i.test(m[1]), from = isMe ? "Moi" : m[1].trim(), text = m[2], reply = null, pre = null, mm;
+        if ((mm = text.match(/^\[r[ée]pond\s*:\s*(.+?)\]\s*(.+)$/i))) { reply = mm[1]; text = mm[2]; }
+        if ((mm = text.match(/^\[h[ée]site\s*:\s*(.+?)\]\s*(.+)$/i))) { pre = mm[1]; text = mm[2]; }
+        var ph = text.match(/^\[photo\s*(\d)\]\s*(.*)$/i);
+        if (ph) { if (isMe) { var pm = { k: "photo", who: "me", from: "Moi", n: +ph[1], text: ph[2], at: t + .3 }; list.push(pm); lastMsg = pm; t += 2.4 * sp; } else t = addOther(from, { k: "photo", n: +ph[1], text: ph[2] }, .9) + 2.3 * sp; return; }
+        var replyFrom = null; if (reply) { for (var j = list.length - 1; j >= 0; j--) if (list[j].k === "msg" && list[j].text.indexOf(reply) === 0) { replyFrom = list[j].who === "me" ? "Moi" : list[j].from; break; } }
+        if (isMe) {
+          var d1 = pre ? Math.min(2.6, .3 + pre.length * .06) * sp : 0, d2 = pre ? Math.min(1.2, pre.length * .03) * sp + .5 : 0, d3 = Math.min(3.4, .35 + text.length * .06) * sp;
+          var ty = { k: "type", text: text, pre: pre, at: t, t1: t + d1, t2: t + d1 + d2, end: t + d1 + d2 + d3 }; list.push(ty);
+          var mi = { k: "msg", who: "me", from: "Moi", text: text, reply: reply, replyFrom: replyFrom, at: ty.end + .2 }; list.push(mi); lastMsg = mi; t = ty.end + .8 * sp;
+        } else {
+          var td = Math.min(1.9, .6 + text.length * .022);
+          t = addOther(from, { k: "msg", text: text, reply: reply, replyFrom: replyFrom }, td) + .7 * sp;
+        }
       }
     });
     items = list; total = t + 2.5; ME = me; header0 = header0 || other; OTHER0 = other;
@@ -2369,18 +2541,30 @@ Eux: Bon… j'arrive 🤝
   var CHAT_TOP = 196, CHAT_BOT = 1188, ME_COL = "#f23c57", OT_COL = "#2c9cf0";
   function fs() { return +S.size || 1; }
   function photoSize(it) { var im = photos[it.n], w = 560, h = 560; if (im) { h = Math.round(w * im.height / im.width); if (h > 700) { h = 700; w = Math.round(h * im.width / im.height); } } return [w, h]; }
+  var PAL = ["#16a34a", "#9333ea", "#ea580c", "#0891b2", "#db2777", "#ca8a04"];
+  function colOf(it) { if (it.who === "me") return ME_COL; var h = headerAt(it.at); if (!h.group && it.from === h.name) return OT_COL; var s = 0, n = String(it.from || ""); for (var i = 0; i < n.length; i++) s = (s * 31 + n.charCodeAt(i)) % 997; return h.group ? PAL[s % PAL.length] : OT_COL; }
+  function delText(it, t) { return it.del != null && t >= it.del; }
   function blocks(g, t) {
-    var out = [], prevWho = null, k = fs(), lh = Math.round(50 * k);
+    var out = [], prevKey = null, k = fs(), lh = Math.round(50 * k), lastMe = -1;
     items.forEach(function (it) {
       if (it.at > t) return;
-      if (it.k === "msg") { g.font = "500 " + Math.round(40 * k) + "px " + FONT; var lines = wrap(g, it.text, 940), head = prevWho !== it.who; out.push({ it: it, lines: lines, head: head, h: (head ? 40 : 0) + lines.length * lh + 14 }); prevWho = it.who; }
-      else if (it.k === "sep") { out.push({ it: it, h: 86 }); prevWho = null; }
-      else if (it.k === "journal") { var hd = prevWho !== "other"; out.push({ it: it, head: hd, h: (hd ? 40 : 0) + 470 }); prevWho = "other"; }
-      else if (it.k === "photo") { var hd2 = prevWho !== it.who; out.push({ it: it, head: hd2, h: (hd2 ? 40 : 0) + photoSize(it)[1] + 30 }); prevWho = it.who; }
+      var key = it.who + "|" + it.from;
+      if (it.k === "msg") { g.font = (delText(it, t) ? "italic 500 " : "500 ") + Math.round(40 * k) + "px " + FONT; var lines = wrap(g, delText(it, t) ? "🚫 Ce message a été supprimé" : it.text, 900), head = prevKey !== key;
+        out.push({ it: it, lines: lines, head: head, h: (head ? 40 : 0) + (it.reply ? 70 : 0) + lines.length * lh + 14 + (it.react && t >= it.react.at ? 18 : 0) }); prevKey = key; if (it.who === "me") lastMe = out.length - 1; }
+      else if (it.k === "sep") { out.push({ it: it, h: 86 }); prevKey = null; }
+      else if (it.k === "sys") { out.push({ it: it, h: 80 }); prevKey = null; }
+      else if (it.k === "journal") { var hd = prevKey !== key; out.push({ it: it, head: hd, h: (hd ? 40 : 0) + 470 }); prevKey = key; }
+      else if (it.k === "photo") { var hd2 = prevKey !== key; out.push({ it: it, head: hd2, h: (hd2 ? 40 : 0) + photoSize(it)[1] + 30 }); prevKey = key; if (it.who === "me") lastMe = out.length - 1; }
     });
+    if (lastMe >= 0) { out[lastMe].status = readState(out[lastMe].it, t); out[lastMe].h += 36; }
     return out;
   }
+  function readState(it, t) { // « Envoyé » puis « Lu » dès que l'autre réagit
+    var nx = null; items.forEach(function (o) { if (nx == null && o.at > it.at && (o.k === "typing" || o.who === "other" || o.k === "call")) nx = o.at; });
+    return nx != null && t >= nx ? "Lu" : "Envoyé";
+  }
   function headerAt(t) { var o = header0; items.forEach(function (it) { if (it.k === "head" && it.at <= t) o = it.o; }); return o; }
+  function initials(g, x, y, r, name, col) { g.fillStyle = col; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill(); g.fillStyle = "#fff"; g.font = "800 " + Math.round(r) + "px " + FONT; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(String(name || "?").charAt(0).toUpperCase(), x, y + 1); g.textAlign = "left"; }
   function drawScene(g, t) {
     var other = headerAt(t), k = fs(), lh = Math.round(50 * k);
     g.fillStyle = "#ffffff"; g.fillRect(0, 0, W, H);
@@ -2389,51 +2573,71 @@ Eux: Bon… j'arrive 🤝
     for (var b = 0; b < 4; b++) g.fillRect(40 + b * 14, 46 - b * 7, 10, 8 + b * 7);
     g.strokeStyle = "#111"; g.lineWidth = 6; g.lineCap = "round"; g.beginPath(); g.moveTo(58, 104); g.lineTo(38, 128); g.lineTo(58, 152); g.stroke();
     badge(g, 132, 128, 46, other);
-    g.textAlign = "left"; g.fillStyle = "#111"; g.font = "800 46px " + FONT; g.fillText(other.name, 196, 128); var nw = g.measureText(other.name).width; g.font = "38px " + FONT; g.fillText(other.emo || "", 206 + nw, 130);
+    g.textAlign = "left"; g.textBaseline = "middle"; g.fillStyle = "#111"; g.font = "800 46px " + FONT; var hn = other.name; while (g.measureText(hn).width > 560 && hn.length > 4) hn = hn.slice(0, -1); g.fillText(hn, 196, other.group ? 116 : 128); var nw = g.measureText(hn).width; g.font = "38px " + FONT; g.fillText(other.emo || "", 206 + nw, other.group ? 118 : 130);
+    if (other.group) { g.fillStyle = "#6b7280"; g.font = "600 26px " + FONT; var names = []; items.forEach(function (it) { if (it.who === "other" && it.from && names.indexOf(it.from) < 0) names.push(it.from); }); g.fillText((names.slice(0, 4).join(", ") + (names.length ? ", toi" : "")).slice(0, 44), 198, 156); }
     g.strokeStyle = "#111"; g.lineWidth = 5; g.beginPath(); g.arc(902, 128, 20, Math.PI * .6, Math.PI * 1.9); g.stroke();
     rr(g, 966, 110, 48, 36, 8); g.stroke(); g.beginPath(); g.moveTo(1016, 128); g.lineTo(1040, 114); g.lineTo(1040, 142); g.closePath(); g.stroke();
     g.fillStyle = "#eceef2"; g.fillRect(0, 186, W, 3);
     // fil de discussion qui défile tout seul
-    var bl = blocks(g, t), typingNow = items.some(function (it) { return it.k === "typing" && t >= it.at && t < it.end; });
+    var bl = blocks(g, t), typingIt = items.filter(function (it) { return it.k === "typing" && t >= it.at && t < it.end; })[0];
     var heights = bl.map(function (x) { var p = Math.min(1, (t - x.it.at) / .22); return x.h * (1 - Math.pow(1 - p, 3)); });
-    var content = heights.reduce(function (a, b2) { return a + b2; }, 0) + (typingNow ? 90 : 0) + 30, view = CHAT_BOT - CHAT_TOP, scroll = Math.max(0, content - view);
+    var content = heights.reduce(function (a, b2) { return a + b2; }, 0) + (typingIt ? 90 : 0) + 30, view = CHAT_BOT - CHAT_TOP, scroll = Math.max(0, content - view);
     g.save(); g.beginPath(); g.rect(0, CHAT_TOP, W, view); g.clip();
     var y = CHAT_TOP + 20 - scroll;
     bl.forEach(function (x, i) {
-      var it = x.it, a = Math.min(1, (t - it.at) / .22); g.globalAlpha = a;
+      var it = x.it, a = Math.min(1, (t - it.at) / .22); g.globalAlpha = a; g.textBaseline = "middle";
       if (it.k === "msg" || it.k === "journal" || it.k === "photo") {
-        var col = it.who === "me" ? ME_COL : OT_COL, yy = y;
-        if (x.head) { g.fillStyle = col; g.font = "800 27px " + FONT; g.textAlign = "left"; g.fillText(it.who === "me" ? "MOI" : headerAt(it.at).name.toUpperCase(), 30, yy + 16); yy += 40; }
+        var col = colOf(it), yy = y;
+        if (x.head) { g.fillStyle = col; g.font = "800 27px " + FONT; g.textAlign = "left"; g.fillText(it.who === "me" ? "MOI" : (other.group ? it.from : headerAt(it.at).name).toUpperCase(), 30, yy + 16); yy += 40; }
+        if (it.reply) { // message cité
+          g.fillStyle = "#f1f2f5"; rr(g, 56, yy + 4, 860, 58, 12); g.fill(); g.fillStyle = it.replyFrom === "Moi" ? ME_COL : OT_COL; g.fillRect(56, yy + 4, 6, 58);
+          g.font = "700 26px " + FONT; g.fillText(it.replyFrom === "Moi" ? "Toi" : (it.replyFrom || ""), 76, yy + 20); g.fillStyle = "#6b7280"; g.font = "500 29px " + FONT; var rq = it.reply; while (g.measureText(rq).width > 800 && rq.length > 4) rq = rq.slice(0, -2); g.fillText(rq + (rq !== it.reply ? "…" : ""), 76, yy + 46); yy += 70;
+        }
         var bodyH = it.k === "msg" ? x.lines.length * lh : it.k === "journal" ? 440 : photoSize(it)[1] + 10;
         g.fillStyle = col; g.globalAlpha = a * .55; g.fillRect(30, yy, 6, bodyH); g.globalAlpha = a;
-        if (it.k === "msg") { g.fillStyle = "#16181d"; g.font = "500 " + Math.round(40 * k) + "px " + FONT; x.lines.forEach(function (ln, j) { g.fillText(ln, 56, yy + lh / 2 + j * lh); }); }
+        if (it.k === "msg") {
+          var dl = delText(it, t); g.fillStyle = dl ? "#8a8f99" : "#16181d"; g.font = (dl ? "italic 500 " : "500 ") + Math.round(40 * k) + "px " + FONT;
+          x.lines.forEach(function (ln, j) { g.fillText(ln, 56, yy + lh / 2 + j * lh); });
+          if (it.react && t >= it.react.at && !dl) { // réaction posée sur le message
+            var lw = g.measureText(x.lines[x.lines.length - 1]).width, rx = Math.min(1000, 56 + lw + 44), ry = yy + (x.lines.length - .5) * lh + 14, pp = Math.min(1, (t - it.react.at) / .25), sc = pp < 1 ? .4 + .9 * pp - .3 * pp * pp : 1;
+            g.save(); g.translate(rx, ry); g.scale(sc, sc); g.shadowColor = "rgba(0,0,0,.2)"; g.shadowBlur = 10; g.fillStyle = "#fff"; g.beginPath(); g.arc(0, 0, 28, 0, Math.PI * 2); g.fill(); g.shadowBlur = 0; g.font = "30px " + FONT; g.textAlign = "center"; g.fillText(it.react.emo, 0, 2); g.restore(); g.textAlign = "left";
+          }
+        }
         else if (it.k === "journal") journal(g, 56, yy + 6, it);
         else photo(g, 56, yy + 6, it);
+        if (x.status) { g.fillStyle = x.status === "Lu" ? "#2b5fd9" : "#9aa0aa"; g.font = "600 24px " + FONT; g.textAlign = "left"; g.fillText(x.status === "Lu" ? "✓✓ Lu" : "✓ Envoyé", 56, yy + bodyH + (it.react && t >= it.react.at ? 40 : 22)); }
       } else if (it.k === "sep") {
         g.fillStyle = "#2b5fd9"; g.font = "800 24px " + FONT; g.textAlign = "center"; var tw = g.measureText(it.text.toUpperCase()).width;
         g.fillText(it.text.toUpperCase(), W / 2, y + 43); g.fillRect(60, y + 42, W / 2 - tw / 2 - 90, 3); g.fillRect(W / 2 + tw / 2 + 30, y + 42, W / 2 - tw / 2 - 90, 3); g.textAlign = "left";
+      } else if (it.k === "sys") {
+        g.font = "700 28px " + FONT; var sw = g.measureText(it.text).width + 50; g.fillStyle = "#f1f2f5"; rr(g, W / 2 - sw / 2, y + 14, sw, 52, 26); g.fill();
+        g.fillStyle = /manqué/.test(it.text) ? "#e11d48" : "#16181d"; g.textAlign = "center"; g.fillText(it.text, W / 2, y + 41); g.textAlign = "left";
       }
       g.globalAlpha = 1; y += heights[i];
     });
-    if (typingNow) {
-      badge(g, 66, y + 40, 30, other);
+    if (typingIt) {
+      if (other.group && typingIt.from && typingIt.from !== other.name) initials(g, 66, y + 40, 30, typingIt.from, colOf({ who: "other", from: typingIt.from, at: typingIt.at })); else badge(g, 66, y + 40, 30, other);
       g.fillStyle = "#eef0f4"; rr(g, 108, y + 14, 120, 54, 27); g.fill();
       for (var d = 0; d < 3; d++) { g.fillStyle = "rgba(60,64,72," + (.35 + .55 * Math.max(0, Math.sin(t * 8 - d * .9))) + ")"; g.beginPath(); g.arc(142 + d * 26, y + 41, 8, 0, Math.PI * 2); g.fill(); }
     }
     g.restore();
-    // barre d'écriture
-    var typing = items.filter(function (it) { return it.k === "type" && t >= it.at && t < it.end + .2; })[0], typed = "";
-    if (typing) typed = typing.text.slice(0, Math.max(0, Math.min(typing.text.length, Math.floor((t - typing.at) / (typing.end - typing.at) * typing.text.length))));
+    // barre d'écriture (avec les hésitations : on tape, on efface, on retape)
+    var typing = items.filter(function (it) { return it.k === "type" && t >= it.at && t < it.end + .2; })[0], typed = "", lastCh = "";
+    if (typing) {
+      if (typing.pre && t < typing.t1) { typed = typing.pre.slice(0, Math.floor((t - typing.at) / (typing.t1 - typing.at) * typing.pre.length)); lastCh = typed.slice(-1); }
+      else if (typing.pre && t < typing.t2) { var er = Math.max(0, (t - typing.t1 - .5) / (typing.t2 - typing.t1 - .5)); typed = typing.pre.slice(0, Math.ceil(typing.pre.length * (1 - Math.min(1, er)))); lastCh = er > 0 ? "⌫" : ""; }
+      else { var s0 = typing.pre ? typing.t2 : typing.at; typed = typing.text.slice(0, Math.max(0, Math.min(typing.text.length, Math.floor((t - s0) / (typing.end - s0) * typing.text.length)))); lastCh = typed.slice(-1); }
+    }
     g.fillStyle = "#fff"; g.fillRect(0, CHAT_BOT, W, 112);
     g.strokeStyle = "#111"; g.lineWidth = 5; g.beginPath(); g.arc(64, CHAT_BOT + 56, 30, 0, Math.PI * 2); g.stroke(); g.beginPath(); g.arc(64, CHAT_BOT + 56, 12, 0, Math.PI * 2); g.stroke();
     g.fillStyle = "#f1f2f5"; rr(g, 112, CHAT_BOT + 20, 800, 72, 36); g.fill();
-    g.font = "500 36px " + FONT; g.textAlign = "left";
+    g.font = "500 36px " + FONT; g.textAlign = "left"; g.textBaseline = "middle";
     if (typed) { var shown = typed; while (g.measureText(shown).width > 740) shown = shown.slice(1); g.fillStyle = "#111"; g.fillText(shown, 140, CHAT_BOT + 57); if ((t * 2) % 1 < .6) g.fillRect(142 + g.measureText(shown).width, CHAT_BOT + 36, 4, 42); }
     else { g.fillStyle = "#9aa0aa"; g.fillText("Envoyer un message", 140, CHAT_BOT + 57); }
     badge(g, 990, CHAT_BOT + 56, 34, ME);
     var chap = ""; items.forEach(function (it) { if (it.k === "chap" && it.at <= t) chap = it.text; });
     g.fillStyle = "#d3d6dc"; g.fillRect(0, CHAT_BOT + 112, W, 76); g.fillStyle = "#111"; g.font = "800 34px " + FONT; g.textAlign = "center"; g.fillText(chap, W / 2, CHAT_BOT + 152);
-    keyboard(g, CHAT_BOT + 188, typing ? typing.text.charAt(Math.max(0, typed.length - 1)) : "", typing && t < typing.end);
+    keyboard(g, CHAT_BOT + 188, lastCh, !!typing && t < typing.end);
     items.forEach(function (it) {
       if (it.k !== "notif" || t < it.at || t > it.at + 3) return;
       var p = t - it.at, s = p < .35 ? 1 - Math.pow(1 - p / .35, 3) : p > 2.6 ? 1 - (p - 2.6) / .4 : 1, ny = -190 + s * 230;
@@ -2442,6 +2646,23 @@ Eux: Bon… j'arrive 🤝
       g.textAlign = "left"; g.fillStyle = "#6b7280"; g.font = "700 26px " + FONT; g.fillText("MESSAGES", 118, ny + 48); g.textAlign = "right"; g.fillText("maintenant", W - 66, ny + 48); g.textAlign = "left";
       g.fillStyle = "#111"; g.font = "800 34px " + FONT; g.fillText(it.from, 60, ny + 98); g.font = "500 32px " + FONT; g.fillText(wrap(g, it.text, W - 140)[0], 60, ny + 140);
     });
+    items.forEach(function (it) { if (it.k === "call" && t >= it.at && t < it.end + .35) callScreen(g, t, it); });
+  }
+  function callScreen(g, t, it) { // appel entrant en plein écran
+    var p = t - it.at, fade = Math.min(1, p / .3) * (t > it.end ? Math.max(0, 1 - (t - it.end) / .35) : 1), who = headerAt(it.at);
+    g.save(); g.globalAlpha = fade;
+    var bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, "#1b2a44"); bg.addColorStop(1, "#05070d"); g.fillStyle = bg; g.fillRect(0, 0, W, H);
+    var talking = it.acc && t >= it.ring, pulse = talking ? 0 : (t * 1.6) % 1;
+    if (!talking) for (var r = 0; r < 2; r++) { var pr = (pulse + r * .5) % 1; g.strokeStyle = "rgba(255,255,255," + (.4 * (1 - pr)) + ")"; g.lineWidth = 6; g.beginPath(); g.arc(W / 2, 640, 150 + pr * 160, 0, Math.PI * 2); g.stroke(); }
+    badge(g, W / 2, 640, 150, who.name === it.from ? who : { name: it.from, c1: "#475569", c2: "#94a3b8" });
+    g.fillStyle = "#fff"; g.textAlign = "center"; g.textBaseline = "middle"; g.font = "800 72px " + FONT; g.fillText(it.from, W / 2, 900);
+    g.fillStyle = "rgba(255,255,255,.75)"; g.font = "500 40px " + FONT;
+    if (talking) { var s2 = Math.floor((t - it.ring) * 3); g.fillText("Appel en cours · 0:" + String(s2).padStart(2, "0"), W / 2, 970); }
+    else g.fillText("Appel vocal entrant…", W / 2, 970);
+    if (!talking) {
+      [[300, "#e11d48", "✕", "Refuser"], [780, "#16a34a", "✆", "Accepter"]].forEach(function (bt) { var sh = bt[1] === "#16a34a" ? Math.sin(t * 14) * 6 : 0; g.fillStyle = bt[1]; g.beginPath(); g.arc(bt[0] + sh, 1520, 80, 0, Math.PI * 2); g.fill(); g.fillStyle = "#fff"; g.font = "800 64px " + FONT; g.fillText(bt[2], bt[0] + sh, 1522); g.font = "600 32px " + FONT; g.fillStyle = "rgba(255,255,255,.8)"; g.fillText(bt[3], bt[0], 1650); });
+    } else { g.fillStyle = "#e11d48"; g.beginPath(); g.arc(W / 2, 1520, 80, 0, Math.PI * 2); g.fill(); g.fillStyle = "#fff"; g.font = "800 64px " + FONT; g.fillText("✕", W / 2, 1522); }
+    g.restore(); g.textAlign = "left";
   }
   function journal(g, x, y, it) { // article d'un journal inventé
     g.save(); g.shadowColor = "rgba(0,0,0,.18)"; g.shadowBlur = 18; g.fillStyle = "#fbfaf6"; rr(g, x, y, 560, 430, 16); g.fill(); g.restore();
@@ -2482,15 +2703,56 @@ Eux: Bon… j'arrive 🤝
   function sounds(ac, dest, t0) {
     function click(t, f, v, d, type) { var o = ac.createOscillator(), g = ac.createGain(); o.type = type || "square"; o.frequency.value = f; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.001, t + d); o.connect(g); g.connect(dest); o.start(t); o.stop(t + d + .02); }
     if (S.sfx) items.forEach(function (it) {
-      if (it.k === "type") { var n = it.text.length; for (var i = 0; i < n; i++) click(t0 + it.at + (it.end - it.at) * i / n, 1800 + Math.random() * 400, .025, .03); }
-      else if (it.k === "msg" || it.k === "photo" || it.k === "journal") { if (it.who === "me") { click(t0 + it.at, 880, .09, .12, "sine"); click(t0 + it.at + .06, 1320, .07, .14, "sine"); } else { click(t0 + it.at, 660, .08, .18, "sine"); click(t0 + it.at + .08, 990, .07, .2, "sine"); } }
+      if (it.k === "type") {
+        var segs = it.pre ? [[it.pre, it.at, it.t1], [it.text, it.t2, it.end]] : [[it.text, it.at, it.end]];
+        segs.forEach(function (sg) { var n = sg[0].length; for (var i = 0; i < n; i++) click(t0 + sg[1] + (sg[2] - sg[1]) * i / n, 1800 + Math.random() * 400, .025, .03); });
+        if (it.pre) { var ne = Math.min(12, it.pre.length); for (var e = 0; e < ne; e++) click(t0 + it.t1 + .5 + (it.t2 - it.t1 - .5) * e / ne, 900, .02, .03); }
+      }
+      else if (it.k === "msg" || it.k === "photo" || it.k === "journal") {
+        if (it.who === "me") { click(t0 + it.at, 880, .09, .12, "sine"); click(t0 + it.at + .06, 1320, .07, .14, "sine"); } else { click(t0 + it.at, 660, .08, .18, "sine"); click(t0 + it.at + .08, 990, .07, .2, "sine"); }
+        if (it.react) { click(t0 + it.react.at, 1500, .07, .1, "sine"); click(t0 + it.react.at + .05, 2000, .05, .12, "sine"); }
+        if (it.del != null) click(t0 + it.del, 400, .06, .25, "triangle");
+      }
       else if (it.k === "notif") { click(t0 + it.at, 1047, .1, .3, "sine"); click(t0 + it.at + .12, 1568, .09, .4, "sine"); }
       else if (it.k === "sep") click(t0 + it.at, 330, .06, .6, "sine");
+      else if (it.k === "call") { for (var rt = it.at + .2; rt < it.ring - .1; rt += 1.2) { click(t0 + rt, 784, .09, .35, "sine"); click(t0 + rt + .38, 659, .09, .35, "sine"); } if (!it.acc) { click(t0 + it.end, 440, .08, .2, "sine"); click(t0 + it.end + .2, 330, .08, .3, "sine"); } }
     });
-    if (S.music) { // nappe douce : 4 accords qui tournent
-      var CH = [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]], bar = 3.2, master = ac.createGain(), lp = ac.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 1200; master.gain.value = .05; lp.connect(master); master.connect(dest);
-      for (var b = 0; b * bar < total; b++) { var tt = t0 + b * bar; CH[b % 4].forEach(function (nn) { var o = ac.createOscillator(), g = ac.createGain(); o.type = "triangle"; o.frequency.value = 440 * Math.pow(2, (nn - 69) / 12); g.gain.setValueAtTime(0, tt); g.gain.linearRampToValueAtTime(.5, tt + .8); g.gain.linearRampToValueAtTime(0, tt + bar + .4); o.connect(g); g.connect(lp); o.start(tt); o.stop(tt + bar + .5); });
-        var o2 = ac.createOscillator(), g2 = ac.createGain(); o2.type = "sine"; o2.frequency.value = 440 * Math.pow(2, (CH[b % 4][0] - 12 - 69) / 12); g2.gain.setValueAtTime(.6, tt); g2.gain.exponentialRampToValueAtTime(.01, tt + bar); o2.connect(g2); g2.connect(lp); o2.start(tt); o2.stop(tt + bar + .1); }
+    music(ac, dest, t0);
+  }
+  /* musiques d'ambiance créées par la page (sans droits) ; « auto » change selon le chapitre */
+  function hz(n) { return 440 * Math.pow(2, (n - 69) / 12); }
+  function moodOf(text) {
+    var x = String(text || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+    if (/rupture|brise|triste|larme|defaite|perdu|adieu/.test(x)) return "triste";
+    if (/ex\b|amour|coeur|saint|valentin|rendez|mariage|fianc|crush|rencard|minuit|souvenir|retour de/.test(x)) return "romantique";
+    if (/verdict|match|penalty|prolong|var\b|final|tirs|derniere|mi-temps|attente|rumeur|reponse|offre|appel|signature|resultat|surprise/.test(x)) return "tension";
+    return "drole";
+  }
+  var STYLES = {
+    douce: { bar: 3.2, ch: [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]], wave: "triangle", lp: 1200, vol: .05 },
+    triste: { bar: 4, ch: [[50, 53, 57], [46, 50, 53], [53, 57, 60], [48, 52, 55]], wave: "sine", lp: 900, vol: .06 },
+    romantique: { bar: 3.6, ch: [[53, 57, 60, 64], [52, 55, 59, 62], [50, 53, 57, 60], [48, 52, 55, 59]], wave: "sine", lp: 1500, vol: .05, bell: true },
+    drole: { bar: 2, ch: [[60, 64, 67], [55, 59, 62], [57, 60, 64], [53, 57, 60]], wave: "triangle", lp: 2500, vol: .035, bounce: true },
+    tension: { bar: 2.4, ch: [[40], [40], [41], [40]], wave: "sawtooth", lp: 600, vol: .045, pulse: true }
+  };
+  function music(ac, dest, t0) {
+    var st0 = S.mstyle || "auto"; if (st0 === "none") return;
+    var chaps = items.filter(function (it) { return it.k === "chap"; }), master = ac.createGain(); master.gain.value = 1; master.connect(dest);
+    var t = 0, bi = 0;
+    while (t < total) {
+      var name = st0; if (st0 === "auto") { name = "drole"; chaps.forEach(function (c) { if (c.at <= t + .5) name = moodOf(c.text); }); }
+      var st = STYLES[name] || STYLES.douce, tt = t0 + t, chord = st.ch[bi % st.ch.length], lp = ac.createBiquadFilter(), out = ac.createGain();
+      lp.type = "lowpass"; lp.frequency.value = st.lp; out.gain.value = st.vol; lp.connect(out); out.connect(master);
+      if (st.pulse) { // tension : basse qui pulse en croches + note aiguë suspendue
+        for (var p = 0; p < 8; p++) { var o = ac.createOscillator(), g = ac.createGain(), pt = tt + p * st.bar / 8; o.type = "sawtooth"; o.frequency.value = hz(chord[0]); g.gain.setValueAtTime(.6, pt); g.gain.exponentialRampToValueAtTime(.02, pt + st.bar / 9); o.connect(g); g.connect(lp); o.start(pt); o.stop(pt + st.bar / 8); }
+        var hi = ac.createOscillator(), hg = ac.createGain(); hi.type = "sine"; hi.frequency.value = hz(bi % 2 ? 77 : 76); hg.gain.setValueAtTime(0, tt); hg.gain.linearRampToValueAtTime(.25, tt + st.bar / 2); hg.gain.linearRampToValueAtTime(0, tt + st.bar); hi.connect(hg); hg.connect(out); hi.start(tt); hi.stop(tt + st.bar + .05);
+      } else {
+        chord.forEach(function (n) { var o = ac.createOscillator(), g = ac.createGain(); o.type = st.wave; o.frequency.value = hz(n); g.gain.setValueAtTime(0, tt); g.gain.linearRampToValueAtTime(.5, tt + Math.min(.8, st.bar / 4)); g.gain.linearRampToValueAtTime(0, tt + st.bar + .3); o.connect(g); g.connect(lp); o.start(tt); o.stop(tt + st.bar + .4); });
+        var bo = ac.createOscillator(), bg = ac.createGain(); bo.type = "sine"; bo.frequency.value = hz(chord[0] - 12); bg.gain.setValueAtTime(.6, tt); bg.gain.exponentialRampToValueAtTime(.01, tt + st.bar); bo.connect(bg); bg.connect(lp); bo.start(tt); bo.stop(tt + st.bar + .1);
+        if (st.bounce) for (var q = 0; q < 4; q++) { var po = ac.createOscillator(), pg = ac.createGain(), qt = tt + q * st.bar / 4; po.type = "square"; po.frequency.value = hz(chord[q % chord.length] + 12); pg.gain.setValueAtTime(.25, qt); pg.gain.exponentialRampToValueAtTime(.01, qt + .14); po.connect(pg); pg.connect(lp); po.start(qt); po.stop(qt + .16); }
+        if (st.bell) for (var r = 0; r < 4; r++) { var bl = ac.createOscillator(), blg = ac.createGain(), rt = tt + r * st.bar / 4; bl.type = "sine"; bl.frequency.value = hz(chord[r % chord.length] + 24); blg.gain.setValueAtTime(.2, rt); blg.gain.exponentialRampToValueAtTime(.005, rt + .8); bl.connect(blg); blg.connect(out); bl.start(rt); bl.stop(rt + .85); }
+      }
+      t += st.bar; bi++;
     }
   }
 
@@ -2499,7 +2761,7 @@ Eux: Bon… j'arrive 🤝
     var h = "<optgroup label=\"⭐ Histoires spéciales\">" + Object.keys(TPL).map(function (k) { return "<option value=\"" + k + "\">" + TPL[k].label + "</option>"; }).join("") + "</optgroup>", cur = null;
     LIB.forEach(function (st, i) { if (st.cat !== cur) { if (cur !== null) h += "</optgroup>"; cur = st.cat; h += "<optgroup label=\"" + st.cat + "\">"; } h += "<option value=\"lib:" + i + "\">" + (i + 1) + ". " + st.title + "</option>"; });
     $("#tpl").innerHTML = h + "</optgroup>"; $("#tpl").value = S.tpl;
-    $("#side").value = S.side; $("#script").value = S.script; $("#speed").value = S.speed; $("#size").value = S.size; $("#q").value = S.q; $("#sfx").checked = !!S.sfx; $("#music").checked = !!S.music;
+    $("#side").value = S.side; $("#script").value = S.script; $("#speed").value = S.speed; $("#size").value = S.size; $("#q").value = S.q; $("#sfx").checked = !!S.sfx; $("#mstyle").value = S.mstyle;
   }
   function allKeys() { return Object.keys(TPL).concat(LIB.map(function (x, i) { return "lib:" + i; })); }
   function edited() { var cur = String(S.script || "").trim(); return !allKeys().some(function (k) { return cur === tplText(k, "om").trim() || cur === tplText(k, "psg").trim(); }); }
@@ -2509,7 +2771,7 @@ Eux: Bon… j'arrive 🤝
   $("#side").onchange = function () { if (edited() && !confirm("Charger la version " + (this.value === "psg" ? "Team PSG" : "Team OM") + " de l'histoire ? Ton texte modifié sera remplacé.")) { this.value = S.side; return; } S.side = this.value; applyTpl(); };
   $("#script").oninput = function () { S.script = this.value; save(); parse(); };
   ["speed", "size", "q"].forEach(function (k) { $("#" + k).onchange = function () { S[k] = this.value; save(); parse(); restart(); }; });
-  $("#sfx").onchange = function () { S.sfx = this.checked; save(); }; $("#music").onchange = function () { S.music = this.checked; save(); };
+  $("#sfx").onchange = function () { S.sfx = this.checked; save(); }; $("#mstyle").onchange = function () { S.mstyle = this.value; save(); };
 
   /* ---------- légende TikTok ---------- */
   var capK = 0;
@@ -2569,7 +2831,7 @@ Eux: Bon… j'arrive 🤝
   loadLogo("om"); loadLogo("psg"); logosForm();
   fill(); parse(); imgsForm(); makeCap();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(restart);
-  window.__histoire = { drawScene: drawScene, total: function () { return total; } };
+  window.__histoire = { drawScene: drawScene, total: function () { return total; }, items: function () { return items; } };
 })();
 </script>
 </body>

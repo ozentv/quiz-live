@@ -165,10 +165,14 @@ Page : https://ozentv.github.io/quiz-live/clubs.html
 ## 💬 Histoire en messages (OM contre PSG)
 Page : https://ozentv.github.io/quiz-live/histoire.html
 - Une conversation qui s'écrit toute seule sur un écran de messagerie (appli inventée, sans marque) : tes messages se tapent lettre par lettre au clavier, les réponses arrivent après « … en train d'écrire », et le fil défile tout seul.
-- **105 histoires prêtes à l'emploi**, chacune en version **Team OM** (« Moi » = l'OM) et **Team PSG** (« Moi » = le PSG) :
+- **111 histoires prêtes à l'emploi**, chacune en version **Team OM** (« Moi » = l'OM) et **Team PSG** (« Moi » = le PSG) :
   - 5 histoires spéciales : Le Classique, Le pari, Les ex, Le mercato, et une vide ;
   - 100 conversations de 35 à 45 secondes chacune, en 3 parties, avec un vrai dialogue, en 7 catégories : 😏 Chambrage, 🤝 Paris et défis, 💔 Amour et ex, ✍️ Mercato et joueurs, 🏟️ Jour de match, 👨‍👩‍👧 Supporters et famille, 🤪 Délires.
   - Les noms, stades, villes, couleurs, slogans et emojis s'adaptent tout seuls au camp choisi. « 🎲 Une histoire au hasard » en tire une.
+- **Réalisme** : « ✓ Envoyé » puis « ✓✓ Lu » sous ton dernier message ; réponse à un message avec la citation au-dessus (`[répond: …]`) ; réactions qui se posent sur une bulle (`[réaction 😂]`) ; message supprimé (`[supprimé]`) ; hésitations (`Moi: [hésite: Je t'aime] Bonne nuit` : tu tapes, tu effaces, tu retapes ; `[hésite]` : l'autre écrit puis n'envoie rien).
+- **📞 Appels** : écran d'appel entrant plein écran avec sonnerie (`[appel] PSG`), puis « Appel manqué » dans le fil, ou appel décroché avec chrono (`[appel] PSG | accepté`).
+- **👥 Groupes de discussion** (`@groupe Supporters OM | 💙`) : chaque personne (Lucas, Inès, Karim…) a son nom et sa couleur, et les membres s'affichent sous le nom du groupe. 6 histoires de groupe prêtes : le match, le spoiler, le billet en trop, la photo floue, le traître, le capitaine.
+- **🎵 Musiques** : Auto (change selon les chapitres : drôle, tension, romantique ou triste), Drôle, Tension, Romantique, Triste, Douce, ou sans musique.
 - **🛡️ Logos des clubs** : importe le logo de l'OM et celui du PSG. Ils remplacent les écussons dessinés (photo du contact, « en train d'écrire », ton avatar, article de journal) et restent sur le téléphone.
 - Pour écrire ta propre histoire, une ligne par message :
   - `Moi: texte` pour ton message, `PSG: texte` pour l'autre ;
