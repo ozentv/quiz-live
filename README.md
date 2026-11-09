@@ -179,6 +179,12 @@ Page : https://ozentv.github.io/quiz-live/histoire.html
 - **📍 Position partagée** (`[position] Devant le Vélodrome`), **📸 photo éphémère** qui s'efface après 5 secondes (`[photo 1 éphémère]`).
 - **🕐 Heure qui avance** pendant l'histoire et saute avec les sauts dans le temps (« TROIS HEURES PLUS TARD », « LE LENDEMAIN MATIN »…), batterie qui baisse. Heure de départ réglable (ou `@heure 23:40`).
 - **🔒 Écran verrouillé** au début (activé par défaut) : grande horloge, date, puis une notification « PSG est en train d'écrire… » qui devient « PSG t'a envoyé un message » (sans dévoiler le message). L'écran glisse vers le haut et la conversation s'ouvre avec le premier message déjà là. Le fond d'écran est le logo du club de « Moi » importé dans « Logos des clubs » (OM pour Team OM, PSG pour Team PSG…), sur les couleurs du club.
+- **💥 Phrase d'accroche** : un grand texte style TikTok pendant les 2 premières secondes (« Ils se sont écrit avant le Classique… 😳 »). Tu l'écris ou tu cliques sur « 💡 Idée » ; vide = aucune.
+- **📥 Liste des conversations** après l'écran verrouillé : « Messages », la conversation qui vient d'arriver en haut (aperçu du message, pastille « 1 ») et d'autres discussions (Maman, le groupe de supporters, le coach…), le doigt tape dessus et la conversation s'ouvre.
+- **🔤 Fautes de frappe corrigées** : sur certains de tes messages, une lettre voisine est tapée par erreur, effacée puis corrigée, comme une vraie personne (case à cocher).
+- **Effets d'écran** : `[choc]` l'écran tremble avec un flash rouge et un boum, `[zoom]` zoom sur le dernier message avec un son dramatique, `[flash]` flash blanc. Ils marchent aussi en début de message : `PSG: [choc] QUOI ???`.
+- **😂 Gros emojis** : un message fait seulement de 1 à 3 emojis s'affiche en grand avec un petit saut. **Autocollants** dessinés par la page : `[sticker chevre]` (GOAT), `ballon`, `coupe`, `but`, `pleure`, `rire`, `feu`, `clown`, `mur`, `dodo`, `coeur`, `bus` (`Moi: [sticker coupe]` pour le tien).
+- **📸 Capture d'écran** : `[capture]` affiche « 📸 PSG a fait une capture d'écran ! », `Moi: [capture]` « 📸 Tu as fait une capture d'écran » avec un flash, et un bruit d'appareil photo.
 - **🌙 Mode sombre** pour toute l'appli de messagerie.
 - **🛡️ Logos des clubs** : importe le logo de l'OM et celui du PSG. Ils remplacent les écussons dessinés (photo du contact, « en train d'écrire », ton avatar, article de journal) et restent sur le téléphone.
 - Pour écrire ta propre histoire, une ligne par message :
