@@ -178,7 +178,7 @@ Page : https://ozentv.github.io/quiz-live/histoire.html
 - **🎤 Messages vocaux** (`[vocal] texte`) : bulle avec forme d'onde et durée, « enregistre un vocal… » chez l'autre, enregistrement en rouge dans ta barre d'écriture, et la voix (voix pro gratuites du relais) dans la vidéo. Tu choisis ta voix et celle de l'autre.
 - **📍 Position partagée** (`[position] Devant le Vélodrome`), **📸 photo éphémère** qui s'efface après 5 secondes (`[photo 1 éphémère]`).
 - **🕐 Heure qui avance** pendant l'histoire et saute avec les sauts dans le temps (« TROIS HEURES PLUS TARD », « LE LENDEMAIN MATIN »…), batterie qui baisse. Heure de départ réglable (ou `@heure 23:40`).
-- **🔒 Écran verrouillé** au début (activé par défaut) : grande horloge, date, puis une notification « PSG est en train d'écrire… » qui devient « PSG t'a envoyé un message » (sans dévoiler le message). L'écran glisse vers le haut et la conversation s'ouvre avec le premier message déjà là.
+- **🔒 Écran verrouillé** au début (activé par défaut) : grande horloge, date, puis une notification « PSG est en train d'écrire… » qui devient « PSG t'a envoyé un message » (sans dévoiler le message). L'écran glisse vers le haut et la conversation s'ouvre avec le premier message déjà là. Le fond d'écran est le logo du club de « Moi » importé dans « Logos des clubs » (OM pour Team OM, PSG pour Team PSG…), sur les couleurs du club.
 - **🌙 Mode sombre** pour toute l'appli de messagerie.
 - **🛡️ Logos des clubs** : importe le logo de l'OM et celui du PSG. Ils remplacent les écussons dessinés (photo du contact, « en train d'écrire », ton avatar, article de journal) et restent sur le téléphone.
 - Pour écrire ta propre histoire, une ligne par message :
