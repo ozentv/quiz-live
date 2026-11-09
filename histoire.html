@@ -73,6 +73,7 @@ button:disabled { opacity: .5; }
         <span><code>[vocal] texte</code> message vocal lu par une voix · <code>[position] Devant le Vélodrome</code> position partagée · <code>[photo 1 éphémère]</code> photo qui s'efface après 5 secondes · <code>-- TROIS HEURES PLUS TARD --</code> fait aussi avancer l'heure</span>
         <span><code>[choc]</code> l'écran tremble avec un flash rouge · <code>[zoom]</code> zoom sur le dernier message · <code>[flash]</code> flash blanc (aussi en début de message : <code>PSG: [choc] Quoi ???</code>)</span>
         <span><code>[capture]</code> « 📸 PSG a fait une capture d'écran » · <code>Moi: [capture]</code> c'est toi qui captures · <code>PSG: 😂😂😂</code> un message fait seulement d'emojis s'affiche en grand</span>
+        <span><code>[sondage] Qui gagne dimanche ? | OM | PSG | Nul</code> sondage avec les votes qui arrivent (<code>| OM 12</code> pour fixer le nombre de votes) · <code>[appel vidéo] PSG | accepté</code> appel vidéo</span>
         <span><code>[sticker chevre]</code> autocollant de l'autre · <code>Moi: [sticker coupe]</code> le tien : ballon, coupe, chevre, but, pleure, rire, feu, clown, mur, dodo, coeur, bus</span>
         <span><code>@groupe Supporters OM | 💙</code> groupe de discussion : chaque nom (<code>Lucas: …</code>, <code>Inès: …</code>) a sa couleur · « Envoyé » et « Lu » s'affichent tout seuls sous ton dernier message</span>
       </div>
@@ -98,6 +99,7 @@ button:disabled { opacity: .5; }
         <label>Qualité<select id="q"><option value="720">720p</option><option value="1080">1080p</option></select></label>
       </div>
       <label class="chk"><input type="checkbox" id="lock"> 🔒 Commencer sur l'écran verrouillé, avec les notifications</label>
+      <label class="chk"><input type="checkbox" id="wall"> 🖼️ Fond de conversation aux couleurs du club, avec le logo en filigrane</label>
       <label class="chk"><input type="checkbox" id="inbox"> 📥 Ouvrir l'appli sur la liste des conversations</label>
       <label class="chk"><input type="checkbox" id="typos"> 🔤 Fautes de frappe corrigées (on tape, on efface, on corrige)</label>
       <label class="chk"><input type="checkbox" id="dark"> 🌙 Mode sombre</label>
@@ -2743,10 +2745,10 @@ Moi: Si, un peu 😂
         "-- 90 MINUTES PLUS TARD --", "# Partie 3 : Le verdict…", "[journal] LE CLASSIQUE | Quelle soirée au Vélodrome ! Revivez le match minute par minute", "[appel] OM", "OM: …", "[capture]", "Moi: Alors ? On fait moins le malin ? 😏", "OM: On en reparle au match retour", "[réaction 😂]", "Moi: Ici c'est Paris ❤️💙", "[notif] Supporters OM : On reviendra plus forts 😤"] },
     pari: { label: "🤝 Le pari (le perdant porte le maillot de l'autre)",
       om: [OM_ME, PSG_CT, "# Partie 1 : Le pari", "Moi: J'ai une idée 😈", "PSG: Dis toujours", "Moi: Le perdant du Classique porte le maillot de l'autre", "Moi: Une journée entière", "PSG: Deal 🤝", "PSG: Prépare-toi à être en bleu et rouge 😂", "Moi: On verra bien",
-        "-- TROIS JOURS PLUS TARD --", "# Partie 2 : Le match", "[notif] Supporters OM : Ce soir on gagne !! 💙", "PSG: Dernière chance pour annuler 😏", "Moi: Jamais", "Moi: Droit au but",
+        "-- TROIS JOURS PLUS TARD --", "# Partie 2 : Le match", "[notif] Supporters OM : Ce soir on gagne !! 💙", "[sondage] Qui gagne le pari ? | OM 58 | PSG 31", "PSG: Dernière chance pour annuler 😏", "Moi: Jamais", "Moi: Droit au but",
         "-- APRÈS LE MATCH --", "# Partie 3 : La photo", "Moi: Alors…", "Moi: J'attends ma photo 📸", "PSG: Attends", "PSG: …", "PSG: Je cherche le maillot", "@contact PSG | 🙈", "PSG: [photo 1] Content ? 😑", "Moi: MDRRRR", "Moi: Je l'encadre 🖼️", "[notif] Supporters OM : 😂😂😂"],
       psg: [PSG_ME, OM_CT, "# Partie 1 : Le pari", "Moi: J'ai une idée 😈", "OM: Dis toujours", "Moi: Le perdant du Classique porte le maillot de l'autre", "Moi: Une journée entière", "OM: Deal 🤝", "OM: Prépare-toi à être en bleu ciel 😂", "Moi: On verra bien",
-        "-- TROIS JOURS PLUS TARD --", "# Partie 2 : Le match", "[notif] Supporters PSG : Ce soir on gagne !! ❤️💙", "OM: Dernière chance pour annuler 😏", "Moi: Jamais", "Moi: Ici c'est Paris",
+        "-- TROIS JOURS PLUS TARD --", "# Partie 2 : Le match", "[notif] Supporters PSG : Ce soir on gagne !! ❤️💙", "[sondage] Qui gagne le pari ? | PSG 61 | OM 34", "OM: Dernière chance pour annuler 😏", "Moi: Jamais", "Moi: Ici c'est Paris",
         "-- APRÈS LE MATCH --", "# Partie 3 : La photo", "Moi: Alors…", "Moi: J'attends ma photo 📸", "OM: Attends", "OM: …", "OM: Je cherche le maillot", "@contact OM | 🙈", "OM: [photo 1] Content ? 😑", "Moi: MDRRRR", "Moi: Je l'encadre 🖼️", "[notif] Supporters PSG : 😂😂😂"] },
     ex: { label: "💔 Les ex (l'autre revient)",
       om: [OM_ME, "@contact Paris | 🖤 | #004170 | #da291c", "# Partie 1 : Il revient…", "Paris: Coucou Marseille", "Paris: Ça fait longtemps", "Moi: Tu as du culot", "Moi: Après tout ce que tu m'as fait en championnat", "Paris: J'ai changé 🥺", "Moi: Tu dis ça chaque saison",
@@ -2840,7 +2842,7 @@ Moi: Si, un peu 😂
   if (!S.mstyle) S.mstyle = S.music === false ? "none" : "auto";
   if (!S.duel) S.duel = "om-psg"; if (S.lock == null) S.lock = true; if (S.dark == null) S.dark = false; if (!S.clock) S.clock = "21:00";
   var HOOKS = ["Ils se sont écrit avant {DERBY}… 😳", "La conversation qui a fuité 👀", "Personne ne devait voir ces messages 🤫", "{LEMECAP} n'aurait jamais dû envoyer ça 💀", "Attends la fin… 😭", "POV : {LETHEM} t'écrit la veille du match 📱", "Ça a très mal fini… 💔", "Les messages que {LETHEM} veut effacer 😂", "Je n'en reviens toujours pas… 😳"];
-  if (S.hook == null) S.hook = HOOKS[0]; if (S.typos == null) S.typos = true; if (S.inbox == null) S.inbox = true;
+  if (S.hook == null) S.hook = HOOKS[0]; if (S.typos == null) S.typos = true; if (S.inbox == null) S.inbox = true; if (S.wall == null) S.wall = true;
   var QS = {}; try { QS = JSON.parse(localStorage.getItem("sq-set") || "{}"); } catch (e) {}
   if (!S.relay) S.relay = QS.relay || "studio-quiz-relais.onrender.com"; if (S.key == null) S.key = QS.lbKey || "";
   function save() { try { localStorage.setItem("histoire-set", JSON.stringify(S)); } catch (e) {} }
@@ -2919,14 +2921,14 @@ Moi: Si, un peu 😂
       if ((m = l.match(/^\[h[ée]site\]$/i))) { list.push({ k: "typing", from: other.name, at: t, end: t + 1.7 * sp }); t += 2.3 * sp; return; }
       if ((m = l.match(/^\[r[ée]action\s*(.+?)\]$/i))) { if (lastMsg) lastMsg.react = { emo: m[1].trim(), at: t + .3 }; t += .9 * sp; return; }
       if ((m = l.match(/^\[supprim[ée]\]$/i))) { if (lastMsg) lastMsg.del = t + .3; t += 1.2 * sp; return; }
-      if ((m = l.match(/^\[appel\]\s*(.+?)(?:\s*\|\s*(accept[ée]))?$/i))) {
-        var acc = !!m[2], ring = acc ? 2 : 3.2, talk = acc ? 4 : 0, end = t + (ring + talk) * sp;
-        list.push({ k: "call", from: m[1], at: t, ring: t + ring * sp, end: end, acc: acc });
-        list.push({ k: "sys", text: acc ? "📞 Appel vocal · 0:" + String(Math.round(talk * 3)).padStart(2, "0") : "📞 Appel manqué de " + m[1], at: end + .2 });
+      if ((m = l.match(/^\[appel(\s+vid[ée]o)?\]\s*(.+?)(?:\s*\|\s*(accept[ée]))?$/i))) {
+        var vid = !!m[1], acc = !!m[3], ring = acc ? 2 : 3.2, talk = acc ? (vid ? 5 : 4) : 0, end = t + (ring + talk) * sp;
+        list.push({ k: "call", from: m[2], at: t, ring: t + ring * sp, end: end, acc: acc, video: vid });
+        list.push({ k: "sys", text: acc ? (vid ? "📹 Appel vidéo" : "📞 Appel vocal") + " · 0:" + String(Math.round(talk * 3)).padStart(2, "0") : (vid ? "📹 Appel vidéo manqué de " : "📞 Appel manqué de ") + m[2], at: end + .2 });
         t = end + 1.2 * sp; lastMsg = null; return; }
       if ((m = l.match(/^\[notif\]\s*(.+?)\s*:\s*(.+)$/i))) { list.push({ k: "notif", from: m[1], text: m[2], at: t }); t += 1.7 * sp; return; }
       if ((m = l.match(/^\[journal\]\s*(.+?)\s*\|\s*(.+)$/i))) { lockN(other.name, "📰 Article"); t = addOther(other.name, { k: "journal", title: m[1], text: m[2] }, .9) + 2.3 * sp; return; }
-      if (/^\[(photo|vocal|position)/i.test(l)) l = other.name + ": " + l;
+      if (/^\[(photo|vocal|position|sondage)/i.test(l)) l = other.name + ": " + l;
       if ((m = l.match(/^(.+?)\s*:\s*(.+)$/))) {
         var isMe = /^moi$/i.test(m[1]), from = isMe ? "Moi" : m[1].trim(), text = m[2], reply = null, pre = null, mm;
         if ((mm = text.match(/^\[r[ée]pond\s*:\s*(.+?)\]\s*(.+)$/i))) { reply = mm[1]; text = mm[2]; }
@@ -2934,6 +2936,10 @@ Moi: Si, un peu 😂
         var ph = text.match(/^\[photo\s*(\d)(\s+(?:[ée]ph[ée]m[èe]re|vue unique|unique))?\]\s*(.*)$/i);
         if (ph) { var pit = { k: "photo", n: +ph[1], eph: !!ph[2], text: ph[3] };
           if (isMe) { pit.who = "me"; pit.from = "Moi"; pit.at = t + .3; list.push(pit); lastMsg = pit; t += (pit.eph ? 6 : 2.4) * sp; } else { lockN(from, pit.eph ? "📸 Photo éphémère" : "📷 Photo"); t = addOther(from, pit, .9) + (pit.eph ? 6 : 2.3) * sp; } return; }
+        var so = text.match(/^\[sondage\]\s*(.+)$/i);
+        if (so) { var sp2 = so[1].split("|").map(function (x) { return x.trim(); }).filter(Boolean), pq = { k: "poll", q: sp2[0] || "Qui gagne ?", opts: [] };
+          (sp2.length > 1 ? sp2.slice(1) : [me.name, other.name, "Match nul"]).slice(0, 4).forEach(function (o, i) { var mn = o.match(/^(.*?)\s+(\d+)$/); pq.opts.push({ l: mn ? mn[1] : o, n: mn ? +mn[2] : 3 + hashS(o + i + pq.q) % 18 }); });
+          if (isMe) { pq.who = "me"; pq.from = "Moi"; pq.at = t + .3; list.push(pq); lastMsg = pq; t += 4.4 * sp; } else { lockN(from); t = addOther(from, pq, .9) + 4.3 * sp; } return; }
         var po = text.match(/^\[position\]\s*(.*)$/i);
         if (po) { var pp = { k: "pos", text: po[1] || "Position partagée" }; if (isMe) { pp.who = "me"; pp.from = "Moi"; pp.at = t + .3; list.push(pp); lastMsg = pp; t += 2.6 * sp; } else { lockN(from, "📍 Position partagée"); t = addOther(from, pp, .9) + 2.5 * sp; } return; }
         if (/^\[capture\]$/i.test(text)) { var ca = isMe ? t + .3 : t + .2;
@@ -3037,6 +3043,7 @@ Moi: Si, un peu 😂
       else if (it.k === "journal") { var hd = prevKey !== key; out.push({ it: it, head: hd, h: (hd ? 40 : 0) + 470 }); prevKey = key; }
       else if (it.k === "photo") { var hd2 = prevKey !== key, gone = it.eph && t > it.at + 5.4; out.push({ it: it, head: hd2, gone: gone, h: (hd2 ? 40 : 0) + (gone ? 84 : photoSize(it)[1] + 30) }); prevKey = key; if (it.who === "me") lastMe = out.length - 1; }
       else if (it.k === "vocal") { var hd3 = prevKey !== key; out.push({ it: it, head: hd3, h: (hd3 ? 40 : 0) + 118 + (it.react && t >= it.react.at ? 18 : 0) }); prevKey = key; if (it.who === "me") lastMe = out.length - 1; }
+      else if (it.k === "poll") { var hd6 = prevKey !== key; out.push({ it: it, head: hd6, h: (hd6 ? 40 : 0) + pollH(g, it) + 24 }); prevKey = key; if (it.who === "me") lastMe = out.length - 1; }
       else if (it.k === "sticker") { var hd5 = prevKey !== key; out.push({ it: it, head: hd5, h: (hd5 ? 40 : 0) + 300 }); prevKey = key; if (it.who === "me") lastMe = out.length - 1; }
       else if (it.k === "pos") { var hd4 = prevKey !== key; out.push({ it: it, head: hd4, h: (hd4 ? 40 : 0) + 430 }); prevKey = key; if (it.who === "me") lastMe = out.length - 1; }
     });
@@ -3113,9 +3120,37 @@ Moi: Si, un peu 😂
     if (t >= tapT && t < tapT + .6) { var q = (t - tapT) / .6; g.fillStyle = "rgba(120,120,130," + (.35 * (1 - q)) + ")"; g.beginPath(); g.arc(560, y0 + rh / 2, 40 + 90 * q, 0, Math.PI * 2); g.fill(); }
     g.restore(); g.textAlign = "left";
   }
+  function clubCol(name, fb) { var c = CL[clubKey(name)]; if (!c) return fb; return lum(c.c1) > .8 ? c.c2 : c.c1; }
+  function chatWall(g, P) { // fond aux couleurs du club de « Moi », logo en filigrane
+    var me = ME || { name: "OM", c1: "#2faee0", c2: "#ffffff" }, col = clubCol(me.name, lum(me.c1) > .8 ? me.c2 : me.c1), n = parseInt(col.slice(1), 16), rgb = (n >> 16) + "," + ((n >> 8) & 255) + "," + (n & 255), lg = logos[clubKey(me.name)], k = S.dark ? 1.5 : 1;
+    g.save(); g.beginPath(); g.rect(0, CHAT_TOP, W, CHAT_BOT - CHAT_TOP); g.clip();
+    var gr = g.createLinearGradient(0, CHAT_TOP, 0, CHAT_BOT); gr.addColorStop(0, "rgba(" + rgb + "," + .16 * k + ")"); gr.addColorStop(1, "rgba(" + rgb + "," + .05 * k + ")"); g.fillStyle = gr; g.fillRect(0, CHAT_TOP, W, CHAT_BOT - CHAT_TOP);
+    g.strokeStyle = "rgba(" + rgb + "," + .05 * k + ")"; g.lineWidth = 14; for (var x = -1200; x < W; x += 70) { g.beginPath(); g.moveTo(x, CHAT_BOT); g.lineTo(x + 1000, CHAT_TOP); g.stroke(); }
+    g.globalAlpha = .08 * k; var cy = (CHAT_TOP + CHAT_BOT) / 2;
+    if (lg) { var r0 = Math.min(580 / lg.width, 580 / lg.height); g.drawImage(lg, (W - lg.width * r0) / 2, cy - lg.height * r0 / 2, lg.width * r0, lg.height * r0); } else badge(g, W / 2, cy, 280, me);
+    g.restore();
+  }
+  function pollH(g, it) { g.font = "800 40px " + FONT; return 96 + Math.min(2, wrap(g, it.q, 800).length) * 50 + it.opts.length * 92 + 56; }
+  function poll(g, x, y, it, t, P) { // sondage : les votes arrivent et les barres bougent
+    var h = pollH(g, it), w = 900, v = Math.max(0, Math.min(1, (t - it.at - .5) / 3)), e = 1 - Math.pow(1 - v, 2);
+    g.fillStyle = P.pill; rr(g, x, y, w, h, 26); g.fill();
+    g.fillStyle = P.sub; g.font = "800 26px " + FONT; g.textAlign = "left"; g.textBaseline = "middle"; g.fillText("📊 SONDAGE", x + 30, y + 40);
+    g.fillStyle = P.text; g.font = "800 40px " + FONT; var ql = wrap(g, it.q, 800).slice(0, 2); ql.forEach(function (l, i) { g.fillText(l, x + 30, y + 92 + i * 50); });
+    var yy = y + 96 + ql.length * 50, cnt = it.opts.map(function (o) { return Math.round(o.n * e); }), tot = cnt.reduce(function (a, b) { return a + b; }, 0), best = Math.max.apply(null, cnt), meK = clubKey((ME || {}).name);
+    it.opts.forEach(function (o, i) {
+      var pct = tot ? cnt[i] / tot : 0, by = yy + i * 92, col = clubCol(o.l, PAL[i % PAL.length]), mine = v > .15 && clubKey(o.l) === meK;
+      g.fillStyle = P.bg; rr(g, x + 24, by, w - 48, 74, 37); g.fill();
+      var bw = pct > 0 ? Math.max(74, (w - 48) * pct) : 0, tl = o.l + (mine ? "  ✓" : ""), pc = Math.round(pct * 100) + " %";
+      if (bw) { g.fillStyle = col; g.globalAlpha = cnt[i] === best ? 1 : .6; rr(g, x + 24, by, bw, 74, 37); g.fill(); g.globalAlpha = 1; }
+      g.font = "700 34px " + FONT; g.fillStyle = P.text; g.textAlign = "left"; g.fillText(tl, x + 54, by + 38); g.textAlign = "right"; g.fillText(pc, x + w - 54, by + 38);
+      if (bw) { g.save(); rr(g, x + 24, by, bw, 74, 37); g.clip(); g.fillStyle = lum(col) > .75 ? "#111" : "#fff"; g.textAlign = "left"; g.fillText(tl, x + 54, by + 38); g.textAlign = "right"; g.fillText(pc, x + w - 54, by + 38); g.restore(); }
+    });
+    g.textAlign = "left"; g.fillStyle = P.sub; g.font = "600 26px " + FONT; g.fillText(tot + " vote" + (tot > 1 ? "s" : "") + (v < 1 && v > 0 ? " · en cours…" : ""), x + 30, y + h - 30);
+  }
   function drawBase(g, t) {
     var other = headerAt(t), k = fs(), lh = Math.round(50 * k), P = TH();
     g.fillStyle = P.bg; g.fillRect(0, 0, W, H);
+    if (S.wall) chatWall(g, P);
     statusBar(g, t, P.icon, P.bg);
     g.strokeStyle = P.icon; g.lineWidth = 6; g.lineCap = "round"; g.beginPath(); g.moveTo(58, 104); g.lineTo(38, 128); g.lineTo(58, 152); g.stroke();
     badge(g, 132, 128, 46, other);
@@ -3132,14 +3167,14 @@ Moi: Si, un peu 😂
     var y = CHAT_TOP + 20 - scroll;
     bl.forEach(function (x, i) {
       var it = x.it, a = Math.min(1, (t - it.at) / .22); g.globalAlpha = a; g.textBaseline = "middle";
-      if (it.k === "msg" || it.k === "journal" || it.k === "photo" || it.k === "vocal" || it.k === "pos" || it.k === "sticker") {
+      if (it.k === "msg" || it.k === "journal" || it.k === "photo" || it.k === "vocal" || it.k === "pos" || it.k === "sticker" || it.k === "poll") {
         var col = colOf(it), yy = y;
         if (x.head) { g.fillStyle = col; g.font = "800 27px " + FONT; g.textAlign = "left"; g.fillText(it.who === "me" ? "MOI" : (other.group ? it.from : headerAt(it.at).name).toUpperCase(), 30, yy + 16); yy += 40; }
         if (it.reply) { // message cité
           g.fillStyle = P.quote; rr(g, 56, yy + 4, 860, 58, 12); g.fill(); g.fillStyle = it.replyFrom === "Moi" ? ME_COL : OT_COL; g.fillRect(56, yy + 4, 6, 58);
           g.font = "700 26px " + FONT; g.fillText(it.replyFrom === "Moi" ? "Toi" : (it.replyFrom || ""), 76, yy + 20); g.fillStyle = P.sub; g.font = "500 29px " + FONT; var rq = it.reply; while (g.measureText(rq).width > 800 && rq.length > 4) rq = rq.slice(0, -2); g.fillText(rq + (rq !== it.reply ? "…" : ""), 76, yy + 46); yy += 70;
         }
-        var bodyH = it.k === "msg" ? (x.big ? 150 : x.lines.length * lh) : it.k === "sticker" ? 280 : it.k === "journal" ? 440 : it.k === "vocal" ? 100 : it.k === "pos" ? 400 : x.gone ? 60 : photoSize(it)[1] + 10;
+        var bodyH = it.k === "msg" ? (x.big ? 150 : x.lines.length * lh) : it.k === "sticker" ? 280 : it.k === "poll" ? pollH(g, it) : it.k === "journal" ? 440 : it.k === "vocal" ? 100 : it.k === "pos" ? 400 : x.gone ? 60 : photoSize(it)[1] + 10;
         g.fillStyle = col; g.globalAlpha = a * .55; g.fillRect(30, yy, 6, bodyH); g.globalAlpha = a;
         if (it.k === "msg") {
           var dl = delText(it, t); g.fillStyle = dl ? "#8a8f99" : P.text; g.font = (dl ? "italic 500 " : "500 ") + Math.round(40 * k) + "px " + FONT;
@@ -3155,6 +3190,7 @@ Moi: Si, un peu 😂
         else if (it.k === "vocal") vocalBubble(g, 56, yy + 4, it, t, col, P);
         else if (it.k === "pos") posCard(g, 56, yy + 6, it, t, P);
         else if (it.k === "sticker") sticker(g, 56, yy, it, t);
+        else if (it.k === "poll") poll(g, 56, yy + 4, it, t, P);
         else if (x.gone) { g.fillStyle = P.pill; rr(g, 56, yy + 4, 470, 60, 30); g.fill(); g.fillStyle = P.sub; g.font = "600 30px " + FONT; g.fillText("📸 Photo éphémère · ouverte", 80, yy + 35); }
         else photo(g, 56, yy + 6, it, t);
         if (x.status) { g.fillStyle = x.status === "Lu" ? "#2b5fd9" : "#9aa0aa"; g.font = "600 24px " + FONT; g.textAlign = "left"; g.fillText(x.status === "Lu" ? "✓✓ Lu" : "✓ Envoyé", 56, yy + bodyH + (it.react && t >= it.react.at ? 40 : 22)); }
@@ -3212,20 +3248,43 @@ Moi: Si, un peu 😂
     if (S.lock && t < LOCK_T + .5) lockScreen(g, t);
   }
   function callScreen(g, t, it) { // appel entrant en plein écran
-    var p = t - it.at, fade = Math.min(1, p / .3) * (t > it.end ? Math.max(0, 1 - (t - it.end) / .35) : 1), who = headerAt(it.at);
+    var p = t - it.at, fade = Math.min(1, p / .3) * (t > it.end ? Math.max(0, 1 - (t - it.end) / .35) : 1), who = headerAt(it.at), cc = CL[clubKey(it.from)];
+    if (who.name !== it.from) who = cc ? { name: it.from, c1: cc.c1, c2: cc.c2 } : { name: it.from, c1: "#475569", c2: "#94a3b8" };
     g.save(); g.globalAlpha = fade;
     var bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, "#1b2a44"); bg.addColorStop(1, "#05070d"); g.fillStyle = bg; g.fillRect(0, 0, W, H);
     var talking = it.acc && t >= it.ring, pulse = talking ? 0 : (t * 1.6) % 1;
+    if (talking && it.video) { videoCall(g, t, it, who); g.restore(); g.textAlign = "left"; return; }
     if (!talking) for (var r = 0; r < 2; r++) { var pr = (pulse + r * .5) % 1; g.strokeStyle = "rgba(255,255,255," + (.4 * (1 - pr)) + ")"; g.lineWidth = 6; g.beginPath(); g.arc(W / 2, 640, 150 + pr * 160, 0, Math.PI * 2); g.stroke(); }
     badge(g, W / 2, 640, 150, who.name === it.from ? who : { name: it.from, c1: "#475569", c2: "#94a3b8" });
     g.fillStyle = "#fff"; g.textAlign = "center"; g.textBaseline = "middle"; g.font = "800 72px " + FONT; g.fillText(it.from, W / 2, 900);
     g.fillStyle = "rgba(255,255,255,.75)"; g.font = "500 40px " + FONT;
     if (talking) { var s2 = Math.floor((t - it.ring) * 3); g.fillText("Appel en cours · 0:" + String(s2).padStart(2, "0"), W / 2, 970); }
-    else g.fillText("Appel vocal entrant…", W / 2, 970);
+    else g.fillText(it.video ? "📹 Appel vidéo entrant…" : "Appel vocal entrant…", W / 2, 970);
     if (!talking) {
-      [[300, "#e11d48", "✕", "Refuser"], [780, "#16a34a", "✆", "Accepter"]].forEach(function (bt) { var sh = bt[1] === "#16a34a" ? Math.sin(t * 14) * 6 : 0; g.fillStyle = bt[1]; g.beginPath(); g.arc(bt[0] + sh, 1520, 80, 0, Math.PI * 2); g.fill(); g.fillStyle = "#fff"; g.font = "800 64px " + FONT; g.fillText(bt[2], bt[0] + sh, 1522); g.font = "600 32px " + FONT; g.fillStyle = "rgba(255,255,255,.8)"; g.fillText(bt[3], bt[0], 1650); });
+      [[300, "#e11d48", "✕", "Refuser"], [780, "#16a34a", it.video ? "📹" : "✆", "Accepter"]].forEach(function (bt) { var sh = bt[1] === "#16a34a" ? Math.sin(t * 14) * 6 : 0; g.fillStyle = bt[1]; g.beginPath(); g.arc(bt[0] + sh, 1520, 80, 0, Math.PI * 2); g.fill(); g.fillStyle = "#fff"; g.font = "800 64px " + FONT; g.fillText(bt[2], bt[0] + sh, 1522); g.font = "600 32px " + FONT; g.fillStyle = "rgba(255,255,255,.8)"; g.fillText(bt[3], bt[0], 1650); });
     } else { g.fillStyle = "#e11d48"; g.beginPath(); g.arc(W / 2, 1520, 80, 0, Math.PI * 2); g.fill(); g.fillStyle = "#fff"; g.font = "800 64px " + FONT; g.fillText("✕", W / 2, 1522); }
     g.restore(); g.textAlign = "left";
+  }
+  function videoCall(g, t, it, who) { // appel vidéo décroché : la « caméra » de l'autre et ta petite fenêtre
+    var o = who.name === it.from ? who : { name: it.from, c1: "#475569", c2: "#94a3b8" }, c1 = clubCol(o.name, lum(o.c1) > .8 ? o.c2 : o.c1), c2 = (CL[clubKey(o.name)] || o).c2, lg = logos[clubKey(o.name)], d = t - it.ring;
+    var bg = g.createRadialGradient(W / 2 + Math.sin(t * .7) * 120, 700, 80, W / 2, 900, 1300); bg.addColorStop(0, c1); bg.addColorStop(.25, c1); bg.addColorStop(.7, "#0b1020"); bg.addColorStop(1, "#000"); g.fillStyle = bg; g.fillRect(0, 0, W, H);
+    g.globalAlpha = .25; g.fillStyle = lum(c2) > .8 ? "#ffffff" : c2; g.beginPath(); g.ellipse(W / 2 + Math.sin(t * .9) * 60, 1700, 700, 260, 0, 0, Math.PI * 2); g.fill(); g.globalAlpha = 1;
+    var sx = Math.sin(t * 1.3) * 16, sy = Math.cos(t * 1.05) * 12, sc = 1 + .025 * Math.sin(t * 2.1), rot = Math.sin(t * .8) * .03; // la caméra bouge un peu, comme tenue à la main
+    g.save(); g.translate(W / 2 + sx, 880 + sy); g.rotate(rot); g.scale(sc, sc); g.shadowColor = "rgba(0,0,0,.5)"; g.shadowBlur = 60;
+    if (lg) { var r0 = Math.min(640 / lg.width, 640 / lg.height); g.drawImage(lg, -lg.width * r0 / 2, -lg.height * r0 / 2, lg.width * r0, lg.height * r0); } else badge(g, 0, 0, 300, o);
+    g.restore();
+    var vg = g.createLinearGradient(0, 0, 0, 360); vg.addColorStop(0, "rgba(0,0,0,.6)"); vg.addColorStop(1, "rgba(0,0,0,0)"); g.fillStyle = vg; g.fillRect(0, 0, W, 360);
+    var vb = g.createLinearGradient(0, H - 420, 0, H); vb.addColorStop(0, "rgba(0,0,0,0)"); vb.addColorStop(1, "rgba(0,0,0,.65)"); g.fillStyle = vb; g.fillRect(0, H - 420, W, 420);
+    g.fillStyle = "#fff"; g.textAlign = "left"; g.textBaseline = "middle"; g.font = "800 60px " + FONT; g.fillText(it.from, 50, 150);
+    g.font = "600 36px " + FONT; g.fillStyle = "rgba(255,255,255,.85)"; g.fillText("📹 0:" + String(Math.floor(d * 3)).padStart(2, "0"), 50, 214);
+    // ta fenêtre (club de « Moi »)
+    var me = ME || { name: "OM", c1: "#2faee0", c2: "#fff" }, px = W - 310, py = 110, pw = 260, ph = 400, mc = clubCol(me.name, me.c1), ml = logos[clubKey(me.name)];
+    g.save(); g.shadowColor = "rgba(0,0,0,.45)"; g.shadowBlur = 30; g.fillStyle = "#000"; rr(g, px, py, pw, ph, 30); g.fill(); g.restore();
+    g.save(); rr(g, px, py, pw, ph, 30); g.clip(); var pg = g.createLinearGradient(0, py, 0, py + ph); pg.addColorStop(0, mc); pg.addColorStop(1, "#05070d"); g.fillStyle = pg; g.fillRect(px, py, pw, ph);
+    var my = py + ph / 2 + Math.sin(t * 1.7) * 6; if (ml) { var r1 = Math.min(190 / ml.width, 190 / ml.height); g.drawImage(ml, px + pw / 2 - ml.width * r1 / 2, my - ml.height * r1 / 2, ml.width * r1, ml.height * r1); } else badge(g, px + pw / 2, my, 90, me);
+    g.restore(); g.strokeStyle = "rgba(255,255,255,.9)"; g.lineWidth = 5; rr(g, px, py, pw, ph, 30); g.stroke();
+    g.textAlign = "center";
+    [["🎤", "rgba(255,255,255,.22)"], ["📷", "rgba(255,255,255,.22)"], ["🔊", "rgba(255,255,255,.22)"], ["✕", "#e11d48"]].forEach(function (b, i) { var bx = 180 + i * 240; g.fillStyle = b[1]; g.beginPath(); g.arc(bx, 1720, 78, 0, Math.PI * 2); g.fill(); g.fillStyle = "#fff"; g.font = (b[0] === "✕" ? "800 64px " : "56px ") + FONT; g.fillText(b[0], bx, 1724); });
   }
   function statusBar(g, t, ink, bg) { // heure qui avance, réseau et batterie qui baisse
     g.fillStyle = ink; g.font = "700 34px " + FONT; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(fmtClock(clockAt(t)), W / 2, 34);
@@ -3373,6 +3432,7 @@ Moi: Si, un peu 😂
       else if (it.k === "notif") { click(t0 + it.at, 1047, .1, .3, "sine"); click(t0 + it.at + .12, 1568, .09, .4, "sine"); }
       else if (it.k === "sep") click(t0 + it.at, 330, .06, .6, "sine");
       else if (it.k === "vocal") { click(t0 + it.at, it.who === "me" ? 880 : 660, .08, .15, "sine"); }
+      else if (it.k === "poll") { click(t0 + it.at, 660, .08, .18, "sine"); for (var pv = 0; pv < 9; pv++) click(t0 + it.at + .5 + pv * .36, 1400 + pv * 60, .03, .06, "sine"); }
       else if (it.k === "call") { for (var rt = it.at + .2; rt < it.ring - .1; rt += 1.2) { click(t0 + rt, 784, .09, .35, "sine"); click(t0 + rt + .38, 659, .09, .35, "sine"); } if (!it.acc) { click(t0 + it.end, 440, .08, .2, "sine"); click(t0 + it.end + .2, 330, .08, .3, "sine"); } }
     });
     if (S.sfx && hookText) { boom(t0 + .02, .35); noise(t0 + .02, .4, 1200, .12); }
@@ -3443,7 +3503,7 @@ Moi: Si, un peu 😂
     var dd = duel(), A = CL[dd.a], B = CL[dd.b];
     $("#side").innerHTML = "<option value=\"om\">" + A.MYHEART + " Team " + A.ME + " (« Moi » = " + A.LEME + ")</option><option value=\"psg\">" + B.MYHEART + " Team " + B.ME + " (« Moi » = " + B.LEME + ")</option>";
     $("#genTheme").innerHTML = Object.keys(GEN).map(function (k) { return "<option value=\"" + k + "\">" + GEN[k].label + "</option>"; }).join("");
-    $("#inbox").checked = !!S.inbox; $("#typos").checked = !!S.typos; $("#hook").value = S.hook ? fillTokens(S.hook, S.side) : "";
+    $("#wall").checked = !!S.wall; $("#inbox").checked = !!S.inbox; $("#typos").checked = !!S.typos; $("#hook").value = S.hook ? fillTokens(S.hook, S.side) : "";
     $("#lock").checked = !!S.lock; $("#dark").checked = !!S.dark; $("#clock").value = S.clock;
     var VO = [["fr-FR-RemyMultilingualNeural", "Rémy (homme)"], ["fr-FR-HenriNeural", "Henri (homme)"], ["fr-BE-GerardNeural", "Gérard (homme)"], ["fr-CA-AntoineNeural", "Antoine (homme)"], ["fr-FR-DeniseNeural", "Denise (femme)"], ["fr-FR-VivienneMultilingualNeural", "Vivienne (femme)"], ["fr-FR-EloiseNeural", "Éloïse (jeune)"]].map(function (v) { return "<option value=\"" + v[0] + "\">" + v[1] + "</option>"; }).join("");
     $("#vMe").innerHTML = VO; $("#vOther").innerHTML = VO; $("#vMe").value = S.vMe || "fr-FR-RemyMultilingualNeural"; $("#vOther").value = S.vOther || "fr-FR-HenriNeural";
@@ -3462,6 +3522,7 @@ Moi: Si, un peu 😂
   $("#genGo").onclick = function () { if (edited() && !confirm("Remplacer ton histoire par une histoire inventée ?")) return; genNew(); };
   $("#lock").onchange = function () { S.lock = this.checked; save(); parse(); restart(); };
   $("#dark").onchange = function () { S.dark = this.checked; save(); };
+  $("#wall").onchange = function () { S.wall = this.checked; save(); };
   $("#inbox").onchange = function () { S.inbox = this.checked; save(); parse(); restart(); };
   $("#typos").onchange = function () { S.typos = this.checked; save(); parse(); };
   $("#hook").oninput = function () { S.hook = this.value; save(); parse(); };

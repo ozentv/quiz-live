@@ -185,6 +185,9 @@ Page : https://ozentv.github.io/quiz-live/histoire.html
 - **Effets d'écran** : `[choc]` l'écran tremble avec un flash rouge et un boum, `[zoom]` zoom sur le dernier message avec un son dramatique, `[flash]` flash blanc. Ils marchent aussi en début de message : `PSG: [choc] QUOI ???`.
 - **😂 Gros emojis** : un message fait seulement de 1 à 3 emojis s'affiche en grand avec un petit saut. **Autocollants** dessinés par la page : `[sticker chevre]` (GOAT), `ballon`, `coupe`, `but`, `pleure`, `rire`, `feu`, `clown`, `mur`, `dodo`, `coeur`, `bus` (`Moi: [sticker coupe]` pour le tien).
 - **📸 Capture d'écran** : `[capture]` affiche « 📸 PSG a fait une capture d'écran ! », `Moi: [capture]` « 📸 Tu as fait une capture d'écran » avec un flash, et un bruit d'appareil photo.
+- **📊 Sondage** : `[sondage] Qui gagne dimanche ? | OM | PSG | Nul` affiche un sondage où les votes arrivent et les barres bougent (`| OM 41` pour choisir le nombre de votes, ✓ sur l'option de ton club). `Moi: [sondage] …` pour le tien.
+- **📹 Appel vidéo** : `[appel vidéo] PSG | accepté` montre la « caméra » de l'autre (son logo qui bouge comme filmé à la main), ta petite fenêtre avec ton logo et les boutons ; sans « accepté », appel vidéo manqué.
+- **🖼️ Fond de conversation** aux couleurs du club de « Moi », avec le logo en filigrane (case à cocher).
 - **🌙 Mode sombre** pour toute l'appli de messagerie.
 - **🛡️ Logos des clubs** : importe le logo de l'OM et celui du PSG. Ils remplacent les écussons dessinés (photo du contact, « en train d'écrire », ton avatar, article de journal) et restent sur le téléphone.
 - Pour écrire ta propre histoire, une ligne par message :
