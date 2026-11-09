@@ -165,7 +165,11 @@ Page : https://ozentv.github.io/quiz-live/clubs.html
 ## 💬 Histoire en messages (OM contre PSG)
 Page : https://ozentv.github.io/quiz-live/histoire.html
 - Une conversation qui s'écrit toute seule sur un écran de messagerie (appli inventée, sans marque) : tes messages se tapent lettre par lettre au clavier, les réponses arrivent après « … en train d'écrire », et le fil défile tout seul.
-- **5 histoires prêtes à l'emploi**, chacune en version **Team OM** (« Moi » = l'OM) et **Team PSG** (« Moi » = le PSG) : Le Classique, Le pari, Les ex, Le mercato, et une vide.
+- **105 histoires prêtes à l'emploi**, chacune en version **Team OM** (« Moi » = l'OM) et **Team PSG** (« Moi » = le PSG) :
+  - 5 histoires spéciales : Le Classique, Le pari, Les ex, Le mercato, et une vide ;
+  - 100 conversations en 7 catégories : 😏 Chambrage, 🤝 Paris et défis, 💔 Amour et ex, ✍️ Mercato et joueurs, 🏟️ Jour de match, 👨‍👩‍👧 Supporters et famille, 🤪 Délires.
+  - Les noms, stades, villes, couleurs, slogans et emojis s'adaptent tout seuls au camp choisi. « 🎲 Une histoire au hasard » en tire une.
+- **🛡️ Logos des clubs** : importe le logo de l'OM et celui du PSG. Ils remplacent les écussons dessinés (photo du contact, « en train d'écrire », ton avatar, article de journal) et restent sur le téléphone.
 - Pour écrire ta propre histoire, une ligne par message :
   - `Moi: texte` pour ton message, `PSG: texte` pour l'autre ;
   - `# Partie 1 : …` pour un chapitre (affiché au-dessus du clavier) ;
