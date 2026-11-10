@@ -158,6 +158,18 @@ button.main::after { content: ""; position: absolute; top: 0; bottom: 0; width: 
     </div>
 
     <div class="box">
+      <h2>🎙️ Voix off (commentateur)</h2>
+      <label class="chk" style="display:flex;align-items:center;gap:8px;color:var(--fg);font-size:14px"><input type="checkbox" id="vOn" checked style="width:20px;height:20px;accent-color:var(--acc)"> Commentateur surexcité pendant toute la vidéo</label>
+      <label>Voix<select id="vVoice"><option value="fr-FR-HenriNeural">Henri · homme, voix radio</option><option value="fr-FR-RemyMultilingualNeural">Rémy · homme, très naturel</option><option value="fr-FR-DeniseNeural">Denise · femme, claire</option><option value="fr-FR-VivienneMultilingualNeural">Vivienne · femme, très naturelle</option></select></label>
+      <details><summary>Réglages du relais</summary><div>
+        <label>Adresse du relais<input type="text" id="vRelay" placeholder="studio-quiz-relais.onrender.com" autocomplete="off"></label>
+        <label>Clé (la même que « Clé du classement » du Studio Quiz)<input type="text" id="vKey" autocomplete="off"></label>
+        <p class="note">Repris tout seuls depuis le Studio Quiz s'ils y sont déjà réglés. Le relais peut mettre 30 secondes à se réveiller la première fois.</p>
+      </div></details>
+      <button type="button" class="mini" id="vTest">🔊 Tester la voix</button>
+    </div>
+
+    <div class="box">
       <h2>📖 L'album</h2>
       <div class="prog"><i id="progI"></i></div>
       <p class="note" id="albumNote"></p>
@@ -702,7 +714,7 @@ Timothé Nkada | Troyes | BU | 68 | France | 1999
 Ibrahim Traoré | Troyes | BU | 66 | France | 2006
 Amadou Diakité | Troyes | BU | 63 | France | 2005
 </script>
-<script src="packs.js?v=52"></script>
+<script src="packs.js?v=54"></script>
 <script src="nav.js?v=49"></script>
 </body>
 </html>
