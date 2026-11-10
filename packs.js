@@ -314,11 +314,13 @@
     // 1. le pack
     if (T > -.4 && T < 3.3) {
       var drop = back((T + .1) / .7), shake = T > 1.2 ? Math.sin(t * 60) * (T - 1.2) * 14 : 0, glow = clamp((T - 1.2) / 1.7);
-      g.save(); g.translate(W / 2 + shake, -600 + 1560 * drop); g.rotate(shake * .002); g.shadowColor = "rgba(" + bestR.beam + "," + (.3 + .7 * glow) + ")"; g.shadowBlur = 40 + 120 * glow;
-      var pg = g.createLinearGradient(-260, -380, 260, 380); pg.addColorStop(0, c0.c1); pg.addColorStop(.55, c0.dark); pg.addColorStop(1, c0.c2); g.fillStyle = pg; rr(g, -260, -380, 520, 760, 40); g.fill(); g.shadowBlur = 0;
-      g.save(); rr(g, -260, -380, 520, 760, 40); g.clip(); g.globalAlpha = .16; g.fillStyle = "#fff"; for (var s = -8; s < 8; s++) g.fillRect(s * 80 + ((t * 120) % 80), -400, 26, 800); g.globalAlpha = 1;
-      var fs = (t * .8) % 1, fsg = g.createLinearGradient(-400 + fs * 900, 0, -200 + fs * 900, 0); fsg.addColorStop(0, "rgba(255,255,255,0)"); fsg.addColorStop(.5, "rgba(255,255,255,.45)"); fsg.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = fsg; g.fillRect(-260, -380, 520, 760); g.restore();
-      badge(g, 0, -60, 130, pc); g.fillStyle = "#fff"; g.textAlign = "center"; g.textBaseline = "middle"; var pn = packName(L); g.font = "900 56px " + FONT; var pf = 56; while (g.measureText(pn).width > 470 && pf > 30) { pf -= 4; g.font = "900 " + pf + "px " + FONT; } g.fillText(pn, 0, 200); g.font = "700 34px " + FONT; g.fillText(L.cards.length + " CARTES", 0, 260);
+      var F = foilOf(L.pack, L.club), pn = packName(L), sub = L.cards.length + " CARTES", lg2 = function () { badge(g, 0, -90, 135, pc); }, tear = clamp((T - 2.45) / .45);
+      g.save(); g.translate(W / 2 + shake, -600 + 1560 * drop); g.rotate(shake * .002);
+      g.save(); g.shadowColor = "rgba(" + bestR.beam + "," + (.3 + .7 * glow) + ")"; g.shadowBlur = 40 + 120 * glow; g.fillStyle = F[1]; packPath(g, 540, 780); g.fill(); g.restore();
+      if (tear <= 0) drawPack(g, t, F, pn, sub, lg2);
+      else { g.save(); g.beginPath(); g.rect(-300, -322, 600, 800); g.clip(); drawPack(g, t, F, pn, sub, lg2); g.restore(); // le haut se déchire et s'envole
+        g.fillStyle = "rgba(255,255,255," + (.9 * tear) + ")"; g.fillRect(-270, -326, 540, 8);
+        g.save(); g.translate(260 * tear * tear, -420 * tear * tear); g.rotate(.5 * tear); g.globalAlpha = 1 - tear * .6; g.beginPath(); g.rect(-300, -420, 600, 98); g.clip(); drawPack(g, t, F, pn, sub, lg2); g.restore(); }
       g.restore();
       if (T > 1.3 && T < 2.9) bigText(g, "👆 Appuie pour ouvrir", 1640, 54, .6 + .4 * Math.sin(t * 6), 1);
     }
@@ -414,6 +416,33 @@
     if (pressed && t >= D && t < D + .5) { var q = (t - D) / .5, rb = BTN[pressed]; g.fillStyle = "rgba(255,255,255," + (.5 * (1 - q)) + ")"; g.beginPath(); g.arc(rb[0] + rb[2] / 2, rb[1] + rb[3] / 2, 60 + 260 * q, 0, Math.PI * 2); g.fill(); }
     g.restore();
   }
+  // pack en aluminium : bords soudés crantés, effet bombé, reflets qui bougent, plis, motif en relief, bandeau
+  var FOIL = { base: ["#f4f6f9", "#b6c0cc", "#5d6773", "#1b2330", "#ffffff"], or: ["#fff2b3", "#e2b93b", "#7a560c", "#2b1d03", "#fff6d0"], futur: ["#b8ffe9", "#19b58c", "#06473a", "#ffffff", "#c8fff0"], totw: ["#4a4a4a", "#1a1a1a", "#040404", "#f5d77a", "#f5d77a"],
+    premium: ["#e2c2ff", "#7c3aed", "#25074f", "#ffe9a8", "#ffe9a8"], icone: ["#ffffff", "#ece3c6", "#a88d4c", "#3a2f12", "#d9b85c"] };
+  function foilOf(id, cl) { if (id === "club") { var c = club(cl), light = lum(c.c1) > .75; return [light ? c.c1 : mix(c.c1, "#ffffff", .35), c.c1, c.dark, light ? "#111111" : "#ffffff", c.c2]; } return FOIL[id] || FOIL.base; }
+  function lum(h) { var n = parseInt(String(h).slice(1), 16); return (.299 * (n >> 16) + .587 * ((n >> 8) & 255) + .114 * (n & 255)) / 255; }
+  function mix(a, b, k) { var x = parseInt(a.slice(1), 16), y = parseInt(b.slice(1), 16), r = Math.round((x >> 16) * (1 - k) + (y >> 16) * k), gg = Math.round(((x >> 8) & 255) * (1 - k) + ((y >> 8) & 255) * k), bb = Math.round((x & 255) * (1 - k) + (y & 255) * k); return "#" + ((1 << 24) + (r << 16) + (gg << 8) + bb).toString(16).slice(1); }
+  function packPath(g, w, h) { var x = -w / 2, y = -h / 2, n = Math.round(w / 18), i; g.beginPath(); g.moveTo(x, y + 10);
+    for (i = 0; i <= n; i++) g.lineTo(x + i * w / n, y + (i % 2 ? 0 : 10)); g.lineTo(-x, -y - 10); for (i = n; i >= 0; i--) g.lineTo(x + i * w / n, -y - (i % 2 ? 0 : 10)); g.closePath(); }
+  function drawPack(g, t, F, name, sub, logo) {
+    var w = 540, h = 780, cr = 46;
+    packPath(g, w, h); var bg = g.createLinearGradient(-w / 2, 0, w / 2, 0); bg.addColorStop(0, F[2]); bg.addColorStop(.18, F[1]); bg.addColorStop(.42, F[0]); bg.addColorStop(.58, F[1]); bg.addColorStop(.85, F[1]); bg.addColorStop(1, F[2]); g.fillStyle = bg; g.fill();
+    g.save(); packPath(g, w, h); g.clip();
+    var vg = g.createLinearGradient(0, -h / 2, 0, h / 2); vg.addColorStop(0, "rgba(0,0,0,.35)"); vg.addColorStop(.12, "rgba(0,0,0,0)"); vg.addColorStop(.88, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,.4)"); g.fillStyle = vg; g.fillRect(-w / 2, -h / 2, w, h); // bombé
+    g.globalAlpha = .07; g.strokeStyle = F[3]; g.lineWidth = 2; for (var k = -14; k < 14; k++) { g.beginPath(); g.moveTo(k * 46, -h / 2 + cr); g.lineTo(k * 46 + 300, h / 2 - cr); g.moveTo(k * 46 + 300, -h / 2 + cr); g.lineTo(k * 46, h / 2 - cr); g.stroke(); } g.globalAlpha = 1; // motif en relief
+    [[-60, .08], [110, -.07], [-170, .05]].forEach(function (wr, i) { var x0 = wr[0] + Math.sin(t * .7 + i) * 6, lg = g.createLinearGradient(x0 - 40, 0, x0 + 40, 0); lg.addColorStop(0, "rgba(255,255,255,0)"); lg.addColorStop(.45, "rgba(255,255,255," + (.18 + .05 * i) + ")"); lg.addColorStop(.55, "rgba(0,0,0,.12)"); lg.addColorStop(1, "rgba(0,0,0,0)"); g.save(); g.rotate(wr[1]); g.fillStyle = lg; g.fillRect(x0 - 40, -h, 80, h * 2); g.restore(); }); // plis
+    var sx = ((t * .35) % 1.6 - .3) * w * 1.4 - w / 2; g.save(); g.rotate(-.42); g.globalCompositeOperation = "lighter"; var sh = g.createLinearGradient(sx - 120, 0, sx + 120, 0); sh.addColorStop(0, "rgba(255,255,255,0)"); sh.addColorStop(.5, "rgba(255,255,255,.4)"); sh.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = sh; g.fillRect(-w * 1.5, -h, w * 3, h * 2); g.restore(); // reflet qui bouge
+    var hl = g.createLinearGradient(-w / 2, 0, -w / 2 + 120, 0); hl.addColorStop(0, "rgba(255,255,255,0)"); hl.addColorStop(.6, "rgba(255,255,255,.28)"); hl.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = hl; g.fillRect(-w / 2 + 40, -h / 2, 120, h); // reflet fixe
+    [-1, 1].forEach(function (sd) { var y0 = sd < 0 ? -h / 2 : h / 2 - cr, cg = g.createLinearGradient(0, y0, 0, y0 + cr); cg.addColorStop(0, sd < 0 ? "rgba(0,0,0,.35)" : "rgba(0,0,0,.05)"); cg.addColorStop(1, sd < 0 ? "rgba(0,0,0,.05)" : "rgba(0,0,0,.35)"); g.fillStyle = cg; g.fillRect(-w / 2, y0, w, cr);
+      for (var x = -w / 2; x < w / 2; x += 7) { g.fillStyle = (x / 7) % 2 ? "rgba(255,255,255,.22)" : "rgba(0,0,0,.18)"; g.fillRect(x, y0, 3, cr); } g.fillStyle = "rgba(255,255,255,.35)"; g.fillRect(-w / 2, sd < 0 ? y0 + cr : y0, w, 2); }); // soudures crantées
+    g.restore();
+    g.save(); packPath(g, w, h); g.lineWidth = 3; g.strokeStyle = "rgba(255,255,255,.45)"; g.stroke(); g.restore();
+    g.fillStyle = F[3]; g.globalAlpha = .85; g.font = "800 22px " + FONT; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("LIGUE 1 · SAISON 2026-2027", 0, -h / 2 + cr + 34); g.globalAlpha = 1;
+    logo();
+    var by = 150; g.save(); g.fillStyle = "rgba(0,0,0,.45)"; g.fillRect(-w / 2, by - 54, w, 108); g.fillStyle = F[4]; g.fillRect(-w / 2, by - 54, w, 5); g.fillRect(-w / 2, by + 49, w, 5); g.restore();
+    g.fillStyle = "#fff"; var f2 = 56; g.font = "900 56px " + FONT; while (g.measureText(name).width > w - 50 && f2 > 30) { f2 -= 4; g.font = "900 " + f2 + "px " + FONT; } g.fillText(name, 0, by + 2);
+    g.font = "800 30px " + FONT; var sw = g.measureText(sub).width + 44; g.fillStyle = "rgba(0,0,0,.5)"; rr(g, -sw / 2, by + 86, sw, 48, 24); g.fill(); g.fillStyle = "#fff"; g.fillText(sub, 0, by + 111);
+  }
   function slotSum(i, n) { var perRow = n > 6 ? 4 : n > 4 ? 3 : n, row = Math.floor(i / perRow), inRow = Math.min(perRow, n - row * perRow); return [W / 2 + ((i % perRow) - (inRow - 1) / 2) * 250, 470 + row * 330]; }
   function tag(g, c, x, y, a, sc) { if (a <= 0) return; g.save(); g.globalAlpha = a; g.translate(x, y); g.scale(sc, sc); if (c.sale) pill(g, "💸 VENDUE +" + fmt(c.sale) + " 🪙", 0, 0, "#fb923c", "#2a1000", 30); else if (c.dup) pill(g, "♻️ DOUBLON +" + fmt(c.sold) + " 🪙", 0, 0, "#f5c542", "#1a1300", 30); else pill(g, "🆕 NOUVELLE", 0, 0, "#22c55e", "#04210f", 30); g.restore(); }
   function summary(g, t, L, tm, k) {
@@ -430,7 +459,7 @@
   }
   function idle(g, t) {
     var gr = g.createRadialGradient(W / 2, 800, 50, W / 2, 900, 1300); gr.addColorStop(0, "#0b1530"); gr.addColorStop(1, "#000"); g.fillStyle = gr; g.fillRect(0, 0, W, H);
-    g.save(); g.translate(W / 2, 900 + Math.sin(t * 2) * 14); g.rotate(Math.sin(t) * .04); var pg = g.createLinearGradient(-260, -380, 260, 380); pg.addColorStop(0, L1.c1); pg.addColorStop(.55, L1.dark); pg.addColorStop(1, L1.c2); g.shadowColor = "rgba(255,210,80,.6)"; g.shadowBlur = 80; g.fillStyle = pg; rr(g, -260, -380, 520, 760, 40); g.fill(); g.shadowBlur = 0; badge(g, 0, -60, 130, "L1"); g.fillStyle = "#fff"; g.font = "900 56px " + FONT; g.textAlign = "center"; g.fillText("TON 1er PACK", 0, 200); g.restore();
+    g.save(); g.translate(W / 2, 900 + Math.sin(t * 2) * 14); g.rotate(Math.sin(t) * .04); g.save(); g.shadowColor = "rgba(255,210,80,.6)"; g.shadowBlur = 80; g.fillStyle = FOIL.or[1]; packPath(g, 540, 780); g.fill(); g.restore(); drawPack(g, t, FOIL.or, "TON 1er PACK", "OFFERT 🎁", function () { badge(g, 0, -90, 135, "L1"); }); g.restore();
     bigText(g, "Choisis un pack et ouvre-le 👈", 1560, 54, 1, 1);
   }
 
