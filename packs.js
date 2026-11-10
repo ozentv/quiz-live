@@ -204,7 +204,8 @@
     var ps = p.pos, gk = ps === "G", def = /^(DEF|DC|DD|DG|DLD|DLG)$/.test(ps), att = /^(ATT|BU|AT|AG|AD|AIL)$/.test(ps), wing = /^(AG|AD|MG|MD)$/.test(ps); if (/^(MDC)$/.test(ps)) { def = false; att = false; }
     return gk ? [["PLO", v(1, 2)], ["MAI", v(2, 0)], ["DÉG", v(3, -8)], ["RÉF", v(4, 3)], ["VIT", v(5, -20)], ["PLA", v(6, 1)]] : [["VIT", v(1, wing ? 6 : att ? 3 : def ? -6 : -2)], ["TIR", v(2, att ? 2 : def ? -25 : -6)], ["PAS", v(3, att ? -5 : 0)], ["DRI", v(4, att ? 1 : -8)], ["DÉF", v(5, def ? 2 : att ? -45 : -15)], ["PHY", v(6, def ? 0 : -8)]]; }
   function cardPath(g, w, h) { var x = -w / 2, y = -h / 2, n = w * .09; g.beginPath(); g.moveTo(x + n, y); g.lineTo(-w * .12, y); g.quadraticCurveTo(0, y + n * .55, w * .12, y); g.lineTo(-x - n, y); g.lineTo(-x, y + n); g.lineTo(-x, -y - h * .1); g.quadraticCurveTo(-x, -y - h * .04, -x - w * .08, -y - h * .025); g.lineTo(0, -y); g.lineTo(x + w * .08, -y - h * .025); g.quadraticCurveTo(x, -y - h * .04, x, -y - h * .1); g.lineTo(x, y + n); g.closePath(); }
-  function card(g, p, face, shine, sp, t) {
+  function card(g, p, face, shine, sp, t, par) {
+    var pxo = par || 0;
     var w = 640, h = 920, R = RAR[p.rk], c = club(p.club), inf = info(p), ph = photos[pkey(p)], tt = t || 0;
     g.save(); g.shadowColor = "rgba(" + R.beam + ",.6)"; g.shadowBlur = 60; cardPath(g, w, h);
     var gr = g.createLinearGradient(-w / 2, -h / 2, w / 2, h / 2); gr.addColorStop(0, R.a); gr.addColorStop(.5, R.b); gr.addColorStop(1, R.c); g.fillStyle = gr; g.fill(); g.restore();
@@ -214,8 +215,8 @@
     g.fillStyle = R.ink; g.textAlign = "center"; g.textBaseline = "middle";
     if (!face) { badge(g, 0, -40, 150, p.club); g.font = "900 44px " + FONT; g.fillText(R.label, 0, 230); }
     else {
-      if (ph) { var phh = 450, phw = phh * ph.width / ph.height; if (phw > 470) { phw = 470; phh = phw * ph.height / ph.width; } g.drawImage(ph, 90 - phw / 2, 25 - phh, phw, phh); var fd = g.createLinearGradient(0, -50, 0, 30); fd.addColorStop(0, "rgba(0,0,0,0)"); fd.addColorStop(1, R.b); g.fillStyle = fd; g.fillRect(-w / 2, -50, w, 80); }
-      else { g.fillStyle = R.rank >= 2 ? "rgba(255,255,255,.16)" : "rgba(0,0,0,.2)"; g.beginPath(); g.arc(80, -215, 100, 0, Math.PI * 2); g.fill(); g.beginPath(); g.moveTo(-100, 10); g.quadraticCurveTo(80, -150, 260, 10); g.closePath(); g.fill(); g.fillRect(-100, 0, 360, 12); }
+      if (ph) { var phh = 450, phw = phh * ph.width / ph.height; if (phw > 470) { phw = 470; phh = phw * ph.height / ph.width; } g.drawImage(ph, 90 - phw / 2 + pxo, 25 - phh, phw, phh); var fd = g.createLinearGradient(0, -50, 0, 30); fd.addColorStop(0, "rgba(0,0,0,0)"); fd.addColorStop(1, R.b); g.fillStyle = fd; g.fillRect(-w / 2, -50, w, 80); }
+      else { g.save(); g.translate(pxo, 0); g.fillStyle = R.rank >= 2 ? "rgba(255,255,255,.16)" : "rgba(0,0,0,.2)"; g.beginPath(); g.arc(80, -215, 100, 0, Math.PI * 2); g.fill(); g.beginPath(); g.moveTo(-100, 10); g.quadraticCurveTo(80, -150, 260, 10); g.closePath(); g.fill(); g.fillRect(-100, 0, 360, 12); g.restore(); }
       g.fillStyle = R.ink; g.font = "900 150px " + FONT; g.fillText(String(p.rating), -200, -300); g.font = "800 " + (p.pos.length > 2 ? 48 : 56) + "px " + FONT; g.fillText(p.pos, -200, -200);
       g.fillRect(-250, -160, 100, 4); var fl = flag(inf.nat); if (fl) { g.font = "62px " + FONT; g.fillText(fl, -200, -110); badge(g, -200, -25, 40, p.club); } else badge(g, -200, -95, 46, p.club);
       g.font = "800 26px " + FONT; g.fillText(R.label, 0, 40);
@@ -224,13 +225,45 @@
       stats(p).forEach(function (s, i) { var col = i < 3 ? -130 : 120, yy = 200 + (i % 3) * 70, v = Math.round(s[1] * ease(sp == null ? 1 : sp)); g.font = "900 54px " + FONT; g.textAlign = "right"; g.fillText(String(v), col, yy); g.font = "700 44px " + FONT; g.textAlign = "left"; g.fillText(s[0], col + 16, yy); });
       g.fillRect(-2, 175, 4, 190);
     }
-    if (R.rank >= 2) holo(g, w, h, tt, R);
+    if (R.rank >= 2) holo(g, w, h, tt + pxo / 120, R);
     if (shine != null) { var sx = -w + shine * w * 2.2, sg = g.createLinearGradient(sx - 120, 0, sx + 120, 0); sg.addColorStop(0, "rgba(255,255,255,0)"); sg.addColorStop(.5, "rgba(255,255,255,.5)"); sg.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = sg; g.save(); g.rotate(-.35); g.fillRect(-w, -h, w * 2, h * 2); g.restore(); }
     g.restore();
     g.save(); cardPath(g, w, h); g.lineWidth = 8; g.strokeStyle = R.edge || "rgba(255,255,255,.7)"; g.stroke();
     if (R.rank >= 2 && g.createConicGradient) { var cg2 = g.createConicGradient(tt * 1.6, 0, 0); ["#ff5f6d", "#ffc371", "#f5d77a", "#7cf7d4", "#5ec8ff", "#c48bff", "#ff5f6d"].forEach(function (col, i, a) { cg2.addColorStop(i / (a.length - 1), col); }); g.lineWidth = 10; g.globalAlpha = .85; g.strokeStyle = cg2; g.stroke(); }
     g.restore();
     if (R.rank >= 2) sparkles(g, w, h, tt);
+  }
+  // carte en 3D : dessinée hors écran puis affichée en bandes verticales avec perspective
+  var oc = null, ocg = null, OW = 760, OH = 1040;
+  function card3d(g, p, ang, shine, sp, t) {
+    if (!oc) { oc = document.createElement("canvas"); oc.width = OW; oc.height = OH; ocg = oc.getContext("2d"); }
+    var a = ang % (Math.PI * 2), face = Math.cos(a) >= 0, ra = face ? a : a - Math.PI, cs = Math.cos(ra), sn = Math.sin(ra);
+    ocg.setTransform(1, 0, 0, 1, 0, 0); ocg.clearRect(0, 0, OW, OH); ocg.translate(OW / 2, OH / 2); card(ocg, p, face, shine, sp, t, -sn * 46); ocg.setTransform(1, 0, 0, 1, 0, 0);
+    if (Math.abs(cs) < .03) return;
+    var N = 32, D = 1500;
+    g.save(); g.shadowColor = "rgba(0,0,0,.45)"; g.shadowBlur = 40; g.fillStyle = "rgba(0,0,0,.25)"; g.beginPath(); g.ellipse(0, OH * .52, 300 * Math.abs(cs), 34, 0, 0, Math.PI * 2); g.fill(); g.restore();
+    for (var i = 0; i < N; i++) { var u0 = i / N, u1 = (i + 1) / N, X0 = (u0 - .5) * OW, X1 = (u1 - .5) * OW, z0 = X0 * sn, z1 = X1 * sn, f0 = D / (D + z0), f1 = D / (D + z1), sx0 = X0 * cs * f0, sx1 = X1 * cs * f1, fm = (f0 + f1) / 2;
+      if (cs < 0) { var tmp = sx0; sx0 = sx1; sx1 = tmp; }
+      var dw = Math.abs(sx1 - sx0) + .8, dh = OH * fm; g.drawImage(oc, u0 * OW, 0, OW / N, OH, Math.min(sx0, sx1), -dh / 2, dw, dh); }
+  }
+  function celebrate(g, t, tm, last) { // fête selon la note : pluie d'or (85+), feux d'artifice et stade qui s'allume (90+)
+    var r = last.rating, d = t - tm.flip - .35; if (r < 85 || d < 0 || t > tm.sum + .6) return; var fade = 1 - clamp((t - tm.sum) / .6), cc = club(last.club);
+    g.save(); g.globalAlpha = fade;
+    if (r >= 90) { // projecteurs du stade qui s'allument un par un
+      for (var k = 0; k < 6; k++) { var on = clamp((d - k * .09) / .12); if (on <= 0) continue; var lx = 90 + k * 180, lg = g.createRadialGradient(lx, 175, 4, lx, 175, 150); lg.addColorStop(0, "rgba(255,255,255," + on + ")"); lg.addColorStop(.25, "rgba(255,250,220," + (.5 * on) + ")"); lg.addColorStop(1, "rgba(255,250,220,0)"); g.fillStyle = lg; g.fillRect(lx - 150, 25, 300, 300);
+        g.save(); g.globalCompositeOperation = "lighter"; var cg = g.createLinearGradient(lx, 175, lx, 1700); cg.addColorStop(0, "rgba(255,250,220," + (.16 * on) + ")"); cg.addColorStop(1, "rgba(255,250,220,0)"); g.fillStyle = cg; g.beginPath(); g.moveTo(lx - 12, 175); g.lineTo(lx + 12, 175); g.lineTo(lx + 240 - k * 40, 1700); g.lineTo(lx - 60 - k * 40, 1700); g.closePath(); g.fill(); g.restore(); }
+      var pal = [cc.c1, "#f5d77a", "#ffffff", cc.c2 === "#ffffff" ? "#ff5f6d" : cc.c2];
+      for (var f = 0; f < 8; f++) { var lt = .15 + f * .32, fd = d - lt; if (fd < 0) continue; var hx = ((f * 389) % 860) + 110, hy = 330 + ((f * 211) % 520), sx = hx + (f % 2 ? -60 : 60), rise = .45;
+        g.save(); g.globalCompositeOperation = "lighter";
+        if (fd < rise) { var q = fd / rise, yy = 1900 - (1900 - hy) * (1 - Math.pow(1 - q, 2)), xx = sx + (hx - sx) * q; g.strokeStyle = "rgba(255,230,160,.9)"; g.lineWidth = 6; g.beginPath(); g.moveTo(xx, yy); g.lineTo(xx - (hx - sx) * .05, yy + 90); g.stroke(); }
+        else { var e = fd - rise; if (e < 1.6) { var col = pal[f % pal.length], al = 1 - e / 1.6; if (e < .12) { var fl = g.createRadialGradient(hx, hy, 0, hx, hy, 380); fl.addColorStop(0, "rgba(255,255,255," + (.35 * (1 - e / .12)) + ")"); fl.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = fl; g.fillRect(hx - 380, hy - 380, 760, 760); }
+          g.fillStyle = col; g.strokeStyle = col; g.lineCap = "round"; g.globalAlpha = fade * al; for (var sp2 = 0; sp2 < 44; sp2++) { var an = sp2 / 44 * Math.PI * 2 + f, v = 420 + (sp2 % 3) * 110, e0 = Math.max(0, e - .09), px = hx + Math.cos(an) * v * e, py = hy + Math.sin(an) * v * e + 260 * e * e, qx = hx + Math.cos(an) * v * e0, qy = hy + Math.sin(an) * v * e0 + 260 * e0 * e0; g.lineWidth = 9 * (1 - e / 1.8); g.beginPath(); g.moveTo(qx, qy); g.lineTo(px, py); g.stroke(); g.beginPath(); g.arc(px, py, 10 * (1 - e / 2), 0, Math.PI * 2); g.fill(); if (sp2 % 4 === 0 && e > .3) { g.globalAlpha = fade * al * (Math.sin(t * 40 + sp2) > 0 ? 1 : .2); g.fillRect(px - 2, py - 2, 4, 4); g.globalAlpha = fade * al; } } } }
+        g.restore(); }
+    }
+    // pluie d'or
+    g.globalCompositeOperation = "lighter"; for (var i = 0; i < (r >= 90 ? 110 : 70); i++) { var sp3 = 220 + (i * 37) % 260, x = ((i * 151) % W) + Math.sin(t * 2 + i) * 18, y = -40 + (d * sp3 + (i * 97) % 500) - 150; if (y < -40 || y > H) continue; var tw = .5 + .5 * Math.sin(t * 10 + i * 1.7), sz = 4 + (i % 4) * 2.5;
+      g.fillStyle = "rgba(255," + (200 + (i % 5) * 10) + ",90," + (.85 * tw) + ")"; g.beginPath(); g.moveTo(x, y - sz * 2); g.quadraticCurveTo(x, y, x + sz * 2, y); g.quadraticCurveTo(x, y, x, y + sz * 2); g.quadraticCurveTo(x, y, x - sz * 2, y); g.quadraticCurveTo(x, y, x, y - sz * 2); g.fill(); }
+    g.restore();
   }
   function holo(g, w, h, t, R) { // reflet holographique qui bouge (cartes spéciales)
     g.save(); g.globalCompositeOperation = "overlay"; var off = (t * 220) % (w * 2), hg = g.createLinearGradient(-w + off - w, -h / 2, off, h / 2);
@@ -315,11 +348,13 @@
       else if (s2[1] === "pos") bigText(g, last.pos, 1000, 280, a2, sc2);
       else { g.save(); g.globalAlpha = a2; g.strokeStyle = "rgba(" + bestR.beam + ",.95)"; g.lineWidth = 14; g.beginPath(); g.arc(W / 2, 1000, 240 * sc2, 0, Math.PI * 2); g.stroke(); g.restore(); bigText(g, String(last.rating), 1000, 300, a2, sc2, bestR.rank >= 2 ? "#f5d77a" : "#fff"); }
     });
+    celebrate(g, t, tm, last);
     if (t >= tm.flip - .5) {
       var ca = ease((t - tm.flip + .5) / .5), flip = clamp((t - tm.flip) / .55), sx2 = Math.cos(flip * Math.PI), idl = t > tm.flip + .6 ? Math.sin((t - tm.flip) * 1.6) * 10 : 0;
       var big2 = tm.n > 4, bx = W / 2, byy = (big2 ? 1150 : 1060) + (1 - ca) * 300 + idl, bsc = big2 ? (.6 + .17 * ca) : (.66 + .2 * ca);
       if (sumK > 0) { var sb = slotSum(L.cards.length - 1, L.cards.length); bx += (sb[0] - bx) * ease(sumK); byy += (sb[1] - byy) * ease(sumK); bsc += (.27 - bsc) * ease(sumK); }
-      g.save(); g.globalAlpha = ca; g.translate(bx, byy); g.scale(bsc * Math.max(.02, Math.abs(sx2)), bsc); card(g, last, flip > .5, t > tm.flip + .6 && sumK < 1 ? ((t - tm.flip - .6) * .5) % 1.4 : null, clamp((t - tm.flip - .5) / 1.2), t); g.restore();
+      var ang = Math.PI * (1 - ease(flip)) + (t > tm.flip + .55 ? Math.sin((t - tm.flip - .55) * 1.1) * .32 * (1 - sumK) * clamp((t - tm.flip - .55) / .6) : 0);
+      g.save(); g.globalAlpha = ca; g.translate(bx, byy); g.scale(bsc, bsc); card3d(g, last, ang, t > tm.flip + .6 && sumK < 1 ? ((t - tm.flip - .6) * .5) % 1.4 : null, clamp((t - tm.flip - .5) / 1.2), t); g.restore();
       if (t > tm.flip + .6) tag(g, t < tm.flip + 2.5 ? { dup: last.dup, sold: last.sold } : last, bx, byy + 920 * bsc / 2 + 24, clamp((t - tm.flip - .6) / .3), sumK > 0 ? .75 : 1.2);
       if (last.value != null && t > tm.flip + 1.3 && t < tm.sum && !btnVis(t)) { var va = clamp((t - tm.flip - 1.3) / .3) * (1 - sumK); g.save(); g.globalAlpha = va; pill(g, "💰 Valeur : " + fmt(last.value) + " 🪙", W / 2, big2 ? 1725 : 1680, "rgba(0,0,0,.7)", "#f5d77a", 40); g.restore(); }
       if (t > tm.flip + 2.5 && t < tm.sum + .3) { var da = clamp((t - tm.flip - 2.5) / .25) * (1 - sumK);
@@ -415,6 +450,9 @@
     tone(t0 + tm.tw, 150, 60, .9, .3, "triangle");
     if (tm.walk) { for (var li = 0; li < 4; li++) { noise(t0 + tm.tun + .2 + li * .32, .12, 300, .5, "lowpass"); tone(t0 + tm.tun + .2 + li * .32, 110, 55, .3, .4); } tone(t0 + tm.sil, 80, 160, tm.flip - tm.sil, .12, "sawtooth"); noise(t0 + tm.sil, tm.flip - tm.sil, 600, .08); }
     [tm.walk ? tm.flag : tm.club, tm.walk ? tm.club : tm.pos, tm.walk ? tm.pos : tm.note].forEach(function (s, i) { tone(t0 + s, 70, 40, .5, .75); noise(t0 + s, .25, 200, .5, "lowpass"); tone(t0 + s, 330 + i * 110, 330 + i * 110, .5, .06, "triangle"); });
+    var lr = L.cards[L.cards.length - 1].rating, fz = t0 + tm.flip + .35;
+    if (lr >= 85) [1568, 2093, 2637, 3136].forEach(function (f, i) { tone(fz + .05 + i * .09, f, f, .7, .035, "triangle"); });
+    if (lr >= 90) for (var fw = 0; fw < 8; fw++) { var lt = fz + .15 + fw * .32; tone(lt, 500, 1500, .4, .025); noise(lt + .45, .5, 180, .55, "lowpass"); tone(lt + .45, 70, 35, .5, .45); for (var cr2 = 0; cr2 < 5; cr2++) noise(lt + .7 + cr2 * .09, .05, 4000, .12, "highpass"); }
     tone(t0 + tm.flip, 400, 1600, .3, .1); [0, .12, .24].forEach(function (d, i) { tone(t0 + tm.flip + .35 + d, [784, 988, 1175][i], [784, 988, 1175][i], .6, .08, "triangle"); });
     var cr = ac.createBufferSource(), cf = ac.createBiquadFilter(), cg = ac.createGain(); cr.buffer = nb; cr.loop = true; cf.type = "bandpass"; cf.frequency.value = 900; cf.Q.value = .5; var cs = t0 + Math.max(tm.flip, lo), ce = t0 + Math.min(tm.sum + 1.6, hi);
     if (ce > cs + .1) { cg.gain.setValueAtTime(.001, cs); cg.gain.linearRampToValueAtTime(.3, cs + .5); cg.gain.linearRampToValueAtTime(.001, ce - .1); cr.connect(cf); cf.connect(cg); cg.connect(dest); cr.start(cs); cr.stop(ce); }
