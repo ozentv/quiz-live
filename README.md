@@ -228,6 +228,7 @@ Page : https://ozentv.github.io/quiz-live/packs.html
 - **🎮 Choisir dans la vidéo** (case cochée par défaut) : quand la dernière carte est retournée, la vidéo s'arrête sur deux gros boutons « 💸 VENDRE (prix) » et « 🔒 GARDER ». Tu touches la vidéo, le bouton s'enfonce et le tampon apparaît. Pendant l'enregistrement, la vidéo se met en pause le temps du choix (l'attente n'est pas dans le fichier). Si le choix est déjà fait, la vidéo rejoue l'appui sur le bon bouton.
 - **Carte en 3D** : la dernière carte se retourne en vraie perspective puis tourne doucement, la photo bouge un peu devant le fond (effet de profondeur), le reflet holographique suit l'angle.
 - **Fête selon la note** : pluie d'or et carillon à partir de 85 ; à partir de 90, les projecteurs du stade s'allument un par un et 8 feux d'artifice éclatent (sifflement, boum, crépitements).
+- **Packs en aluminium** : bords soudés crantés, effet bombé, reflets métalliques qui bougent, plis, motif en relief et bandeau ; une matière par pack (argent, couleurs du club, or, vert, noir et or, violet, nacré) ; le haut du pack se déchire et s'envole avant l'explosion.
 - Une collection **Team OM** et une **Team PSG**, gardées sur le téléphone, avec copie de secours (fichier) ; logos des clubs facultatifs (et le logo de la Ligue 1 pour les packs Ligue 1, à importer soi-même ; ses bords blancs sont coupés automatiquement) ; légende TikTok prête à copier.
 
 ## 📊 Duel en chiffres (vidéos « Clasico en chiffres »)
