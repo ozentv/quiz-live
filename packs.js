@@ -114,7 +114,8 @@
     completed.forEach(function (c) { S.done[c] = true; S.free++; });
     S.epi++;
     S.last = { epi: S.epi, pack: P.id, club: P.club ? clubName : "", free: useFree, price: useFree ? 0 : P.price, who: $("#who").value.trim(), com: $("#com").value.trim(), cards: cards, earned: earned, bonus: BONUS, sales: 0, coins: S.coins, coinsBefore: coins0, album: [albumCount(), PLAYERS.length], albumBefore: before, completed: completed };
-    save(); refresh(); showResult(); makeCap(); playNow();
+    save(); refresh(); showResult(); makeCap();
+    var Lp = S.last; if (vSet().on) { msg("🎙️ Préparation de la voix…"); var to = new Promise(function (r) { setTimeout(function () { r(false); }, 12000); }); Promise.race([prepVoice(Lp), to]).then(function () { if (S.last === Lp) { msg(""); playNow(); } }); } else playNow();
     toast("🃏", packOf(P.id).label + (P.club ? " " + clubName : ""), useFree ? "Pack offert 🎁" : "Pack acheté · -" + fmt(P.price) + " 🪙"); if (completed.length) setTimeout(function () { toast("🏆", "Page " + completed.join(", ") + " complétée !", "Pack offert débloqué", "good"); }, 900);
   }
   function selPack() { var r = document.querySelector("input[name=pk]:checked"); return r ? r.value : "base"; }
@@ -769,6 +770,71 @@
     bigText(g, "Choisis un pack et ouvre-le 👈", 1560, 54, 1, 1);
   }
 
+  /* ---------- voix off : commentateur surexcité (voix pro gratuite, fabriquée par le relais du Studio Quiz) ---------- */
+  var VO = { key: "", bufs: {}, ready: false, busy: null };
+  var SAY_CLUB = { "OM": "l'OM", "PSG": "le PSG", "Paris FC": "le Paris FC" }, SAY_AT = { "OM": "à l'OM", "PSG": "au PSG", "Paris FC": "au Paris FC", "Le Havre": "au Havre", "Le Mans": "au Mans" }, SAY_OF = { "OM": "de l'OM", "PSG": "du PSG", "Paris FC": "du Paris FC", "Le Havre": "du Havre", "Le Mans": "du Mans" };
+  var SAY_POS = { G: "gardien", DC: "défenseur central", DG: "latéral gauche", DD: "latéral droit", MDC: "milieu défensif", MC: "milieu central", MOC: "milieu offensif", MG: "milieu gauche", MD: "milieu droit", AG: "ailier gauche", AD: "ailier droit", BU: "buteur" };
+  var SAY_RAR = { commune: "carte commune", or: "carte or", futur: "futur talent", forme: "carte en forme", totw: "équipe de la semaine", potm: "joueur du mois", hero: "carte héros", fds: "fin de saison", icone: "icône" };
+  function vSet() { var d = {}; try { d = JSON.parse(localStorage.getItem("packs-voice") || "null") || {}; } catch (e) {} var q = {}; try { q = JSON.parse(localStorage.getItem("sq-set") || "{}") || {}; } catch (e) {}
+    return { on: d.on !== false, voice: d.voice || "fr-FR-HenriNeural", relay: d.relay || q.relay || "studio-quiz-relais.onrender.com", key: d.key || q.lbKey || "" }; }
+  function sayClub(c) { return SAY_CLUB[c] || c; }
+  function sayAt(c) { return SAY_AT[c] || "à " + c; }
+  function sayOf(c) { return SAY_OF[c] || (/^[AEIOUYÉH]/i.test(c) ? "d'" : "de ") + c; }
+  function sayName(n) { return String(n).replace(/[_@#]/g, " ").trim(); }
+  function sayCoins(n) { return String(Math.round(n)); }
+  // le texte : seulement les moments importants, phrases courtes et punchy
+  function vScript(L) {
+    var tm = TL(L), c = L.cards, last = c[c.length - 1], inf = info(last), P = packOf(L.pack), pk = P.id === "club" ? "pack " + sayOf(L.club) : P.label.toLowerCase(), out = [];
+    function add(x, text, pri, flex) { out.push({ x: x, text: text, pri: pri || 2, flex: flex || 0 }); }
+    if (L.who || L.com) add(.25, (L.who ? sayName(L.who) + " veut le " + pk : "Vous voulez le " + pk) + " ! C'est parti !", 3);
+    else add(.1, "Épisode " + L.epi + " ! On ouvre le " + pk + " !", 2);
+    add(tm.intro + 1.25, TEAR.on ? "On déchire !" : "Ça tremble !", 2, .3);
+    for (var j = 0; j < tm.n; j++) { var cd = c[j], rk = RAR[cd.rk].rank, ts = tm.intro + 3.45 + j * STEP;
+      if (rk >= 2) add(ts, SAY_RAR[cd.rk] + " ! " + sayName(cd.name) + " ! Énorme !", 3); else if (cd.rk === "or") add(ts, "Carte or ! " + sayName(cd.name) + " !", 2, .4); else if (cd.dup && j === 0) add(ts, "Un doublon… ça fait des pièces !", 1, .5); }
+    add(tm.tw + .05, "Et la dernière carte…", 3, .7);
+    if (tm.walk) {
+      add(tm.tun - .2, "Le tunnel !", 1, .2);
+      if (flag(inf.nat)) add(tm.flag + .05, "Nationalité : " + inf.nat + " !", 3, .2);
+      add(tm.club + .05, "Il joue " + sayAt(last.club) + " !", 3, .2);
+      add(tm.pos + .05, SAY_POS[last.pos] || last.pos, 3, .2);
+      add(tm.sil + .1, "Il arrive !", 2, .3);
+    } else {
+      add(tm.club + .02, sayClub(last.club) + " !", 3, .15); add(tm.pos + .02, SAY_POS[last.pos] || last.pos, 3, .15); add(tm.note + .02, String(last.rating) + " !", 3, .1);
+    }
+    add(tm.flip + .3, sayName(last.name) + ", " + (RAR[last.rk].rank >= 2 ? SAY_RAR[last.rk] + " !" : last.rating >= 80 ? "quelle carte !" : last.rk === "or" ? "carte or !" : "pas mal !"), 3);
+    if (RAR[last.rk].rank >= 2 || last.rating >= 88) add(tm.flip + 1.6, "In-croy-able !", 1, .5);
+    if (last.dup) add(tm.flip + 2.6, "Doublon ! Plus " + sayCoins(last.sold) + " pièces !", 2, .3);
+    else if (last.value != null) { var D = decT(); add(D + .2, "__DEAL__", 2, .8); }
+    var nNew = c.filter(function (x) { return !x.dup; }).length, nDup = c.length - nNew;
+    add(tm.sum + .45, "Bilan : " + nNew + " nouvelle" + (nNew > 1 ? "s" : "") + (nDup ? ", " + nDup + " doublon" + (nDup > 1 ? "s" : "") : "") + ", " + sayCoins(L.coins) + " pièces !", 3, .4);
+    add(tm.sum + 3.1, "Quel pack ensuite ? Dis-moi en commentaire !", 3, .6);
+    return out;
+  }
+  function vDeal(L) { var last = L.cards[L.cards.length - 1]; return last.sale ? "Vendue, plus " + sayCoins(last.sale) + " pièces !" : last.keep ? "Je la garde !" : "Je la garde ou je la vends ?"; }
+  function vTexts(L) { var t = vScript(L).map(function (l) { return l.text; }).filter(function (x) { return x !== "__DEAL__"; }), last = L.cards[L.cards.length - 1]; if (last.value != null) { t.push("Vendue, plus " + sayCoins(last.value) + " pièces !", "Je la garde !", "Je la garde ou je la vends ?"); } return t; }
+  function vKey(L) { if (!L) return ""; var c = L.cards[L.cards.length - 1]; return L.epi + "|" + L.cards.length + "|" + c.name + "|" + c.rk + "|" + c.rating + "|" + TEAR.on; }
+  function prepVoice(L) { // télécharge toutes les phrases (en parallèle) avant de jouer
+    var st = vSet(); if (!st.on || !L) { VO.ready = false; return Promise.resolve(false); }
+    var key = vKey(L) + st.voice; if (VO.key === key && VO.ready) return Promise.resolve(true); if (VO.key === key && VO.busy) return VO.busy;
+    VO.key = key; VO.ready = false; var a = audio(), base = String(st.relay).trim().replace(/\/+$/, ""); if (!/^[a-z]+:\/\//i.test(base)) base = "https://" + base; base = base.replace(/^ws/i, "http");
+    var texts = vTexts(L), fails = 0;
+    function trim(b) { var d = b.getChannelData(0), n = d.length, i = 0, j = n - 1, th = .012; while (i < n && Math.abs(d[i]) < th) i++; while (j > i && Math.abs(d[j]) < th) j--; i = Math.max(0, i - Math.round(b.sampleRate * .02)); j = Math.min(n - 1, j + Math.round(b.sampleRate * .06)); if (j <= i) return b;
+      var o = a.createBuffer(b.numberOfChannels, j - i + 1, b.sampleRate); for (var c = 0; c < b.numberOfChannels; c++) o.getChannelData(c).set(b.getChannelData(c).subarray(i, j + 1)); return o; }
+    function one(tx, tries) { if (VO.bufs[st.voice + "|" + tx]) return Promise.resolve(1);
+      return fetch(base + "/tts?engine=edge&rate=" + encodeURIComponent("+12%") + "&voice=" + encodeURIComponent(st.voice) + "&key=" + encodeURIComponent(st.key) + "&text=" + encodeURIComponent(tx), { signal: AbortSignal.timeout ? AbortSignal.timeout(45000) : undefined })
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); }).then(function (ab) { return a.decodeAudioData(ab); }).then(function (b) { VO.bufs[st.voice + "|" + tx] = trim(b); }, function () { if (tries > 0) return one(tx, tries - 1); fails++; }); }
+    var q = texts.slice(); function worker() { var tx = q.shift(); return tx == null ? Promise.resolve() : one(tx, 1).then(worker); }
+    VO.busy = Promise.all([worker(), worker(), worker()])
+      .then(function () { VO.busy = null; VO.ready = fails < texts.length; if (fails) msg(fails === texts.length ? "⚠️ La voix ne répond pas : vérifie le relais et la clé dans « Voix off »." : "⚠️ " + fails + " phrase(s) de la voix n'ont pas chargé."); return VO.ready; });
+    return VO.busy;
+  }
+  function vPlan(L) { // place les phrases sans qu'elles se chevauchent
+    var st = vSet(); if (!st.on || !VO.ready || VO.key !== vKey(L) + st.voice) return [];
+    var lines = vScript(L).map(function (l) { var tx = l.text === "__DEAL__" ? vDeal(L) : l.text; return { x: l.x, pri: l.pri, flex: l.flex, buf: VO.bufs[st.voice + "|" + tx] }; }).filter(function (l) { return l.buf; }).sort(function (a, b) { return a.x - b.x; });
+    var res = [], end = -1;
+    lines.forEach(function (l) { var x = l.x; if (x < end + .05) { if (end + .05 - x <= l.flex) x = end + .05; else if (l.pri < 3) return; else { while (res.length && x < end + .05 - .25 && res[res.length - 1].pri < 3) { res.pop(); end = res.length ? res[res.length - 1].x + res[res.length - 1].buf.duration : -1; } if (x < end + .05) x = end + .05; } } res.push({ x: x, buf: l.buf, pri: l.pri }); end = x + l.buf.duration; });
+    return res;
+  }
   /* ---------- sons (créés par la page) ---------- */
   var IMP = null;
   function impulse(ac) { if (IMP && IMP.sampleRate === ac.sampleRate) return IMP; var n = Math.floor(ac.sampleRate * 2.6), b = ac.createBuffer(2, n, ac.sampleRate); for (var c = 0; c < 2; c++) { var d = b.getChannelData(c); for (var i = 0; i < n; i++) { var x = i / n; d[i] = (Math.random() * 2 - 1) * Math.pow(1 - x, 2.8) * (i < ac.sampleRate * .012 ? i / (ac.sampleRate * .012) : 1); } } IMP = b; return b; }
@@ -840,6 +906,8 @@
     else if (lc.keep) { tone(ds, 90, 40, .3, .5); noise(ds, .08, 2500, .3, "highpass"); tone(ds + .08, 660, 660, .12, .08, "square"); }
     else { tone(ds, 392, 392, .2, .06, "triangle"); tone(ds + .22, 494, 494, .3, .06, "triangle"); }
     tone(t0 + tm.sum + 2.9, 523, 523, .25, .07, "triangle"); tone(t0 + tm.sum + 3.1, 784, 784, .45, .07, "triangle");
+    vPlan(L).forEach(function (l) { var at = t0 + l.x; if (!ok(at)) return; var s3 = ac.createBufferSource(), vg = ac.createGain(), vs = ac.createGain(); s3.buffer = l.buf; vg.gain.value = 1.6; vs.gain.value = .12; s3.connect(vg); vg.connect(lim); vg.connect(vs); vs.connect(verb); s3.start(at);
+      bus.gain.setTargetAtTime(.38, Math.max(0, at - .05), .04); bus.gain.setTargetAtTime(1, at + l.buf.duration, .2); });
   }
 
   /* ---------- aperçu, lecture, vidéo ---------- */
@@ -870,7 +938,7 @@
   }
   cv.addEventListener("pointerdown", function (e) { if (!pending()) return; var r = cv.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * W, y = (e.clientY - r.top) / r.height * H;
     Object.keys(BTN).forEach(function (k) { var b = BTN[k]; if (x >= b[0] && x <= b[0] + b[2] && y >= b[1] - 20 && y <= b[1] + b[3] + 20) { e.preventDefault(); choose(k); } }); });
-  $("#play").onclick = playNow;
+  $("#play").onclick = function () { if (vSet().on && !VO.ready && S.last) { msg("🎙️ Préparation de la voix…"); Promise.race([prepVoice(S.last), new Promise(function (r) { setTimeout(r, 15000); })]).then(function () { msg(""); playNow(); }); } else playNow(); };
   var lastURL = null, lastFile = null;
   function download(blob, name) {
     if (lastURL) URL.revokeObjectURL(lastURL); lastURL = URL.createObjectURL(blob);
@@ -883,6 +951,7 @@
   $("#gotShare").onclick = function () { if (lastFile) navigator.share({ files: [lastFile] }).catch(function () {}); };
   $("#rec").onclick = async function () {
     if (busy) return; if (!S.last) { msg("Ouvre d'abord un pack."); return; }
+    if (vSet().on && !VO.ready) { msg("🎙️ Préparation de la voix…"); await Promise.race([prepVoice(S.last), new Promise(function (r) { setTimeout(r, 20000); })]); }
     if (!pending() && !window.__noHQ) { var sup = null; try { sup = await hqSupport(); } catch (e) {} if (sup) { busy = true; $("#rec").disabled = true; $("#bar").hidden = false; msg("🎬 Préparation de la vidéo HD…");
       try { var blob = await exportHQ(sup); download(blob, "pack-episode-" + S.last.epi + "-hd.mp4"); msg("Vidéo HD 60 images/s téléchargée ✅"); }
       catch (e) { console.error(e); window.__noHQ = true; msg("⚠️ La vidéo HD n'a pas marché sur ce téléphone : touche encore « Télécharger la vidéo » pour la version normale."); busy = false; $("#rec").disabled = false; $("#bar").hidden = true; t0 = performance.now(); return; }
@@ -916,6 +985,11 @@
   /* ---------- événements ---------- */
   $("#open").onclick = openPack;
   try { $("#inter").checked = localStorage.getItem("packs-inter") !== "0"; } catch (e) {}
+  (function () { var st = vSet(); $("#vOn").checked = st.on; $("#vVoice").value = st.voice; $("#vRelay").value = st.relay; $("#vKey").value = st.key;
+    function sv() { try { localStorage.setItem("packs-voice", JSON.stringify({ on: $("#vOn").checked, voice: $("#vVoice").value, relay: $("#vRelay").value.trim(), key: $("#vKey").value.trim() })); } catch (e) {} VO.ready = false; VO.key = ""; }
+    ["#vOn", "#vVoice", "#vRelay", "#vKey"].forEach(function (q) { $(q).onchange = sv; });
+    $("#vTest").onclick = function () { sv(); var st2 = vSet(), base = st2.relay.replace(/\/+$/, ""); if (!/^[a-z]+:\/\//i.test(base)) base = "https://" + base; msg("🎙️ Test de la voix…"); fetch(base + "/tts?engine=edge&rate=" + encodeURIComponent("+12%") + "&voice=" + encodeURIComponent(st2.voice) + "&key=" + encodeURIComponent(st2.key) + "&text=" + encodeURIComponent("Et c'est une icône ! Incroyable !")).then(function (r) { if (!r.ok) return r.json().then(function (j) { throw new Error(j.error || r.status); }, function () { throw new Error("erreur " + r.status); }); return r.arrayBuffer(); }).then(function (ab) { return audio().decodeAudioData(ab); }).then(function (b) { var a = audio(), s4 = a.createBufferSource(); s4.buffer = b; s4.connect(a.destination); s4.start(); msg("✅ La voix marche"); }).catch(function (e) { msg("⚠️ La voix ne marche pas : " + e.message); }); };
+  })();
   try { TEAR.on = localStorage.getItem("packs-tear") !== "0"; } catch (e) {} $("#tearOn").checked = TEAR.on;
   $("#tearOn").onchange = function () { TEAR.on = this.checked; try { localStorage.setItem("packs-tear", this.checked ? "1" : "0"); } catch (e) {} if (!TEAR.on && TEAR.hold) tearDone(); };
   $("#inter").onchange = function () { try { localStorage.setItem("packs-inter", this.checked ? "1" : "0"); } catch (e) {} pressed = decided(); };
