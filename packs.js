@@ -401,7 +401,7 @@
     o.intro = intro; o.n = n; o.tw = tw; o.sum = o.flip + 4.8; o.end = o.sum + 6; return o; }
   function slot(i, n) { var row = Math.floor(i / 4), inRow = Math.min(4, n - row * 4); return [W / 2 + ((i % 4) - (inRow - 1) / 2) * 240, 330 + row * 300]; }
   function packName(L) { var P = packOf(L.pack); return P.id === "club" ? "PACK " + (L.club || "").toUpperCase() : P.label.toUpperCase(); }
-  function drawScene(g, t) {
+  function drawScene0(g, t) {
     var L = S && S.last; if (!L) { idle(g, t); return; }
     var tm = TL(L), last = L.cards[L.cards.length - 1], bestR = RAR[last.rk], pc = L.pack === "club" ? L.club : "L1", c0 = pc === "L1" ? L1 : club(pc), T = t - tm.intro;
     var gr = g.createRadialGradient(W / 2, 800, 50, W / 2, 900, 1300); gr.addColorStop(0, c0.dark); gr.addColorStop(1, "#000"); g.fillStyle = gr; g.fillRect(0, 0, W, H);
@@ -433,7 +433,7 @@
       g.save(); g.translate(W / 2 + shake, -600 + 1560 * drop); g.rotate(shake * .002);
       g.save(); g.shadowColor = "rgba(" + bestR.beam + "," + (.3 + .7 * glow) + ")"; g.shadowBlur = 40 + 120 * glow; g.fillStyle = F[1]; g.scale(.86, .9); packPath(g, 540, 780); g.fill(); g.restore();
       if (hold) { // déchirure au doigt : la bande du haut se décolle là où passe le doigt
-        var tp = clamp(TEAR.p), xa = -270 + 540 * tp, live = performance.now() / 1000;
+        var tp = clamp(TEAR.p), xa = -270 + 540 * tp, live = nowS();
         g.save(); g.beginPath(); g.rect(-300, -322, 600, 800); g.clip(); pack3d(g, t, F, pn, sub, lg2, 0, 0); g.restore();
         g.save(); g.beginPath(); g.rect(xa, -430, 330 - xa, 108); g.clip(); pack3d(g, t, F, pn, sub, lg2, 0, 0); g.restore();
         if (tp > 0) { g.save(); g.translate(xa, -322); g.rotate((.12 + .55 * tp) + Math.sin(live * 9) * .01); g.translate(-xa, 322); g.beginPath(); g.rect(-300, -430, xa + 300, 108); g.clip(); g.shadowColor = "rgba(0,0,0,.5)"; g.shadowBlur = 20; pack3d(g, t, F, pn, sub, lg2, 0, 0); g.restore();
@@ -447,7 +447,7 @@
         g.save(); g.translate(260 * tear * tear, -420 * tear * tear); g.rotate(.5 * tear); g.globalAlpha = 1 - tear * .6; g.beginPath(); g.rect(-300, -420, 600, 98); g.clip(); pack3d(g, t, F, pn, sub, lg2, ry3, rx3); g.restore(); }
       g.restore();
       if (T > 1.3 && T < 2.9 && !TEAR.on) bigText(g, "👆 Appuie pour ouvrir", 1640, 54, .6 + .4 * Math.sin(t * 6), 1);
-      if (TEAR.on && T > 1.3 && T < 2.45 + (hold ? 1 : 0) && !(hold && TEAR.p > .05)) { var lv2 = performance.now() / 1000, hx = W / 2 - 230 + ((lv2 * .8) % 1) * 460; bigText(g, "👉 Glisse ton doigt pour déchirer", 1640, 54, .7 + .3 * Math.sin(lv2 * 6), 1); if (hold) { g.save(); g.globalAlpha = .9; g.font = "110px " + FONT; g.textAlign = "center"; g.fillText("👆", hx + 20, 760); g.restore(); } }
+      if (TEAR.on && T > 1.3 && T < 2.45 + (hold ? 1 : 0) && !(hold && TEAR.p > .05)) { var lv2 = nowS(), hx = W / 2 - 230 + ((lv2 * .8) % 1) * 460; bigText(g, "👉 Glisse ton doigt pour déchirer", 1640, 54, .7 + .3 * Math.sin(lv2 * 6), 1); if (hold) { g.save(); g.globalAlpha = .9; g.font = "110px " + FONT; g.textAlign = "center"; g.fillText("👆", hx + 20, 760); g.restore(); } }
     }
     if (T >= 2.9 && T < 3.6) { g.fillStyle = "rgba(255,255,255," + (1 - (T - 2.9) / .7) + ")"; g.fillRect(0, 0, W, H); }
     particles(g, T, 2.95, bestR.beam, 80);
@@ -496,6 +496,99 @@
     // 4. le bilan : nouvelles, doublons, pièces, album
     if (sumK > 0) summary(g, t, L, tm, sumK);
     g.fillStyle = "rgba(0,0,0,.45)"; rr(g, 200, 60, 680, 90, 45); g.fill(); g.fillStyle = "#fff"; g.textAlign = "center"; g.textBaseline = "middle"; g.font = "900 42px " + FONT; g.fillText("🃏 ÉPISODE " + L.epi + " · ALBUM LIGUE 1", W / 2, 106);
+  }
+  /* ---------- réalisation « Hollywood » : caméra virtuelle, flash, reflet d'objectif, halo lumineux ---------- */
+  var XT = null; function nowS() { return XT != null ? XT : performance.now() / 1000; }
+  function pulse(d, len) { return d < 0 || d > len ? 0 : Math.pow(1 - d / len, 2); }
+  function cam(t, tm, L) {
+    var T = t - tm.intro, s = 1, x = 0, y = 0, r = 0, sh = 0;
+    s += .05 * ease((T - .9) / 1.9) * (1 - ease((T - 2.9) / .6)); // le pack : lente avancée pendant qu'il tremble
+    s += .09 * pulse(T - 2.9, .55); sh += 12 * pulse(T - 2.9, .45); // ouverture : coup de zoom et secousse
+    for (var j = 0; j < tm.n; j++) { var ts = tm.intro + 3.4 + j * STEP, rk = RAR[L.cards[j].rk].rank; s += (.025 + .02 * rk) * pulse(t - ts, .4); sh += (2 + 4 * rk) * pulse(t - ts, .25); }
+    if (!tm.walk) { var a = clamp((t - tm.tw) / (tm.flip - tm.tw)), b = 1 - ease((t - tm.flip) / .9); if (t >= tm.tw) { var k = t < tm.flip ? ease(a) : b; s += .1 * k; r += .012 * k * Math.sin(t * .7); y -= 30 * k; } } // suspense : avancée lente et léger angle
+    s += .13 * pulse(t - tm.flip, .8); sh += 18 * pulse(t - tm.flip, .6); // révélation : gros coup de zoom
+    if (t > tm.sum - .2) s += .04 * (1 - ease((t - tm.sum + .2) / 1.2)) * clamp((t - tm.sum + .2) / .2); // recul doux vers le bilan
+    var D = decT(); if (t > D - 1.2 && t < tm.sum - .2) { var z = 1 - clamp((t - D + 1.2) / .5); s = 1 + (s - 1) * z; r *= z; y *= z; sh *= z; } // cadre fixe pendant les boutons
+    x += Math.sin(t * 83) * sh + Math.sin(t * 1.3) * 4; y += Math.cos(t * 71) * sh + Math.cos(t * 1.1) * 3;
+    return { s: s, x: x, y: y, r: r };
+  }
+  var BLM = null, BLM2 = null, CHR = null;
+  function post(g, t, tm, L) { // finitions : halo, aberration, reflet anamorphique, vignette, grain
+    var cvs = g.canvas;
+    if (!BLM) { BLM = document.createElement("canvas"); BLM.width = 135; BLM.height = 240; BLM2 = document.createElement("canvas"); BLM2.width = 270; BLM2.height = 480; }
+    var b = BLM.getContext("2d"), b2 = BLM2.getContext("2d");
+    b.globalCompositeOperation = "source-over"; b.globalAlpha = 1; b.drawImage(cvs, 0, 0, 135, 240); b.globalCompositeOperation = "multiply"; b.drawImage(BLM, 0, 0); b.drawImage(BLM, 0, 0); // ne garde que les zones très claires
+    b2.clearRect(0, 0, 270, 480); b2.drawImage(BLM, 0, 0, 270, 480);
+    g.save(); g.globalCompositeOperation = "lighter"; g.globalAlpha = .3; g.imageSmoothingEnabled = true; g.drawImage(BLM2, 0, 0, W, H); g.restore();
+    if (tm && L) {
+      var R = RAR[L.cards[L.cards.length - 1].rk], fk = pulse(t - tm.flip, .9), ok2 = pulse(t - tm.intro - 2.9, .6);
+      if (fk > 0 || ok2 > 0) { var k = Math.max(fk, ok2), cy = fk >= ok2 ? 1060 : 960; // reflet d'objectif anamorphique
+        g.save(); g.globalCompositeOperation = "lighter"; var st = g.createLinearGradient(0, 0, W, 0); st.addColorStop(0, "rgba(" + R.beam + ",0)"); st.addColorStop(.5, "rgba(210,235,255," + (.8 * k) + ")"); st.addColorStop(1, "rgba(" + R.beam + ",0)"); g.fillStyle = st; g.fillRect(0, cy - 5 - 10 * k, W, 10 + 20 * k);
+        var cg = g.createRadialGradient(W / 2, cy, 0, W / 2, cy, 520); cg.addColorStop(0, "rgba(255,255,255," + (.55 * k) + ")"); cg.addColorStop(1, "rgba(" + R.beam + ",0)"); g.fillStyle = cg; g.fillRect(W / 2 - 520, cy - 520, 1040, 1040);
+        [[-.6, 60, .25], [-.25, 26, .35], [.35, 40, .25], [.7, 90, .15]].forEach(function (o) { var gx = W / 2 + (W / 2 - 200) * o[0] * 1.6, gy = cy + (cy - 960) * o[0], gr = g.createRadialGradient(gx, gy, 0, gx, gy, o[1]); gr.addColorStop(0, "rgba(" + R.beam + "," + (o[2] * k) + ")"); gr.addColorStop(1, "rgba(" + R.beam + ",0)"); g.fillStyle = gr; g.fillRect(gx - o[1], gy - o[1], o[1] * 2, o[1] * 2); }); g.restore();
+        var ca = Math.max(pulse(t - tm.flip, .3), pulse(t - tm.intro - 2.9, .25)); if (ca > .02) { // aberration chromatique
+          if (!CHR) { CHR = document.createElement("canvas"); CHR.width = W; CHR.height = H; } var c2 = CHR.getContext("2d");
+          [["#ff0000", -1], ["#0040ff", 1]].forEach(function (cc) { c2.globalCompositeOperation = "source-over"; c2.drawImage(cvs, 0, 0); c2.globalCompositeOperation = "multiply"; c2.fillStyle = cc[0]; c2.fillRect(0, 0, W, H); g.save(); g.globalCompositeOperation = "lighter"; g.globalAlpha = .45 * ca; g.drawImage(CHR, cc[1] * 22 * ca, 0); g.restore(); }); }
+      }
+    }
+    var v = g.createRadialGradient(W / 2, H / 2, H * .35, W / 2, H / 2, H * .78); v.addColorStop(0, "rgba(0,0,0,0)"); v.addColorStop(1, "rgba(0,0,0,.42)"); g.fillStyle = v; g.fillRect(0, 0, W, H);
+    grain(g, t, .045);
+  }
+  function drawScene(g, t) {
+    var L = S && S.last; g.setTransform(1, 0, 0, 1, 0, 0);
+    if (!L) { idle(g, t); post(g, t, null, null); return; }
+    var tm = TL(L), c = cam(t, tm, L);
+    g.save(); g.fillStyle = "#000"; g.fillRect(0, 0, W, H); g.translate(W / 2 + c.x, H / 2 + c.y); g.rotate(c.r); g.scale(c.s, c.s); g.translate(-W / 2, -H / 2);
+    drawScene0(g, t); g.restore();
+    post(g, t, tm, L);
+  }
+
+  /* ---------- export haute qualité : 60 images/seconde calculées une par une, flou de mouvement, son calculé à part ---------- */
+  function loadMuxer() { return window.Mp4Muxer ? Promise.resolve() : new Promise(function (res, rej) { var s = document.createElement("script"); s.src = "https://cdn.jsdelivr.net/npm/mp4-muxer@5.2.2/build/mp4-muxer.min.js"; s.onload = res; s.onerror = rej; document.head.appendChild(s); }); }
+  async function hqSupport() {
+    if (!window.VideoEncoder || !window.AudioEncoder || !window.VideoFrame || !window.AudioData || !window.OfflineAudioContext) return null;
+    var vc = null; for (var c of ["avc1.64002A", "avc1.4D402A", "avc1.42E02A", "avc1.640028"]) { try { var r = await VideoEncoder.isConfigSupported({ codec: c, width: 1080, height: 1920, bitrate: 20e6, framerate: 60 }); if (r.supported) { vc = c; break; } } catch (e) {} }
+    if (!vc) return null; var ac2 = null;
+    for (var a of [["mp4a.40.2", "aac"], ["opus", "opus"]]) { try { var r2 = await AudioEncoder.isConfigSupported({ codec: a[0], sampleRate: 48000, numberOfChannels: 2, bitrate: 192000 }); if (r2.supported) { ac2 = a; break; } } catch (e) {} }
+    return ac2 ? { v: vc, a: ac2 } : null;
+  }
+  async function exportHQ(sup) {
+    await loadMuxer();
+    var L = S.last, fps = 60, TH = tearT(), HOLD = TEAR.on ? 1.5 : 0, dur = Math.min(total() + HOLD + .3, window.__hqLimit || 1e9), N = Math.ceil(dur * fps), sr = 48000, tStart = 0;
+    pressed = decided();
+    // le son
+    var oac = new OfflineAudioContext(2, Math.ceil(sr * (dur + .2)), sr), out = oac.createGain(); out.connect(oac.destination);
+    TEAR.done = false; sounds(oac, out, 0, null, HOLD ? TH : null); if (HOLD) { TEAR.done = true; sounds(oac, out, HOLD, TH, null);
+      var nb = oac.createBuffer(1, 4096, sr), nd = nb.getChannelData(0); for (var q = 0; q < nd.length; q++) nd[q] = Math.random() * 2 - 1;
+      for (var gi = 0; gi < 70; gi++) { var at = TH + .15 + Math.random() * (HOLD - .4), s2 = oac.createBufferSource(), f = oac.createBiquadFilter(), gg = oac.createGain(); s2.buffer = nb; f.type = "bandpass"; f.frequency.value = 1800 + Math.random() * 4500; f.Q.value = 3; gg.gain.setValueAtTime(.22, at); gg.gain.exponentialRampToValueAtTime(.001, at + .04); s2.connect(f); f.connect(gg); gg.connect(out); s2.start(at); s2.stop(at + .05); } }
+    msg("🎧 Mixage du son…"); var abuf = await oac.startRendering();
+    var muxer = new Mp4Muxer.Muxer({ target: new Mp4Muxer.ArrayBufferTarget(), video: { codec: "avc", width: 1080, height: 1920, frameRate: fps }, audio: { codec: sup.a[1], numberOfChannels: 2, sampleRate: sr }, fastStart: "in-memory", firstTimestampBehavior: "offset" });
+    var fail = null, venc = new VideoEncoder({ output: function (c, m) { muxer.addVideoChunk(c, m); }, error: function (e) { fail = e; } });
+    venc.configure({ codec: sup.v, width: 1080, height: 1920, bitrate: 20e6, framerate: fps, avc: { format: "avc" } });
+    var aenc = new AudioEncoder({ output: function (c, m) { muxer.addAudioChunk(c, m); }, error: function (e) { fail = e; } });
+    aenc.configure({ codec: sup.a[0], sampleRate: sr, numberOfChannels: 2, bitrate: 192000 });
+    var c0 = abuf.getChannelData(0), c1 = abuf.getChannelData(1), len = Math.min(abuf.length, Math.ceil(dur * sr));
+    for (var off = 0; off < len; off += 4800) { var n = Math.min(4800, len - off), dat = new Float32Array(n * 2); dat.set(c0.subarray(off, off + n), 0); dat.set(c1.subarray(off, off + n), n); var ad = new AudioData({ format: "f32-planar", sampleRate: sr, numberOfFrames: n, numberOfChannels: 2, timestamp: Math.round(off / sr * 1e6), data: dat }); aenc.encode(ad); ad.close(); }
+    // l'image : deux sous-images par image pour un vrai flou de mouvement
+    var A = document.createElement("canvas"), B = document.createElement("canvas"); A.width = B.width = W; A.height = B.height = H; var ag = A.getContext("2d"), bg2 = B.getContext("2d");
+    function at2(v) { if (!HOLD || v < TH) { TEAR.hold = false; return v; } if (v < TH + HOLD) { var p = ease((v - TH - .2) / (HOLD - .45)); TEAR.hold = true; TEAR.drag = v - TH > .15 && p < 1; TEAR.p = p; TEAR.fx = W / 2 - 280 + 560 * p; TEAR.fy = 600 + Math.sin(p * 9) * 6; return TH; } TEAR.hold = false; TEAR.done = true; return v - HOLD; }
+    var keep = { done: TEAR.done, hold: TEAR.hold, p: TEAR.p, drag: TEAR.drag }, tm = TL(L);
+    function fast(t) { var T = t - tm.intro; if (T < .9 || (T > 2.85 && T < 3.7)) return true; for (var j = 0; j < tm.n; j++) { var d = t - (tm.intro + 3.4 + j * STEP); if (d > -.05 && d < .45 || d > .9 && d < 1.35) return true; }
+      if (tm.walk && (t > tm.tun - .5 && t < tm.flag)) return true; return Math.abs(t - tm.flip) < .8 || (t > tm.sum - .1 && t < tm.sum + .7); }
+    try {
+      for (var i = 0; i < N; i++) {
+        if (fail) throw fail; var v = i / fps;
+        var sc = Math.min(at2(v), total()), nsub = fast(sc) ? 4 : 1; // flou de mouvement seulement quand ça bouge vite
+        for (var k = 0; k < nsub; k++) { var vk = Math.max(0, v - k * .6 / fps / Math.max(1, nsub - 1)); XT = vk; bg2.setTransform(1, 0, 0, 1, 0, 0); drawScene(bg2, Math.min(at2(vk), total())); ag.globalAlpha = 1 / (k + 1); ag.drawImage(B, 0, 0); }
+        ag.globalAlpha = 1; at2(v);
+        var fr = new VideoFrame(A, { timestamp: Math.round(v * 1e6), duration: Math.round(1e6 / fps) }); venc.encode(fr, { keyFrame: i % 120 === 0 }); fr.close();
+        if (i === 0) tStart = performance.now();
+        if (i % 6 === 0) { var left = i > 30 ? (performance.now() - tStart) / i * (N - i) / 1000 : 0; $("#barI").style.width = Math.round(i / N * 100) + "%"; msg("🎬 Fabrication HD 60 images/s… " + Math.round(i / N * 100) + " %" + (left ? " · encore " + (left > 90 ? Math.ceil(left / 60) + " min" : Math.ceil(left) + " s") : "") + " (garde la page ouverte)"); g.drawImage(A, 0, 0); await new Promise(function (r) { setTimeout(r, 0); }); }
+        while (venc.encodeQueueSize > 6) await new Promise(function (r) { setTimeout(r, 5); });
+      }
+      await venc.flush(); await aenc.flush(); muxer.finalize();
+    } finally { XT = null; TEAR.done = keep.done; TEAR.hold = keep.hold; TEAR.p = keep.p; TEAR.drag = keep.drag; }
+    return new Blob([muxer.target.buffer], { type: "video/mp4" });
   }
   /* ---------- walkout de cinéma : tunnel, stade de nuit, écran géant, sortie du joueur ---------- */
   var GRAIN = null, CROWD = null;
@@ -788,8 +881,12 @@
     var can = false; try { can = !!(lastFile && navigator.canShare && navigator.canShare({ files: [lastFile] })); } catch (e) {} $("#gotShare").hidden = !can; $("#got").hidden = false;
   }
   $("#gotShare").onclick = function () { if (lastFile) navigator.share({ files: [lastFile] }).catch(function () {}); };
-  $("#rec").onclick = function () {
+  $("#rec").onclick = async function () {
     if (busy) return; if (!S.last) { msg("Ouvre d'abord un pack."); return; }
+    if (!pending() && !window.__noHQ) { var sup = null; try { sup = await hqSupport(); } catch (e) {} if (sup) { busy = true; $("#rec").disabled = true; $("#bar").hidden = false; msg("🎬 Préparation de la vidéo HD…");
+      try { var blob = await exportHQ(sup); download(blob, "pack-episode-" + S.last.epi + "-hd.mp4"); msg("Vidéo HD 60 images/s téléchargée ✅"); }
+      catch (e) { console.error(e); window.__noHQ = true; msg("⚠️ La vidéo HD n'a pas marché sur ce téléphone : touche encore « Télécharger la vidéo » pour la version normale."); busy = false; $("#rec").disabled = false; $("#bar").hidden = true; t0 = performance.now(); return; }
+      busy = false; $("#rec").disabled = false; $("#bar").hidden = true; t0 = performance.now(); return; } }
     if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) { msg("Ce navigateur ne sait pas créer de vidéo. Utilise Chrome."); return; }
     if (prevGain) try { prevGain.disconnect(); } catch (e) {}
     var a = audio(), dest = a.createMediaStreamDestination(), st = cv.captureStream(30); dest.stream.getAudioTracks().forEach(function (tr) { st.addTrack(tr); });
