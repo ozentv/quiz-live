@@ -219,6 +219,10 @@ Page : https://ozentv.github.io/quiz-live/packs.html
 - **Album** : une page par club (case grise « ? » pour les joueurs manquants) et une page des cartes spéciales. Club complété = 1 pack offert.
 - **Doublons revendus** automatiquement (commune 50, or 200, équipe de la semaine 1 000, joueur du mois 1 500, héros 2 500) + **bonus d'épisode** de 500 🪙. Si tu ne peux plus rien acheter, le pack de base est offert : la série ne s'arrête jamais.
 - La fin de la vidéo fait le **bilan** : nouvelles cartes, doublons, pièces gagnées, solde, album qui se remplit, « Quel pack j'ouvre ensuite ? 👇 ».
+- **Walkout** pour les grosses cartes (équipe de la semaine, joueur du mois, héros) : tunnel du stade, projecteurs qui s'allument un par un, fumée, puis le drapeau du pays, l'écusson du club, le poste, la silhouette du joueur qui avance vers la caméra, et la carte qui se retourne.
+- **Vrais postes** (G, DC, DG, DD, MDC, MC, MOC, MG, MD, AG, AD, BU) relevés dans les fiches Wikipédia des joueurs, **drapeau de la nationalité** sur chaque carte ; stats adaptées au poste.
+- **Photos des joueurs** : touche un joueur dans l'album pour lui mettre une photo (gardée sur le téléphone) ; elle apparaît sur toutes ses cartes et en silhouette pendant le walkout.
+- **Cartes brillantes** : reflet holographique qui bouge, petites étoiles et contour arc-en-ciel animé pour les cartes spéciales.
 - Une collection **Team OM** et une **Team PSG**, gardées sur le téléphone, avec copie de secours (fichier) ; logos des clubs facultatifs ; légende TikTok prête à copier.
 
 ## 📊 Duel en chiffres (vidéos « Clasico en chiffres »)

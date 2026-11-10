@@ -17,6 +17,10 @@
     "Le Mans": { c1: "#e2001a", c2: "#f2c200", dark: "#3d0007", ab: "LMFC" }, "Troyes": { c1: "#0055a4", c2: "#ffffff", dark: "#001a33", ab: "ESTAC" }
   };
   var L1 = { c1: "#1d4ed8", c2: "#e11d48", dark: "#0b1530", ab: "L1" };
+  var ISO = { "France": "FR", "Sénégal": "SN", "Algérie": "DZ", "Maroc": "MA", "Côte d'Ivoire": "CI", "Mali": "ML", "Danemark": "DK", "Portugal": "PT", "Belgique": "BE", "Brésil": "BR", "Cameroun": "CM", "Suisse": "CH", "Espagne": "ES", "Ghana": "GH", "Japon": "JP", "Pologne": "PL", "Italie": "IT", "Pays-Bas": "NL", "Argentine": "AR", "États-Unis": "US", "Allemagne": "DE", "Suède": "SE", "Canada": "CA", "RD Congo": "CD", "Norvège": "NO", "Équateur": "EC", "Guinée": "GN", "Burkina Faso": "BF", "Nigeria": "NG", "Mauritanie": "MR", "Centrafrique": "CF", "Gabon": "GA", "Autriche": "AT", "Turquie": "TR", "Tunisie": "TN", "Russie": "RU", "Comores": "KM", "Haïti": "HT", "Congo": "CG", "Chine": "CN", "Guinée-Bissau": "GW", "Tanzanie": "TZ", "Bosnie-Herzégovine": "BA", "Arabie saoudite": "SA", "Monténégro": "ME", "Croatie": "HR", "Paraguay": "PY", "Indonésie": "ID", "Islande": "IS", "Slovénie": "SI", "Grèce": "GR", "Bénin": "BJ", "Slovaquie": "SK", "Angola": "AO", "Tchéquie": "CZ", "Finlande": "FI", "Égypte": "EG", "Burundi": "BI", "Ukraine": "UA", "Géorgie": "GE", "Jordanie": "JO", "Costa Rica": "CR", "Venezuela": "VE", "Madagascar": "MG", "Australie": "AU", "Togo": "TG", "Uruguay": "UY", "Colombie": "CO", "Mexique": "MX", "Serbie": "RS", "Hongrie": "HU", "Roumanie": "RO", "Irlande": "IE", "Corée du Sud": "KR", "Cap-Vert": "CV", "Zambie": "ZM", "Gambie": "GM", "Kosovo": "XK", "Albanie": "AL", "Macédoine du Nord": "MK", "Israël": "IL", "Iran": "IR", "Chili": "CL", "Pérou": "PE", "Jamaïque": "JM", "Bulgarie": "BG", "Luxembourg": "LU", "Kenya": "KE", "Afrique du Sud": "ZA", "Libye": "LY", "Ouzbékistan": "UZ", "Lituanie": "LT", "Lettonie": "LV", "Estonie": "EE", "Chypre": "CY", "Malte": "MT", "Arménie": "AM", "Azerbaïdjan": "AZ", "Kazakhstan": "KZ", "Moldavie": "MD", "Biélorussie": "BY", "Nouvelle-Zélande": "NZ", "Qatar": "QA", "Émirats arabes unis": "AE", "Irak": "IQ", "Syrie": "SY", "Liban": "LB", "Ouganda": "UG", "Rwanda": "RW", "Zimbabwe": "ZW", "Soudan": "SD", "Niger": "NE", "Tchad": "TD", "Sierra Leone": "SL", "Liberia": "LR", "Guinée équatoriale": "GQ", "Mozambique": "MZ", "Namibie": "NA", "Panama": "PA", "Honduras": "HN", "Guatemala": "GT", "Salvador": "SV", "Bolivie": "BO", "Suriname": "SR", "Guyana": "GY", "Martinique": "MQ", "Guadeloupe": "GP", "Nouvelle-Calédonie": "NC" };
+  var SUBD = { "Angleterre": "gbeng", "Écosse": "gbsct", "Pays de Galles": "gbwls" };
+  function flag(nat) { if (SUBD[nat]) return "\uD83C\uDFF4" + SUBD[nat].split("").map(function (ch) { return String.fromCodePoint(0xE0000 + ch.charCodeAt(0)); }).join("") + String.fromCodePoint(0xE007F); var c = ISO[nat]; if (!c) return ""; return String.fromCodePoint(0x1F1E6 + c.charCodeAt(0) - 65, 0x1F1E6 + c.charCodeAt(1) - 65); }
+  function info(c) { if (c.nat !== undefined) return c; var p = (BYCLUB[c.club] || []).filter(function (x) { return x.name === c.name; })[0]; return p ? { nat: p.nat, an: p.an, pos: p.pos } : {}; }
   function club(n) { return CLUBS[n] || { c1: "#475569", c2: "#cbd5e1", dark: "#111827", ab: String(n || "?").slice(0, 4).toUpperCase() }; }
   var RAR = {
     commune: { a: "#eef1f5", b: "#b9c2cc", c: "#7d8794", ink: "#1f2630", beam: "205,214,228", label: "COMMUNE", bonus: -7, rank: 0, sell: 50 },
@@ -42,7 +46,7 @@
     var txt = ""; try { txt = localStorage.getItem("packs-db") || ""; } catch (e) {}
     if (!txt) txt = $("#dbDefault").textContent;
     PLAYERS = []; BYCLUB = {};
-    txt.split("\n").forEach(function (l) { var p = l.split("|").map(function (x) { return x.trim(); }); if (p.length < 4 || !p[0]) return; var o = { name: p[0], club: p[1], pos: p[2] || "MIL", base: Math.max(40, Math.min(99, +p[3] || 70)) }; PLAYERS.push(o); (BYCLUB[o.club] = BYCLUB[o.club] || []).push(o); });
+    txt.split("\n").forEach(function (l) { var p = l.split("|").map(function (x) { return x.trim(); }); if (p.length < 4 || !p[0]) return; var o = { name: p[0], club: p[1], pos: (p[2] || "MC").toUpperCase(), base: Math.max(40, Math.min(99, +p[3] || 70)), nat: p[4] || "", an: +p[5] || 0 }; PLAYERS.push(o); (BYCLUB[o.club] = BYCLUB[o.club] || []).push(o); });
     $("#db").value = txt.trim();
   }
   function clubList() { var k = Object.keys(CLUBS).filter(function (c) { return BYCLUB[c]; }); Object.keys(BYCLUB).forEach(function (c) { if (k.indexOf(c) < 0) k.push(c); }); return k; }
@@ -68,7 +72,7 @@
       var sorted = pool.slice().sort(function (a, b) { return b.base - a.base; }), top = minRank >= 2 ? sorted.slice(0, Math.max(3, Math.ceil(sorted.length * .2))) : minRank === 1 ? sorted.slice(0, Math.max(5, Math.ceil(sorted.length * .6))) : sorted;
       var c = top.filter(function (p) { return !used[p.name]; }); if (!c.length) c = pool.filter(function (p) { return !used[p.name]; }); if (!c.length) c = pool;
       var p = c[Math.floor(r() * c.length)]; used[p.name] = 1; return p; }
-    function card(p, rk) { return { name: p.name, club: p.club, pos: p.pos, rk: rk, rating: Math.max(45, Math.min(99, p.base + RAR[rk].bonus)) }; }
+    function card(p, rk) { return { name: p.name, club: p.club, pos: p.pos, nat: p.nat, an: p.an, rk: rk, rating: Math.max(45, Math.min(99, p.base + RAR[rk].bonus)) }; }
     P.slots.forEach(function (s) { var rk = s === "co" ? (r() < .5 ? "or" : "commune") : s; out.push(card(pick(RAR[rk].rank), rk)); });
     out.sort(function (a, b) { return RAR[a.rk].rank - RAR[b.rk].rank || a.rating - b.rating; });
     var bk = pickW(r, P.best); out.push(card(pick(RAR[bk].rank + 1), bk));
@@ -117,12 +121,22 @@
       h = ks.length ? ks.map(function (k) { var p = k.split("|"), pl = (BYCLUB[p[1]] || []).filter(function (x) { return x.name === p[0]; })[0] || { base: 70, pos: "" }; return mini({ name: p[0], club: p[1], pos: pl.pos, rk: p[2], rating: Math.max(45, Math.min(99, pl.base + RAR[p[2]].bonus)) }, S.cards[k]); }).join("") : "<p class=\"note\">Aucune carte spéciale pour l'instant.</p>"; }
     else (BYCLUB[tab] || []).slice().sort(function (a, b) { return b.base - a.base; }).forEach(function (p) {
       var bo = bestOwned(p);
-      h += bo ? mini({ name: p.name, club: p.club, pos: p.pos, rk: bo.rk, rating: Math.max(45, Math.min(99, p.base + RAR[bo.rk].bonus)) }, bo.n) : "<div class=\"mc miss\" title=\"" + esc(p.name) + "\"><span></span><span class=\"q\">?</span><span class=\"n\">" + esc(p.name) + "</span></div>";
+      h += bo ? mini({ name: p.name, club: p.club, pos: p.pos, rk: bo.rk, rating: Math.max(45, Math.min(99, p.base + RAR[bo.rk].bonus)) }, bo.n) : "<div class=\"mc miss\" role=\"button\" tabindex=\"0\" data-ph=\"" + esc(pkey(p)) + "\" title=\"" + esc(p.name) + " · touche pour la photo\"><span></span><span class=\"q\">?</span><span class=\"n\">" + esc(p.name) + "</span></div>";
     });
     $("#album").innerHTML = h;
+    document.querySelectorAll("[data-ph]").forEach(function (el) { el.onclick = function () { var k = el.getAttribute("data-ph"); if (photos[k] && !confirm("Changer la photo de " + k.split("|")[0] + " ?\n(Annuler = garder ou retirer)")) { if (confirm("Retirer la photo de " + k.split("|")[0] + " ?")) { idbPut(k, null).then(function () { delete photos[k]; refresh(); }); } return; } pickPhoto(k); }; el.onkeydown = function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); el.onclick(); } }; });
   }
-  function mini(c, n) { return "<div class=\"mc " + c.rk + "\" title=\"" + esc(c.name + " · " + RAR[c.rk].label) + "\"><span><span class=\"r\">" + c.rating + "</span><span class=\"p\"> " + esc(c.pos) + "</span></span><span></span><span class=\"n\">" + esc(c.name) + "</span>" + (n > 1 ? "<span class=\"x\">×" + n + "</span>" : "") + "</div>"; }
+  function mini(c, n) { var ph = photos[pkey(c)], fl = flag(info(c).nat); return "<div class=\"mc " + c.rk + "\" role=\"button\" tabindex=\"0\" data-ph=\"" + esc(pkey(c)) + "\" title=\"" + esc(c.name + " · " + RAR[c.rk].label + " · touche pour la photo") + "\">" + (ph ? "<img alt=\"\" src=\"" + ph.src + "\">" : "") + "<span><span class=\"r\">" + c.rating + "</span><span class=\"p\"> " + esc(c.pos) + " " + fl + "</span></span><span></span><span class=\"n\">" + esc(c.name) + "</span>" + (n > 1 ? "<span class=\"x\">×" + n + "</span>" : "") + "</div>"; }
   function fillClubs() { $("#club").innerHTML = clubList().map(function (c) { return "<option>" + esc(c) + "</option>"; }).join(""); $("#club").value = ACC === "psg" ? "PSG" : "OM"; }
+
+  /* ---------- photos des joueurs (IndexedDB, sur l'appareil) ---------- */
+  var photos = {}, idb = null;
+  function pkey(c) { return c.name + "|" + c.club; }
+  function idbOpen() { return new Promise(function (res) { try { var r = indexedDB.open("packs-photos", 1); r.onupgradeneeded = function () { r.result.createObjectStore("p"); }; r.onsuccess = function () { idb = r.result; res(idb); }; r.onerror = function () { res(null); }; } catch (e) { res(null); } }); }
+  function idbAll() { return idbOpen().then(function (db) { if (!db) return; return new Promise(function (res) { var st = db.transaction("p").objectStore("p"), out = []; st.openCursor().onsuccess = function (e) { var c = e.target.result; if (c) { out.push([c.key, c.value]); c.continue(); } else res(out); }; }); }).then(function (list) { (list || []).forEach(function (kv) { var im = new Image(); im.onload = function () { photos[kv[0]] = im; if (tab) refresh(); }; im.src = kv[1]; }); }); }
+  function idbPut(k, v) { return idbOpen().then(function (db) { if (!db) throw new Error("db"); return new Promise(function (res, rej) { var tx = db.transaction("p", "readwrite"); if (v == null) tx.objectStore("p").delete(k); else tx.objectStore("p").put(v, k); tx.oncomplete = res; tx.onerror = rej; }); }); }
+  var photoFor = null;
+  function pickPhoto(k) { photoFor = k; $("#ppFile").click(); }
 
   /* ---------- logos (facultatifs, sur l'appareil) ---------- */
   var logos = {};
@@ -147,11 +161,11 @@
   }
   function shortName(n) { var w = n.split(" "); return (w.length > 1 && n.length > 13 ? w.slice(1).join(" ") : n).toUpperCase(); }
   function stats(p) { var r = p.rating, s = 0; for (var i = 0; i < p.name.length; i++) s = (s * 31 + p.name.charCodeAt(i)) % 997; function v(k, b) { return Math.max(25, Math.min(99, r + b + ((s >> k) % 9) - 4)); }
-    var gk = p.pos === "G", def = p.pos === "DEF", att = p.pos === "ATT";
-    return gk ? [["PLO", v(1, 2)], ["MAI", v(2, 0)], ["DÉG", v(3, -8)], ["RÉF", v(4, 3)], ["VIT", v(5, -20)], ["PLA", v(6, 1)]] : [["VIT", v(1, att ? 3 : def ? -6 : -2)], ["TIR", v(2, att ? 2 : def ? -25 : -6)], ["PAS", v(3, att ? -5 : 0)], ["DRI", v(4, att ? 1 : -8)], ["DÉF", v(5, def ? 2 : att ? -45 : -15)], ["PHY", v(6, def ? 0 : -8)]]; }
+    var ps = p.pos, gk = ps === "G", def = /^(DEF|DC|DD|DG|DLD|DLG)$/.test(ps), att = /^(ATT|BU|AT|AG|AD|AIL)$/.test(ps), wing = /^(AG|AD|MG|MD)$/.test(ps); if (/^(MDC)$/.test(ps)) { def = false; att = false; }
+    return gk ? [["PLO", v(1, 2)], ["MAI", v(2, 0)], ["DÉG", v(3, -8)], ["RÉF", v(4, 3)], ["VIT", v(5, -20)], ["PLA", v(6, 1)]] : [["VIT", v(1, wing ? 6 : att ? 3 : def ? -6 : -2)], ["TIR", v(2, att ? 2 : def ? -25 : -6)], ["PAS", v(3, att ? -5 : 0)], ["DRI", v(4, att ? 1 : -8)], ["DÉF", v(5, def ? 2 : att ? -45 : -15)], ["PHY", v(6, def ? 0 : -8)]]; }
   function cardPath(g, w, h) { var x = -w / 2, y = -h / 2, n = w * .09; g.beginPath(); g.moveTo(x + n, y); g.lineTo(-w * .12, y); g.quadraticCurveTo(0, y + n * .55, w * .12, y); g.lineTo(-x - n, y); g.lineTo(-x, y + n); g.lineTo(-x, -y - h * .1); g.quadraticCurveTo(-x, -y - h * .04, -x - w * .08, -y - h * .025); g.lineTo(0, -y); g.lineTo(x + w * .08, -y - h * .025); g.quadraticCurveTo(x, -y - h * .04, x, -y - h * .1); g.lineTo(x, y + n); g.closePath(); }
-  function card(g, p, face, shine, sp) {
-    var w = 640, h = 920, R = RAR[p.rk], c = club(p.club);
+  function card(g, p, face, shine, sp, t) {
+    var w = 640, h = 920, R = RAR[p.rk], c = club(p.club), inf = info(p), ph = photos[pkey(p)], tt = t || 0;
     g.save(); g.shadowColor = "rgba(" + R.beam + ",.6)"; g.shadowBlur = 60; cardPath(g, w, h);
     var gr = g.createLinearGradient(-w / 2, -h / 2, w / 2, h / 2); gr.addColorStop(0, R.a); gr.addColorStop(.5, R.b); gr.addColorStop(1, R.c); g.fillStyle = gr; g.fill(); g.restore();
     g.save(); cardPath(g, w, h); g.clip();
@@ -160,19 +174,30 @@
     g.fillStyle = R.ink; g.textAlign = "center"; g.textBaseline = "middle";
     if (!face) { badge(g, 0, -40, 150, p.club); g.font = "900 44px " + FONT; g.fillText(R.label, 0, 230); }
     else {
-      g.fillStyle = R.rank >= 2 ? "rgba(255,255,255,.16)" : "rgba(0,0,0,.2)"; g.beginPath(); g.arc(80, -215, 100, 0, Math.PI * 2); g.fill(); g.beginPath(); g.moveTo(-100, 10); g.quadraticCurveTo(80, -150, 260, 10); g.closePath(); g.fill(); g.fillRect(-100, 0, 360, 12);
+      if (ph) { var phh = 450, phw = phh * ph.width / ph.height; if (phw > 470) { phw = 470; phh = phw * ph.height / ph.width; } g.drawImage(ph, 90 - phw / 2, 25 - phh, phw, phh); var fd = g.createLinearGradient(0, -50, 0, 30); fd.addColorStop(0, "rgba(0,0,0,0)"); fd.addColorStop(1, R.b); g.fillStyle = fd; g.fillRect(-w / 2, -50, w, 80); }
+      else { g.fillStyle = R.rank >= 2 ? "rgba(255,255,255,.16)" : "rgba(0,0,0,.2)"; g.beginPath(); g.arc(80, -215, 100, 0, Math.PI * 2); g.fill(); g.beginPath(); g.moveTo(-100, 10); g.quadraticCurveTo(80, -150, 260, 10); g.closePath(); g.fill(); g.fillRect(-100, 0, 360, 12); }
       g.fillStyle = R.ink; g.font = "900 150px " + FONT; g.fillText(String(p.rating), -200, -300); g.font = "800 " + (p.pos.length > 2 ? 48 : 56) + "px " + FONT; g.fillText(p.pos, -200, -200);
-      g.fillRect(-250, -160, 100, 4); badge(g, -200, -95, 46, p.club);
+      g.fillRect(-250, -160, 100, 4); var fl = flag(inf.nat); if (fl) { g.font = "62px " + FONT; g.fillText(fl, -200, -110); badge(g, -200, -25, 40, p.club); } else badge(g, -200, -95, 46, p.club);
       g.font = "800 26px " + FONT; g.fillText(R.label, 0, 40);
       var sn = shortName(p.name); g.font = "900 64px " + FONT; var fs = 64; while (g.measureText(sn).width > 560 && fs > 34) { fs -= 4; g.font = "900 " + fs + "px " + FONT; } g.fillText(sn, 0, 100);
       g.fillRect(-230, 145, 460, 3);
       stats(p).forEach(function (s, i) { var col = i < 3 ? -130 : 120, yy = 200 + (i % 3) * 70, v = Math.round(s[1] * ease(sp == null ? 1 : sp)); g.font = "900 54px " + FONT; g.textAlign = "right"; g.fillText(String(v), col, yy); g.font = "700 44px " + FONT; g.textAlign = "left"; g.fillText(s[0], col + 16, yy); });
       g.fillRect(-2, 175, 4, 190);
     }
+    if (R.rank >= 2) holo(g, w, h, tt, R);
     if (shine != null) { var sx = -w + shine * w * 2.2, sg = g.createLinearGradient(sx - 120, 0, sx + 120, 0); sg.addColorStop(0, "rgba(255,255,255,0)"); sg.addColorStop(.5, "rgba(255,255,255,.5)"); sg.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = sg; g.save(); g.rotate(-.35); g.fillRect(-w, -h, w * 2, h * 2); g.restore(); }
     g.restore();
-    g.save(); cardPath(g, w, h); g.lineWidth = 8; g.strokeStyle = R.edge || "rgba(255,255,255,.7)"; g.stroke(); g.restore();
+    g.save(); cardPath(g, w, h); g.lineWidth = 8; g.strokeStyle = R.edge || "rgba(255,255,255,.7)"; g.stroke();
+    if (R.rank >= 2 && g.createConicGradient) { var cg2 = g.createConicGradient(tt * 1.6, 0, 0); ["#ff5f6d", "#ffc371", "#f5d77a", "#7cf7d4", "#5ec8ff", "#c48bff", "#ff5f6d"].forEach(function (col, i, a) { cg2.addColorStop(i / (a.length - 1), col); }); g.lineWidth = 10; g.globalAlpha = .85; g.strokeStyle = cg2; g.stroke(); }
+    g.restore();
+    if (R.rank >= 2) sparkles(g, w, h, tt);
   }
+  function holo(g, w, h, t, R) { // reflet holographique qui bouge (cartes spéciales)
+    g.save(); g.globalCompositeOperation = "overlay"; var off = (t * 220) % (w * 2), hg = g.createLinearGradient(-w + off - w, -h / 2, off, h / 2);
+    ["rgba(255,95,109,.0)", "rgba(255,95,109,.35)", "rgba(255,195,113,.35)", "rgba(124,247,212,.35)", "rgba(94,200,255,.35)", "rgba(196,139,255,.35)", "rgba(196,139,255,0)"].forEach(function (c, i, a) { hg.addColorStop(i / (a.length - 1), c); });
+    g.fillStyle = hg; g.fillRect(-w / 2, -h / 2, w, h); g.restore();
+  }
+  function sparkles(g, w, h, t) { g.save(); g.globalCompositeOperation = "lighter"; for (var i = 0; i < 9; i++) { var ph2 = (t * .9 + i * .37) % 1, a = Math.sin(ph2 * Math.PI), x = ((i * 173) % w) - w / 2, y = ((i * 311) % h) - h / 2, r = 6 + 16 * a; g.fillStyle = "rgba(255,255,240," + (.9 * a) + ")"; g.beginPath(); g.moveTo(x, y - r * 2); g.quadraticCurveTo(x, y, x + r * 2, y); g.quadraticCurveTo(x, y, x, y + r * 2); g.quadraticCurveTo(x, y, x - r * 2, y); g.quadraticCurveTo(x, y, x, y - r * 2); g.fill(); } g.restore(); }
   function bigText(g, txt, y, size, a, sc, col) { if (a <= 0) return; g.save(); g.globalAlpha = Math.min(1, a); g.translate(W / 2, y); g.scale(sc, sc); g.textAlign = "center"; g.textBaseline = "middle"; g.font = "900 " + size + "px " + FONT; var s = size; while (g.measureText(txt).width > 1000 && s > 24) { s -= 4; g.font = "900 " + s + "px " + FONT; } g.lineWidth = s * .09; g.strokeStyle = "rgba(0,0,0,.65)"; g.strokeText(txt, 0, 0); g.fillStyle = col || "#fff"; g.fillText(txt, 0, 0); g.restore(); }
   function pill(g, txt, x, y, bg, fg, size) { g.font = "900 " + (size || 34) + "px " + FONT; var w = g.measureText(txt).width + 40, h = (size || 34) * 1.6; g.fillStyle = bg; rr(g, x - w / 2, y - h / 2, w, h, h / 2); g.fill(); g.fillStyle = fg; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(txt, x, y + 2); }
   function beamFx(g, t, col, k) { if (k <= 0) return; g.save(); g.globalCompositeOperation = "lighter"; var bw = 120 + k * 260, bgd = g.createLinearGradient(W / 2 - bw, 0, W / 2 + bw, 0); bgd.addColorStop(0, "rgba(" + col + ",0)"); bgd.addColorStop(.5, "rgba(" + col + "," + (.7 * k) + ")"); bgd.addColorStop(1, "rgba(" + col + ",0)"); g.fillStyle = bgd; g.fillRect(W / 2 - bw, 0, bw * 2, H);
@@ -181,7 +206,11 @@
 
   /* timeline de la vidéo (calculée depuis le dernier pack ouvert) */
   var STEP = 1.35;
-  function TL(L) { var intro = L && (L.who || L.com) ? 3.4 : .4, n = (L ? L.cards.length : 5) - 1, tw = intro + 3.4 + n * STEP + .2; return { intro: intro, n: n, tw: tw, club: tw + 1, pos: tw + 1.9, note: tw + 2.8, flip: tw + 3.8, sum: tw + 8.6, end: tw + 14.6 }; }
+  function isWalk(L) { return L && RAR[L.cards[L.cards.length - 1].rk].rank >= 2; }
+  function TL(L) { var intro = L && (L.who || L.com) ? 3.4 : .4, n = (L ? L.cards.length : 5) - 1, tw = intro + 3.4 + n * STEP + .2, o;
+    if (isWalk(L)) o = { walk: true, tun: tw + 1, flag: tw + 2.5, club: tw + 3.5, pos: tw + 4.4, sil: tw + 5.3, flip: tw + 7.1 };
+    else o = { walk: false, club: tw + 1, pos: tw + 1.9, note: tw + 2.8, flip: tw + 3.8 };
+    o.intro = intro; o.n = n; o.tw = tw; o.sum = o.flip + 4.8; o.end = o.sum + 6; return o; }
   function slot(i, n) { var row = Math.floor(i / 4), inRow = Math.min(4, n - row * 4); return [W / 2 + ((i % 4) - (inRow - 1) / 2) * 240, 330 + row * 300]; }
   function packName(L) { var P = packOf(L.pack); return P.id === "club" ? "PACK " + (L.club || "").toUpperCase() : P.label.toUpperCase(); }
   function drawScene(g, t) {
@@ -194,6 +223,7 @@
     if (t >= tm.tw + .9 && t < tm.sum) { bk = t < tm.flip + 1 ? 1 : Math.max(.3, 1 - (t - tm.flip - 1) / 1.5); bcol = bestR.beam; }
     beamFx(g, t, bcol, bk);
     g.fillStyle = "rgba(0,0,0,.55)"; for (var k = 0; k < 40; k++) { var x = (k * 97) % W, hh = 60 + (k * 37) % 70, by = Math.sin(t * 6 + k) * (t > tm.flip ? 10 : 2); g.beginPath(); g.arc(x, H - 80 - hh + by, 34, 0, Math.PI * 2); g.fill(); g.fillRect(x - 40, H - 80 - hh + by, 80, 200); }
+    if (tm.walk && t >= tm.tun - .4 && t < tm.flip + .6) tunnel(g, t, tm, last, bestR);
     // 0. le commentaire choisi
     if (t < tm.intro + .4 && (L.who || L.com)) {
       var ia = Math.min(1, t / .25) * (t > tm.intro ? 1 - (t - tm.intro) / .4 : 1), isc = .8 + .2 * back(t / .4);
@@ -224,26 +254,32 @@
     // 2. les cartes une par une
     var sumK = clamp((t - tm.sum) / .5);
     if (sumK > 0) { g.save(); g.globalAlpha = sumK * .6; g.fillStyle = "#000"; g.fillRect(0, 160, W, H); g.restore(); }
+    var hideK = tm.walk ? clamp((t - tm.tun + .3) / .4) * (1 - clamp((t - tm.flip - .3) / .5)) : 0;
     for (var q = 0; q < tm.n; q++) {
-      var ts2 = tm.intro + 3.4 + q * STEP, cd = L.cards[q]; if (t < ts2) continue;
+      var ts2 = tm.intro + 3.4 + q * STEP, cd = L.cards[q]; if (t < ts2 || hideK >= 1) continue;
+      g.save(); g.globalAlpha = 1 - hideK;
       var d = t - ts2, sl = slot(q, tm.n), mv = ease((d - .95) / .35), s0 = .7 * back(d / .3), sc = s0 + (.3 - s0) * mv, cx = W / 2 + (sl[0] - W / 2) * mv, cy = 980 + (sl[1] - 980) * mv;
       if (sumK > 0) { var ss = slotSum(q, L.cards.length); cx += (ss[0] - cx) * ease(sumK); cy += (ss[1] - cy) * ease(sumK); sc += (.27 - sc) * ease(sumK); }
-      g.save(); g.translate(cx, cy); g.rotate((1 - Math.min(1, d / .3)) * .3); g.scale(sc, sc); card(g, cd, true, null, Math.min(1, d / .6)); g.restore();
+      g.save(); g.translate(cx, cy); g.rotate((1 - Math.min(1, d / .3)) * .3); g.scale(sc, sc); card(g, cd, true, null, Math.min(1, d / .6), t); g.restore();
       if (d > .3) tag(g, cd, cx, cy + 920 * sc / 2 + 20, Math.min(1, (d - .3) / .2), sc > .5 ? 1 : .75);
       if (d < 1) bigText(g, RAR[cd.rk].label, 1520, 66, Math.min(1, d / .15) * (d > .85 ? 1 - (d - .85) / .15 : 1), 1, RAR[cd.rk].rank ? "#f5d77a" : "#fff");
+      g.restore();
     }
     // 3. la dernière carte : suspense
-    if (t >= tm.tw && t < tm.club) bigText(g, "Et la dernière carte… 👀", 1000, 76, Math.min(1, (t - tm.tw) / .2), .9 + .1 * Math.sin(t * 8));
-    [[tm.club, "club"], [tm.pos, "pos"], [tm.note, "note"]].forEach(function (s2, i, arr) { var d2 = t - s2[0], nx = arr[i + 1] ? arr[i + 1][0] : tm.flip - .1; if (d2 < 0 || t > nx + .15) return; var a2 = Math.min(1, d2 / .15) * (t > nx ? 1 - (t - nx) / .15 : 1), sc2 = .4 + .6 * back(d2 / .35);
-      if (s2[1] === "club") { g.save(); g.globalAlpha = a2; g.translate(W / 2, 980); g.scale(sc2, sc2); badge(g, 0, 0, 220, last.club); g.restore(); bigText(g, String(last.club).toUpperCase(), 1300, 90, a2, 1); }
+    if (t >= tm.tw && t < (tm.walk ? tm.tun : tm.club)) bigText(g, "Et la dernière carte… 👀", 1000, 76, Math.min(1, (t - tm.tw) / .2), .9 + .1 * Math.sin(t * 8));
+    var lastInf = info(last), steps = tm.walk ? [[tm.flag, "flag"], [tm.club, "club"], [tm.pos, "pos"]] : [[tm.club, "club"], [tm.pos, "pos"], [tm.note, "note"]];
+    if (tm.walk && !flag(lastInf.nat)) steps.shift();
+    steps.forEach(function (s2, i, arr) { var d2 = t - s2[0], nx = arr[i + 1] ? arr[i + 1][0] : (tm.walk ? tm.sil : tm.flip - .1); if (d2 < 0 || t > nx + .15) return; var a2 = Math.min(1, d2 / .15) * (t > nx ? 1 - (t - nx) / .15 : 1), sc2 = .4 + .6 * back(d2 / .35);
+      if (s2[1] === "flag") { g.save(); g.globalAlpha = a2; g.translate(W / 2, 900); g.scale(sc2, sc2); g.font = "300px " + FONT; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(flag(lastInf.nat), 0, 0); g.restore(); bigText(g, String(lastInf.nat).toUpperCase(), 1180, 80, a2, 1); }
+      else if (s2[1] === "club") { g.save(); g.globalAlpha = a2; g.translate(W / 2, 980); g.scale(sc2, sc2); badge(g, 0, 0, 220, last.club); g.restore(); bigText(g, String(last.club).toUpperCase(), 1300, 90, a2, 1); }
       else if (s2[1] === "pos") bigText(g, last.pos, 1000, 280, a2, sc2);
       else { g.save(); g.globalAlpha = a2; g.strokeStyle = "rgba(" + bestR.beam + ",.95)"; g.lineWidth = 14; g.beginPath(); g.arc(W / 2, 1000, 240 * sc2, 0, Math.PI * 2); g.stroke(); g.restore(); bigText(g, String(last.rating), 1000, 300, a2, sc2, bestR.rank >= 2 ? "#f5d77a" : "#fff"); }
     });
     if (t >= tm.flip - .5) {
       var ca = ease((t - tm.flip + .5) / .5), flip = clamp((t - tm.flip) / .55), sx2 = Math.cos(flip * Math.PI), idl = t > tm.flip + .6 ? Math.sin((t - tm.flip) * 1.6) * 10 : 0;
-      var bx = W / 2, byy = 1060 + (1 - ca) * 300 + idl, bsc = (.66 + .2 * ca);
+      var big2 = tm.n > 4, bx = W / 2, byy = (big2 ? 1150 : 1060) + (1 - ca) * 300 + idl, bsc = big2 ? (.6 + .17 * ca) : (.66 + .2 * ca);
       if (sumK > 0) { var sb = slotSum(L.cards.length - 1, L.cards.length); bx += (sb[0] - bx) * ease(sumK); byy += (sb[1] - byy) * ease(sumK); bsc += (.27 - bsc) * ease(sumK); }
-      g.save(); g.globalAlpha = ca; g.translate(bx, byy); g.scale(bsc * Math.max(.02, Math.abs(sx2)), bsc); card(g, last, flip > .5, t > tm.flip + .6 && sumK < 1 ? ((t - tm.flip - .6) * .5) % 1.4 : null, clamp((t - tm.flip - .5) / 1.2)); g.restore();
+      g.save(); g.globalAlpha = ca; g.translate(bx, byy); g.scale(bsc * Math.max(.02, Math.abs(sx2)), bsc); card(g, last, flip > .5, t > tm.flip + .6 && sumK < 1 ? ((t - tm.flip - .6) * .5) % 1.4 : null, clamp((t - tm.flip - .5) / 1.2), t); g.restore();
       if (t > tm.flip + .6) tag(g, last, bx, byy + 920 * bsc / 2 + 24, clamp((t - tm.flip - .6) / .3), sumK > 0 ? .75 : 1.2);
       if (t > tm.flip + .5 && t < tm.sum) bigText(g, "🔥 " + RAR[last.rk].label + " 🔥", 1590, 72, clamp((t - tm.flip - .5) / .3) * (1 - sumK), .6 + .4 * back((t - tm.flip - .5) / .4), "#f5d77a");
     }
@@ -252,6 +288,30 @@
     // 4. le bilan : nouvelles, doublons, pièces, album
     if (sumK > 0) summary(g, t, L, tm, sumK);
     g.fillStyle = "rgba(0,0,0,.45)"; rr(g, 200, 60, 680, 90, 45); g.fill(); g.fillStyle = "#fff"; g.textAlign = "center"; g.textBaseline = "middle"; g.font = "900 42px " + FONT; g.fillText("🃏 ÉPISODE " + L.epi + " · ALBUM LIGUE 1", W / 2, 106);
+  }
+  function tunnel(g, t, tm, last, R) { // walkout : tunnel, fumée, projecteurs, silhouette qui arrive
+    var a = clamp((t - tm.tun + .4) / .4) * (t > tm.flip + .2 ? 1 - (t - tm.flip - .2) / .4 : 1); if (a <= 0) return;
+    g.save(); g.globalAlpha = a; g.fillStyle = "#020306"; g.fillRect(0, 0, W, H);
+    var vx = W / 2, vy = 820; // point de fuite
+    g.fillStyle = "#0b0f18"; g.beginPath(); g.moveTo(0, H); g.lineTo(vx - 150, vy + 120); g.lineTo(vx + 150, vy + 120); g.lineTo(W, H); g.closePath(); g.fill(); // sol
+    g.fillStyle = "#070a12"; g.beginPath(); g.moveTo(0, 0); g.lineTo(vx - 150, vy - 260); g.lineTo(vx - 150, vy + 120); g.lineTo(0, H); g.closePath(); g.fill(); g.beginPath(); g.moveTo(W, 0); g.lineTo(vx + 150, vy - 260); g.lineTo(vx + 150, vy + 120); g.lineTo(W, H); g.closePath(); g.fill();
+    var door = g.createRadialGradient(vx, vy - 60, 10, vx, vy - 60, 260); door.addColorStop(0, "rgba(" + R.beam + "," + (.25 + .5 * clamp((t - tm.sil) / 1)) + ")"); door.addColorStop(1, "rgba(" + R.beam + ",0)"); g.fillStyle = door; g.fillRect(vx - 300, vy - 400, 600, 600);
+    g.fillStyle = "rgba(" + R.beam + ",.35)"; g.fillRect(vx - 150, vy - 260, 300, 380);
+    for (var i = 0; i < 4; i++) { var on = t >= tm.tun + .2 + i * .32, k = (i + 1) / 5, lx = vx + (i % 2 ? 1 : -1) * (150 + (W / 2 - 150) * (1 - k)), ly = (vy - 260) * (1 - k) + 40 * k; if (!on) continue; // projecteurs qui s'allument un par un
+      var fl = clamp((t - tm.tun - .2 - i * .32) / .15), lg = g.createRadialGradient(lx, ly, 2, lx, ly, 160 * (1 - k * .5)); lg.addColorStop(0, "rgba(255,255,255," + fl + ")"); lg.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = lg; g.fillRect(lx - 200, ly - 200, 400, 400);
+      g.save(); g.globalCompositeOperation = "lighter"; var cg = g.createLinearGradient(lx, ly, vx, H); cg.addColorStop(0, "rgba(255,255,255," + (.18 * fl) + ")"); cg.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = cg; g.beginPath(); g.moveTo(lx - 10, ly); g.lineTo(lx + 10, ly); g.lineTo(vx + (i % 2 ? 260 : -100), H); g.lineTo(vx + (i % 2 ? 100 : -260), H); g.closePath(); g.fill(); g.restore(); }
+    for (var s = 0; s < 9; s++) { var sx = ((s * 211 + t * 40 * (s % 2 ? 1 : -1)) % (W + 400)) - 200, sy = 1300 + (s % 3) * 160 + Math.sin(t + s) * 30, sm = g.createRadialGradient(sx, sy, 10, sx, sy, 320); sm.addColorStop(0, "rgba(200,210,230,.16)"); sm.addColorStop(1, "rgba(200,210,230,0)"); g.fillStyle = sm; g.fillRect(sx - 320, sy - 320, 640, 640); } // fumée
+    if (t >= tm.sil) { // la silhouette avance vers la caméra
+      var p = clamp((t - tm.sil) / (tm.flip - tm.sil - .2)), e = p * p, sc = .22 + .95 * e, cy = vy + 60 + 560 * e, ph = photos[pkey(last)];
+      g.save(); g.translate(vx + Math.sin(t * 5) * 6 * (1 - e), cy); g.scale(sc, sc);
+      g.shadowColor = "rgba(" + R.beam + ",.95)"; g.shadowBlur = 50;
+      if (ph && "filter" in g) { var hh = 900, ww = hh * ph.width / ph.height; g.filter = "brightness(0)"; g.drawImage(ph, -ww / 2, -hh, ww, hh); g.filter = "none"; }
+      else { g.fillStyle = "#000"; g.beginPath(); g.arc(0, -760, 95, 0, Math.PI * 2); g.fill(); g.beginPath(); g.moveTo(-230, -560); g.quadraticCurveTo(0, -660, 230, -560); g.lineTo(260, -160); g.lineTo(150, -150); g.lineTo(120, 0); g.lineTo(30, 0); g.lineTo(0, -300); g.lineTo(-30, 0); g.lineTo(-120, 0); g.lineTo(-150, -150); g.lineTo(-260, -160); g.closePath(); g.fill(); }
+      g.restore();
+      bigText(g, String(last.rating), 330, 170, clamp((t - tm.sil - .6) / .3), 1, "#f5d77a");
+    }
+    g.restore();
+    if (t > tm.flip - .35 && t < tm.flip + .1) { g.fillStyle = "rgba(255,255,255," + (1 - Math.abs(t - tm.flip + .12) / .25) + ")"; g.fillRect(0, 0, W, H); }
   }
   function slotSum(i, n) { var perRow = n > 6 ? 4 : n > 4 ? 3 : n, row = Math.floor(i / perRow), inRow = Math.min(perRow, n - row * perRow); return [W / 2 + ((i % perRow) - (inRow - 1) / 2) * 250, 470 + row * 330]; }
   function tag(g, c, x, y, a, sc) { if (a <= 0) return; g.save(); g.globalAlpha = a; g.translate(x, y); g.scale(sc, sc); if (c.dup) pill(g, "♻️ DOUBLON +" + fmt(c.sold) + " 🪙", 0, 0, "#f5c542", "#1a1300", 30); else pill(g, "🆕 NOUVELLE", 0, 0, "#22c55e", "#04210f", 30); g.restore(); }
@@ -285,7 +345,8 @@
     tone(o + 1.2, 200, 900, 1.7, .06, "sawtooth"); noise(o + 2.9, 1.2, 3000, .5, "highpass"); tone(o + 2.9, 90, 30, 1.2, .7);
     for (var q = 0; q < tm.n; q++) { var ts = o + 3.4 + q * STEP, rk = RAR[L.cards[q].rk].rank; noise(ts, .18, 2500, .25, "highpass"); tone(ts + .05, 500 + rk * 200, 900 + rk * 300, .18, .08); if (rk) tone(ts + .12, 1175 + rk * 100, 1175 + rk * 100, .4, .05, "triangle"); if (L.cards[q].dup) { tone(ts + .35, 1568, 1568, .12, .05, "square"); tone(ts + .45, 2093, 2093, .2, .05, "square"); } }
     tone(t0 + tm.tw, 150, 60, .9, .3, "triangle");
-    [tm.club, tm.pos, tm.note].forEach(function (s, i) { tone(t0 + s, 70, 40, .5, .75); noise(t0 + s, .25, 200, .5, "lowpass"); tone(t0 + s, 330 + i * 110, 330 + i * 110, .5, .06, "triangle"); });
+    if (tm.walk) { for (var li = 0; li < 4; li++) { noise(t0 + tm.tun + .2 + li * .32, .12, 300, .5, "lowpass"); tone(t0 + tm.tun + .2 + li * .32, 110, 55, .3, .4); } tone(t0 + tm.sil, 80, 160, tm.flip - tm.sil, .12, "sawtooth"); noise(t0 + tm.sil, tm.flip - tm.sil, 600, .08); }
+    [tm.walk ? tm.flag : tm.club, tm.walk ? tm.club : tm.pos, tm.walk ? tm.pos : tm.note].forEach(function (s, i) { tone(t0 + s, 70, 40, .5, .75); noise(t0 + s, .25, 200, .5, "lowpass"); tone(t0 + s, 330 + i * 110, 330 + i * 110, .5, .06, "triangle"); });
     tone(t0 + tm.flip, 400, 1600, .3, .1); [0, .12, .24].forEach(function (d, i) { tone(t0 + tm.flip + .35 + d, [784, 988, 1175][i], [784, 988, 1175][i], .6, .08, "triangle"); });
     var cr = ac.createBufferSource(), cf = ac.createBiquadFilter(), cg = ac.createGain(); cr.buffer = nb; cr.loop = true; cf.type = "bandpass"; cf.frequency.value = 900; cf.Q.value = .5; cg.gain.setValueAtTime(.001, t0 + tm.flip); cg.gain.linearRampToValueAtTime(.3, t0 + tm.flip + .5); cg.gain.linearRampToValueAtTime(.001, t0 + tm.sum + 1.5); cr.connect(cf); cf.connect(cg); cg.connect(dest); cr.start(t0 + tm.flip); cr.stop(t0 + tm.sum + 1.6);
     for (var cn = 0; cn < 8; cn++) tone(t0 + tm.sum + 1 + cn * .07, 1800 + cn * 80, 2400, .1, .04, "square");
@@ -343,7 +404,9 @@
   $("#dbSave").onclick = function () { try { localStorage.setItem("packs-db", $("#db").value); } catch (e) {} loadDb(); fillClubs(); refresh(); logosForm(); msg("Liste des joueurs enregistrée ✅ (" + PLAYERS.length + " joueurs)"); };
   $("#dbReset").onclick = function () { if (!confirm("Revenir à la liste d'origine (500 joueurs) ?")) return; try { localStorage.removeItem("packs-db"); } catch (e) {} loadDb(); fillClubs(); refresh(); logosForm(); };
 
+  $("#ppFile").onchange = function () { var f = this.files && this.files[0], k = photoFor; this.value = ""; if (!f || !k) return; var im = new Image(); im.onload = function () { var r = Math.min(1, 640 / im.height), c2 = document.createElement("canvas"); c2.width = Math.round(im.width * r); c2.height = Math.round(im.height * r); c2.getContext("2d").drawImage(im, 0, 0, c2.width, c2.height); var png = /png|webp/.test(f.type), url = c2.toDataURL(png ? "image/png" : "image/jpeg", .85); URL.revokeObjectURL(im.src); idbPut(k, url).then(function () { var i2 = new Image(); i2.onload = function () { photos[k] = i2; refresh(); msg("📷 Photo ajoutée : " + k.split("|")[0]); }; i2.src = url; }, function () { msg("⚠️ Impossible d'enregistrer la photo sur ce téléphone."); }); }; im.src = URL.createObjectURL(f); };
+  idbAll();
   loadDb(); load(); fillClubs(); Object.keys(CLUBS).forEach(loadLogo); logosForm(); refresh(); showResult(); makeCap();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { t0 = performance.now(); });
-  window.__packs = { drawScene: drawScene, tl: function () { return S.last ? TL(S.last) : null; }, state: function () { return S; }, open: openPack };
+  window.__packs = { setPhoto: function (k, url) { var i3 = new Image(); i3.onload = function () { photos[k] = i3; }; i3.src = url; }, drawScene: drawScene, tl: function () { return S.last ? TL(S.last) : null; }, state: function () { return S; }, open: openPack };
 })();
