@@ -132,8 +132,9 @@
     if (what === "sell" && !c.sale) { c.sale = c.value; c.keep = false; S.coins += c.value; L.sales = (L.sales || 0) + c.value; S.cards[k] = (S.cards[k] || 1) - 1; if (S.cards[k] <= 0) delete S.cards[k]; }
     else if (what === "sell" && c.sale) { S.coins -= c.sale; L.sales -= c.sale; delete c.sale; S.cards[k] = (S.cards[k] || 0) + 1; }
     else if (what === "keep") { if (c.sale) { S.coins -= c.sale; L.sales -= c.sale; delete c.sale; S.cards[k] = (S.cards[k] || 0) + 1; } c.keep = !c.keep; }
-    L.coins = S.coins; L.album = [albumCount(), PLAYERS.length]; save(); refresh(); showResult(); makeCap(); t0 = performance.now() - (TL(L).flip + .8) * 1000;
+    L.coins = S.coins; L.album = [albumCount(), PLAYERS.length]; save(); refresh(); showResult(); makeCap(); if (!fromVideo) { pressed = null; t0 = performance.now() - (TL(L).flip + .8) * 1000; }
   }
+  var fromVideo = false;
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]; }); }
 
   /* ---------- formulaire, album ---------- */
@@ -315,11 +316,12 @@
       if (sumK > 0) { var sb = slotSum(L.cards.length - 1, L.cards.length); bx += (sb[0] - bx) * ease(sumK); byy += (sb[1] - byy) * ease(sumK); bsc += (.27 - bsc) * ease(sumK); }
       g.save(); g.globalAlpha = ca; g.translate(bx, byy); g.scale(bsc * Math.max(.02, Math.abs(sx2)), bsc); card(g, last, flip > .5, t > tm.flip + .6 && sumK < 1 ? ((t - tm.flip - .6) * .5) % 1.4 : null, clamp((t - tm.flip - .5) / 1.2), t); g.restore();
       if (t > tm.flip + .6) tag(g, t < tm.flip + 2.5 ? { dup: last.dup, sold: last.sold } : last, bx, byy + 920 * bsc / 2 + 24, clamp((t - tm.flip - .6) / .3), sumK > 0 ? .75 : 1.2);
-      if (last.value != null && t > tm.flip + 1.3 && t < tm.sum) { var va = clamp((t - tm.flip - 1.3) / .3) * (1 - sumK); g.save(); g.globalAlpha = va; pill(g, "💰 Valeur : " + fmt(last.value) + " 🪙", W / 2, big2 ? 1725 : 1680, "rgba(0,0,0,.7)", "#f5d77a", 40); g.restore(); }
+      if (last.value != null && t > tm.flip + 1.3 && t < tm.sum && !btnVis(t)) { var va = clamp((t - tm.flip - 1.3) / .3) * (1 - sumK); g.save(); g.globalAlpha = va; pill(g, "💰 Valeur : " + fmt(last.value) + " 🪙", W / 2, big2 ? 1725 : 1680, "rgba(0,0,0,.7)", "#f5d77a", 40); g.restore(); }
       if (t > tm.flip + 2.5 && t < tm.sum + .3) { var da = clamp((t - tm.flip - 2.5) / .25) * (1 - sumK);
         if (last.sale || last.keep) { var st = .6 + .4 * back((t - tm.flip - 2.5) / .35), col = last.sale ? "#fb923c" : "#22c55e", tx = last.sale ? "💸 VENDUE !" : "🔒 JE LA GARDE"; g.save(); g.globalAlpha = da; g.translate(W / 2, byy); g.rotate(-.18); g.scale(st * 1.6 - .6, st * 1.6 - .6); g.font = "900 96px " + FONT; var tw2 = g.measureText(tx).width + 80; g.lineWidth = 14; g.strokeStyle = col; g.fillStyle = "rgba(0,0,0,.55)"; rr(g, -tw2 / 2, -80, tw2, 160, 26); g.fill(); g.stroke(); g.fillStyle = col; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(tx, 0, 6); g.restore(); }
-        else bigText(g, "Je la garde ou je la vends ? 👇", big2 ? 1815 : 1790, 60, da, .95 + .05 * Math.sin(t * 6), "#fff"); }
-      if (t > tm.flip + .5 && t < tm.sum) bigText(g, "🔥 " + RAR[last.rk].label + " 🔥", big2 ? 1630 : 1590, 72, clamp((t - tm.flip - .5) / .3) * (1 - sumK), .6 + .4 * back((t - tm.flip - .5) / .4), "#f5d77a");
+        else if (!pending()) bigText(g, "Je la garde ou je la vends ? 👇", big2 ? 1815 : 1790, 60, da, .95 + .05 * Math.sin(t * 6), "#fff"); }
+      choiceButtons(g, t, tm, last);
+      if (t > tm.flip + .5 && t < tm.sum && !btnVis(t)) bigText(g, "🔥 " + RAR[last.rk].label + " 🔥", big2 ? 1630 : 1590, 72, clamp((t - tm.flip - .5) / .3) * (1 - sumK), .6 + .4 * back((t - tm.flip - .5) / .4), "#f5d77a");
     }
     particles(g, t, tm.flip + .05, bestR.beam, 70);
     if (t > tm.flip + .2 && t < tm.sum + 1) for (var z = 0; z < 70; z++) { var zx = (z * 151) % W, zy = ((t - tm.flip - .2) * (300 + (z * 37) % 300) + (z * 83) % 600) - 200; if (zy > H) continue; g.save(); g.translate(zx + Math.sin(t * 3 + z) * 30, zy); g.rotate(t * 4 + z); var cc = club(last.club); g.fillStyle = [cc.c1, cc.c2, "#f5d77a"][z % 3]; g.fillRect(-10, -5, 20, 10); g.restore(); }
@@ -351,6 +353,27 @@
     g.restore();
     if (t > tm.flip - .35 && t < tm.flip + .1) { g.fillStyle = "rgba(255,255,255," + (1 - Math.abs(t - tm.flip + .12) / .25) + ")"; g.fillRect(0, 0, W, H); }
   }
+  // boutons « vendre / garder » dans la vidéo : la lecture s'arrête dessus jusqu'au choix
+  var BTN = { sell: [70, 1640, 450, 170], keep: [560, 1640, 450, 170] }, pressed = null;
+  function decided() { var L = S && S.last, c = L && L.cards[L.cards.length - 1]; return c && $("#inter").checked ? (c.sale ? "sell" : c.keep ? "keep" : null) : null; }
+  function decT() { return S && S.last ? TL(S.last).flip + 1.7 : 1e9; }
+  function pending() { var L = S && S.last, c = L && L.cards[L.cards.length - 1]; return !!(c && $("#inter").checked && !c.dup && !c.sale && !c.keep && c.value != null); }
+  function btnVis(t) { var D = decT(); return pending() ? t >= D - .3 : !!(pressed && t >= D - 1 && t < D + .8); }
+  function choiceButtons(g, t, tm, last) {
+    var D = decT(), show = btnVis(t); if (!show) return;
+    var a = pending() ? clamp((t - D + .3) / .3) : clamp((t - D + 1) / .3) * (1 - clamp((t - D - .5) / .3));
+    g.save(); g.globalAlpha = a; g.fillStyle = "rgba(0,0,0,.5)"; g.fillRect(0, 1505, W, 360);
+    [["sell", "💸 VENDRE", fmt(last.value) + " 🪙", "#fb923c", "#2a1000"], ["keep", "🔒 GARDER", "dans l'album", "#22c55e", "#04210f"]].forEach(function (b) {
+      var r = BTN[b[0]], on = pressed === b[0], off = pressed && !on, sc = on ? 1 + .08 * Math.sin(clamp((t - D) / .3) * Math.PI) : 1, pulse = pending() ? 1 + .03 * Math.sin(t * 6 + (b[0] === "keep" ? 1.5 : 0)) : 1;
+      g.save(); g.globalAlpha = a * (off ? .35 : 1); g.translate(r[0] + r[2] / 2, r[1] + r[3] / 2); g.scale(sc * pulse, sc * pulse);
+      g.shadowColor = "rgba(0,0,0,.5)"; g.shadowBlur = 24; g.fillStyle = b[3]; rr(g, -r[2] / 2, -r[3] / 2, r[2], r[3], 40); g.fill(); g.shadowBlur = 0;
+      if (on) { g.lineWidth = 10; g.strokeStyle = "#fff"; rr(g, -r[2] / 2, -r[3] / 2, r[2], r[3], 40); g.stroke(); }
+      g.fillStyle = b[4]; g.textAlign = "center"; g.textBaseline = "middle"; g.font = "900 58px " + FONT; g.fillText(b[1], 0, -24); g.font = "800 38px " + FONT; g.fillText(b[2], 0, 40); g.restore(); });
+    if (pending()) bigText(g, "Je la garde ou je la vends ? 👇", 1560, 54, a, 1, "#fff");
+    if (pressed && !pending() && t < D && t > D - .25) { var hb = BTN[pressed]; g.font = "80px " + FONT; g.textAlign = "center"; g.fillText("👆", hb[0] + hb[2] / 2 + 40, hb[1] + hb[3] - 10 + (D - t) * 200); }
+    if (pressed && t >= D && t < D + .5) { var q = (t - D) / .5, rb = BTN[pressed]; g.fillStyle = "rgba(255,255,255," + (.5 * (1 - q)) + ")"; g.beginPath(); g.arc(rb[0] + rb[2] / 2, rb[1] + rb[3] / 2, 60 + 260 * q, 0, Math.PI * 2); g.fill(); }
+    g.restore();
+  }
   function slotSum(i, n) { var perRow = n > 6 ? 4 : n > 4 ? 3 : n, row = Math.floor(i / perRow), inRow = Math.min(perRow, n - row * perRow); return [W / 2 + ((i % perRow) - (inRow - 1) / 2) * 250, 470 + row * 330]; }
   function tag(g, c, x, y, a, sc) { if (a <= 0) return; g.save(); g.globalAlpha = a; g.translate(x, y); g.scale(sc, sc); if (c.sale) pill(g, "💸 VENDUE +" + fmt(c.sale) + " 🪙", 0, 0, "#fb923c", "#2a1000", 30); else if (c.dup) pill(g, "♻️ DOUBLON +" + fmt(c.sold) + " 🪙", 0, 0, "#f5c542", "#1a1300", 30); else pill(g, "🆕 NOUVELLE", 0, 0, "#22c55e", "#04210f", 30); g.restore(); }
   function summary(g, t, L, tm, k) {
@@ -372,11 +395,12 @@
   }
 
   /* ---------- sons (créés par la page) ---------- */
-  function sounds(ac, dest, t0) {
-    var L = S.last; if (!L) return; var tm = TL(L);
-    function tone(t, f1, f2, d, v, type) { var o = ac.createOscillator(), g = ac.createGain(); o.type = type || "sine"; o.frequency.setValueAtTime(f1, t); o.frequency.exponentialRampToValueAtTime(f2, t + d); g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.001, t + d); o.connect(g); g.connect(dest); o.start(t); o.stop(t + d + .02); }
+  function sounds(ac, dest, t0, minX, maxX) {
+    var L = S.last; if (!L) return; var tm = TL(L), lo = minX == null ? -1 : minX, hi = maxX == null ? 1e9 : maxX;
+    function ok(t) { var x = t - t0; return x >= lo && x < hi; }
+    function tone(t, f1, f2, d, v, type) { if (!ok(t)) return; var o = ac.createOscillator(), g = ac.createGain(); o.type = type || "sine"; o.frequency.setValueAtTime(f1, t); o.frequency.exponentialRampToValueAtTime(f2, t + d); g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.001, t + d); o.connect(g); g.connect(dest); o.start(t); o.stop(t + d + .02); }
     var nb = ac.createBuffer(1, ac.sampleRate * 2, ac.sampleRate), nd = nb.getChannelData(0); for (var i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
-    function noise(t, d, f, v, type) { var s = ac.createBufferSource(), fl = ac.createBiquadFilter(), g = ac.createGain(); s.buffer = nb; fl.type = type || "bandpass"; fl.frequency.value = f; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.001, t + d); s.connect(fl); fl.connect(g); g.connect(dest); s.start(t); s.stop(t + d); }
+    function noise(t, d, f, v, type) { if (!ok(t)) return; var s = ac.createBufferSource(), fl = ac.createBiquadFilter(), g = ac.createGain(); s.buffer = nb; fl.type = type || "bandpass"; fl.frequency.value = f; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.001, t + d); s.connect(fl); fl.connect(g); g.connect(dest); s.start(t); s.stop(t + d); }
     var o = t0 + tm.intro;
     if (L.who || L.com) { tone(t0 + .05, 600, 900, .12, .1); tone(t0 + .14, 900, 1300, .14, .08); }
     tone(o + .55, 120, 45, .5, .5); noise(o + .55, .3, 400, .3);
@@ -387,7 +411,8 @@
     if (tm.walk) { for (var li = 0; li < 4; li++) { noise(t0 + tm.tun + .2 + li * .32, .12, 300, .5, "lowpass"); tone(t0 + tm.tun + .2 + li * .32, 110, 55, .3, .4); } tone(t0 + tm.sil, 80, 160, tm.flip - tm.sil, .12, "sawtooth"); noise(t0 + tm.sil, tm.flip - tm.sil, 600, .08); }
     [tm.walk ? tm.flag : tm.club, tm.walk ? tm.club : tm.pos, tm.walk ? tm.pos : tm.note].forEach(function (s, i) { tone(t0 + s, 70, 40, .5, .75); noise(t0 + s, .25, 200, .5, "lowpass"); tone(t0 + s, 330 + i * 110, 330 + i * 110, .5, .06, "triangle"); });
     tone(t0 + tm.flip, 400, 1600, .3, .1); [0, .12, .24].forEach(function (d, i) { tone(t0 + tm.flip + .35 + d, [784, 988, 1175][i], [784, 988, 1175][i], .6, .08, "triangle"); });
-    var cr = ac.createBufferSource(), cf = ac.createBiquadFilter(), cg = ac.createGain(); cr.buffer = nb; cr.loop = true; cf.type = "bandpass"; cf.frequency.value = 900; cf.Q.value = .5; cg.gain.setValueAtTime(.001, t0 + tm.flip); cg.gain.linearRampToValueAtTime(.3, t0 + tm.flip + .5); cg.gain.linearRampToValueAtTime(.001, t0 + tm.sum + 1.5); cr.connect(cf); cf.connect(cg); cg.connect(dest); cr.start(t0 + tm.flip); cr.stop(t0 + tm.sum + 1.6);
+    var cr = ac.createBufferSource(), cf = ac.createBiquadFilter(), cg = ac.createGain(); cr.buffer = nb; cr.loop = true; cf.type = "bandpass"; cf.frequency.value = 900; cf.Q.value = .5; var cs = t0 + Math.max(tm.flip, lo), ce = t0 + Math.min(tm.sum + 1.6, hi);
+    if (ce > cs + .1) { cg.gain.setValueAtTime(.001, cs); cg.gain.linearRampToValueAtTime(.3, cs + .5); cg.gain.linearRampToValueAtTime(.001, ce - .1); cr.connect(cf); cf.connect(cg); cg.connect(dest); cr.start(cs); cr.stop(ce); }
     for (var cn = 0; cn < 8; cn++) tone(t0 + tm.sum + 1 + cn * .07, 1800 + cn * 80, 2400, .1, .04, "square");
     var lc = L.cards[L.cards.length - 1], ds = t0 + tm.flip + 2.5;
     if (lc.sale) { tone(ds, 90, 40, .3, .5); for (var cs = 0; cs < 10; cs++) tone(ds + .1 + cs * .06, 1900 + cs * 90, 2600, .1, .05, "square"); }
@@ -401,8 +426,18 @@
   function msg(t) { $("#msg").textContent = t; }
   function audio() { if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === "suspended") ac.resume(); return ac; }
   function total() { return S && S.last ? TL(S.last).end : 4; }
-  (function loop(now) { if (!busy) { var t = (now - t0) / 1000; if (t > total() + 1.5) { t0 = now; t = 0; } drawScene(g, Math.min(t, total())); } requestAnimationFrame(loop); })(performance.now());
-  function playNow() { if (!S.last) return; var a = audio(); if (prevGain) try { prevGain.disconnect(); } catch (e) {} prevGain = a.createGain(); prevGain.connect(a.destination); t0 = performance.now(); sounds(a, prevGain, a.currentTime); }
+  var waiting = false, onChoice = null;
+  (function loop(now) { if (!busy) { var t = (now - t0) / 1000, D = decT(); if (t > total() + 1.5) { t0 = now; t = 0; pressed = decided(); }
+      if (pending() && t >= D) { t = D; t0 = now - D * 1000; if (!waiting) { waiting = true; msg("👆 Touche VENDRE ou GARDER sur la vidéo"); } }
+      drawScene(g, Math.min(t, total())); } requestAnimationFrame(loop); })(performance.now());
+  var soundOn = false;
+  function playNow() { if (!S.last) return; var a = audio(); if (prevGain) try { prevGain.disconnect(); } catch (e) {} prevGain = a.createGain(); prevGain.connect(a.destination); t0 = performance.now(); pressed = decided(); waiting = false; soundOn = true; sounds(a, prevGain, a.currentTime, null, pending() ? decT() : null); }
+  function choose(which) { // choix fait en touchant la vidéo
+    var L = S.last; if (!L || !pending()) return; var D = decT(); pressed = which; fromVideo = true; deal(L.cards.length - 1, which); fromVideo = false; waiting = false; msg(which === "sell" ? "💸 Vendue !" : "🔒 Gardée !");
+    if (onChoice) onChoice(); else { t0 = performance.now() - D * 1000; if (soundOn && prevGain) { var a = audio(); sounds(a, prevGain, a.currentTime - D, D, null); } }
+  }
+  cv.addEventListener("pointerdown", function (e) { if (!pending()) return; var r = cv.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * W, y = (e.clientY - r.top) / r.height * H;
+    Object.keys(BTN).forEach(function (k) { var b = BTN[k]; if (x >= b[0] && x <= b[0] + b[2] && y >= b[1] - 20 && y <= b[1] + b[3] + 20) { e.preventDefault(); choose(k); } }); });
   $("#play").onclick = playNow;
   var lastURL = null, lastFile = null;
   function download(blob, name) {
@@ -423,9 +458,12 @@
     try { rec = new MediaRecorder(st, type ? { mimeType: type, videoBitsPerSecond: 9e6 } : {}); } catch (e) { msg("Impossible de démarrer l'enregistrement."); return; }
     rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); }; var chunks = ch;
     busy = true; $("#rec").disabled = true; $("#bar").hidden = false; msg("Création de la vidéo (" + Math.round(end) + " s)… garde la page ouverte.");
-    sounds(a, dest, a.currentTime + .2); var s0 = performance.now() + 200; rec.start(500);
-    (function fr() { var t = Math.max(0, (performance.now() - s0) / 1000); drawScene(g, Math.min(t, end)); $("#barI").style.width = Math.round(Math.min(1, t / end) * 100) + "%";
-      if (t >= end) { rec.onstop = function () { var ext = /mp4/.test(rec.mimeType || type) ? "mp4" : "webm"; download(new Blob(ch, { type: rec.mimeType || type || "video/webm" }), "pack-episode-" + S.last.epi + "." + ext); msg(ext === "mp4" ? "Vidéo téléchargée ✅" : "Vidéo téléchargée ✅ (format WEBM) : si ta galerie ne la voit pas, ouvre-la dans CapCut et réexporte-la."); busy = false; $("#rec").disabled = false; $("#bar").hidden = true; t0 = performance.now(); }; try { rec.stop(); } catch (e) { rec.onstop(); } return; }
+    var inter = pending(), D = decT(); pressed = decided(); sounds(a, dest, a.currentTime + .2, null, inter ? D : null); var s0 = performance.now() + 200; rec.start(500);
+    onChoice = function () { s0 = performance.now() - D * 1000; try { rec.resume(); } catch (e) {} sounds(a, dest, a.currentTime - D, D, null); msg("Création de la vidéo… garde la page ouverte."); };
+    (function fr() { var t = Math.max(0, (performance.now() - s0) / 1000);
+      if (pending() && t >= D) { t = D; if (rec.state === "recording") { drawScene(g, D); try { rec.pause(); } catch (e) {} msg("⏸️ Vidéo en pause : touche VENDRE ou GARDER sur la vidéo"); } s0 = performance.now() - D * 1000; }
+      drawScene(g, Math.min(t, end)); $("#barI").style.width = Math.round(Math.min(1, t / end) * 100) + "%";
+      if (t >= end) { rec.onstop = function () { var ext = /mp4/.test(rec.mimeType || type) ? "mp4" : "webm"; download(new Blob(ch, { type: rec.mimeType || type || "video/webm" }), "pack-episode-" + S.last.epi + "." + ext); msg(ext === "mp4" ? "Vidéo téléchargée ✅" : "Vidéo téléchargée ✅ (format WEBM) : si ta galerie ne la voit pas, ouvre-la dans CapCut et réexporte-la."); busy = false; onChoice = null; $("#rec").disabled = false; $("#bar").hidden = true; t0 = performance.now(); }; try { rec.stop(); } catch (e) { rec.onstop(); } return; }
       requestAnimationFrame(fr); })();
   };
 
@@ -440,6 +478,8 @@
 
   /* ---------- événements ---------- */
   $("#open").onclick = openPack;
+  try { $("#inter").checked = localStorage.getItem("packs-inter") !== "0"; } catch (e) {}
+  $("#inter").onchange = function () { try { localStorage.setItem("packs-inter", this.checked ? "1" : "0"); } catch (e) {} pressed = decided(); };
   $("#acc").onchange = function () { ACC = this.value; try { localStorage.setItem("packs-acc", ACC); } catch (e) {} load(); tab = null; fillClubs(); refresh(); showResult(); makeCap(); t0 = performance.now(); };
   $("#exp").onclick = function () { var b = new Blob([JSON.stringify({ acc: ACC, save: S }, null, 1)], { type: "application/json" }), u = URL.createObjectURL(b), a = document.createElement("a"); a.href = u; a.download = "collection-" + ACC + ".json"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 4000); };
   $("#imp").onchange = function () { var f = this.files && this.files[0]; if (!f) return; f.text().then(function (txt) { var j = JSON.parse(txt), s2 = j.save || j; if (!s2 || !s2.cards) throw new Error("fichier"); if (!confirm("Remplacer la collection " + (ACC === "psg" ? "Team PSG" : "Team OM") + " par ce fichier ?")) return; S = s2; save(); refresh(); showResult(); makeCap(); msg("Collection restaurée ✅"); }).catch(function () { msg("⚠️ Ce fichier n'est pas une copie de secours valide."); }); this.value = ""; };
