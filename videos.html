@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vidéos quiz</title>
+<meta name="theme-color" content="#0b1220">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #0b1220; --card: #131d31; --line: rgba(255,255,255,.09); --txt: #eef2f8; --mut: #9aa8bd; --acc: #2ec4b6; --acc2: #06222a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 0 16px 40px; background: var(--bg); color: var(--txt); font: 15px/1.45 Figtree, system-ui, sans-serif; }
+  main { max-width: 980px; margin: 0 auto; }
+  h1 { font-size: 26px; margin: 14px 0 4px; }
+  .sub { color: var(--mut); margin: 0 0 16px; }
+  .make { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; margin-bottom: 18px; }
+  .make b { display: block; margin-bottom: 6px; }
+  .make ol { margin: 6px 0 10px; padding-left: 20px; color: var(--mut); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 0 16px; border-radius: 12px; border: 0; font: 700 15px Figtree, system-ui, sans-serif; text-decoration: none; cursor: pointer; background: var(--acc); color: var(--acc2); }
+  .btn.ghost { background: rgba(255,255,255,.08); color: var(--txt); }
+  .btn:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+  .filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .filters button { min-height: 36px; padding: 0 14px; border-radius: 18px; border: 0; background: rgba(255,255,255,.07); color: var(--txt); font: 600 14px Figtree, system-ui, sans-serif; cursor: pointer; }
+  .filters button[aria-pressed=true] { background: var(--acc); color: var(--acc2); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; }
+  .card video { width: 100%; aspect-ratio: 9/16; background: #000; display: block; }
+  .info { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 8px; }
+  .meta { display: flex; justify-content: space-between; color: var(--mut); font-size: 13px; }
+  .meta b { color: var(--txt); font-size: 15px; }
+  .cap { font-size: 13px; color: var(--mut); white-space: pre-wrap; max-height: 4.4em; overflow: hidden; }
+  .row { display: flex; gap: 8px; }
+  .row .btn { flex: 1; }
+  .empty { color: var(--mut); padding: 30px 0; text-align: center; }
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--acc); color: var(--acc2); padding: 10px 16px; border-radius: 12px; font-weight: 700; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.on { opacity: 1; }
+</style>
+</head>
+<body>
+<main>
+  <h1>🎬 Vidéos quiz</h1>
+  <p class="sub">Les vidéos Studio Quiz (QUIZ-GAME), prêtes à poster sur TikTok. Appuie sur « Télécharger » pour l'enregistrer sur ton téléphone.</p>
+
+  <section class="make">
+    <b>Fabriquer de nouvelles vidéos</b>
+    <ol>
+      <li>Ouvre la page de fabrication (connecte-toi à GitHub si besoin).</li>
+      <li>Appuie sur « Run workflow », choisis les thèmes (ex : <code>om psg football</code>), puis le bouton vert « Run workflow ».</li>
+      <li>Reviens ici dans 10 minutes environ : les nouvelles vidéos apparaissent en premier.</li>
+    </ol>
+    <div class="row" style="max-width:460px">
+      <a class="btn" href="https://github.com/ozentv/quiz-live/actions/workflows/videos.yml" target="_blank" rel="noopener">⚙️ Fabriquer</a>
+      <button class="btn ghost" id="reload" type="button">🔄 Actualiser</button>
+    </div>
+  </section>
+
+  <div class="filters" id="filters" role="group" aria-label="Filtrer par thème"></div>
+  <div class="grid" id="grid"><p class="empty">Chargement…</p></div>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+(function () {
+  var API = "https://api.github.com/repos/ozentv/quiz-live/releases/tags/videos";
+  var NAMES = { om: "OM", psg: "PSG", football: "Football" };
+  var grid = document.getElementById("grid"), filters = document.getElementById("filters"), toast = document.getElementById("toast");
+  var items = [], cur = "all";
+  function nice(t) { return NAMES[t] || (t.charAt(0).toUpperCase() + t.slice(1)); }
+  function when(d) { var m = /^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(d || ""); if (!m) return ""; var dt = new Date(Date.UTC(+m[1], m[2] - 1, +m[3], +m[4], +m[5])); return dt.toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) + " à " + dt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]; }); }
+  function say(t) { toast.textContent = t; toast.classList.add("on"); clearTimeout(say.t); say.t = setTimeout(function () { toast.classList.remove("on"); }, 1800); }
+  function drawFilters() {
+    var th = ["all"]; items.forEach(function (i) { if (th.indexOf(i.theme) < 0) th.push(i.theme); });
+    filters.innerHTML = th.length > 2 ? th.map(function (t) { return "<button type=\"button\" data-t=\"" + esc(t) + "\" aria-pressed=\"" + (t === cur) + "\">" + (t === "all" ? "Toutes" : esc(nice(t))) + "</button>"; }).join("") : "";
+  }
+  function draw() {
+    drawFilters();
+    var list = items.filter(function (i) { return cur === "all" || i.theme === cur; });
+    if (!list.length) { grid.innerHTML = "<p class=\"empty\">Aucune vidéo pour l'instant. Appuie sur « Fabriquer » pour en créer.</p>"; return; }
+    grid.innerHTML = list.map(function (i, k) {
+      return "<article class=\"card\"><video controls playsinline preload=\"metadata\" src=\"" + esc(i.url) + "#t=0.5\"></video><div class=\"info\">" +
+        "<div class=\"meta\"><b>Quiz " + esc(nice(i.theme)) + "</b><span>" + esc(when(i.date)) + (i.size ? " · " + (i.size / 1048576).toFixed(0) + " Mo" : "") + "</span></div>" +
+        (i.cap ? "<div class=\"cap\">" + esc(i.cap) + "</div>" : "") +
+        "<div class=\"row\"><a class=\"btn\" href=\"" + esc(i.url) + "\" download=\"" + esc(i.file) + "\">⬇️ Télécharger</a>" +
+        (i.cap ? "<button class=\"btn ghost\" type=\"button\" data-cap=\"" + k + "\">📋 Description</button>" : "") + "</div></div></article>";
+    }).join("");
+    grid.querySelectorAll("[data-cap]").forEach(function (b) { b.onclick = function () { var t = list[+b.dataset.cap].cap; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { say("Description copiée"); }, function () { prompt("Copie la description :", t); }); }; });
+  }
+  filters.onclick = function (e) { var b = e.target.closest("button"); if (b) { cur = b.dataset.t; draw(); } };
+  function load() {
+    grid.innerHTML = "<p class=\"empty\">Chargement…</p>";
+    fetch(API, { cache: "no-store" }).then(function (r) { if (r.status === 404) return null; if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (rel) {
+      items = [];
+      if (rel) {
+        var m = /<!--DATA([\s\S]*?)DATA-->/.exec(rel.body || ""), data = [];
+        try { data = m ? JSON.parse(m[1]) : []; } catch (e) {}
+        var assets = {}; (rel.assets || []).forEach(function (a) { assets[a.name] = a; });
+        data.forEach(function (d) { var a = assets[d.file]; if (a) items.push({ file: d.file, theme: d.theme, date: d.date, cap: d.cap, url: a.browser_download_url, size: a.size }); });
+      }
+      if (cur !== "all" && !items.some(function (i) { return i.theme === cur; })) cur = "all";
+      draw();
+    }).catch(function () { grid.innerHTML = "<p class=\"empty\">Impossible de charger la liste. Vérifie ta connexion puis appuie sur « Actualiser ».</p>"; });
+  }
+  document.getElementById("reload").onclick = load;
+  load();
+})();
+</script>
+<script src="nav.js?v=49"></script>
+</body>
+</html>
