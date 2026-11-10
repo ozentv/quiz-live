@@ -1,0 +1,1 @@
+{ "name": "quiz-video", "private": true, "dependencies": { "playwright": "1.63.0" } }

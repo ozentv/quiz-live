@@ -2431,8 +2431,9 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   if (S.skin !== "classic") S.skin = "neon";
   seg($("#segSkin"), [["Néon", "neon"], ["Classique", "classic"]], function () { return S.skin; }, function (v) { S.skin = v; tvLayout(); });
   if (!S.brand) S.brand = "REF";
+  function brandParts() { return S.brand === "QUIZGAME" ? ["QUIZ", "GAME"] : [brandName(), "QUIZZ"]; }
   function brandName() { return (S.brand === "custom" ? (S.brandTxt || "").trim() || "REF" : S.brand).toUpperCase(); }
-  seg($("#segBrand"), [["REF QUIZZ", "REF"], ["BENJYY QUIZZ", "BENJYY"], ["Autre", "custom"]], function () { return S.brand; }, function (v) { S.brand = v; $("#brandTxt").hidden = v !== "custom"; if (v === "custom") $("#brandTxt").focus(); });
+  seg($("#segBrand"), [["REF QUIZZ", "REF"], ["BENJYY QUIZZ", "BENJYY"], ["QUIZ-GAME", "QUIZGAME"], ["Autre", "custom"]], function () { return S.brand; }, function (v) { S.brand = v; $("#brandTxt").hidden = v !== "custom"; if (v === "custom") $("#brandTxt").focus(); });
   $("#brandTxt").value = S.brandTxt || ""; $("#brandTxt").hidden = S.brand !== "custom";
   $("#brandTxt").oninput = function () { S.brandTxt = this.value.slice(0, 12); save(); };
   $("#tvOn").checked = S.tvOn !== false;
@@ -3155,7 +3156,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         "<div class=\"ck\"><svg width=\"30\" height=\"30\" viewBox=\"0 0 30 30\"><path d=\"M5 16 L12 23 L25 8\" fill=\"none\" stroke=\"#2ecc71\" stroke-width=\"5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div></div>";
     });
     return (lv ? "<div class=\"top3\" id=\"top3\">" + top3Text() + "</div><div class=\"news\" id=\"news\"></div>" + (S.chatOn && S.giftsOn ? "<div class=\"ticker\" id=\"ticker\"><span>🎁 " + GIFT_INFO[tickI % GIFT_INFO.length].join(" ") + "</span></div>" : "") + (S.chatOn && S.likeGoal ? "<div class=\"likes\" id=\"likes\">" + likesInner() + "</div>" : "") : "") +
-      "<div class=\"hd-pill\">" + esc(T.title) + "</div><div class=\"hd-logo\"><span class=\"l1\"" + (brandName().length > 7 ? " style=\"letter-spacing:3px;font-size:22px;padding-left:11px\"" : "") + ">" + esc(brandName()) + "</span><span class=\"l2\">QUIZZ</span></div><div class=\"hd-count" + (bonus ? " bonus" : "") + "\">" + (bonus === 3 ? "❤️ BONUS ×3" : bonus === 2 ? "⭐ BONUS ×2" : bonus ? "🎁 BONUS ×" + bonus : lv ? "Q" + (qi + 1) : (qi + 1) + "/" + n) + "</div><div class=\"bars\">" + bars + "</div>" +
+      "<div class=\"hd-pill\">" + esc(T.title) + "</div><div class=\"hd-logo\"><span class=\"l1\"" + (brandParts()[0].length > 7 ? " style=\"letter-spacing:3px;font-size:22px;padding-left:11px\"" : "") + ">" + esc(brandParts()[0]) + "</span><span class=\"l2\">" + brandParts()[1] + "</span></div><div class=\"hd-count" + (bonus ? " bonus" : "") + "\">" + (bonus === 3 ? "❤️ BONUS ×3" : bonus === 2 ? "⭐ BONUS ×2" : bonus ? "🎁 BONUS ×" + bonus : lv ? "Q" + (qi + 1) : (qi + 1) + "/" + n) + "</div><div class=\"bars\">" + bars + "</div>" +
       "<div class=\"ring\"><svg viewBox=\"0 0 280 280\"><circle cx=\"140\" cy=\"140\" r=\"98\" fill=\"none\" stroke=\"rgba(255,255,255,.22)\" stroke-width=\"20\"/>" +
       "<circle id=\"arc\" cx=\"140\" cy=\"140\" r=\"98\" fill=\"none\" stroke=\"var(--sacc)\" stroke-width=\"20\" stroke-linecap=\"round\" stroke-dasharray=\"" + C + "\" stroke-dashoffset=\"0\"/></svg><div class=\"num\" id=\"num\">" + (lv ? S.liveCount : S.count) + "</div></div>" +
       "<div class=\"fact" + (neon && !lv ? " low" : "") + "\"><b>LE SAVIEZ-VOUS ?</b><div class=\"ft\" id=\"ft\">" + esc(q.f) + "</div></div>" +
@@ -4149,5 +4150,5 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 })();
 </script>
 
-<script src="nav.js?v=46"></script>
+<script src="nav.js?v=49"></script>
 </body></html>
