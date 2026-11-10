@@ -41,7 +41,8 @@ button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-
 .album { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 8px; }
 .mc { position: relative; aspect-ratio: 64 / 92; border-radius: 10px 10px 16px 16px; padding: 6px 5px; display: grid; grid-template-rows: auto 1fr auto; text-align: center; font-weight: 800; overflow: hidden; border: 2px solid rgba(255,255,255,.25); }
 .mc .r { font: 900 20px Outfit, sans-serif; line-height: 1; text-align: left; } .mc .p { font-size: 10px; text-align: left; }
-.mc .n { font-size: 10px; line-height: 1.15; word-break: break-word; } .mc .x { position: absolute; right: 4px; top: 4px; font-size: 10px; background: rgba(0,0,0,.55); color: #fff; padding: 1px 5px; border-radius: 8px; }
+.mc .n { font-size: 10px; line-height: 1.15; word-break: break-word; } .mc { cursor: pointer; } .mc > span { position: relative; z-index: 1; } .mc img { position: absolute; right: -4%; bottom: 22%; height: 58%; max-width: 80%; object-fit: contain; pointer-events: none; }
+.mc .x { position: absolute; right: 4px; top: 4px; font-size: 10px; background: rgba(0,0,0,.55); color: #fff; padding: 1px 5px; border-radius: 8px; }
 .mc.miss { background: #1b2030; color: #59627a; border-style: dashed; border-color: #2b3246; } .mc.miss .q { font: 900 30px Outfit, sans-serif; align-self: center; }
 .mc.commune { background: linear-gradient(135deg, #eef1f5, #b9c2cc 55%, #7d8794); color: #1f2630; }
 .mc.or { background: linear-gradient(135deg, #fff3b0, #e2b93b 55%, #8a6512); color: #2b1d03; }
@@ -92,6 +93,8 @@ details summary { cursor: pointer; font-weight: 700; } details > div { display: 
       <p class="note" id="albumNote"></p>
       <div class="tabs" id="tabs"></div>
       <div class="album" id="album"></div>
+      <p class="note">📷 Touche un joueur (même s'il te manque) pour lui mettre une photo : elle apparaît sur toutes ses cartes et pendant le walkout. Une image détourée (fond transparent, PNG) rend beaucoup mieux. Les photos restent sur ce téléphone.</p>
+      <input type="file" id="ppFile" accept="image/*" hidden>
     </div>
 
     <div class="box">
@@ -108,7 +111,7 @@ details summary { cursor: pointer; font-weight: 700; } details > div { display: 
         <button type="button" id="reset">🗑️ Recommencer cette collection à zéro</button>
       </div></details>
       <details><summary>🧑‍🤝‍🧑 Joueurs (500, effectifs 2026-2027)</summary><div>
-        <p class="note">Une ligne par joueur : <code>Nom | Club | Poste | Note</code>. Effectifs relevés sur Wikipédia en novembre 2026 ; les notes sont calculées par la page. Corrige ou ajoute des joueurs après un transfert.</p>
+        <p class="note">Une ligne par joueur : <code>Nom | Club | Poste | Note | Pays | Année de naissance</code>. Postes : G, DC, DG, DD, MDC, MC, MOC, MG, MD, AG, AD, BU. Effectifs, postes et nationalités relevés sur Wikipédia en novembre 2026 ; les notes sont calculées par la page. Corrige ou ajoute des joueurs après un transfert.</p>
         <textarea id="db" spellcheck="false"></textarea>
         <div class="row2"><button type="button" id="dbSave">✅ Enregistrer la liste</button><button type="button" id="dbReset">↩️ Liste d'origine</button></div>
       </div></details>
@@ -128,506 +131,506 @@ details summary { cursor: pointer; font-weight: 700; } details > div { display: 
   </div>
 </div>
 <script type="text/plain" id="dbDefault">
-Alessandro Longoni | PSG | G | 77
-Lucas Chevalier | PSG | G | 90
-Matveï Safonov | PSG | G | 86
-Achraf Hakimi | PSG | DEF | 90
-Lucas Beraldo | PSG | DEF | 86
-Marquinhos | PSG | DEF | 86
-Illya Zabarnyi | PSG | DEF | 88
-Lucas Digne | PSG | DEF | 84
-Lucas Hernandez | PSG | DEF | 86
-Nuno Mendes | PSG | DEF | 91
-David Boly | PSG | DEF | 75
-Willian Pacho | PSG | DEF | 88
-Fabián Ruiz | PSG | MIL | 87
-Maghnes Akliouche | PSG | MIL | 85
-Vitinha | PSG | MIL | 92
-Senny Mayulu | PSG | MIL | 77
-Dro Fernández | PSG | MIL | 78
-Warren Zaïre-Emery | PSG | MIL | 82
-João Neves | PSG | MIL | 86
-Khvicha Kvaratskhelia | PSG | ATT | 92
-Ferran Torres | PSG | ATT | 82
-Ousmane Dembélé | PSG | ATT | 88
-Désiré Doué | PSG | ATT | 87
-Mika Godts | PSG | ATT | 82
-Quentin Ndjantou | PSG | ATT | 75
-Jeffrey de Lange | OM | G | 75
-Jelle Van Neck | OM | G | 79
-Théo Vermot | OM | G | 76
-CJ Egan-Riley | OM | DEF | 78
-Derek Cornelius | OM | DEF | 79
-Bamo Meïté | OM | DEF | 76
-Nayef Aguerd | OM | DEF | 77
-Timothy Weah | OM | DEF | 77
-Ulisses Garcia | OM | DEF | 77
-Emerson Palmieri | OM | DEF | 78
-Alexi Koum | OM | DEF | 72
-Kelyann Bezahaf | OM | DEF | 74
-Tochukwu Nnadi | OM | MIL | 79
-Angel Gomes | OM | MIL | 81
-Himad Abdelli | OM | MIL | 79
-Geoffrey Kondogbia | OM | MIL | 76
-Pierre-Emile Højbjerg | OM | MIL | 82
-Nouhoum Kamissoko | OM | MIL | 77
-Amine Harit | OM | MIL | 80
-Amine Gouiri | OM | ATT | 83
-Neal Maupay | OM | ATT | 74
-Igor Paixão | OM | ATT | 78
-Faris Moumbagna | OM | ATT | 82
-Tadjidine Mmadi | OM | ATT | 72
-Keyliane Abdallah | OM | ATT | 74
-Lukáš Hrádecký | Monaco | G | 75
-Philipp Köhn | Monaco | G | 76
-Jules Stawiecki | Monaco | G | 68
-Vanderson | Monaco | DEF | 83
-Jordan Teze | Monaco | DEF | 79
-Christian Mawissa | Monaco | DEF | 75
-Eric Dier | Monaco | DEF | 80
-Flávio Nazinho | Monaco | DEF | 74
-Mohammed Salisu | Monaco | DEF | 80
-Samuel Nibombé | Monaco | DEF | 70
-Sadibou Sané | Monaco | DEF | 77
-Denis Zakaria | Monaco | MIL | 82
-Lamine Camara | Monaco | MIL | 81
-Aleksandr Golovin | Monaco | MIL | 79
-Stanis Idumbo | Monaco | MIL | 76
-Takumi Minamino | Monaco | MIL | 82
-Pape Cabral | Monaco | MIL | 72
-Mamadou Coulibaly | Monaco | MIL | 78
-Edan Diop | Monaco | MIL | 80
-Aymen Assab | Monaco | MIL | 72
-Anis Soubeir | Monaco | MIL | 73
-Safouane Benzahra | Monaco | MIL | 69
-Ilane Touré | Monaco | MIL | 74
-Mathys Detourbet | Monaco | ATT | 71
-Folarin Balogun | Monaco | ATT | 78
-Matthis Abline | Monaco | ATT | 80
-Mika Biereth | Monaco | ATT | 79
-Paris Brunner | Monaco | ATT | 75
-Ansu Fati | Monaco | ATT | 79
-Berke Özer | Lille | G | 77
-Orlando Gill | Lille | G | 83
-Loun Srdanović | Lille | DEF | 76
-Nathan Ngoy | Lille | DEF | 78
-Alexsandro | Lille | DEF | 78
-Romain Perraud | Lille | DEF | 80
-Tiago Santos | Lille | DEF | 76
-Tanguy Nianzou | Lille | DEF | 80
-Calvin Verdonk | Lille | DEF | 79
-Isaac Cossier | Lille | DEF | 76
-Maxima Goffi | Lille | DEF | 73
-Nabil Bentaleb | Lille | MIL | 77
-Ethan Mbappé | Lille | MIL | 77
-Hákon Arnar Haraldsson | Lille | MIL | 82
-Maurits Kjærgaard | Lille | MIL | 80
-N'Gala Mukau | Lille | MIL | 83
-Benjamin André | Lille | MIL | 72
-Gaëtan Perrin | Lille | MIL | 75
-Dilane Bakwa | Lille | ATT | 74
-Olivier Giroud | Lille | ATT | 73
-Osame Sahraoui | Lille | ATT | 81
-Ayase Ueda | Lille | ATT | 77
-Başar Önal | Lille | ATT | 75
-Hamza Igamane | Lille | ATT | 77
-Soriba Diaoune | Lille | ATT | 74
-Tiago Morais | Lille | ATT | 75
-Dominik Greif | Lyon | G | 77
-Justin Bengui | Lyon | G | 74
-Rémy Descamps | Lyon | G | 80
-Lassine Diarra | Lyon | G | 79
-Nicolás Tagliafico | Lyon | DEF | 75
-Zachary Athekame | Lyon | DEF | 80
-Abner Vinícius | Lyon | DEF | 79
-Moussa Niakhaté | Lyon | DEF | 78
-Felix Bacher | Lyon | DEF | 77
-Ruben Kluivert | Lyon | DEF | 74
-Clinton Mata | Lyon | DEF | 77
-Steeve Kango | Lyon | DEF | 71
-Mohamed Ouédraogo | Lyon | DEF | 75
-Noham Kamara | Lyon | DEF | 71
-Mads Bidstrup | Lyon | MIL | 82
-Paul Akouokou | Lyon | MIL | 78
-Tanner Tessmann | Lyon | MIL | 81
-Corentin Tolisso | Lyon | MIL | 77
-Pavel Šulc | Lyon | MIL | 83
-Khalis Merah | Lyon | MIL | 72
-Tyler Morton | Lyon | MIL | 76
-Noah Nartey | Lyon | MIL | 72
-Ernest Nuamah | Lyon | ATT | 79
-Keito Nakamura | Lyon | ATT | 77
-Loïs Openda | Lyon | ATT | 83
-Julien Duranville | Lyon | ATT | 80
-Kaïl Boudache | Lyon | ATT | 72
-Alejandro Gomes Rodríguez | Lyon | ATT | 70
-Rémi Himbert | Lyon | ATT | 74
-Régis Gurtner | Lens | G | 76
-Mathieu Gorgelin | Lens | G | 74
-Robin Risser | Lens | G | 82
-Ilan Jourdren | Lens | G | 74
-Ruben Aguilar | Lens | DEF | 77
-Maik Nawrocki | Lens | DEF | 75
-Nidal Čelik | Lens | DEF | 74
-Samson Baidoo | Lens | DEF | 79
-Matthieu Udol | Lens | DEF | 74
-Jean-Clair Todibo | Lens | DEF | 81
-Saud Abdulhamid | Lens | DEF | 77
-Jonathan Gradit | Lens | DEF | 75
-Ismaëlo Ganiou | Lens | DEF | 73
-Souleymane Sagnan | Lens | DEF | 72
-Kyllian Antonio | Lens | DEF | 70
-Jhoanner Chávez | Lens | DEF | 81
-Andrija Bulatović | Lens | MIL | 77
-Yacine Titraoui | Lens | MIL | 77
-Amadou Haidara | Lens | MIL | 81
-Michał Skóraś | Lens | MIL | 79
-Michaël Cuisance | Lens | MIL | 77
-Florian Sotoca | Lens | ATT | 72
-Thorgan Hazard | Lens | ATT | 82
-Florian Thauvin | Lens | ATT | 76
-Odsonne Édouard | Lens | ATT | 80
-Abdallah Sima | Lens | ATT | 78
-Junior Kadile | Lens | ATT | 80
-Franjo Ivanović | Lens | ATT | 83
-Mezian Mesloub | Lens | ATT | 74
-Yehvann Diouf | Nice | G | 78
-Martin Ponsot | Nice | G | 72
-Teddy Boulhendi | Nice | G | 73
-Ali Abdi | Nice | DEF | 75
-Mohamed Abdelmonem | Nice | DEF | 81
-Niels Nkounkou | Nice | DEF | 74
-Antoine Mendy | Nice | DEF | 80
-Alidu Seidu | Nice | DEF | 75
-Youssouf Ndayishimiye | Nice | DEF | 77
-Moïse Bombito | Nice | DEF | 77
-Hamza Koutoune | Nice | DEF | 70
-Jonathan Clauss | Nice | DEF | 72
-Hicham Boudaoui | Nice | MIL | 80
-Gauthier Hein | Nice | MIL | 73
-Morgan Sanson | Nice | MIL | 71
-Laurent Abergel | Nice | MIL | 75
-Issiaga Camara | Nice | MIL | 72
-Axel Witsel | Nice | MIL | 73
-Nassim Lareej | Nice | MIL | 71
-Xavier Junior Mandza | Nice | MIL | 69
-Djibril Coulibaly | Nice | MIL | 70
-Everton Pereira | Nice | MIL | 70
-Salis Abdul Samed | Nice | MIL | 75
-Mohammed Amoura | Nice | ATT | 78
-Sofiane Diop | Nice | ATT | 81
-Elye Wahi | Nice | ATT | 77
-Isak Jansson | Nice | ATT | 74
-Nathan Ngoumou | Nice | ATT | 80
-Zoumana Diallo | Nice | ATT | 72
-Nicolas Lemaître | Rennes | G | 73
-Brice Samba | Rennes | G | 79
-Kilian Belazzoug | Rennes | G | 76
-Charlie Cresswell | Rennes | DEF | 73
-Gonçalo Oliveira | Rennes | DEF | 71
-Bryan Reynolds | Rennes | DEF | 77
-Mahamadou Nagida | Rennes | DEF | 76
-Anthony Rouault | Rennes | DEF | 71
-Quentin Merlin | Rennes | DEF | 74
-Abdelhamid Aït Boudlal | Rennes | DEF | 72
-Przemysław Frankowski | Rennes | DEF | 75
-Djaoui Cissé | Rennes | MIL | 73
-Ludovic Blas | Rennes | MIL | 76
-Sebastian Szymański | Rennes | MIL | 77
-Valentin Rongier | Rennes | MIL | 75
-Adrien Thomasson | Rennes | MIL | 75
-Mahdi Camara | Rennes | MIL | 72
-Henrick Do Marcolino | Rennes | MIL | 76
-Estéban Lepaul | Rennes | ATT | 75
-Mousa Al-Tamari | Rennes | ATT | 79
-Eliezer Mayenda | Rennes | ATT | 73
-Boulaye Dia | Rennes | ATT | 78
-Elías Quiñónez | Rennes | ATT | 66
-Arnaud Nordin | Rennes | ATT | 77
-Issa Soumaré | Rennes | ATT | 76
-Ayanda Sishuba | Rennes | ATT | 72
-Filip Jörgensen | Strasbourg | G | 80
-Miłosz Piekutowski | Strasbourg | G | 71
-Gabriel Kerckaert | Strasbourg | G | 67
-Jeyland Mitchell | Strasbourg | DEF | 75
-Ismaël Doukouré | Strasbourg | DEF | 78
-Mateo Del Blanco | Strasbourg | DEF | 72
-Genesis Antwi | Strasbourg | DEF | 66
-Lucas Høgsberg | Strasbourg | DEF | 73
-Karim Coulibaly | Strasbourg | DEF | 71
-Oso | Strasbourg | DEF | 78
-Yoann Becker | Strasbourg | DEF | 66
-Maxi Oyedele | Strasbourg | MIL | 81
-Giovanni Reyna | Strasbourg | MIL | 79
-Sebastian Nanasi | Strasbourg | MIL | 76
-Dário Essugo | Strasbourg | MIL | 71
-Fábio Baldé | Strasbourg | MIL | 72
-Pape Demba Diop | Strasbourg | MIL | 74
-Diogo Sousa | Strasbourg | MIL | 74
-Omari Kellyman | Strasbourg | MIL | 69
-Tyrese Noubissie | Strasbourg | MIL | 66
-Samir El Mourabet | Strasbourg | MIL | 77
-Benjamin Brantlind | Strasbourg | MIL | 69
-Samuel Amo-Ameyaw | Strasbourg | ATT | 72
-Joaquín Panichelli | Strasbourg | ATT | 78
-Sékou Mara | Strasbourg | ATT | 74
-Deivid Washington | Strasbourg | ATT | 70
-Martial Godo | Strasbourg | ATT | 78
-Jacobo Ortega | Strasbourg | ATT | 70
-Kingsley Olufadé | Strasbourg | ATT | 71
-Yaya Diémé | Strasbourg | ATT | 65
-Conrad Harder | Strasbourg | ATT | 74
-Gessime Yassine | Strasbourg | ATT | 76
-Kevin Trapp | Paris FC | G | 69
-Obed Nkambadio | Paris FC | G | 73
-Emmanuel Mbemba | Paris FC | DEF | 70
-Moustapha Mbow | Paris FC | DEF | 80
-Otávio Ataíde | Paris FC | DEF | 73
-Hamari Traoré | Paris FC | DEF | 76
-Nhoa Sangui | Paris FC | DEF | 73
-Yoan Koré | Paris FC | DEF | 77
-Thibault De Smet | Paris FC | DEF | 76
-Samir Chergui | Paris FC | DEF | 74
-Diego Coppola | Paris FC | DEF | 79
-Vincent Marchetti | Paris FC | MIL | 73
-Patrick Zabi | Paris FC | MIL | 73
-Ilan Kebbal | Paris FC | MIL | 79
-Adama Camara | Paris FC | MIL | 80
-Maxime Lopez | Paris FC | MIL | 72
-Rudy Matondo | Paris FC | MIL | 69
-Pierre Lees-Melou | Paris FC | MIL | 72
-Pablo Pagis | Paris FC | ATT | 74
-Lassine Sinayoko | Paris FC | ATT | 79
-Jean-Philippe Krasso | Paris FC | ATT | 80
-Luca Koleosho | Paris FC | ATT | 75
-Omar Sissoko | Paris FC | ATT | 70
-Moses Simon | Paris FC | ATT | 79
-Jonathan Ikoné | Paris FC | ATT | 77
-Egil Selvik | Brest | G | 73
-Noé Poillion | Brest | G | 66
-Mathieu Patouillet | Brest | G | 74
-Romain Cagnon | Brest | G | 71
-Bradley Locko | Brest | DEF | 71
-Gautier Lloris | Brest | DEF | 68
-Brendan Chardonnet | Brest | DEF | 68
-Justin Bourgault | Brest | DEF | 71
-Luck Zogbé | Brest | DEF | 71
-Kenny Lala | Brest | DEF | 71
-Raphaël Le Guen | Brest | DEF | 68
-Mamady Diambou | Brest | MIL | 75
-Joseph Nonge | Brest | MIL | 67
-Hugo Magnetti | Brest | MIL | 72
-Joris Chotard | Brest | MIL | 72
-Kamory Doumbia | Brest | MIL | 74
-Samba Diop | Brest | MIL | 63
-Lucas Tousart | Brest | MIL | 73
-Pathé Mboup | Brest | ATT | 71
-Giovani Versini | Brest | ATT | 73
-Noah Edjouma | Brest | ATT | 69
-Mama Baldé | Brest | ATT | 74
-Ludovic Ajorque | Brest | ATT | 72
-Ibrahim Kanté | Brest | ATT | 67
-Mathis Lainé | Brest | ATT | 69
-Djylian N'Guessan | Brest | ATT | 69
-Théo Collin | Toulouse | G | 73
-Guillaume Restes | Toulouse | G | 76
-Naïme Saïd Mchindra | Toulouse | G | 72
-Mathys Niflore | Toulouse | G | 64
-Rasmus Nicolaisen | Toulouse | DEF | 72
-Mark McKenzie | Toulouse | DEF | 77
-Seny Koumbassa | Toulouse | DEF | 66
-Christ Tapé | Toulouse | DEF | 73
-David Odogu | Toulouse | DEF | 69
-Rafik Messali | Toulouse | DEF | 70
-Frédéric Efuele Ngoyala | Toulouse | DEF | 71
-Thibaud Garondo | Toulouse | DEF | 71
-Gaëtan Bakhouche | Toulouse | DEF | 67
-Ismaïl Diallo | Toulouse | DEF | 71
-Alexis Vossah | Toulouse | MIL | 70
-Thomas Jørgensen | Toulouse | MIL | 75
-Niko Sigur | Toulouse | MIL | 75
-Abu Francis | Toulouse | MIL | 73
-Mathis Amougou | Toulouse | MIL | 68
-Cristian Cásseres Jr. | Toulouse | MIL | 75
-Niklas Schmidt | Toulouse | MIL | 74
-Adam El Ouali | Toulouse | MIL | 70
-Darris Zema | Toulouse | MIL | 64
-Julián Vignolo | Toulouse | ATT | 67
-Santiago Hidalgo | Toulouse | ATT | 68
-Sion Oppong | Toulouse | ATT | 67
-Jacen Russell-Rowe | Toulouse | ATT | 74
-Aron Dønnum | Toulouse | ATT | 73
-Casper Tengstedt | Toulouse | ATT | 74
-Ilyas Azizi | Toulouse | ATT | 65
-Wassim Dardake | Toulouse | ATT | 70
-Aymen Amaaouch | Toulouse | ATT | 66
-Benjamin Leroy | Lorient | G | 67
-Bingourou Kamara | Lorient | G | 72
-Yvon Mvogo | Lorient | G | 71
-Alec Georgen | Lorient | DEF | 74
-Montassar Talbi | Lorient | DEF | 77
-Formose Mendy | Lorient | DEF | 78
-Dembo Sylla | Lorient | DEF | 73
-Srđan Kuzmić | Lorient | DEF | 75
-Nathaniel Adjei | Lorient | DEF | 76
-Arsène Kouassi | Lorient | DEF | 78
-Nosa Obaretin | Lorient | DEF | 74
-Isaak Touré | Lorient | DEF | 69
-Bandiougou Fadiga | Lorient | MIL | 68
-Noah Cadiou | Lorient | MIL | 75
-Théo Le Bris | Lorient | MIL | 74
-Jean-Victor Makengo | Lorient | MIL | 72
-Gabin Bernardeau | Lorient | MIL | 67
-Arthur Avom | Lorient | MIL | 74
-Noah Mbamba | Lorient | MIL | 66
-Pános Katséris | Lorient | MIL | 73
-Mohamed Bamba | Lorient | ATT | 75
-Isak Jensen | Lorient | ATT | 69
-Aiyegun Tosin | Lorient | ATT | 78
-Ibrahima Baldé | Lorient | ATT | 74
-Souleymane Faye | Lorient | ATT | 77
-Mamadou Koné | Lorient | ATT | 70
-Paul Nardi | Auxerre | G | 73
-Mamadou Diop | Auxerre | G | 75
-Louis Mezerette | Auxerre | G | 66
-Axel Tuanzebe | Auxerre | DEF | 73
-Telli Siwe | Auxerre | DEF | 70
-Christ Makosso | Auxerre | DEF | 74
-Sinaly Diomandé | Auxerre | DEF | 73
-Fredrik Oppegård | Auxerre | DEF | 70
-Bryan Okoh | Auxerre | DEF | 74
-Lamine Sy | Auxerre | DEF | 76
-Marvin Senaya | Auxerre | DEF | 75
-Rayan Mandengue | Auxerre | DEF | 65
-Elikya Legros | Auxerre | DEF | 69
-Alvin Petit Dol | Auxerre | DEF | 71
-Mohamed Coulibaly | Auxerre | DEF | 62
-Clément Akpa | Auxerre | DEF | 73
-Sékou Fofana | Auxerre | DEF | 69
-Kévin Danois | Auxerre | MIL | 73
-Assane Dioussé | Auxerre | MIL | 74
-Naouirou Ahamada | Auxerre | MIL | 70
-Pierre Ekwah | Auxerre | MIL | 70
-Lamfia Dioubaté | Auxerre | MIL | 67
-Tidiane Devernois | Auxerre | MIL | 67
-Yvan Zaddy | Auxerre | MIL | 65
-Arthur Piedfort | Auxerre | MIL | 71
-Rémy Labeau-Lascary | Auxerre | ATT | 71
-Cameron Archer | Auxerre | ATT | 70
-Danny Namaso | Auxerre | ATT | 75
-Eros Maddy | Auxerre | ATT | 71
-Romain Faivre | Auxerre | ATT | 73
-Ryan Rodin | Auxerre | ATT | 67
-Mamoudou Cissokho | Auxerre | ATT | 63
-Xiangxin Wei | Auxerre | ATT | 68
-Aristide Zossou | Auxerre | ATT | 68
-Anthony Lopes | Angers | G | 71
-Melvin Zinga | Angers | G | 71
-Oumar Pona | Angers | G | 67
-Carlens Arcus | Angers | DEF | 75
-Ousmane Camara | Angers | DEF | 73
-Joseph Kalulu | Angers | DEF | 71
-Marius Louër | Angers | DEF | 65
-Jordan Lefort | Angers | DEF | 75
-Emmanuel Biumla | Angers | DEF | 71
-Lilian Raolisoa | Angers | DEF | 72
-Maël Gernigon | Angers | DEF | 62
-Louis Mouton | Angers | MIL | 72
-Branco van den Boomen | Angers | MIL | 72
-Yassin Belkhdim | Angers | MIL | 70
-Bané Diatta | Angers | MIL | 63
-Jules Bouffandeau | Angers | MIL | 63
-Haris Belkebla | Angers | MIL | 70
-Usman Simbakoli | Angers | ATT | 73
-Prosper Peter | Angers | ATT | 65
-Amine Sbaï | Angers | ATT | 71
-Harouna Djibirin | Angers | ATT | 71
-Jim Allevinah | Angers | ATT | 72
-Amine El Ouazzani | Angers | ATT | 70
-Anthony Bermont | Angers | ATT | 71
-Mamadou Diallo | Angers | ATT | 63
-Paul Argney | Le Havre | G | 66
-Lionel Mpasi | Le Havre | G | 75
-Gauthier Gallon | Le Havre | G | 67
-Ahmed Touba | Le Havre | DEF | 73
-Elias Jelert | Le Havre | DEF | 76
-Fodé Doucouré | Le Havre | DEF | 74
-Ayumu Seko | Le Havre | DEF | 71
-Vincent Sasso | Le Havre | DEF | 71
-Stephan Zagadou | Le Havre | DEF | 67
-Timothée Pembélé | Le Havre | DEF | 70
-Junior Mwanga | Le Havre | MIL | 70
-Amir Richardson | Le Havre | MIL | 71
-Rassoul Ndiaye | Le Havre | MIL | 72
-Kaito Mizuta | Le Havre | MIL | 72
-Guy-Noël Zohouri | Le Havre | MIL | 67
-Simon Ebonog | Le Havre | MIL | 74
-Ismail Bouneb | Le Havre | MIL | 71
-Daren Mosengo | Le Havre | MIL | 69
-Josh Maja | Le Havre | ATT | 74
-Felix Mambimbi | Le Havre | ATT | 71
-Godson Kyeremeh | Le Havre | ATT | 70
-Joan Tincres | Le Havre | ATT | 71
-Mbwana Samatta | Le Havre | ATT | 69
-Enzo Koffi | Le Havre | ATT | 66
-Sōta Nakamura | Le Havre | ATT | 77
-Rayan Fofana | Le Havre | ATT | 71
-Élysée Logbo | Le Havre | ATT | 74
-Ewan Hatfout | Le Mans | G | 67
-Augustin Delbecque | Le Mans | G | 68
-Nicolas Kocik | Le Mans | G | 67
-Harold Voyer | Le Mans | DEF | 70
-Raúl Torrente | Le Mans | DEF | 67
-Samuel Yohou | Le Mans | DEF | 66
-Lucas Buades | Le Mans | DEF | 67
-Djibril Sidibé | Le Mans | DEF | 69
-Théo Eyoum | Le Mans | DEF | 67
-Lucas Calodat | Le Mans | DEF | 69
-Rayan Bamba | Le Mans | DEF | 65
-Noa Boissé | Le Mans | DEF | 64
-Yasser Larouci | Le Mans | DEF | 69
-Joao Almeida | Le Mans | DEF | 63
-Edwin Quarshie | Le Mans | MIL | 70
-Alexandre Lauray | Le Mans | MIL | 66
-Jean Vercruysse | Le Mans | MIL | 70
-Adil Bourabaa | Le Mans | MIL | 66
-Daouda Traoré | Le Mans | MIL | 67
-Martin Rossignol | Le Mans | MIL | 65
-Lucas Bretelle | Le Mans | MIL | 68
-Billal Brahimi | Le Mans | ATT | 72
-Antoine Rabillard | Le Mans | ATT | 69
-Habib Diallo | Le Mans | ATT | 73
-Louis Mafouta | Le Mans | ATT | 71
-William Harhouz | Le Mans | ATT | 66
-Dame Gueye | Le Mans | ATT | 74
-Erwan Colas | Le Mans | ATT | 65
-Enzo Vagner | Le Mans | ATT | 64
-Zacharie Boucher | Troyes | G | 71
-Patrick Beach | Troyes | G | 75
-Hillel Konaté | Troyes | G | 69
-Lucas Maronnier | Troyes | DEF | 71
-Anis Ouzenadji | Troyes | DEF | 64
-Junior Diaz | Troyes | DEF | 69
-Paolo Gozzi | Troyes | DEF | 72
-Adrien Monfray | Troyes | DEF | 65
-Ismaël Boura | Troyes | DEF | 69
-Tom Akpakoun | Troyes | DEF | 63
-Yvann Titi | Troyes | DEF | 66
-Mouhamed Diop | Troyes | MIL | 72
-Iron Gomis | Troyes | MIL | 65
-Antoine Mille | Troyes | MIL | 65
-Hugo Picard | Troyes | MIL | 69
-Alexandre Phliponeau | Troyes | MIL | 68
-Karim Dermane | Troyes | MIL | 70
-Roman Murcy | Troyes | MIL | 66
-Kandet Diawara | Troyes | ATT | 75
-Jérémy Le Douaron | Troyes | ATT | 67
-Merwan Ifnaoui | Troyes | ATT | 67
-Elijah Odede | Troyes | ATT | 60
-Renaud Ripart | Troyes | ATT | 67
-Timothé Nkada | Troyes | ATT | 68
-Ibrahim Traoré | Troyes | ATT | 66
-Amadou Diakité | Troyes | ATT | 63
+Alessandro Longoni | PSG | G | 77 | Italie | 2008
+Lucas Chevalier | PSG | G | 90 | France | 2001
+Matveï Safonov | PSG | G | 86 | Russie | 1999
+Achraf Hakimi | PSG | DD | 90 | Maroc | 1998
+Lucas Beraldo | PSG | MDC | 86 | Brésil | 2003
+Marquinhos | PSG | DC | 86 | Brésil | 1994
+Illya Zabarnyi | PSG | DC | 88 | Ukraine | 2002
+Lucas Digne | PSG | DG | 84 | France | 1993
+Lucas Hernandez | PSG | DC | 86 | France | 1996
+Nuno Mendes | PSG | DG | 91 | Portugal | 2002
+David Boly | PSG | DD | 75 | France | 2009
+Willian Pacho | PSG | DC | 88 | Équateur | 2001
+Fabián Ruiz | PSG | MC | 87 | Espagne | 1996
+Maghnes Akliouche | PSG | MOC | 85 | France | 2002
+Vitinha | PSG | MC | 92 | Portugal | 2000
+Senny Mayulu | PSG | MOC | 77 | France | 2006
+Dro Fernández | PSG | MOC | 78 | Espagne | 2008
+Warren Zaïre-Emery | PSG | MC | 82 | France | 2006
+João Neves | PSG | MC | 86 | Portugal | 2004
+Khvicha Kvaratskhelia | PSG | AG | 92 | Géorgie | 2001
+Ferran Torres | PSG | BU | 82 | Espagne | 2000
+Ousmane Dembélé | PSG | AD | 88 | France | 1997
+Désiré Doué | PSG | MOC | 87 | France | 2005
+Mika Godts | PSG | AG | 82 | Belgique | 2005
+Quentin Ndjantou | PSG | BU | 75 | France | 2007
+Jeffrey de Lange | OM | G | 75 | Pays-Bas | 1998
+Jelle Van Neck | OM | G | 79 | Belgique | 2004
+Théo Vermot | OM | G | 76 | France | 1997
+CJ Egan-Riley | OM | DC | 78 | Angleterre | 2003
+Derek Cornelius | OM | DC | 79 | Canada | 1997
+Bamo Meïté | OM | DC | 76 | Côte d'Ivoire | 2001
+Nayef Aguerd | OM | DC | 77 | Maroc | 1996
+Timothy Weah | OM | AD | 77 | États-Unis | 2000
+Ulisses Garcia | OM | DG | 77 | Suisse | 1996
+Emerson Palmieri | OM | DG | 78 | Italie | 1994
+Alexi Koum | OM | DC | 72 | Cameroun | 2006
+Kelyann Bezahaf | OM | DC | 74 | Algérie | 2006
+Tochukwu Nnadi | OM | MDC | 79 | Nigeria | 2003
+Angel Gomes | OM | MOC | 81 | Angleterre | 2000
+Himad Abdelli | OM | MOC | 79 | Algérie | 1999
+Geoffrey Kondogbia | OM | MDC | 76 | Centrafrique | 1993
+Pierre-Emile Højbjerg | OM | MC | 82 | Danemark | 1995
+Nouhoum Kamissoko | OM | MC | 77 | Mali | 2004
+Amine Harit | OM | AG | 80 | Maroc | 1997
+Amine Gouiri | OM | BU | 83 | Algérie | 2000
+Neal Maupay | OM | BU | 74 | France | 1996
+Igor Paixão | OM | AG | 78 | Brésil | 2000
+Faris Moumbagna | OM | BU | 82 | Cameroun | 2000
+Tadjidine Mmadi | OM | AD | 72 | France | 2007
+Keyliane Abdallah | OM | AD | 74 | France | 2006
+Lukáš Hrádecký | Monaco | G | 75 | Finlande | 1989
+Philipp Köhn | Monaco | G | 76 | Suisse | 1998
+Jules Stawiecki | Monaco | G | 68 | France | 2007
+Vanderson | Monaco | DD | 83 | Brésil | 2001
+Jordan Teze | Monaco | DC | 79 | Pays-Bas | 1999
+Christian Mawissa | Monaco | DC | 75 | France | 2005
+Eric Dier | Monaco | MDC | 80 | Angleterre | 1994
+Flávio Nazinho | Monaco | DG | 74 | Portugal | 2003
+Mohammed Salisu | Monaco | DC | 80 | Ghana | 1999
+Samuel Nibombé | Monaco | MDC | 70 | Belgique | 2007
+Sadibou Sané | Monaco | DC | 77 | Sénégal | 2004
+Denis Zakaria | Monaco | MC | 82 | Suisse | 1996
+Lamine Camara | Monaco | MC | 81 | Sénégal | 2004
+Aleksandr Golovin | Monaco | MOC | 79 | Russie | 1996
+Stanis Idumbo | Monaco | MOC | 76 | RD Congo | 2005
+Takumi Minamino | Monaco | BU | 82 | Japon | 1995
+Pape Cabral | Monaco | MC | 72 | France | 2007
+Mamadou Coulibaly | Monaco | MC | 78 | France | 2004
+Edan Diop | Monaco | MC | 80 | France | 2004
+Aymen Assab | Monaco | MC | 72 | France | 2008
+Anis Soubeir | Monaco | MC | 73 | Maroc | 2007
+Safouane Benzahra | Monaco | MC | 69 | Maroc | 2008
+Ilane Touré | Monaco | MC | 74 | France | 2006
+Mathys Detourbet | Monaco | AG | 71 | France | 2007
+Folarin Balogun | Monaco | BU | 78 | États-Unis | 2001
+Matthis Abline | Monaco | BU | 80 | France | 2003
+Mika Biereth | Monaco | BU | 79 | Danemark | 2003
+Paris Brunner | Monaco | BU | 75 | Allemagne | 2006
+Ansu Fati | Monaco | AG | 79 | Espagne | 2002
+Berke Özer | Lille | G | 77 | Turquie | 2000
+Orlando Gill | Lille | G | 83 | Paraguay | 2000
+Loun Srdanović | Lille | DD | 76 | Suisse | 2006
+Nathan Ngoy | Lille | DC | 78 | Belgique | 2003
+Alexsandro | Lille | DC | 78 | Brésil | 1999
+Romain Perraud | Lille | DG | 80 | France | 1997
+Tiago Santos | Lille | DD | 76 | Portugal | 2002
+Tanguy Nianzou | Lille | DC | 80 | France | 2002
+Calvin Verdonk | Lille | DG | 79 | Indonésie | 1997
+Isaac Cossier | Lille | DC | 76 | France | 2006
+Maxima Goffi | Lille | DC | 73 | France | 2008
+Nabil Bentaleb | Lille | MC | 77 | Algérie | 1994
+Ethan Mbappé | Lille | MC | 77 | France | 2006
+Hákon Arnar Haraldsson | Lille | MOC | 82 | Islande | 2003
+Maurits Kjærgaard | Lille | MC | 80 | Danemark | 2003
+N'Gala Mukau | Lille | MC | 83 | RD Congo | 2004
+Benjamin André | Lille | MC | 72 | France | 1990
+Gaëtan Perrin | Lille | MOC | 75 | France | 1996
+Dilane Bakwa | Lille | AD | 74 | France | 2002
+Olivier Giroud | Lille | BU | 73 | France | 1986
+Osame Sahraoui | Lille | AG | 81 | Maroc | 2001
+Ayase Ueda | Lille | BU | 77 | Japon | 1998
+Başar Önal | Lille | AD | 75 | Turquie | 2004
+Hamza Igamane | Lille | BU | 77 | Maroc | 2002
+Soriba Diaoune | Lille | AG | 74 | France | 2007
+Tiago Morais | Lille | AG | 75 | Portugal | 2003
+Dominik Greif | Lyon | G | 77 | Slovaquie | 1997
+Justin Bengui | Lyon | G | 74 | France | 2005
+Rémy Descamps | Lyon | G | 80 | France | 1996
+Lassine Diarra | Lyon | G | 79 | Mali | 2002
+Nicolás Tagliafico | Lyon | DC | 75 | Argentine | 1992
+Zachary Athekame | Lyon | DD | 80 | Suisse | 2004
+Abner Vinícius | Lyon | DG | 79 | Brésil | 2000
+Moussa Niakhaté | Lyon | DC | 78 | Sénégal | 1996
+Felix Bacher | Lyon | DC | 77 | Autriche | 2000
+Ruben Kluivert | Lyon | DC | 74 | Pays-Bas | 2001
+Clinton Mata | Lyon | DC | 77 | Angola | 1992
+Steeve Kango | Lyon | DC | 71 | France | 2006
+Mohamed Ouédraogo | Lyon | DG | 75 | Burkina Faso | 2003
+Noham Kamara | Lyon | DC | 71 | France | 2007
+Mads Bidstrup | Lyon | MC | 82 | Danemark | 2001
+Paul Akouokou | Lyon | MDC | 78 | Côte d'Ivoire | 1997
+Tanner Tessmann | Lyon | MC | 81 | États-Unis | 2001
+Corentin Tolisso | Lyon | MC | 77 | France | 1994
+Pavel Šulc | Lyon | MOC | 83 | Tchéquie | 2000
+Khalis Merah | Lyon | MC | 72 | France | 2007
+Tyler Morton | Lyon | MC | 76 | Angleterre | 2002
+Noah Nartey | Lyon | MC | 72 | Danemark | 2005
+Ernest Nuamah | Lyon | AD | 79 | Ghana | 2003
+Keito Nakamura | Lyon | AG | 77 | Japon | 2000
+Loïs Openda | Lyon | BU | 83 | Belgique | 2000
+Julien Duranville | Lyon | AG | 80 | Belgique | 2006
+Kaïl Boudache | Lyon | AD | 72 | Algérie | 2006
+Alejandro Gomes Rodríguez | Lyon | BU | 70 | Angleterre | 2008
+Rémi Himbert | Lyon | AD | 74 | France | 2008
+Régis Gurtner | Lens | G | 76 | France | 1986
+Mathieu Gorgelin | Lens | G | 74 | France | 1990
+Robin Risser | Lens | G | 82 | France | 2004
+Ilan Jourdren | Lens | G | 74 | France | 2008
+Ruben Aguilar | Lens | DD | 77 | France | 1993
+Maik Nawrocki | Lens | DC | 75 | Pologne | 2001
+Nidal Čelik | Lens | DC | 74 | Bosnie-Herzégovine | 2006
+Samson Baidoo | Lens | DC | 79 | Autriche | 2004
+Matthieu Udol | Lens | DG | 74 | France | 1996
+Jean-Clair Todibo | Lens | DC | 81 | France | 1999
+Saud Abdulhamid | Lens | DD | 77 | Arabie saoudite | 1999
+Jonathan Gradit | Lens | DC | 75 | France | 1992
+Ismaëlo Ganiou | Lens | DC | 73 | France | 2005
+Souleymane Sagnan | Lens | DC | 72 | Mali | 2005
+Kyllian Antonio | Lens | DC | 70 | France | 2008
+Jhoanner Chávez | Lens | DG | 81 | Équateur | 2002
+Andrija Bulatović | Lens | MC | 77 | Monténégro | 2006
+Yacine Titraoui | Lens | MC | 77 | Algérie | 2003
+Amadou Haidara | Lens | MC | 81 | Mali | 1998
+Michał Skóraś | Lens | AD | 79 | Pologne | 2000
+Michaël Cuisance | Lens | MC | 77 | France | 1999
+Florian Sotoca | Lens | BU | 72 | France | 1990
+Thorgan Hazard | Lens | MOC | 82 | Belgique | 1993
+Florian Thauvin | Lens | MOC | 76 | France | 1993
+Odsonne Édouard | Lens | BU | 80 | France | 1998
+Abdallah Sima | Lens | AD | 78 | Sénégal | 2001
+Junior Kadile | Lens | BU | 80 | RD Congo | 2002
+Franjo Ivanović | Lens | BU | 83 | Croatie | 2003
+Mezian Mesloub | Lens | MC | 74 | Portugal | 2009
+Yehvann Diouf | Nice | G | 78 | Sénégal | 1999
+Martin Ponsot | Nice | G | 72 | France | 2009
+Teddy Boulhendi | Nice | G | 73 | Algérie | 2001
+Ali Abdi | Nice | DG | 75 | Tunisie | 1993
+Mohamed Abdelmonem | Nice | DC | 81 | Égypte | 1999
+Niels Nkounkou | Nice | DG | 74 | France | 2000
+Antoine Mendy | Nice | DD | 80 | Sénégal | 2004
+Alidu Seidu | Nice | DD | 75 | Ghana | 2000
+Youssouf Ndayishimiye | Nice | DC | 77 | Burundi | 1998
+Moïse Bombito | Nice | DC | 77 | Canada | 2000
+Hamza Koutoune | Nice | DD | 70 | Maroc | 2006
+Jonathan Clauss | Nice | DD | 72 | France | 1992
+Hicham Boudaoui | Nice | MC | 80 | Algérie | 1999
+Gauthier Hein | Nice | MC | 73 | France | 1996
+Morgan Sanson | Nice | MC | 71 | France | 1994
+Laurent Abergel | Nice | MDC | 75 | France | 1993
+Issiaga Camara | Nice | MC | 72 | Guinée | 2005
+Axel Witsel | Nice | MDC | 73 | Belgique | 1989
+Nassim Lareej | Nice | MC | 71 | France | 2009
+Xavier Junior Mandza | Nice | MC | 69 | France | 2009
+Djibril Coulibaly | Nice | MC | 70 | France | 2008
+Everton Pereira | Nice | MC | 70 | France | 2007
+Salis Abdul Samed | Nice | MDC | 75 | Ghana | 2000
+Mohammed Amoura | Nice | BU | 78 | Algérie | 2000
+Sofiane Diop | Nice | AD | 81 | Maroc | 2000
+Elye Wahi | Nice | BU | 77 | Côte d'Ivoire | 2003
+Isak Jansson | Nice | AG | 74 | Suède | 2002
+Nathan Ngoumou | Nice | BU | 80 | Cameroun | 2000
+Zoumana Diallo | Nice | BU | 72 | France | 2005
+Nicolas Lemaître | Rennes | G | 73 | France | 1997
+Brice Samba | Rennes | G | 79 | France | 1994
+Kilian Belazzoug | Rennes | G | 76 | Algérie | 2006
+Charlie Cresswell | Rennes | DC | 73 | Angleterre | 2002
+Gonçalo Oliveira | Rennes | DC | 71 | Portugal | 2006
+Bryan Reynolds | Rennes | DD | 77 | États-Unis | 2001
+Mahamadou Nagida | Rennes | DG | 76 | Cameroun | 2005
+Anthony Rouault | Rennes | DC | 71 | France | 2001
+Quentin Merlin | Rennes | DG | 74 | France | 2002
+Abdelhamid Aït Boudlal | Rennes | DC | 72 | Maroc | 2006
+Przemysław Frankowski | Rennes | DD | 75 | Pologne | 1995
+Djaoui Cissé | Rennes | MC | 73 | France | 2004
+Ludovic Blas | Rennes | MC | 76 |  | 1997
+Sebastian Szymański | Rennes | MOC | 77 | Pologne | 1999
+Valentin Rongier | Rennes | MC | 75 | France | 1994
+Adrien Thomasson | Rennes | MOC | 75 | France | 1993
+Mahdi Camara | Rennes | MDC | 72 | France | 1998
+Henrick Do Marcolino | Rennes | MOC | 76 | Gabon | 2006
+Estéban Lepaul | Rennes | BU | 75 | France | 2000
+Mousa Al-Tamari | Rennes | BU | 79 | Jordanie | 1997
+Eliezer Mayenda | Rennes | BU | 73 | Espagne | 2005
+Boulaye Dia | Rennes | BU | 78 | Sénégal | 1996
+Elías Quiñónez | Rennes | BU | 66 | Équateur | 2008
+Arnaud Nordin | Rennes | BU | 77 | France | 1998
+Issa Soumaré | Rennes | AG | 76 | Sénégal | 2000
+Ayanda Sishuba | Rennes | BU | 72 | Belgique | 2001
+Filip Jörgensen | Strasbourg | G | 80 | Danemark | 2002
+Miłosz Piekutowski | Strasbourg | G | 71 | Pologne | 2006
+Gabriel Kerckaert | Strasbourg | G | 67 | France | 2007
+Jeyland Mitchell | Strasbourg | DC | 75 | Costa Rica | 2004
+Ismaël Doukouré | Strasbourg | MDC | 78 | France | 2003
+Mateo Del Blanco | Strasbourg | DG | 72 | Argentine | 2003
+Genesis Antwi | Strasbourg | DD | 66 | Suède | 2007
+Lucas Høgsberg | Strasbourg | DC | 73 | Danemark | 2006
+Karim Coulibaly | Strasbourg | MC | 71 | Allemagne | 2007
+Oso | Strasbourg | DC | 78 | Espagne | 2003
+Yoann Becker | Strasbourg | DC | 66 | France | 2009
+Maxi Oyedele | Strasbourg | MDC | 81 | Pologne | 2004
+Giovanni Reyna | Strasbourg | MOC | 79 | États-Unis | 2002
+Sebastian Nanasi | Strasbourg | AG | 76 | Suède | 2002
+Dário Essugo | Strasbourg | MDC | 71 | Portugal | 2005
+Fábio Baldé | Strasbourg | AD | 72 | Portugal | 2005
+Pape Demba Diop | Strasbourg | MC | 74 | Sénégal | 2003
+Diogo Sousa | Strasbourg | MDC | 74 | Portugal | 2006
+Omari Kellyman | Strasbourg | MOC | 69 | Angleterre | 2005
+Tyrese Noubissie | Strasbourg | MC | 66 | France | 2009
+Samir El Mourabet | Strasbourg | MC | 77 | Maroc | 2005
+Benjamin Brantlind | Strasbourg | MC | 69 | Suède | 2008
+Samuel Amo-Ameyaw | Strasbourg | AD | 72 | Angleterre | 2006
+Joaquín Panichelli | Strasbourg | BU | 78 | Argentine | 2002
+Sékou Mara | Strasbourg | BU | 74 | France | 2002
+Deivid Washington | Strasbourg | BU | 70 | Brésil | 2005
+Martial Godo | Strasbourg | BU | 78 | Côte d'Ivoire | 2003
+Jacobo Ortega | Strasbourg | BU | 70 | Espagne | 2006
+Kingsley Olufadé | Strasbourg | BU | 71 | France | 2008
+Yaya Diémé | Strasbourg | BU | 65 | Sénégal | 2007
+Conrad Harder | Strasbourg | BU | 74 | Danemark | 2005
+Gessime Yassine | Strasbourg | AD | 76 | Maroc | 2005
+Kevin Trapp | Paris FC | G | 69 | Allemagne | 1990
+Obed Nkambadio | Paris FC | G | 73 | France | 2003
+Emmanuel Mbemba | Paris FC | DC | 70 | France | 2008
+Moustapha Mbow | Paris FC | DC | 80 | Sénégal | 2000
+Otávio Ataíde | Paris FC | DC | 73 | Brésil | 2002
+Hamari Traoré | Paris FC | DD | 76 | Mali | 1992
+Nhoa Sangui | Paris FC | DG | 73 | France | 2006
+Yoan Koré | Paris FC | DC | 77 | France | 2004
+Thibault De Smet | Paris FC | DG | 76 | Belgique | 1998
+Samir Chergui | Paris FC | DC | 74 | Algérie | 1999
+Diego Coppola | Paris FC | DC | 79 | Italie | 2003
+Vincent Marchetti | Paris FC | MC | 73 | France | 1997
+Patrick Zabi | Paris FC | MC | 73 | Côte d'Ivoire | 2006
+Ilan Kebbal | Paris FC | MOC | 79 | Algérie | 1998
+Adama Camara | Paris FC | MDC | 80 | Mali | 1996
+Maxime Lopez | Paris FC | MC | 72 | France | 1997
+Rudy Matondo | Paris FC | MC | 69 | France | 2008
+Pierre Lees-Melou | Paris FC | MDC | 72 | France | 1993
+Pablo Pagis | Paris FC | AG | 74 | France | 2002
+Lassine Sinayoko | Paris FC | AD | 79 | Mali | 1999
+Jean-Philippe Krasso | Paris FC | BU | 80 | Côte d'Ivoire | 1997
+Luca Koleosho | Paris FC | AD | 75 | Italie | 2004
+Omar Sissoko | Paris FC | BU | 70 | France | 2006
+Moses Simon | Paris FC | AG | 79 | Nigeria | 1995
+Jonathan Ikoné | Paris FC | AD | 77 | France | 1998
+Egil Selvik | Brest | G | 73 | Norvège | 1997
+Noé Poillion | Brest | G | 66 | France | 2007
+Mathieu Patouillet | Brest | G | 74 | France | 2004
+Romain Cagnon | Brest | G | 71 | France | 1997
+Bradley Locko | Brest | DG | 71 | France | 2002
+Gautier Lloris | Brest | DC | 68 | France | 1995
+Brendan Chardonnet | Brest | DC | 68 | France | 1994
+Justin Bourgault | Brest | DC | 71 | France | 2005
+Luck Zogbé | Brest | DC | 71 | Côte d'Ivoire | 2005
+Kenny Lala | Brest | DD | 71 |  | 1991
+Raphaël Le Guen | Brest | DC | 68 | France | 2006
+Mamady Diambou | Brest | MDC | 75 | Mali | 2002
+Joseph Nonge | Brest | MC | 67 | Belgique | 2005
+Hugo Magnetti | Brest | MC | 72 | France | 1998
+Joris Chotard | Brest | MC | 72 | France | 2001
+Kamory Doumbia | Brest | MOC | 74 | Mali | 2003
+Samba Diop | Brest | MC | 63 | Sénégal | 2007
+Lucas Tousart | Brest | MC | 73 | France | 1997
+Pathé Mboup | Brest | BU | 71 | Sénégal | 2003
+Giovani Versini | Brest | AD | 73 | France | 2004
+Noah Edjouma | Brest | AD | 69 | France | 2005
+Mama Baldé | Brest | BU | 74 | Guinée-Bissau | 1995
+Ludovic Ajorque | Brest | BU | 72 | France | 1994
+Ibrahim Kanté | Brest | BU | 67 | France | 2007
+Mathis Lainé | Brest | BU | 69 | France | 2007
+Djylian N'Guessan | Brest | BU | 69 | France | 2008
+Théo Collin | Toulouse | G | 73 | France | 2006
+Guillaume Restes | Toulouse | G | 76 | France | 2005
+Naïme Saïd Mchindra | Toulouse | G | 72 | Comores | 2005
+Mathys Niflore | Toulouse | G | 64 | France | 2007
+Rasmus Nicolaisen | Toulouse | DC | 72 | Danemark | 1997
+Mark McKenzie | Toulouse | DC | 77 | États-Unis | 1999
+Seny Koumbassa | Toulouse | DC | 66 | France | 2007
+Christ Tapé | Toulouse | DC | 73 | Côte d'Ivoire | 2006
+David Odogu | Toulouse | DC | 69 | Allemagne | 2006
+Rafik Messali | Toulouse | DD | 70 | Algérie | 2003
+Frédéric Efuele Ngoyala | Toulouse | DC | 71 | RD Congo | 2005
+Thibaud Garondo | Toulouse | DC | 71 | France | 2006
+Gaëtan Bakhouche | Toulouse | DC | 67 | Algérie | 2005
+Ismaïl Diallo | Toulouse | DC | 71 | France | 2003
+Alexis Vossah | Toulouse | MC | 70 | France | 2008
+Thomas Jørgensen | Toulouse | MC | 75 | Danemark | 2005
+Niko Sigur | Toulouse | DD | 75 | Canada | 2003
+Abu Francis | Toulouse | MC | 73 | Ghana | 2001
+Mathis Amougou | Toulouse | MC | 68 | France | 2006
+Cristian Cásseres Jr. | Toulouse | MC | 75 | Venezuela | 2000
+Niklas Schmidt | Toulouse | MC | 74 | Allemagne | 1998
+Adam El Ouali | Toulouse | MC | 70 | France | 2006
+Darris Zema | Toulouse | MC | 64 | Algérie | 2007
+Julián Vignolo | Toulouse | BU | 67 | Argentine | 2006
+Santiago Hidalgo | Toulouse | BU | 68 | Argentine | 2005
+Sion Oppong | Toulouse | BU | 67 | Suède | 2007
+Jacen Russell-Rowe | Toulouse | BU | 74 | Canada | 2002
+Aron Dønnum | Toulouse | AG | 73 | Norvège | 1998
+Casper Tengstedt | Toulouse | BU | 74 | Danemark | 2000
+Ilyas Azizi | Toulouse | AD | 65 | France | 2008
+Wassim Dardake | Toulouse | BU | 70 | Maroc | 2008
+Aymen Amaaouch | Toulouse | BU | 66 | France | 2009
+Benjamin Leroy | Lorient | G | 67 | France | 1989
+Bingourou Kamara | Lorient | G | 72 | Sénégal | 1996
+Yvon Mvogo | Lorient | G | 71 | Suisse | 1994
+Alec Georgen | Lorient | DD | 74 | France | 1998
+Montassar Talbi | Lorient | DC | 77 | Tunisie | 1998
+Formose Mendy | Lorient | DC | 78 | Sénégal | 2001
+Dembo Sylla | Lorient | DD | 73 | Guinée | 2002
+Srđan Kuzmić | Lorient | DG | 75 | Slovénie | 2004
+Nathaniel Adjei | Lorient | DC | 76 | Ghana | 2002
+Arsène Kouassi | Lorient | DG | 78 | Burkina Faso | 2004
+Nosa Obaretin | Lorient | DC | 74 | Italie | 2003
+Isaak Touré | Lorient | DC | 69 | France | 2003
+Bandiougou Fadiga | Lorient | MOC | 68 | France | 2001
+Noah Cadiou | Lorient | MC | 75 | France | 1998
+Théo Le Bris | Lorient | MD | 74 | France | 2002
+Jean-Victor Makengo | Lorient | MC | 72 | France | 1998
+Gabin Bernardeau | Lorient | MOC | 67 | France | 2006
+Arthur Avom | Lorient | MC | 74 | Cameroun | 2004
+Noah Mbamba | Lorient | DC | 66 | RD Congo | 2005
+Pános Katséris | Lorient | MD | 73 | Grèce | 2001
+Mohamed Bamba | Lorient | MDC | 75 | Côte d'Ivoire | 2001
+Isak Jensen | Lorient | AG | 69 | Danemark | 2003
+Aiyegun Tosin | Lorient | BU | 78 | Bénin | 1998
+Ibrahima Baldé | Lorient | BU | 74 | France | 2003
+Souleymane Faye | Lorient | BU | 77 | Sénégal | 2003
+Mamadou Koné | Lorient | BU | 70 | Côte d'Ivoire | 2006
+Paul Nardi | Auxerre | G | 73 | France | 1994
+Mamadou Diop | Auxerre | G | 75 | Mauritanie | 2000
+Louis Mezerette | Auxerre | G | 66 | France | 2006
+Axel Tuanzebe | Auxerre | DC | 73 | RD Congo | 1997
+Telli Siwe | Auxerre | DC | 70 | France | 2004
+Christ Makosso | Auxerre | DC | 74 | Congo | 2004
+Sinaly Diomandé | Auxerre | DC | 73 | Côte d'Ivoire | 2001
+Fredrik Oppegård | Auxerre | DG | 70 | Norvège | 2002
+Bryan Okoh | Auxerre | DC | 74 | Suisse | 2003
+Lamine Sy | Auxerre | DD | 76 | Sénégal | 2002
+Marvin Senaya | Auxerre | DD | 75 | Ghana | 2001
+Rayan Mandengue | Auxerre | DC | 65 | Cameroun | 2006
+Elikya Legros | Auxerre | DC | 69 | France | 2008
+Alvin Petit Dol | Auxerre | DC | 71 | France | 2006
+Mohamed Coulibaly | Auxerre | DC | 62 | Mali | 2008
+Clément Akpa | Auxerre | DG | 73 | Côte d'Ivoire | 2001
+Sékou Fofana | Auxerre | DC | 69 | France | 2003
+Kévin Danois | Auxerre | MC | 73 | France | 2004
+Assane Dioussé | Auxerre | MC | 74 | Sénégal | 1997
+Naouirou Ahamada | Auxerre | MDC | 70 | France | 2002
+Pierre Ekwah | Auxerre | MDC | 70 | France | 2002
+Lamfia Dioubaté | Auxerre | MC | 67 | France | 2007
+Tidiane Devernois | Auxerre | MC | 67 | France | 2007
+Yvan Zaddy | Auxerre | MC | 65 | Côte d'Ivoire | 2006
+Arthur Piedfort | Auxerre | MDC | 71 | Belgique | 2005
+Rémy Labeau-Lascary | Auxerre | BU | 71 | France | 2003
+Cameron Archer | Auxerre | BU | 70 | Angleterre | 2001
+Danny Namaso | Auxerre | BU | 75 | Cameroun | 2000
+Eros Maddy | Auxerre | AD | 71 | Pays-Bas | 2001
+Romain Faivre | Auxerre | MD | 73 | France | 1998
+Ryan Rodin | Auxerre | BU | 67 | France | 2006
+Mamoudou Cissokho | Auxerre | BU | 63 | France | 2007
+Xiangxin Wei | Auxerre | BU | 68 | Chine | 2008
+Aristide Zossou | Auxerre | BU | 68 | Côte d'Ivoire | 2005
+Anthony Lopes | Angers | G | 71 | Portugal | 1990
+Melvin Zinga | Angers | G | 71 | France | 2002
+Oumar Pona | Angers | G | 67 | Mali | 2006
+Carlens Arcus | Angers | DD | 75 | Haïti | 1996
+Ousmane Camara | Angers | DC | 73 | Mali | 2003
+Joseph Kalulu | Angers | DG | 71 | France | 2004
+Marius Louër | Angers | DD | 65 | France | 2007
+Jordan Lefort | Angers | DC | 75 | Mauritanie | 1993
+Emmanuel Biumla | Angers | DC | 71 | France | 2005
+Lilian Raolisoa | Angers | DD | 72 | France | 2000
+Maël Gernigon | Angers | DC | 62 | France | 2009
+Louis Mouton | Angers | MC | 72 | France | 2002
+Branco van den Boomen | Angers | MC | 72 | Pays-Bas | 1995
+Yassin Belkhdim | Angers | MC | 70 | Maroc | 2002
+Bané Diatta | Angers | MC | 63 | France | 2008
+Jules Bouffandeau | Angers | MC | 63 | France | 2008
+Haris Belkebla | Angers | MC | 70 | Algérie | 1994
+Usman Simbakoli | Angers | BU | 73 | Centrafrique | 2001
+Prosper Peter | Angers | BU | 65 | France | 2007
+Amine Sbaï | Angers | AG | 71 | Maroc | 2000
+Harouna Djibirin | Angers | AD | 71 | Cameroun | 2006
+Jim Allevinah | Angers | AG | 72 | Gabon | 1995
+Amine El Ouazzani | Angers | BU | 70 | Maroc | 2001
+Anthony Bermont | Angers | AG | 71 | France | 2005
+Mamadou Diallo | Angers | BU | 63 | France | 2010
+Paul Argney | Le Havre | G | 66 | France | 2006
+Lionel Mpasi | Le Havre | G | 75 | RD Congo | 1994
+Gauthier Gallon | Le Havre | G | 67 | France | 1993
+Ahmed Touba | Le Havre | DC | 73 | Algérie | 1998
+Elias Jelert | Le Havre | DD | 76 | Danemark | 2003
+Fodé Doucouré | Le Havre | DD | 74 | Mali | 2001
+Ayumu Seko | Le Havre | DC | 71 | Japon | 2000
+Vincent Sasso | Le Havre | DC | 71 | France | 1991
+Stephan Zagadou | Le Havre | DC | 67 | France | 2008
+Timothée Pembélé | Le Havre | DC | 70 | France | 2002
+Junior Mwanga | Le Havre | MDC | 70 | France | 2003
+Amir Richardson | Le Havre | MC | 71 | Maroc | 2002
+Rassoul Ndiaye | Le Havre | MC | 72 | Sénégal | 2001
+Kaito Mizuta | Le Havre | MC | 72 | Japon | 2000
+Guy-Noël Zohouri | Le Havre | MC | 67 | Côte d'Ivoire | 2007
+Simon Ebonog | Le Havre | MC | 74 | France | 2004
+Ismail Bouneb | Le Havre | MOC | 71 | France | 2006
+Daren Mosengo | Le Havre | MC | 69 | France | 2006
+Josh Maja | Le Havre | BU | 74 | Nigeria | 1998
+Felix Mambimbi | Le Havre | AG | 71 | Suisse | 2001
+Godson Kyeremeh | Le Havre | AD | 70 | France | 2000
+Joan Tincres | Le Havre | BU | 71 | France | 2006
+Mbwana Samatta | Le Havre | BU | 69 | Tanzanie | 1992
+Enzo Koffi | Le Havre | DG | 66 | France | 2006
+Sōta Nakamura | Le Havre | BU | 77 | Japon | 2002
+Rayan Fofana | Le Havre | BU | 71 | Côte d'Ivoire | 2006
+Élysée Logbo | Le Havre | BU | 74 | France | 2004
+Ewan Hatfout | Le Mans | G | 67 | France | 2000
+Augustin Delbecque | Le Mans | G | 68 | France | 2002
+Nicolas Kocik | Le Mans | G | 67 | France | 1998
+Harold Voyer | Le Mans | DC | 70 | France | 1997
+Raúl Torrente | Le Mans | DC | 67 | Espagne | 2001
+Samuel Yohou | Le Mans | DC | 66 | France | 1991
+Lucas Buades | Le Mans | MD | 67 | France | 1997
+Djibril Sidibé | Le Mans | DC | 69 | France | 1992
+Théo Eyoum | Le Mans | DC | 67 | France | 2002
+Lucas Calodat | Le Mans | DC | 69 | France | 2002
+Rayan Bamba | Le Mans | DC | 65 | France | 2004
+Noa Boissé | Le Mans | DC | 64 | France | 2006
+Yasser Larouci | Le Mans | DG | 69 | Algérie | 2001
+Joao Almeida | Le Mans | DC | 63 | Brésil | 2006
+Edwin Quarshie | Le Mans | MC | 70 | France | 1995
+Alexandre Lauray | Le Mans | MDC | 66 | France | 1997
+Jean Vercruysse | Le Mans | MC | 70 | France | 2000
+Adil Bourabaa | Le Mans | MC | 66 | Algérie | 2005
+Daouda Traoré | Le Mans | MC | 67 | France | 2006
+Martin Rossignol | Le Mans | MC | 65 | France | 2003
+Lucas Bretelle | Le Mans | MC | 68 | France | 2002
+Billal Brahimi | Le Mans | AG | 72 | Algérie | 2000
+Antoine Rabillard | Le Mans | BU | 69 | France | 1995
+Habib Diallo | Le Mans | BU | 73 | Sénégal | 1995
+Louis Mafouta | Le Mans | BU | 71 | Centrafrique | 1994
+William Harhouz | Le Mans | BU | 66 | France | 1999
+Dame Gueye | Le Mans | BU | 74 | Sénégal | 1995
+Erwan Colas | Le Mans | BU | 65 | France | 1997
+Enzo Vagner | Le Mans | BU | 64 | Brésil | 2006
+Zacharie Boucher | Troyes | G | 71 | Madagascar | 1992
+Patrick Beach | Troyes | G | 75 | Australie | 2003
+Hillel Konaté | Troyes | G | 69 | Burkina Faso | 1994
+Lucas Maronnier | Troyes | DD | 71 | France | 2000
+Anis Ouzenadji | Troyes | DG | 64 | France | 2006
+Junior Diaz | Troyes | DC | 69 | Côte d'Ivoire | 2003
+Paolo Gozzi | Troyes | DC | 72 | Italie | 2001
+Adrien Monfray | Troyes | DC | 65 | France | 1990
+Ismaël Boura | Troyes | DG | 69 | Comores | 2000
+Tom Akpakoun | Troyes | DC | 63 | France | 2005
+Yvann Titi | Troyes | DD | 66 | France | 2006
+Mouhamed Diop | Troyes | MOC | 72 | Sénégal | 2000
+Iron Gomis | Troyes | MOC | 65 | France | 1999
+Antoine Mille | Troyes | MC | 65 | France | 1997
+Hugo Picard | Troyes | MOC | 69 | France | 2003
+Alexandre Phliponeau | Troyes | MDC | 68 | France | 2000
+Karim Dermane | Troyes | MOC | 70 | Togo | 2003
+Roman Murcy | Troyes | MDC | 66 | France | 2006
+Kandet Diawara | Troyes | AG | 75 | Guinée | 2000
+Jérémy Le Douaron | Troyes | BU | 67 | France | 1998
+Merwan Ifnaoui | Troyes | MOC | 67 | France | 1998
+Elijah Odede | Troyes | AG | 60 | Nigeria | 2007
+Renaud Ripart | Troyes | BU | 67 | France | 1993
+Timothé Nkada | Troyes | BU | 68 | France | 1999
+Ibrahim Traoré | Troyes | BU | 66 | France | 2006
+Amadou Diakité | Troyes | BU | 63 | France | 2005
 </script>
 <script src="packs.js"></script>
 <script src="nav.js"></script>
