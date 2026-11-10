@@ -215,7 +215,7 @@ Page : https://ozentv.github.io/quiz-live/histoire.html
 Page : https://ozentv.github.io/quiz-live/packs.html
 - **Une vidéo = un épisode** : tes abonnés choisissent le pack en commentaire ; tu tapes le pseudo et le commentaire, la vidéo commence par ce commentaire (comme une réponse TikTok), puis le pack s'ouvre.
 - **500 joueurs des 18 clubs de Ligue 1** (effectifs 2026-2027 relevés sur Wikipédia en novembre 2026), modifiables dans la page après un transfert. Les notes sont calculées par la page (niveau du club, sélection nationale, âge).
-- **5 raretés** : commune, or rare, équipe de la semaine, joueur du mois, héros. **5 packs** : de base (500 🪙), club (1 500), or (2 500), équipe de la semaine (5 000), premium (10 000) ; 5 à 7 cartes, la meilleure en dernier avec le suspense (club, poste, note) puis la carte qui se retourne.
+- **9 raretés** : commune, or rare, futur talent, en forme, équipe de la semaine, joueur du mois, héros, fin de saison, icône. **Packs** : de base (500 🪙), club (1 500), or (2 500), équipe de la semaine (5 000), premium (10 000) ; 5 à 7 cartes, la meilleure en dernier avec le suspense (club, poste, note) puis la carte qui se retourne.
 - **Album** : une page par club (case grise « ? » pour les joueurs manquants) et une page des cartes spéciales. Club complété = 1 pack offert.
 - **Doublons revendus** automatiquement (commune 50, or 200, équipe de la semaine 1 000, joueur du mois 1 500, héros 2 500) + **bonus d'épisode** de 500 🪙. Si tu ne peux plus rien acheter, le pack de base est offert : la série ne s'arrête jamais.
 - La fin de la vidéo fait le **bilan** : nouvelles cartes, doublons, pièces gagnées, solde, album qui se remplit, « Quel pack j'ouvre ensuite ? 👇 ».
@@ -223,6 +223,8 @@ Page : https://ozentv.github.io/quiz-live/packs.html
 - **Vrais postes** (G, DC, DG, DD, MDC, MC, MOC, MG, MD, AG, AD, BU) relevés dans les fiches Wikipédia des joueurs, **drapeau de la nationalité** sur chaque carte ; stats adaptées au poste.
 - **Photos des joueurs** : touche un joueur dans l'album pour lui mettre une photo (gardée sur le téléphone) ; elle apparaît sur toutes ses cartes et en silhouette pendant le walkout.
 - **Cartes brillantes** : reflet holographique qui bouge, petites étoiles et contour arc-en-ciel animé pour les cartes spéciales.
+- **Nouvelles raretés** : Futur talent (joueurs de moins de 21 ans), En forme, Fin de saison et **Icônes** (32 légendes des clubs, à la retraite : Papin, Drogba, Ibrahimović, Ronaldinho, Juninho, Henry, Cantona…, avec leur page « 👑 Icônes » dans l'album). Nouveaux packs : Futurs talents (4 000 🪙) et Icône (25 000 🪙) ; le pack premium peut donner une fin de saison ou une icône.
+- **Vendre ou garder** : chaque carte a une valeur sur le marché (selon sa note et sa rareté, le marché bouge à chaque épisode). Après l'ouverture, « 💸 Vendre » ou « 🔒 Garder » pour chaque nouvelle carte. Dans la vidéo, la dernière carte affiche sa valeur puis le tampon « 💸 VENDUE ! » ou « 🔒 JE LA GARDE » ; sans choix, la vidéo demande « Je la garde ou je la vends ? 👇 ». Le bilan compte les ventes.
 - Une collection **Team OM** et une **Team PSG**, gardées sur le téléphone, avec copie de secours (fichier) ; logos des clubs facultatifs ; légende TikTok prête à copier.
 
 ## 📊 Duel en chiffres (vidéos « Clasico en chiffres »)

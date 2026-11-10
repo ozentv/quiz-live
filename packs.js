@@ -20,22 +20,38 @@
   var ISO = { "France": "FR", "Sénégal": "SN", "Algérie": "DZ", "Maroc": "MA", "Côte d'Ivoire": "CI", "Mali": "ML", "Danemark": "DK", "Portugal": "PT", "Belgique": "BE", "Brésil": "BR", "Cameroun": "CM", "Suisse": "CH", "Espagne": "ES", "Ghana": "GH", "Japon": "JP", "Pologne": "PL", "Italie": "IT", "Pays-Bas": "NL", "Argentine": "AR", "États-Unis": "US", "Allemagne": "DE", "Suède": "SE", "Canada": "CA", "RD Congo": "CD", "Norvège": "NO", "Équateur": "EC", "Guinée": "GN", "Burkina Faso": "BF", "Nigeria": "NG", "Mauritanie": "MR", "Centrafrique": "CF", "Gabon": "GA", "Autriche": "AT", "Turquie": "TR", "Tunisie": "TN", "Russie": "RU", "Comores": "KM", "Haïti": "HT", "Congo": "CG", "Chine": "CN", "Guinée-Bissau": "GW", "Tanzanie": "TZ", "Bosnie-Herzégovine": "BA", "Arabie saoudite": "SA", "Monténégro": "ME", "Croatie": "HR", "Paraguay": "PY", "Indonésie": "ID", "Islande": "IS", "Slovénie": "SI", "Grèce": "GR", "Bénin": "BJ", "Slovaquie": "SK", "Angola": "AO", "Tchéquie": "CZ", "Finlande": "FI", "Égypte": "EG", "Burundi": "BI", "Ukraine": "UA", "Géorgie": "GE", "Jordanie": "JO", "Costa Rica": "CR", "Venezuela": "VE", "Madagascar": "MG", "Australie": "AU", "Togo": "TG", "Uruguay": "UY", "Colombie": "CO", "Mexique": "MX", "Serbie": "RS", "Hongrie": "HU", "Roumanie": "RO", "Irlande": "IE", "Corée du Sud": "KR", "Cap-Vert": "CV", "Zambie": "ZM", "Gambie": "GM", "Kosovo": "XK", "Albanie": "AL", "Macédoine du Nord": "MK", "Israël": "IL", "Iran": "IR", "Chili": "CL", "Pérou": "PE", "Jamaïque": "JM", "Bulgarie": "BG", "Luxembourg": "LU", "Kenya": "KE", "Afrique du Sud": "ZA", "Libye": "LY", "Ouzbékistan": "UZ", "Lituanie": "LT", "Lettonie": "LV", "Estonie": "EE", "Chypre": "CY", "Malte": "MT", "Arménie": "AM", "Azerbaïdjan": "AZ", "Kazakhstan": "KZ", "Moldavie": "MD", "Biélorussie": "BY", "Nouvelle-Zélande": "NZ", "Qatar": "QA", "Émirats arabes unis": "AE", "Irak": "IQ", "Syrie": "SY", "Liban": "LB", "Ouganda": "UG", "Rwanda": "RW", "Zimbabwe": "ZW", "Soudan": "SD", "Niger": "NE", "Tchad": "TD", "Sierra Leone": "SL", "Liberia": "LR", "Guinée équatoriale": "GQ", "Mozambique": "MZ", "Namibie": "NA", "Panama": "PA", "Honduras": "HN", "Guatemala": "GT", "Salvador": "SV", "Bolivie": "BO", "Suriname": "SR", "Guyana": "GY", "Martinique": "MQ", "Guadeloupe": "GP", "Nouvelle-Calédonie": "NC" };
   var SUBD = { "Angleterre": "gbeng", "Écosse": "gbsct", "Pays de Galles": "gbwls" };
   function flag(nat) { if (SUBD[nat]) return "\uD83C\uDFF4" + SUBD[nat].split("").map(function (ch) { return String.fromCodePoint(0xE0000 + ch.charCodeAt(0)); }).join("") + String.fromCodePoint(0xE007F); var c = ISO[nat]; if (!c) return ""; return String.fromCodePoint(0x1F1E6 + c.charCodeAt(0) - 65, 0x1F1E6 + c.charCodeAt(1) - 65); }
-  function info(c) { if (c.nat !== undefined) return c; var p = (BYCLUB[c.club] || []).filter(function (x) { return x.name === c.name; })[0]; return p ? { nat: p.nat, an: p.an, pos: p.pos } : {}; }
+  function info(c) { if (c.nat !== undefined) return c; var p = (BYCLUB[c.club] || []).concat(ICONS).filter(function (x) { return x.name === c.name; })[0]; return p ? { nat: p.nat, an: p.an, pos: p.pos } : {}; }
   function club(n) { return CLUBS[n] || { c1: "#475569", c2: "#cbd5e1", dark: "#111827", ab: String(n || "?").slice(0, 4).toUpperCase() }; }
   var RAR = {
     commune: { a: "#eef1f5", b: "#b9c2cc", c: "#7d8794", ink: "#1f2630", beam: "205,214,228", label: "COMMUNE", bonus: -7, rank: 0, sell: 50 },
     or: { a: "#fff3b0", b: "#e2b93b", c: "#8a6512", ink: "#2b1d03", beam: "255,210,80", label: "OR RARE", bonus: 0, rank: 1, sell: 200 },
+    futur: { a: "#9ff7e0", b: "#10a37f", c: "#053b2e", ink: "#ffffff", beam: "60,230,170", label: "FUTUR TALENT", bonus: 6, rank: 2, sell: 800, edge: "#b8ffe9" },
+    forme: { a: "#ff8a7a", b: "#8f1220", c: "#1a0204", ink: "#ffd27a", beam: "255,90,70", label: "EN FORME", bonus: 2, rank: 2, sell: 800, edge: "#ffd27a" },
     totw: { a: "#3b3b3b", b: "#141414", c: "#000000", ink: "#f5d77a", beam: "255,185,60", label: "ÉQUIPE DE LA SEMAINE", bonus: 3, rank: 2, sell: 1000, edge: "#f5d77a" },
     potm: { a: "#7fd4ff", b: "#1e4fd8", c: "#0a1f6b", ink: "#ffffff", beam: "90,170,255", label: "JOUEUR DU MOIS", bonus: 4, rank: 3, sell: 1500, edge: "#bfe8ff" },
-    hero: { a: "#d5a6ff", b: "#6d28d9", c: "#22074f", ink: "#ffe9a8", beam: "190,120,255", label: "HÉROS", bonus: 5, rank: 4, sell: 2500, edge: "#ffe9a8" }
+    hero: { a: "#d5a6ff", b: "#6d28d9", c: "#22074f", ink: "#ffe9a8", beam: "190,120,255", label: "HÉROS", bonus: 5, rank: 4, sell: 2500, edge: "#ffe9a8" },
+    fds: { a: "#8fc3ff", b: "#1b4fd1", c: "#06103d", ink: "#ffe58a", beam: "120,170,255", label: "FIN DE SAISON", bonus: 7, rank: 4, sell: 3000, edge: "#ffe58a" },
+    icone: { a: "#ffffff", b: "#efe6c8", c: "#b89a52", ink: "#3a2f12", beam: "255,240,200", label: "ICÔNE", bonus: 0, rank: 5, sell: 5000, edge: "#d9b85c" }
   };
+  // Icônes : anciennes légendes des clubs (joueurs à la retraite), notes inventées par la page
+  var ICONS = ("Zlatan Ibrahimović|PSG|BU|94|Suède|1981;Ronaldinho|PSG|MOC|94|Brésil|1980;Raí|PSG|MOC|91|Brésil|1965;Safet Sušić|PSG|MOC|90|Bosnie-Herzégovine|1955;Pauleta|PSG|BU|89|Portugal|1973;" +
+    "Jean-Pierre Papin|OM|BU|93|France|1963;Didier Drogba|OM|BU|93|Côte d'Ivoire|1978;Marcel Desailly|OM|DC|91|France|1968;Abedi Pelé|OM|MOC|90|Ghana|1964;Chris Waddle|OM|AD|89|Angleterre|1960;Basile Boli|OM|DC|88|France|1967;" +
+    "Thierry Henry|Monaco|AG|94|France|1977;Ludovic Giuly|Monaco|AD|87|France|1976;Juninho|Lyon|MC|92|Brésil|1975;Sonny Anderson|Lyon|BU|90|Brésil|1970;Grégory Coupet|Lyon|G|88|France|1972;" +
+    "Eden Hazard|Lille|AG|91|Belgique|1991;Yohan Cabaye|Lille|MC|86|France|1986;Raphaël Varane|Lens|DC|89|France|1993;Tony Vairelles|Lens|BU|85|France|1973;Éric Sikora|Lens|DD|85|France|1968;" +
+    "Hatem Ben Arfa|Nice|AD|87|France|1987;Sylvain Wiltord|Rennes|BU|87|France|1974;Yoann Gourcuff|Rennes|MOC|87|France|1986;José Luis Chilavert|Strasbourg|G|88|Paraguay|1965;Frank Lebœuf|Strasbourg|DC|87|France|1968;" +
+    "Franck Ribéry|Brest|AG|92|France|1983;Fabien Barthez|Toulouse|G|90|France|1971;Laurent Koscielny|Lorient|DC|87|France|1985;Éric Cantona|Auxerre|BU|92|France|1966;Djibril Cissé|Auxerre|BU|88|France|1981;Lassana Diarra|Le Havre|MDC|87|France|1985")
+    .split(";").map(function (l) { var p = l.split("|"); return { name: p[0], club: p[1], pos: p[2], base: +p[3], nat: p[4], an: +p[5], icon: true }; });
   var PACKS = [
-    { id: "base", label: "Pack de base", info: "5 cartes, surtout des communes", price: 500, slots: ["commune", "commune", "commune", "co"], best: [["or", .88], ["totw", .12]] },
-    { id: "club", label: "Pack club", info: "5 cartes du club demandé", price: 1500, club: true, slots: ["commune", "commune", "or", "or"], best: [["or", .62], ["totw", .26], ["potm", .12]] },
-    { id: "or", label: "Pack or", info: "6 cartes, au moins 3 en or", price: 2500, slots: ["commune", "commune", "or", "or", "or"], best: [["or", .68], ["totw", .32]] },
+    { id: "base", label: "Pack de base", info: "5 cartes, surtout des communes", price: 500, slots: ["commune", "commune", "commune", "co"], best: [["or", .82], ["totw", .08], ["forme", .06], ["futur", .04]] },
+    { id: "club", label: "Pack club", info: "5 cartes du club demandé", price: 1500, club: true, slots: ["commune", "commune", "or", "or"], best: [["or", .5], ["totw", .2], ["forme", .12], ["futur", .12], ["potm", .06]] },
+    { id: "or", label: "Pack or", info: "6 cartes, au moins 3 en or", price: 2500, slots: ["commune", "commune", "or", "or", "or"], best: [["or", .6], ["totw", .22], ["forme", .1], ["futur", .08]] },
+    { id: "futur", label: "Pack Futurs talents", info: "5 cartes, 1 futur talent garanti (moins de 21 ans)", price: 4000, slots: ["commune", "commune", "or", "or"], best: [["futur", 1]] },
     { id: "totw", label: "Pack Équipe de la semaine", info: "5 cartes, 1 équipe de la semaine garantie", price: 5000, slots: ["commune", "commune", "or", "or"], best: [["totw", 1]] },
-    { id: "premium", label: "Pack premium", info: "7 cartes, 1 héros ou joueur du mois garanti", price: 10000, slots: ["commune", "commune", "or", "or", "or", "totw"], best: [["potm", .55], ["hero", .45]] }
+    { id: "premium", label: "Pack premium", info: "7 cartes, 1 joueur du mois, héros, fin de saison ou icône garanti", price: 10000, slots: ["commune", "commune", "or", "or", "or", "totw"], best: [["potm", .4], ["hero", .33], ["fds", .2], ["icone", .07]] },
+    { id: "icone", label: "Pack Icône", info: "6 cartes, 1 icône garantie (légende d'un club)", price: 25000, slots: ["commune", "or", "or", "totw", "forme"], best: [["icone", 1]] }
   ];
+  // valeur sur le marché : selon la rareté et la note, et le marché bouge un peu à chaque épisode
+  function value(c, epi) { var r = c.rating, base = { commune: 150 + Math.max(0, r - 55) * 12, or: 400 + Math.max(0, r - 65) * 90, futur: 1800 + Math.max(0, r - 70) * 260, forme: 1800 + Math.max(0, r - 70) * 260, totw: 2000 + Math.max(0, r - 70) * 280, potm: 3500 + Math.max(0, r - 75) * 420, hero: 5000 + Math.max(0, r - 75) * 550, fds: 7000 + Math.max(0, r - 75) * 700, icone: 18000 + Math.max(0, r - 84) * 2500 }[c.rk] || 300, h = 7, k = c.name + "#" + epi; for (var i = 0; i < k.length; i++) h = (h * 31 + k.charCodeAt(i)) % 100003; return Math.max(50, Math.round(base * (.85 + .3 * (h % 100) / 100) / 50) * 50); }
   var BONUS = 500; // pièces gagnées à chaque épisode, en plus des doublons
   function rescue(P) { return S.free <= 0 && P.id === "base" && S.coins < P.price; } // pack de secours : la série ne s'arrête jamais
   function packOf(id) { return PACKS.filter(function (p) { return p.id === id; })[0] || PACKS[0]; }
@@ -73,9 +89,14 @@
       var c = top.filter(function (p) { return !used[p.name]; }); if (!c.length) c = pool.filter(function (p) { return !used[p.name]; }); if (!c.length) c = pool;
       var p = c[Math.floor(r() * c.length)]; used[p.name] = 1; return p; }
     function card(p, rk) { return { name: p.name, club: p.club, pos: p.pos, nat: p.nat, an: p.an, rk: rk, rating: Math.max(45, Math.min(99, p.base + RAR[rk].bonus)) }; }
-    P.slots.forEach(function (s) { var rk = s === "co" ? (r() < .5 ? "or" : "commune") : s; out.push(card(pick(RAR[rk].rank), rk)); });
+    function pickFrom(list) { var c = list.filter(function (p) { return !used[p.name]; }); if (!c.length) return null; var p = c[Math.floor(r() * c.length)]; used[p.name] = 1; return p; }
+    function special(rk) { // futur talent : jeunes de moins de 21 ans ; icône : légende du club
+      if (rk === "icone") { var ic = pickFrom(P.club ? ICONS.filter(function (x) { return x.club === clubName; }) : ICONS) || pickFrom(ICONS); return ic ? card(ic, "icone") : null; }
+      if (rk === "futur") { var yg = pool.filter(function (p) { return p.an >= 2005; }).sort(function (a, b) { return b.base - a.base; }); var y = pickFrom(yg.slice(0, Math.max(4, Math.ceil(yg.length * .5)))); return y ? card(y, "futur") : null; }
+      return card(pick(RAR[rk].rank + 1), rk); }
+    P.slots.forEach(function (s) { var rk = s === "co" ? (r() < .5 ? "or" : "commune") : s; out.push(rk === "forme" || rk === "futur" ? (special(rk) || card(pick(1), "or")) : card(pick(RAR[rk].rank), rk)); });
     out.sort(function (a, b) { return RAR[a.rk].rank - RAR[b.rk].rank || a.rating - b.rating; });
-    var bk = pickW(r, P.best); out.push(card(pick(RAR[bk].rank + 1), bk));
+    var bk = pickW(r, P.best); out.push(special(bk) || card(pick(2), "totw"));
     return out;
   }
 
@@ -87,19 +108,31 @@
     var clubName = $("#club").value, seed = Date.now() % 2147483646, cards = draw(P.id, clubName, seed), coins0 = S.coins, before = albumCount(), seen = {}, earned = 0;
     if (S.free > 0) S.free--; else if (!useFree) S.coins -= P.price;
     var doneBefore = {}; clubList().forEach(function (c) { doneBefore[c] = clubDone(c); });
-    cards.forEach(function (c) { var k = keyOf(c); if (S.cards[k] || seen[k]) { c.dup = true; c.sold = RAR[c.rk].sell; earned += c.sold; S.cards[k] = (S.cards[k] || 0) + 1; } else { c.isNew = true; S.cards[k] = 1; } seen[k] = 1; });
+    cards.forEach(function (c) { c.value = value(c, S.epi + 1); var k = keyOf(c); if (S.cards[k] || seen[k]) { c.dup = true; c.sold = RAR[c.rk].sell; earned += c.sold; S.cards[k] = (S.cards[k] || 0) + 1; } else { c.isNew = true; S.cards[k] = 1; } seen[k] = 1; });
     S.coins += earned + BONUS;
     var completed = clubList().filter(function (c) { return !doneBefore[c] && clubDone(c); });
     completed.forEach(function (c) { S.done[c] = true; S.free++; });
     S.epi++;
-    S.last = { epi: S.epi, pack: P.id, club: P.club ? clubName : "", free: useFree, price: useFree ? 0 : P.price, who: $("#who").value.trim(), com: $("#com").value.trim(), cards: cards, earned: earned, bonus: BONUS, coins: S.coins, coinsBefore: coins0, album: [albumCount(), PLAYERS.length], albumBefore: before, completed: completed };
+    S.last = { epi: S.epi, pack: P.id, club: P.club ? clubName : "", free: useFree, price: useFree ? 0 : P.price, who: $("#who").value.trim(), com: $("#com").value.trim(), cards: cards, earned: earned, bonus: BONUS, sales: 0, coins: S.coins, coinsBefore: coins0, album: [albumCount(), PLAYERS.length], albumBefore: before, completed: completed };
     save(); refresh(); showResult(); makeCap(); playNow();
   }
   function selPack() { var r = document.querySelector("input[name=pk]:checked"); return r ? r.value : "base"; }
   function fmt(n) { return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
   function showResult() {
     var L = S.last; if (!L) { $("#res").innerHTML = ""; return; }
-    $("#res").innerHTML = "<b>Épisode " + L.epi + " · " + packOf(L.pack).label + (L.club ? " " + L.club : "") + "</b>" + L.cards.map(function (c) { return "<span class=\"" + (c.dup ? "dup" : "new") + "\">" + (c.dup ? "♻️ Doublon" : "🆕 Nouvelle") + " · " + esc(c.name) + " (" + RAR[c.rk].label.toLowerCase() + ", " + c.rating + ")" + (c.dup ? " +" + fmt(c.sold) + " 🪙" : "") + "</span>"; }).join("") + (L.completed.length ? "<b>🏆 Page complétée : " + L.completed.map(esc).join(", ") + " → 1 pack offert !</b>" : "");
+    $("#res").innerHTML = "<b>Épisode " + L.epi + " · " + packOf(L.pack).label + (L.club ? " " + L.club : "") + "</b>" + L.cards.map(function (c, i) {
+      var last = i === L.cards.length - 1, line = "<span class=\"" + (c.dup ? "dup" : "new") + "\">" + (c.dup ? "♻️ Doublon" : c.sale ? "💸 Vendue" : "🆕 Nouvelle") + " · " + esc(c.name) + " (" + RAR[c.rk].label.toLowerCase() + ", " + c.rating + ")" + (c.dup ? " +" + fmt(c.sold) + " 🪙" : c.sale ? " +" + fmt(c.sale) + " 🪙" : "") + "</span>";
+      if (c.dup || c.value == null) return line;
+      return "<div class=\"deal\">" + line + "<span class=\"btns2\"><button type=\"button\" class=\"mini" + (c.sale ? " on" : "") + "\" data-sell=\"" + i + "\">💸 " + (c.sale ? "Vendue" : "Vendre") + " " + fmt(c.value) + " 🪙</button><button type=\"button\" class=\"mini" + (c.keep ? " on" : "") + "\" data-keep=\"" + i + "\">🔒 " + (c.keep ? "Gardée" : "Garder") + "</button></span>" + (last && !c.sale && !c.keep ? "<small>Sans choix, la vidéo demande aux abonnés : « Je la garde ou je la vends ? 👇 »</small>" : "") + "</div>"; }).join("") + (L.completed.length ? "<b>🏆 Page complétée : " + L.completed.map(esc).join(", ") + " → 1 pack offert !</b>" : "");
+    document.querySelectorAll("[data-sell]").forEach(function (b) { b.onclick = function () { deal(+b.getAttribute("data-sell"), "sell"); }; });
+    document.querySelectorAll("[data-keep]").forEach(function (b) { b.onclick = function () { deal(+b.getAttribute("data-keep"), "keep"); }; });
+  }
+  function deal(i, what) { // vendre ou garder une carte du dernier pack
+    var L = S.last, c = L && L.cards[i]; if (!c || c.dup) return; var k = keyOf(c);
+    if (what === "sell" && !c.sale) { c.sale = c.value; c.keep = false; S.coins += c.value; L.sales = (L.sales || 0) + c.value; S.cards[k] = (S.cards[k] || 1) - 1; if (S.cards[k] <= 0) delete S.cards[k]; }
+    else if (what === "sell" && c.sale) { S.coins -= c.sale; L.sales -= c.sale; delete c.sale; S.cards[k] = (S.cards[k] || 0) + 1; }
+    else if (what === "keep") { if (c.sale) { S.coins -= c.sale; L.sales -= c.sale; delete c.sale; S.cards[k] = (S.cards[k] || 0) + 1; } c.keep = !c.keep; }
+    L.coins = S.coins; L.album = [albumCount(), PLAYERS.length]; save(); refresh(); showResult(); makeCap(); t0 = performance.now() - (TL(L).flip + .8) * 1000;
   }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]; }); }
 
@@ -109,15 +142,16 @@
     $("#acc").value = ACC; $("#epi").value = String(S.epi + 1);
     $("#wCoins").textContent = fmt(S.coins); $("#wFree").textContent = String(S.free);
     var have = albumCount(); $("#wAlbum").textContent = have + "/" + PLAYERS.length; $("#progI").style.width = (PLAYERS.length ? have / PLAYERS.length * 100 : 0) + "%";
-    var specials = Object.keys(S.cards).filter(function (k) { return !/\|(commune|or)$/.test(k); }).length;
-    $("#albumNote").textContent = have + " joueurs sur " + PLAYERS.length + " (" + (PLAYERS.length ? Math.floor(have / PLAYERS.length * 100) : 0) + " %) · " + specials + " cartes spéciales · " + Object.keys(S.done).length + " clubs complétés";
+    var specials = Object.keys(S.cards).filter(function (k) { return !/\|(commune|or|icone)$/.test(k); }).length, icons = ICONS.filter(function (x) { return S.cards[x.name + "|" + x.club + "|icone"]; }).length;
+    $("#albumNote").textContent = have + " joueurs sur " + PLAYERS.length + " (" + (PLAYERS.length ? Math.floor(have / PLAYERS.length * 100) : 0) + " %) · " + specials + " cartes spéciales · " + icons + "/" + ICONS.length + " icônes · " + Object.keys(S.done).length + " clubs complétés";
     var cur = selPack(); $("#shop").innerHTML = PACKS.map(function (p) { var ok = S.free > 0 || S.coins >= p.price || rescue(p); return "<label class=\"pk\"><input type=\"radio\" name=\"pk\" value=\"" + p.id + "\"" + (p.id === cur ? " checked" : "") + "><span>" + p.label + "<small>" + p.info + "</small></span><span class=\"price\" style=\"color:" + (ok ? "var(--fg)" : "#e11d48") + "\">" + (S.free > 0 || rescue(p) ? "🎁 offert" : fmt(p.price) + " 🪙") + "</span></label>"; }).join("");
     $("#open").textContent = S.free > 0 ? "🎁 Ouvrir le pack offert" : "🃏 Ouvrir le pack";
-    var cl = clubList(); if (!tab || (tab !== "spe" && !BYCLUB[tab])) tab = ACC === "psg" ? "PSG" : "OM";
-    $("#tabs").innerHTML = cl.map(function (c) { var l = BYCLUB[c] || [], n = l.filter(hasBase).length; return "<button type=\"button\" data-tab=\"" + esc(c) + "\" aria-pressed=\"" + (tab === c) + "\">" + (S.done[c] ? "🏆 " : "") + esc(c) + " " + n + "/" + l.length + "</button>"; }).join("") + "<button type=\"button\" data-tab=\"spe\" aria-pressed=\"" + (tab === "spe") + "\">⭐ Spéciales " + specials + "</button>";
+    var cl = clubList(); if (!tab || (tab !== "spe" && tab !== "ico" && !BYCLUB[tab])) tab = ACC === "psg" ? "PSG" : "OM";
+    $("#tabs").innerHTML = cl.map(function (c) { var l = BYCLUB[c] || [], n = l.filter(hasBase).length; return "<button type=\"button\" data-tab=\"" + esc(c) + "\" aria-pressed=\"" + (tab === c) + "\">" + (S.done[c] ? "🏆 " : "") + esc(c) + " " + n + "/" + l.length + "</button>"; }).join("") + "<button type=\"button\" data-tab=\"spe\" aria-pressed=\"" + (tab === "spe") + "\">⭐ Spéciales " + specials + "</button><button type=\"button\" data-tab=\"ico\" aria-pressed=\"" + (tab === "ico") + "\">👑 Icônes " + icons + "/" + ICONS.length + "</button>";
     document.querySelectorAll("[data-tab]").forEach(function (b) { b.onclick = function () { tab = b.getAttribute("data-tab"); refresh(); }; });
     var h = "";
-    if (tab === "spe") { var ks = Object.keys(S.cards).filter(function (k) { return !/\|(commune|or)$/.test(k); });
+    if (tab === "ico") h = ICONS.map(function (x) { var n = S.cards[x.name + "|" + x.club + "|icone"]; return n ? mini({ name: x.name, club: x.club, pos: x.pos, rk: "icone", rating: x.base }, n) : "<div class=\"mc miss\" role=\"button\" tabindex=\"0\" data-ph=\"" + esc(pkey(x)) + "\" title=\"" + esc(x.name) + " · touche pour la photo\"><span></span><span class=\"q\">👑</span><span class=\"n\">" + esc(x.name) + "</span></div>"; }).join("");
+    else if (tab === "spe") { var ks = Object.keys(S.cards).filter(function (k) { return !/\|(commune|or|icone)$/.test(k); });
       h = ks.length ? ks.map(function (k) { var p = k.split("|"), pl = (BYCLUB[p[1]] || []).filter(function (x) { return x.name === p[0]; })[0] || { base: 70, pos: "" }; return mini({ name: p[0], club: p[1], pos: pl.pos, rk: p[2], rating: Math.max(45, Math.min(99, pl.base + RAR[p[2]].bonus)) }, S.cards[k]); }).join("") : "<p class=\"note\">Aucune carte spéciale pour l'instant.</p>"; }
     else (BYCLUB[tab] || []).slice().sort(function (a, b) { return b.base - a.base; }).forEach(function (p) {
       var bo = bestOwned(p);
@@ -280,8 +314,12 @@
       var big2 = tm.n > 4, bx = W / 2, byy = (big2 ? 1150 : 1060) + (1 - ca) * 300 + idl, bsc = big2 ? (.6 + .17 * ca) : (.66 + .2 * ca);
       if (sumK > 0) { var sb = slotSum(L.cards.length - 1, L.cards.length); bx += (sb[0] - bx) * ease(sumK); byy += (sb[1] - byy) * ease(sumK); bsc += (.27 - bsc) * ease(sumK); }
       g.save(); g.globalAlpha = ca; g.translate(bx, byy); g.scale(bsc * Math.max(.02, Math.abs(sx2)), bsc); card(g, last, flip > .5, t > tm.flip + .6 && sumK < 1 ? ((t - tm.flip - .6) * .5) % 1.4 : null, clamp((t - tm.flip - .5) / 1.2), t); g.restore();
-      if (t > tm.flip + .6) tag(g, last, bx, byy + 920 * bsc / 2 + 24, clamp((t - tm.flip - .6) / .3), sumK > 0 ? .75 : 1.2);
-      if (t > tm.flip + .5 && t < tm.sum) bigText(g, "🔥 " + RAR[last.rk].label + " 🔥", 1590, 72, clamp((t - tm.flip - .5) / .3) * (1 - sumK), .6 + .4 * back((t - tm.flip - .5) / .4), "#f5d77a");
+      if (t > tm.flip + .6) tag(g, t < tm.flip + 2.5 ? { dup: last.dup, sold: last.sold } : last, bx, byy + 920 * bsc / 2 + 24, clamp((t - tm.flip - .6) / .3), sumK > 0 ? .75 : 1.2);
+      if (last.value != null && t > tm.flip + 1.3 && t < tm.sum) { var va = clamp((t - tm.flip - 1.3) / .3) * (1 - sumK); g.save(); g.globalAlpha = va; pill(g, "💰 Valeur : " + fmt(last.value) + " 🪙", W / 2, big2 ? 1725 : 1680, "rgba(0,0,0,.7)", "#f5d77a", 40); g.restore(); }
+      if (t > tm.flip + 2.5 && t < tm.sum + .3) { var da = clamp((t - tm.flip - 2.5) / .25) * (1 - sumK);
+        if (last.sale || last.keep) { var st = .6 + .4 * back((t - tm.flip - 2.5) / .35), col = last.sale ? "#fb923c" : "#22c55e", tx = last.sale ? "💸 VENDUE !" : "🔒 JE LA GARDE"; g.save(); g.globalAlpha = da; g.translate(W / 2, byy); g.rotate(-.18); g.scale(st * 1.6 - .6, st * 1.6 - .6); g.font = "900 96px " + FONT; var tw2 = g.measureText(tx).width + 80; g.lineWidth = 14; g.strokeStyle = col; g.fillStyle = "rgba(0,0,0,.55)"; rr(g, -tw2 / 2, -80, tw2, 160, 26); g.fill(); g.stroke(); g.fillStyle = col; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(tx, 0, 6); g.restore(); }
+        else bigText(g, "Je la garde ou je la vends ? 👇", big2 ? 1815 : 1790, 60, da, .95 + .05 * Math.sin(t * 6), "#fff"); }
+      if (t > tm.flip + .5 && t < tm.sum) bigText(g, "🔥 " + RAR[last.rk].label + " 🔥", big2 ? 1630 : 1590, 72, clamp((t - tm.flip - .5) / .3) * (1 - sumK), .6 + .4 * back((t - tm.flip - .5) / .4), "#f5d77a");
     }
     particles(g, t, tm.flip + .05, bestR.beam, 70);
     if (t > tm.flip + .2 && t < tm.sum + 1) for (var z = 0; z < 70; z++) { var zx = (z * 151) % W, zy = ((t - tm.flip - .2) * (300 + (z * 37) % 300) + (z * 83) % 600) - 200; if (zy > H) continue; g.save(); g.translate(zx + Math.sin(t * 3 + z) * 30, zy); g.rotate(t * 4 + z); var cc = club(last.club); g.fillStyle = [cc.c1, cc.c2, "#f5d77a"][z % 3]; g.fillRect(-10, -5, 20, 10); g.restore(); }
@@ -314,13 +352,14 @@
     if (t > tm.flip - .35 && t < tm.flip + .1) { g.fillStyle = "rgba(255,255,255," + (1 - Math.abs(t - tm.flip + .12) / .25) + ")"; g.fillRect(0, 0, W, H); }
   }
   function slotSum(i, n) { var perRow = n > 6 ? 4 : n > 4 ? 3 : n, row = Math.floor(i / perRow), inRow = Math.min(perRow, n - row * perRow); return [W / 2 + ((i % perRow) - (inRow - 1) / 2) * 250, 470 + row * 330]; }
-  function tag(g, c, x, y, a, sc) { if (a <= 0) return; g.save(); g.globalAlpha = a; g.translate(x, y); g.scale(sc, sc); if (c.dup) pill(g, "♻️ DOUBLON +" + fmt(c.sold) + " 🪙", 0, 0, "#f5c542", "#1a1300", 30); else pill(g, "🆕 NOUVELLE", 0, 0, "#22c55e", "#04210f", 30); g.restore(); }
+  function tag(g, c, x, y, a, sc) { if (a <= 0) return; g.save(); g.globalAlpha = a; g.translate(x, y); g.scale(sc, sc); if (c.sale) pill(g, "💸 VENDUE +" + fmt(c.sale) + " 🪙", 0, 0, "#fb923c", "#2a1000", 30); else if (c.dup) pill(g, "♻️ DOUBLON +" + fmt(c.sold) + " 🪙", 0, 0, "#f5c542", "#1a1300", 30); else pill(g, "🆕 NOUVELLE", 0, 0, "#22c55e", "#04210f", 30); g.restore(); }
   function summary(g, t, L, tm, k) {
     var a = clamp((t - tm.sum - .3) / .4), nNew = L.cards.filter(function (c) { return !c.dup; }).length, nDup = L.cards.length - nNew, rows = Math.ceil(L.cards.length / (L.cards.length > 6 ? 4 : L.cards.length > 4 ? 3 : L.cards.length)), y0 = 470 + rows * 330 - 40;
     bigText(g, "📦 BILAN DU PACK", 230, 64, a, 1, "#f5d77a");
-    var lines = [["🆕 " + nNew + " nouvelle" + (nNew > 1 ? "s" : "") + " · ♻️ " + nDup + " doublon" + (nDup > 1 ? "s" : ""), "#fff"], [(L.earned ? "Doublons +" + fmt(L.earned) + " 🪙 · " : "") + "Bonus d'épisode +" + fmt(L.bonus || 0) + " 🪙", "#f5c542"], ["💰 Solde : " + fmt(L.coins) + " 🪙", "#fff"]];
+    var nSold = L.cards.filter(function (c) { return c.sale; }).length;
+    var lines = [["🆕 " + nNew + " nouvelle" + (nNew > 1 ? "s" : "") + " · ♻️ " + nDup + " doublon" + (nDup > 1 ? "s" : ""), "#fff"], [(L.earned ? "Doublons +" + fmt(L.earned) + " 🪙 · " : "") + "Bonus d'épisode +" + fmt(L.bonus || 0) + " 🪙", "#f5c542"]].concat(L.sales ? [["💸 " + nSold + " carte" + (nSold > 1 ? "s" : "") + " vendue" + (nSold > 1 ? "s" : "") + " : +" + fmt(L.sales) + " 🪙", "#fb923c"]] : []).concat([, ["💰 Solde : " + fmt(L.coins) + " 🪙", "#fff"]]);
     lines.forEach(function (l, i) { bigText(g, l[0], y0 + i * 78, 50, clamp((t - tm.sum - .5 - i * .35) / .3), 1, l[1]); });
-    var pa = clamp((t - tm.sum - 1.6) / .4), pb = y0 + 260, fill = L.album[1] ? (L.albumBefore + (L.album[0] - L.albumBefore) * ease((t - tm.sum - 1.8) / 1)) / L.album[1] : 0;
+    var pa = clamp((t - tm.sum - 1.6) / .4), pb = y0 + lines.length * 78 + 26, fill = L.album[1] ? (L.albumBefore + (L.album[0] - L.albumBefore) * ease((t - tm.sum - 1.8) / 1)) / L.album[1] : 0;
     if (pa > 0) { g.save(); g.globalAlpha = pa; g.fillStyle = "rgba(255,255,255,.15)"; rr(g, 140, pb, 800, 40, 20); g.fill(); var pgd = g.createLinearGradient(140, 0, 940, 0); pgd.addColorStop(0, "#f5c542"); pgd.addColorStop(1, "#34d399"); g.fillStyle = pgd; rr(g, 140, pb, Math.max(40, 800 * fill), 40, 20); g.fill(); g.restore();
       bigText(g, "📖 Album : " + Math.round(fill * L.album[1]) + " / " + L.album[1] + " joueurs", pb + 90, 46, pa, 1); }
     if (L.completed && L.completed.length) bigText(g, "🏆 Page " + L.completed.join(", ") + " complétée ! 🎁 Pack offert", pb + 170, 44, clamp((t - tm.sum - 2.4) / .3), 1, "#34d399");
@@ -350,6 +389,10 @@
     tone(t0 + tm.flip, 400, 1600, .3, .1); [0, .12, .24].forEach(function (d, i) { tone(t0 + tm.flip + .35 + d, [784, 988, 1175][i], [784, 988, 1175][i], .6, .08, "triangle"); });
     var cr = ac.createBufferSource(), cf = ac.createBiquadFilter(), cg = ac.createGain(); cr.buffer = nb; cr.loop = true; cf.type = "bandpass"; cf.frequency.value = 900; cf.Q.value = .5; cg.gain.setValueAtTime(.001, t0 + tm.flip); cg.gain.linearRampToValueAtTime(.3, t0 + tm.flip + .5); cg.gain.linearRampToValueAtTime(.001, t0 + tm.sum + 1.5); cr.connect(cf); cf.connect(cg); cg.connect(dest); cr.start(t0 + tm.flip); cr.stop(t0 + tm.sum + 1.6);
     for (var cn = 0; cn < 8; cn++) tone(t0 + tm.sum + 1 + cn * .07, 1800 + cn * 80, 2400, .1, .04, "square");
+    var lc = L.cards[L.cards.length - 1], ds = t0 + tm.flip + 2.5;
+    if (lc.sale) { tone(ds, 90, 40, .3, .5); for (var cs = 0; cs < 10; cs++) tone(ds + .1 + cs * .06, 1900 + cs * 90, 2600, .1, .05, "square"); }
+    else if (lc.keep) { tone(ds, 90, 40, .3, .5); noise(ds, .08, 2500, .3, "highpass"); tone(ds + .08, 660, 660, .12, .08, "square"); }
+    else { tone(ds, 392, 392, .2, .06, "triangle"); tone(ds + .22, 494, 494, .3, .06, "triangle"); }
     tone(t0 + tm.sum + 2.9, 523, 523, .25, .07, "triangle"); tone(t0 + tm.sum + 3.1, 784, 784, .45, .07, "triangle");
   }
 
@@ -391,7 +434,7 @@
     var L = S.last, tg = ACC === "psg" ? "#psg #teampsg" : "#om #teamom";
     if (!L) { $("#cap").value = "Épisode 1 : j'ouvre mon premier pack de cartes Ligue 1 🃏 Vous choisissez le prochain en commentaire 👇\n\n#packopening #ligue1 " + tg + " #foot #fyp #pourtoi"; return; }
     var best = L.cards[L.cards.length - 1];
-    $("#cap").value = "Épisode " + L.epi + " : j'ouvre le " + packName(L).toLowerCase() + (L.who ? " choisi par " + L.who.replace(/^@?/, "@") : "") + " 🃏 " + best.name + " en " + RAR[best.rk].label.toLowerCase() + " 🔥 Album : " + L.album[0] + "/" + L.album[1] + ". Quel pack ensuite ? 👇\n\n#packopening #ligue1 " + tg + " #foot #fyp #pourtoi";
+    $("#cap").value = "Épisode " + L.epi + " : j'ouvre le " + packName(L).toLowerCase() + (L.who ? " choisi par " + L.who.replace(/^@?/, "@") : "") + " 🃏 " + best.name + " en " + RAR[best.rk].label.toLowerCase() + " 🔥 " + (best.sale ? "Vendue " + fmt(best.sale) + " 🪙 💸 " : best.keep ? "Je la garde 🔒 " : "Je la garde ou je la vends ? ") + "Album : " + L.album[0] + "/" + L.album[1] + ". Quel pack ensuite ? 👇\n\n#packopening #ligue1 " + tg + " #foot #fyp #pourtoi";
   }
   $("#capCopy").onclick = function () { var c = $("#cap"); c.select(); var ok = false; try { if (navigator.clipboard) { navigator.clipboard.writeText(c.value); ok = true; } } catch (e) {} if (!ok) try { document.execCommand("copy"); } catch (e) {} msg("Légende copiée ✅"); };
 
