@@ -103,7 +103,7 @@
   /* ---------- ouverture : achat, nouvelles cartes, doublons ---------- */
   function openPack() {
     var P = packOf(selPack()), useFree = S.free > 0 || rescue(P);
-    if (!useFree && S.coins < P.price) { msg("Pas assez de pièces : il te faut " + fmt(P.price) + " 🪙."); return; }
+    if (!useFree && S.coins < P.price) { msg("Pas assez de pièces : il te faut " + fmt(P.price) + " 🪙."); toast("🔒", "Pas assez de pièces", "Il te faut " + fmt(P.price) + " 🪙", "bad"); return; }
     if (!PLAYERS.length) { msg("La liste des joueurs est vide."); return; }
     var clubName = $("#club").value, seed = Date.now() % 2147483646, cards = draw(P.id, clubName, seed), coins0 = S.coins, before = albumCount(), seen = {}, earned = 0;
     if (S.free > 0) S.free--; else if (!useFree) S.coins -= P.price;
@@ -115,6 +115,7 @@
     S.epi++;
     S.last = { epi: S.epi, pack: P.id, club: P.club ? clubName : "", free: useFree, price: useFree ? 0 : P.price, who: $("#who").value.trim(), com: $("#com").value.trim(), cards: cards, earned: earned, bonus: BONUS, sales: 0, coins: S.coins, coinsBefore: coins0, album: [albumCount(), PLAYERS.length], albumBefore: before, completed: completed };
     save(); refresh(); showResult(); makeCap(); playNow();
+    toast("🃏", packOf(P.id).label + (P.club ? " " + clubName : ""), useFree ? "Pack offert 🎁" : "Pack acheté · -" + fmt(P.price) + " 🪙"); if (completed.length) setTimeout(function () { toast("🏆", "Page " + completed.join(", ") + " complétée !", "Pack offert débloqué", "good"); }, 900);
   }
   function selPack() { var r = document.querySelector("input[name=pk]:checked"); return r ? r.value : "base"; }
   function fmt(n) { return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
@@ -132,7 +133,7 @@
     if (what === "sell" && !c.sale) { c.sale = c.value; c.keep = false; S.coins += c.value; L.sales = (L.sales || 0) + c.value; S.cards[k] = (S.cards[k] || 1) - 1; if (S.cards[k] <= 0) delete S.cards[k]; }
     else if (what === "sell" && c.sale) { S.coins -= c.sale; L.sales -= c.sale; delete c.sale; S.cards[k] = (S.cards[k] || 0) + 1; }
     else if (what === "keep") { if (c.sale) { S.coins -= c.sale; L.sales -= c.sale; delete c.sale; S.cards[k] = (S.cards[k] || 0) + 1; } c.keep = !c.keep; }
-    L.coins = S.coins; L.album = [albumCount(), PLAYERS.length]; save(); refresh(); showResult(); makeCap(); if (!fromVideo) { pressed = null; t0 = performance.now() - (TL(L).flip + .8) * 1000; }
+    L.coins = S.coins; L.album = [albumCount(), PLAYERS.length]; save(); refresh(); if (what === "sell" && c.sale) toast("💸", "Carte vendue : " + c.name, "+" + fmt(c.sale) + " 🪙", "good"); else if (what === "keep" && c.keep) toast("🔒", "Carte gardée : " + c.name, "Ajoutée à l'album", "good"); showResult(); makeCap(); if (!fromVideo) { pressed = null; t0 = performance.now() - (TL(L).flip + .8) * 1000; }
   }
   var fromVideo = false;
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]; }); }
@@ -141,8 +142,8 @@
   var tab = null;
   function refresh() {
     $("#acc").value = ACC; $("#epi").value = String(S.epi + 1);
-    $("#wCoins").textContent = fmt(S.coins); $("#wFree").textContent = String(S.free);
-    var have = albumCount(); $("#wAlbum").textContent = have + "/" + PLAYERS.length; $("#progI").style.width = (PLAYERS.length ? have / PLAYERS.length * 100 : 0) + "%";
+    roll($("#wCoins"), S.coins); roll($("#wFree"), S.free);
+    var have = albumCount(); roll($("#wAlbum"), have, "/" + PLAYERS.length); $("#progI").style.width = (PLAYERS.length ? have / PLAYERS.length * 100 : 0) + "%";
     var specials = Object.keys(S.cards).filter(function (k) { return !/\|(commune|or|icone)$/.test(k); }).length, icons = ICONS.filter(function (x) { return S.cards[x.name + "|" + x.club + "|icone"]; }).length;
     $("#albumNote").textContent = have + " joueurs sur " + PLAYERS.length + " (" + (PLAYERS.length ? Math.floor(have / PLAYERS.length * 100) : 0) + " %) · " + specials + " cartes spéciales · " + icons + "/" + ICONS.length + " icônes · " + Object.keys(S.done).length + " clubs complétés";
     var cur = selPack(); $("#shop").innerHTML = PACKS.map(function (p) { var ok = S.free > 0 || S.coins >= p.price || rescue(p); return "<label class=\"pk\"><input type=\"radio\" name=\"pk\" value=\"" + p.id + "\"" + (p.id === cur ? " checked" : "") + "><span>" + p.label + "<small>" + p.info + "</small></span><span class=\"price\" style=\"color:" + (ok ? "var(--fg)" : "#e11d48") + "\">" + (S.free > 0 || rescue(p) ? "🎁 offert" : fmt(p.price) + " 🪙") + "</span></label>"; }).join("");
@@ -161,6 +162,12 @@
     $("#album").innerHTML = h;
     document.querySelectorAll("[data-ph]").forEach(function (el) { el.onclick = function () { var k = el.getAttribute("data-ph"); if (photos[k] && !confirm("Changer la photo de " + k.split("|")[0] + " ?\n(Annuler = garder ou retirer)")) { if (confirm("Retirer la photo de " + k.split("|")[0] + " ?")) { idbPut(k, null).then(function () { delete photos[k]; refresh(); }); } return; } pickPhoto(k); }; el.onkeydown = function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); el.onclick(); } }; });
   }
+  // compteur qui défile comme dans un jeu
+  function roll(el, to, suf) { suf = suf || ""; var from = el.__v == null ? to : el.__v; el.__v = to; if (from === to) { el.textContent = fmt(to) + suf; return; } var st = performance.now(), d = Math.min(1200, 300 + Math.abs(to - from) / 4); el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump");
+    (function f() { var k = Math.min(1, (performance.now() - st) / d), e = 1 - Math.pow(1 - k, 3); el.textContent = fmt(from + (to - from) * e) + suf; if (k < 1 && el.__v === to) requestAnimationFrame(f); })(); }
+  function toast(ic, ti, sub, kind) { var box = $("#toasts"); if (!box) return; var d = document.createElement("div"); d.className = "toast" + (kind ? " " + kind : ""); d.innerHTML = "<i>" + ic + "</i><div><small>" + esc(sub || "") + "</small>" + esc(ti) + "</div>"; box.appendChild(d); while (box.children.length > 3) box.removeChild(box.firstChild);
+    uiSound(kind === "bad" ? 0 : 1); setTimeout(function () { d.classList.add("out"); setTimeout(function () { d.remove(); }, 400); }, 2600); }
+  function uiSound(k) { try { var a = audio(), t = a.currentTime; (k ? [880, 1320] : [300, 200]).forEach(function (f, i) { var o = a.createOscillator(), g2 = a.createGain(); o.type = k ? "triangle" : "square"; o.frequency.value = f; g2.gain.setValueAtTime(.0001, t + i * .07); g2.gain.exponentialRampToValueAtTime(k ? .07 : .03, t + i * .07 + .01); g2.gain.exponentialRampToValueAtTime(.0001, t + i * .07 + .16); o.connect(g2); g2.connect(a.destination); o.start(t + i * .07); o.stop(t + i * .07 + .2); }); } catch (e) {} }
   function mini(c, n) { var ph = photos[pkey(c)], fl = flag(info(c).nat); return "<div class=\"mc " + c.rk + "\" role=\"button\" tabindex=\"0\" data-ph=\"" + esc(pkey(c)) + "\" title=\"" + esc(c.name + " · " + RAR[c.rk].label + " · touche pour la photo") + "\">" + (ph ? "<img alt=\"\" src=\"" + ph.src + "\">" : "") + "<span><span class=\"r\">" + c.rating + "</span><span class=\"p\"> " + esc(c.pos) + " " + fl + "</span></span><span></span><span class=\"n\">" + esc(c.name) + "</span>" + (n > 1 ? "<span class=\"x\">×" + n + "</span>" : "") + "</div>"; }
   function fillClubs() { $("#club").innerHTML = clubList().map(function (c) { return "<option>" + esc(c) + "</option>"; }).join(""); $("#club").value = ACC === "psg" ? "PSG" : "OM"; }
 
@@ -234,6 +241,8 @@
     if (R.rank >= 2 && !TEXMODE) sparkles(g, w, h, tt);
   }
   var TEXMODE = false;
+  var TEAR = { on: true, done: false, hold: false, p: 0, drag: false, fx: null, fy: null, lx: 0, out: null, onDone: null };
+
   // carte en 3D : dessinée hors écran puis affichée en bandes verticales avec perspective
   var oc = null, ocg = null, OW = 760, OH = 1040;
   function card3d(g, p, ang, shine, sp, t) {
@@ -420,15 +429,25 @@
     // 1. le pack
     if (T > -.4 && T < 3.3) {
       var drop = back((T + .1) / .7), shake = T > 1.2 ? Math.sin(t * 60) * (T - 1.2) * 14 : 0, glow = clamp((T - 1.2) / 1.7);
-      var F = foilOf(L.pack, L.club), pn = packName(L), sub = L.cards.length + " CARTES", lg2 = function (gg) { badge(gg || g, 0, -90, 135, pc); }, tear = clamp((T - 2.45) / .45), ry3 = (Math.sin(t * .9) * .32 + (1 - clamp(drop)) * 2.4) * (1 - clamp(tear * 3)), rx3 = Math.sin(t * .7) * .1 * (1 - clamp(tear * 3));
+      var F = foilOf(L.pack, L.club), pn = packName(L), sub = L.cards.length + " CARTES", lg2 = function (gg) { badge(gg || g, 0, -90, 135, pc); }, tear = clamp((T - 2.45) / .45), tf = 1 - clamp((T - 2) / .45), ry3 = (Math.sin(t * .9) * .32 + (1 - clamp(drop)) * 2.4) * tf, rx3 = Math.sin(t * .7) * .1 * tf, hold = TEAR.hold && T >= 2.4;
       g.save(); g.translate(W / 2 + shake, -600 + 1560 * drop); g.rotate(shake * .002);
       g.save(); g.shadowColor = "rgba(" + bestR.beam + "," + (.3 + .7 * glow) + ")"; g.shadowBlur = 40 + 120 * glow; g.fillStyle = F[1]; g.scale(.86, .9); packPath(g, 540, 780); g.fill(); g.restore();
-      if (tear <= 0) pack3d(g, t, F, pn, sub, lg2, ry3, rx3);
+      if (hold) { // déchirure au doigt : la bande du haut se décolle là où passe le doigt
+        var tp = clamp(TEAR.p), xa = -270 + 540 * tp, live = performance.now() / 1000;
+        g.save(); g.beginPath(); g.rect(-300, -322, 600, 800); g.clip(); pack3d(g, t, F, pn, sub, lg2, 0, 0); g.restore();
+        g.save(); g.beginPath(); g.rect(xa, -430, 330 - xa, 108); g.clip(); pack3d(g, t, F, pn, sub, lg2, 0, 0); g.restore();
+        if (tp > 0) { g.save(); g.translate(xa, -322); g.rotate((.12 + .55 * tp) + Math.sin(live * 9) * .01); g.translate(-xa, 322); g.beginPath(); g.rect(-300, -430, xa + 300, 108); g.clip(); g.shadowColor = "rgba(0,0,0,.5)"; g.shadowBlur = 20; pack3d(g, t, F, pn, sub, lg2, 0, 0); g.restore();
+          g.save(); g.strokeStyle = "rgba(255,255,255,.95)"; g.lineWidth = 5; g.shadowColor = "rgba(255,255,255,.9)"; g.shadowBlur = 14; g.beginPath(); g.moveTo(-270, -324); for (var zx = -270; zx < xa; zx += 14) g.lineTo(zx + 7, -324 + ((zx / 14) % 2 ? 4 : -4)); g.stroke(); g.restore();
+          g.save(); g.globalCompositeOperation = "lighter"; var sg3 = g.createRadialGradient(xa, -322, 2, xa, -322, 90); sg3.addColorStop(0, "rgba(" + bestR.beam + ",.9)"); sg3.addColorStop(1, "rgba(" + bestR.beam + ",0)"); g.fillStyle = sg3; g.fillRect(xa - 90, -412, 180, 180); g.restore(); }
+        else { g.save(); g.setLineDash([16, 12]); g.lineDashOffset = -live * 40; g.strokeStyle = "rgba(255,255,255,.75)"; g.lineWidth = 4; g.beginPath(); g.moveTo(-270, -324); g.lineTo(270, -324); g.stroke(); g.restore(); }
+      }
+      else if (tear <= 0) pack3d(g, t, F, pn, sub, lg2, ry3, rx3);
       else { g.save(); g.beginPath(); g.rect(-300, -322, 600, 800); g.clip(); pack3d(g, t, F, pn, sub, lg2, ry3, rx3); g.restore(); // le haut se déchire et s'envole
         g.fillStyle = "rgba(255,255,255," + (.9 * tear) + ")"; g.fillRect(-270, -326, 540, 8);
         g.save(); g.translate(260 * tear * tear, -420 * tear * tear); g.rotate(.5 * tear); g.globalAlpha = 1 - tear * .6; g.beginPath(); g.rect(-300, -420, 600, 98); g.clip(); pack3d(g, t, F, pn, sub, lg2, ry3, rx3); g.restore(); }
       g.restore();
-      if (T > 1.3 && T < 2.9) bigText(g, "👆 Appuie pour ouvrir", 1640, 54, .6 + .4 * Math.sin(t * 6), 1);
+      if (T > 1.3 && T < 2.9 && !TEAR.on) bigText(g, "👆 Appuie pour ouvrir", 1640, 54, .6 + .4 * Math.sin(t * 6), 1);
+      if (TEAR.on && T > 1.3 && T < 2.45 + (hold ? 1 : 0) && !(hold && TEAR.p > .05)) { var lv2 = performance.now() / 1000, hx = W / 2 - 230 + ((lv2 * .8) % 1) * 460; bigText(g, "👉 Glisse ton doigt pour déchirer", 1640, 54, .7 + .3 * Math.sin(lv2 * 6), 1); if (hold) { g.save(); g.globalAlpha = .9; g.font = "110px " + FONT; g.textAlign = "center"; g.fillText("👆", hx + 20, 760); g.restore(); } }
     }
     if (T >= 2.9 && T < 3.6) { g.fillStyle = "rgba(255,255,255," + (1 - (T - 2.9) / .7) + ")"; g.fillRect(0, 0, W, H); }
     particles(g, T, 2.95, bestR.beam, 80);
@@ -473,6 +492,7 @@
     }
     particles(g, t, tm.flip + .05, bestR.beam, 70);
     if (t > tm.flip + .2 && t < tm.sum + 1) for (var z = 0; z < 70; z++) { var zx = (z * 151) % W, zy = ((t - tm.flip - .2) * (300 + (z * 37) % 300) + (z * 83) % 600) - 200; if (zy > H) continue; g.save(); g.translate(zx + Math.sin(t * 3 + z) * 30, zy); g.rotate(t * 4 + z); var cc = club(last.club); g.fillStyle = [cc.c1, cc.c2, "#f5d77a"][z % 3]; g.fillRect(-10, -5, 20, 10); g.restore(); }
+    if (TEAR.hold && TEAR.drag && TEAR.fx != null) { g.save(); g.font = "120px " + FONT; g.textAlign = "center"; g.textBaseline = "top"; g.shadowColor = "rgba(0,0,0,.5)"; g.shadowBlur = 20; g.fillText("👆", TEAR.fx + 10, TEAR.fy - 10); g.restore(); }
     // 4. le bilan : nouvelles, doublons, pièces, album
     if (sumK > 0) summary(g, t, L, tm, sumK);
     g.fillStyle = "rgba(0,0,0,.45)"; rr(g, 200, 60, 680, 90, 45); g.fill(); g.fillStyle = "#fff"; g.textAlign = "center"; g.textBaseline = "middle"; g.font = "900 42px " + FONT; g.fillText("🃏 ÉPISODE " + L.epi + " · ALBUM LIGUE 1", W / 2, 106);
@@ -694,7 +714,7 @@
       s1.start(a, Math.random()); s2.start(a, Math.random()); lfo.start(a); s1.stop(b); s2.stop(b); lfo.stop(b); })();
     // aluminium froissé pendant que le pack tremble, puis vraie déchirure
     for (var cr3 = 0; cr3 < 70; cr3++) { var ct = o + .6 + Math.random() * 2.25, kk = (ct - o - .6) / 2.25; grainN(ct, .015 + Math.random() * .04, 2200 + Math.random() * 5500, .03 + .12 * kk * Math.random(), 3); }
-    sweep(o + 2.45, .5, 700, 5200, .45, 1.5); for (var tc = 0; tc < 14; tc++) grainN(o + 2.45 + tc * .032, .03, 3000 + Math.random() * 3000, .16, 4);
+    if (!TEAR.on) sweep(o + 2.45, .5, 700, 5200, .45, 1.5); if (!TEAR.on) for (var tc = 0; tc < 14; tc++) grainN(o + 2.45 + tc * .032, .03, 3000 + Math.random() * 3000, .16, 4);
     // chaque carte qui arrive : souffle
     for (var wq = 0; wq < tm.n; wq++) sweep(o + 3.35 + wq * STEP, .32, 380, 2200, .13, 1);
     // montée de tension puis grosse basse à la révélation
@@ -736,10 +756,21 @@
   function total() { return S && S.last ? TL(S.last).end : 4; }
   var waiting = false, onChoice = null;
   (function loop(now) { if (!busy) { var t = (now - t0) / 1000, D = decT(); if (t > total() + 1.5) { t0 = now; t = 0; pressed = decided(); }
-      if (pending() && t >= D) { t = D; t0 = now - D * 1000; if (!waiting) { waiting = true; msg("👆 Touche VENDRE ou GARDER sur la vidéo"); } }
+      var TH = tearT(); if (tearPending() && t >= TH) { t = TH; t0 = now - TH * 1000; if (!TEAR.hold) { TEAR.hold = true; TEAR.p = 0; TEAR.out = prevGain; cv.style.touchAction = "none"; try { cv.scrollIntoView({ behavior: "smooth", block: "center" }); } catch (e) {} TEAR.onDone = function () { t0 = performance.now() - TH * 1000; if (soundOn && prevGain) { var a = audio(); sounds(a, prevGain, a.currentTime - TH, TH, pending() ? decT() : null); } }; msg("👉 Glisse ton doigt sur le haut du pack pour le déchirer"); } }
+      else if (pending() && t >= D) { t = D; t0 = now - D * 1000; if (!waiting) { waiting = true; msg("👆 Touche VENDRE ou GARDER sur la vidéo"); } }
       drawScene(g, Math.min(t, total())); } requestAnimationFrame(loop); })(performance.now());
   var soundOn = false;
-  function playNow() { if (!S.last) return; var a = audio(); if (prevGain) try { prevGain.disconnect(); } catch (e) {} prevGain = a.createGain(); prevGain.connect(a.destination); t0 = performance.now(); pressed = decided(); waiting = false; soundOn = true; sounds(a, prevGain, a.currentTime, null, pending() ? decT() : null); }
+  function tearT() { return S && S.last ? TL(S.last).intro + 2.45 : 1e9; }
+  function tearPending() { return !!(S && S.last && TEAR.on && !TEAR.done); }
+  function nextHold(from) { var th = tearT(); if (tearPending() && th >= (from || 0)) return th; return pending() ? decT() : null; }
+  function tearSound(k) { var a = ac, out = TEAR.out; if (!a || !out) return; try { var n = Math.max(1, Math.round(k * 6)); for (var i = 0; i < n; i++) { var s2 = a.createBufferSource(), b = a.createBuffer(1, 2048, a.sampleRate), d = b.getChannelData(0); for (var j = 0; j < d.length; j++) d[j] = Math.random() * 2 - 1; s2.buffer = b; var f = a.createBiquadFilter(), g2 = a.createGain(), at = a.currentTime + i * .012; f.type = "bandpass"; f.frequency.value = 1800 + Math.random() * 4500; f.Q.value = 3; g2.gain.setValueAtTime(.25, at); g2.gain.exponentialRampToValueAtTime(.001, at + .04); s2.connect(f); f.connect(g2); g2.connect(out); s2.start(at); s2.stop(at + .05); } } catch (e) {} }
+  function tearDone() { TEAR.done = true; TEAR.hold = false; TEAR.drag = false; cv.style.touchAction = ""; msg(""); if (TEAR.onDone) TEAR.onDone(); }
+  function cvXY(e) { var r = cv.getBoundingClientRect(); return [(e.clientX - r.left) / r.width * W, (e.clientY - r.top) / r.height * H]; }
+  cv.addEventListener("pointerdown", function (e) { if (!TEAR.hold) return; var p = cvXY(e); TEAR.drag = true; TEAR.lx = p[0]; TEAR.fx = p[0]; TEAR.fy = p[1]; try { cv.setPointerCapture(e.pointerId); } catch (er) {} e.preventDefault(); });
+  cv.addEventListener("pointermove", function (e) { if (!TEAR.hold || !TEAR.drag) return; var p = cvXY(e), dx = p[0] - TEAR.lx; TEAR.lx = p[0]; TEAR.fx = p[0]; TEAR.fy = p[1]; if (dx > 0) { TEAR.p += dx / 500; tearSound(Math.min(1, dx / 40)); } e.preventDefault(); if (TEAR.p >= 1) tearDone(); });
+  function tearUp() { if (!TEAR.drag) return; TEAR.drag = false; if (TEAR.hold && TEAR.p > .5) { var p0 = TEAR.p, st = performance.now(); (function fin() { TEAR.p = p0 + (1 - p0) * Math.min(1, (performance.now() - st) / 180); if (TEAR.p >= 1) tearDone(); else requestAnimationFrame(fin); })(); } }
+  cv.addEventListener("pointerup", tearUp); cv.addEventListener("pointercancel", tearUp);
+  function playNow() { if (!S.last) return; var a = audio(); if (prevGain) try { prevGain.disconnect(); } catch (e) {} prevGain = a.createGain(); prevGain.connect(a.destination); t0 = performance.now(); pressed = decided(); waiting = false; soundOn = true; TEAR.done = false; TEAR.hold = false; TEAR.p = 0; sounds(a, prevGain, a.currentTime, null, nextHold()); }
   function choose(which) { // choix fait en touchant la vidéo
     var L = S.last; if (!L || !pending()) return; var D = decT(); pressed = which; fromVideo = true; deal(L.cards.length - 1, which); fromVideo = false; waiting = false; msg(which === "sell" ? "💸 Vendue !" : "🔒 Gardée !");
     if (onChoice) onChoice(); else { t0 = performance.now() - D * 1000; if (soundOn && prevGain) { var a = audio(); sounds(a, prevGain, a.currentTime - D, D, null); } }
@@ -752,7 +783,7 @@
     if (lastURL) URL.revokeObjectURL(lastURL); lastURL = URL.createObjectURL(blob);
     try { lastFile = new File([blob], name, { type: blob.type }); } catch (e) { lastFile = null; }
     var a = document.createElement("a"); a.href = lastURL; a.download = name; document.body.appendChild(a); try { a.click(); } catch (e) {} a.remove();
-    var mo = blob.size / 1048576; $("#gotName").textContent = "✅ " + name + " · " + (mo >= 1 ? mo.toFixed(1) + " Mo" : Math.max(1, Math.round(blob.size / 1024)) + " Ko");
+    toast("🎬", "Vidéo prête !", name, "good"); var mo = blob.size / 1048576; $("#gotName").textContent = "✅ " + name + " · " + (mo >= 1 ? mo.toFixed(1) + " Mo" : Math.max(1, Math.round(blob.size / 1024)) + " Ko");
     $("#gotDl").href = lastURL; $("#gotDl").setAttribute("download", name);
     var can = false; try { can = !!(lastFile && navigator.canShare && navigator.canShare({ files: [lastFile] })); } catch (e) {} $("#gotShare").hidden = !can; $("#got").hidden = false;
   }
@@ -766,10 +797,11 @@
     try { rec = new MediaRecorder(st, type ? { mimeType: type, videoBitsPerSecond: 9e6 } : {}); } catch (e) { msg("Impossible de démarrer l'enregistrement."); return; }
     rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); }; var chunks = ch;
     busy = true; $("#rec").disabled = true; $("#bar").hidden = false; msg("Création de la vidéo (" + Math.round(end) + " s)… garde la page ouverte.");
-    var inter = pending(), D = decT(); pressed = decided(); sounds(a, dest, a.currentTime + .2, null, inter ? D : null); var s0 = performance.now() + 200; rec.start(500);
+    var inter = pending(), D = decT(), TH = tearT(); pressed = decided(); TEAR.done = false; TEAR.hold = false; TEAR.p = 0; sounds(a, dest, a.currentTime + .2, null, nextHold()); var s0 = performance.now() + 200; rec.start(500);
     onChoice = function () { s0 = performance.now() - D * 1000; try { rec.resume(); } catch (e) {} sounds(a, dest, a.currentTime - D, D, null); msg("Création de la vidéo… garde la page ouverte."); };
     (function fr() { var t = Math.max(0, (performance.now() - s0) / 1000);
-      if (pending() && t >= D) { t = D; if (rec.state === "recording") { drawScene(g, D); try { rec.pause(); } catch (e) {} msg("⏸️ Vidéo en pause : touche VENDRE ou GARDER sur la vidéo"); } s0 = performance.now() - D * 1000; }
+      if (tearPending() && t >= TH) { t = TH; s0 = performance.now() - TH * 1000; if (!TEAR.hold) { TEAR.hold = true; TEAR.p = 0; TEAR.out = dest; cv.style.touchAction = "none"; try { cv.scrollIntoView({ behavior: "smooth", block: "center" }); } catch (e) {} TEAR.onDone = function () { s0 = performance.now() - TH * 1000; sounds(a, dest, a.currentTime - TH, TH, inter ? D : null); msg("Création de la vidéo… garde la page ouverte."); }; msg("👉 Glisse ton doigt sur le haut du pack pour le déchirer (c'est filmé !)"); } }
+      else if (pending() && t >= D) { t = D; if (rec.state === "recording") { drawScene(g, D); try { rec.pause(); } catch (e) {} msg("⏸️ Vidéo en pause : touche VENDRE ou GARDER sur la vidéo"); } s0 = performance.now() - D * 1000; }
       drawScene(g, Math.min(t, end)); $("#barI").style.width = Math.round(Math.min(1, t / end) * 100) + "%";
       if (t >= end) { rec.onstop = function () { var ext = /mp4/.test(rec.mimeType || type) ? "mp4" : "webm"; download(new Blob(ch, { type: rec.mimeType || type || "video/webm" }), "pack-episode-" + S.last.epi + "." + ext); msg(ext === "mp4" ? "Vidéo téléchargée ✅" : "Vidéo téléchargée ✅ (format WEBM) : si ta galerie ne la voit pas, ouvre-la dans CapCut et réexporte-la."); busy = false; onChoice = null; $("#rec").disabled = false; $("#bar").hidden = true; t0 = performance.now(); }; try { rec.stop(); } catch (e) { rec.onstop(); } return; }
       requestAnimationFrame(fr); })();
@@ -787,6 +819,8 @@
   /* ---------- événements ---------- */
   $("#open").onclick = openPack;
   try { $("#inter").checked = localStorage.getItem("packs-inter") !== "0"; } catch (e) {}
+  try { TEAR.on = localStorage.getItem("packs-tear") !== "0"; } catch (e) {} $("#tearOn").checked = TEAR.on;
+  $("#tearOn").onchange = function () { TEAR.on = this.checked; try { localStorage.setItem("packs-tear", this.checked ? "1" : "0"); } catch (e) {} if (!TEAR.on && TEAR.hold) tearDone(); };
   $("#inter").onchange = function () { try { localStorage.setItem("packs-inter", this.checked ? "1" : "0"); } catch (e) {} pressed = decided(); };
   $("#acc").onchange = function () { ACC = this.value; try { localStorage.setItem("packs-acc", ACC); } catch (e) {} load(); tab = null; fillClubs(); refresh(); showResult(); makeCap(); t0 = performance.now(); };
   $("#exp").onclick = function () { var b = new Blob([JSON.stringify({ acc: ACC, save: S }, null, 1)], { type: "application/json" }), u = URL.createObjectURL(b), a = document.createElement("a"); a.href = u; a.download = "collection-" + ACC + ".json"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 4000); };
@@ -797,7 +831,11 @@
 
   $("#ppFile").onchange = function () { var f = this.files && this.files[0], k = photoFor; this.value = ""; if (!f || !k) return; var im = new Image(); im.onload = function () { var r = Math.min(1, 640 / im.height), c2 = document.createElement("canvas"); c2.width = Math.round(im.width * r); c2.height = Math.round(im.height * r); c2.getContext("2d").drawImage(im, 0, 0, c2.width, c2.height); var png = /png|webp/.test(f.type), url = c2.toDataURL(png ? "image/png" : "image/jpeg", .85); URL.revokeObjectURL(im.src); idbPut(k, url).then(function () { var i2 = new Image(); i2.onload = function () { photos[k] = i2; refresh(); msg("📷 Photo ajoutée : " + k.split("|")[0]); }; i2.src = url; }, function () { msg("⚠️ Impossible d'enregistrer la photo sur ce téléphone."); }); }; im.src = URL.createObjectURL(f); };
   idbAll();
+  (function () { var tt = $("#title"); if (!tt) return; var seen = false; try { seen = sessionStorage.getItem("packs-title") === "1"; } catch (e) {} if (seen) return; tt.hidden = false;
+    function go() { if (tt.classList.contains("out")) return; try { sessionStorage.setItem("packs-title", "1"); } catch (e) {} try { var a = audio(), t = a.currentTime; [523, 659, 784, 1047].forEach(function (f, i) { var o = a.createOscillator(), g2 = a.createGain(); o.type = "triangle"; o.frequency.value = f; g2.gain.setValueAtTime(.0001, t + i * .06); g2.gain.exponentialRampToValueAtTime(.08, t + i * .06 + .02); g2.gain.exponentialRampToValueAtTime(.0001, t + i * .06 + .5); o.connect(g2); g2.connect(a.destination); o.start(t + i * .06); o.stop(t + i * .06 + .6); }); } catch (e) {}
+      tt.classList.add("out"); setTimeout(function () { tt.hidden = true; }, 650); }
+    tt.addEventListener("click", go); document.addEventListener("keydown", function (e) { if (!tt.hidden && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); go(); } }); })();
   loadDb(); load(); fillClubs(); ["L1"].concat(Object.keys(CLUBS)).forEach(loadLogo); logosForm(); refresh(); showResult(); makeCap();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { t0 = performance.now(); });
-  window.__packs = { setPhoto: function (k, url) { var i3 = new Image(); i3.onload = function () { photos[k] = i3; }; i3.src = url; }, drawScene: drawScene, tl: function () { return S.last ? TL(S.last) : null; }, state: function () { return S; }, open: openPack };
+  window.__packs = { tear: function () { return TEAR; }, setPhoto: function (k, url) { var i3 = new Image(); i3.onload = function () { photos[k] = i3; }; i3.src = url; }, drawScene: drawScene, tl: function () { return S.last ? TL(S.last) : null; }, state: function () { return S; }, open: openPack };
 })();
