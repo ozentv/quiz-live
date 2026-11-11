@@ -410,6 +410,13 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 .stat { position: absolute; left: 80px; width: 920px; top: 1700px; text-align: center; font-size: 40px; font-weight: 800; opacity: .92; }
 @media (prefers-reduced-motion: reduce) { .scene, .rev .fact { animation: none; } }
 .fact.nf, .rev .fact.nf, #stage.neon .rev .fact.nf { display: none !important; }
+/* mode léger : pour le partage d'écran d'un téléphone peu puissant */
+#stageWrap.lite .beam { display: none; }
+#stageWrap.lite .leds i { animation: none; opacity: .5; }
+#stageWrap.lite, #stageWrap.lite.neon { --glow: none; }
+#stageWrap.lite *, #stageWrap.lite *::before, #stageWrap.lite *::after { box-shadow: none !important; }
+#stageWrap.lite #pulse.on { animation: none; background: radial-gradient(ellipse at center, rgba(255, 40, 40, 0) 55%, rgba(255, 40, 40, .35)); }
+#stageWrap.lite .rl-dots::after { animation: none; content: "…"; }
 </style>
 
 <main class="app">
@@ -438,6 +445,8 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     <p class="note" id="diffNote" style="margin:0"></p>
     <div class="row" id="rowSafe"><span class="lab">🛡️ Mode TikTok sûr</span><div class="seg" id="segSafe" role="group" aria-label="Mode TikTok sûr"></div></div>
     <p class="note" id="safeNote" style="margin:0"></p>
+    <div class="row" id="rowLite"><span class="lab">🪶 Mode léger</span><div class="seg" id="segLite" role="group" aria-label="Mode léger"></div></div>
+    <p class="note" id="liteNote" style="margin:0"></p>
     <div class="row" id="rowBonus" hidden><span class="lab">Question bonus ×2</span><div class="seg" id="segBonus" role="group" aria-label="Fréquence des questions bonus"></div></div>
     <div class="row" id="rowRC" hidden><span class="lab">Récap après chaque question</span><div class="seg" id="segRC" role="group" aria-label="Récap après chaque question"></div></div>
     <div class="row" id="rowLB" hidden><span class="lab">Classement automatique</span><div class="seg" id="segLB" role="group" aria-label="Fréquence du classement"></div></div>
@@ -2444,6 +2453,9 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   function safeNote() { $("#safeNote").textContent = S.safe === false ? "Toutes les questions sont utilisées, même celles avec des mots sensibles (guerre, mort, alcool…). À éviter en live." : "Activé : " + SAFE_N + " questions avec des mots sensibles pour TikTok (guerre, mort, alcool, drogue…) sont retirées, et les anecdotes sensibles ne sont plus lues."; }
   seg($("#segSafe"), [["Oui", true], ["Non", false]], function () { return S.safe !== false; }, function (v) { S.safe = v; applySafe(); try { localStorage.removeItem("sq-used"); } catch (e) {} safeNote(); });
   safeNote();
+  function liteNote() { $("#liteNote").textContent = S.lite ? "Activé : moins d'effets lumineux et animations ralenties, pour que le partage d'écran du téléphone ne coupe pas pendant le live." : "Active-le si ton live coupe pendant le partage d'écran du téléphone : le quiz demande beaucoup moins d'effort au téléphone."; }
+  seg($("#segLite"), [["Oui", true], ["Non", false]], function () { return !!S.lite; }, function (v) { S.lite = v; $("#stageWrap").classList.toggle("lite", v); liteNote(); });
+  liteNote(); $("#stageWrap").classList.toggle("lite", !!S.lite);
   seg($("#segD"), [["Facile", "facile"], ["Normal", "normal"], ["Expert", "expert"]], function () { return S.diff; }, function (v) { S.diff = v; $("#diffNote").textContent = DIFF_NOTE[v]; });
   $("#diffNote").textContent = DIFF_NOTE[S.diff] || "";
   seg($("#segRC"), [["Non", 0], ["5 s", 5], ["7 s", 7], ["10 s", 10]], function () { return S.recapSec; }, function (v) { S.recapSec = v; });
@@ -2800,6 +2812,12 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   }
   window.addEventListener("resize", fitStage);
 
+  function rafL(fn) { return S.lite ? -setTimeout(function () { fn(performance.now()); }, 66) : requestAnimationFrame(fn); }
+  function cafL(id) { if (id < 0) clearTimeout(-id); else if (id) cancelAnimationFrame(id); }
+  /* écran toujours allumé pendant le quiz */
+  var wakeLock = null;
+  function keepAwake() { try { if (navigator.wakeLock && !wakeLock) navigator.wakeLock.request("screen").then(function (l) { wakeLock = l; l.addEventListener("release", function () { wakeLock = null; }); }).catch(function () {}); } catch (e) {} }
+  document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible" && !$("#stageWrap").hidden) keepAwake(); });
   /* ---------- incrustation : parkour en blocs, vue à la première personne (dessiné en direct) ---------- */
   var gameUrl = null, parkour = (function () {
     var cv = $("#gameCv"), g = cv.getContext("2d"), W = cv.width, H = cv.height, raf = 0, last = 0;
@@ -2888,10 +2906,10 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       camPos();
     }
     camPos(); yaw = Math.atan2(path[2].x - path[0].x, path[2].z - path[0].z);
-    function loop(ts) { var dt = Math.min(0.05, (ts - (last || ts)) / 1000); last = ts; step(dt); draw(); raf = requestAnimationFrame(loop); }
+    function loop(ts) { var dt = Math.min(0.05, (ts - (last || ts)) / 1000); last = ts; step(dt); draw(); raf = rafL(loop); }
     return {
-      start: function () { if (!raf) { last = 0; raf = requestAnimationFrame(loop); } },
-      stop: function () { if (raf) cancelAnimationFrame(raf); raf = 0; },
+      start: function () { if (!raf) { last = 0; raf = rafL(loop); } },
+      stop: function () { cafL(raf); raf = 0; },
       frame: function () { step(0); draw(); }
     };
   })();
@@ -2983,7 +3001,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       var mg = g.createRadialGradient(-5, -22, 2, 0, -16, 20); mg.addColorStop(0, "#d7dae1"); mg.addColorStop(1, "#6b707c"); g.fillStyle = mg; g.beginPath(); g.arc(0, -18, 18, 0, Math.PI * 2); g.fill(); g.restore();
       g.fillStyle = skin; g.beginPath(); g.ellipse(tx + 20, ty + 30, 24, 20, -.4, 0, Math.PI * 2); g.fill();
       g.fillStyle = sh; g.beginPath(); g.ellipse(tx + 6, ty + 24, 8, 12, -.4, 0, Math.PI * 2); g.fill();
-      raf = requestAnimationFrame(host);
+      raf = rafL(host);
     }
     function draw(now) {
       var t = (now - t0) / 1000, W = 340, H = 500, col = acc(), md = now < moodEnd ? moodName : "";
@@ -3034,18 +3052,18 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       var sw = Math.sin(t * 2.6) * .25; g.strokeStyle = mix(col, .55); g.lineWidth = 7; g.beginPath(); g.moveTo(cx, cy - R); g.quadraticCurveTo(cx + 10, cy - R - 34, cx + Math.sin(sw) * 40, cy - R - 62); g.stroke();
       g.fillStyle = "#ffd60a"; g.beginPath(); g.arc(cx + Math.sin(sw) * 40, cy - R - 82, 26, 0, Math.PI * 2); g.fill();
       g.fillStyle = "#14151a"; g.font = "900 34px Outfit, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("?", cx + Math.sin(sw) * 40, cy - R - 80);
-      raf = requestAnimationFrame(draw);
+      raf = rafL(draw);
     }
     return {
       show: function (on) {
         var el = $("#mascot"); on = on && S.mascOn !== false && S.mode === "live";
         el.hidden = !on; stage.classList.toggle("masc-on", on);
-        cancelAnimationFrame(raf); raf = 0;
+        cafL(raf); raf = 0;
         var st = S.mascStyle || "host", img = $("#mascImg"), vid = $("#mascVid"), media = st === "media" && (mascMedia.img || mascMedia.vid);
         $("#mascCv").hidden = !!media; img.hidden = !(media && mascMedia.img); vid.hidden = !(media && mascMedia.vid);
         if (!on || !media) vid.pause();
         if (on && media) { if (mascMedia.img) img.src = mascMedia.img; if (mascMedia.vid) { if (vid.src !== mascMedia.vid) vid.src = mascMedia.vid; vid.play().catch(function () {}); } }
-        else if (on) { cv = $("#mascCv"); g = cv.getContext("2d"); raf = requestAnimationFrame(st === "blob" ? draw : host); }
+        else if (on) { cv = $("#mascCv"); g = cv.getContext("2d"); raf = rafL(st === "blob" ? draw : host); }
       },
       talk: function (on) { talking = !!on; },
       mood: function (m, ms) { moodName = m; moodEnd = performance.now() + (ms || 1800); }
@@ -4344,7 +4362,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     };
   })();
 
-  $("#go").onclick = function () { unlockAudio(); music.stop(); musicTrying = false; music.start(); if (S.mode === "live") live(); else play(); setTimeout(pipLayout, 0); };
+  $("#go").onclick = function () { keepAwake(); unlockAudio(); music.stop(); musicTrying = false; music.start(); if (S.mode === "live") live(); else play(); setTimeout(pipLayout, 0); };
   $("#again").onclick = function () { music.start(); play(); };
   $("#back").onclick = stopAll;
   $("#goRec").onclick = recordVideo;
