@@ -417,6 +417,8 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 #stageWrap.lite *, #stageWrap.lite *::before, #stageWrap.lite *::after { box-shadow: none !important; }
 #stageWrap.lite #pulse.on { animation: none; background: radial-gradient(ellipse at center, rgba(255, 40, 40, 0) 55%, rgba(255, 40, 40, .35)); }
 #stageWrap.lite .rl-dots::after { animation: none; content: "…"; }
+#stage.demo::after { content: "🧪 MODE TEST : faux commentaires, ne pas diffuser en live"; position: absolute; left: 0; right: 0; top: 46%; z-index: 50; padding: 22px 30px; background: rgba(220, 20, 40, .92); color: #fff; font-size: 40px; font-weight: 900; text-align: center; pointer-events: none; }
+.nins .live-ping { color: #fff; } .nins .live-ping b { color: var(--sacc); }
 </style>
 
 <main class="app">
@@ -459,6 +461,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
           <div class="chat-test"><button class="btn ghost small" id="chatTest" type="button">Tester la connexion</button><span id="chatState" class="chat-st" role="status"></span></div>
           <div class="chat-last" id="chatLast" aria-live="polite"></div>
           <div class="chat-test"><span class="lab">Décalage du live TikTok</span><div class="seg" id="segLag" role="group" aria-label="Décalage du live"></div></div>
+          <div class="chat-test"><span class="lab">⏸️ Pause si personne ne joue</span><div class="seg" id="segWait" role="group" aria-label="Pause si personne ne joue"></div></div>
           <div class="chat-test"><span class="lab">Le chat vote pour le thème</span><div class="seg" id="segVote" role="group" aria-label="Vote du chat"></div></div>
           <div class="chat-test"><span class="lab">⚡ Votes surprise bonus ou malus</span><div class="seg" id="segSurp" role="group" aria-label="Fréquence des votes surprise"></div></div>
           <div class="chat-test"><span class="lab">❤️ Likes pour débloquer une question ×3</span><div class="seg" id="segLike" role="group" aria-label="Objectif de likes"></div></div>
@@ -2451,6 +2454,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   }
   var DIFF_NOTE = { facile: "Facile : seulement 2 choix de réponse.", normal: "Normal : 4 choix de réponse.", expert: "Expert : les choix n'apparaissent qu'à la moitié du temps." };
   function safeNote() { $("#safeNote").textContent = S.safe === false ? "Toutes les questions sont utilisées, même celles avec des mots sensibles (guerre, mort, alcool…). À éviter en live." : "Activé : " + SAFE_N + " questions avec des mots sensibles pour TikTok (guerre, mort, alcool, drogue…) sont retirées, et les anecdotes sensibles ne sont plus lues."; }
+  seg($("#segWait"), [["Oui", true], ["Non", false]], function () { return S.waitChat !== false; }, function (v) { S.waitChat = v; });
   seg($("#segSafe"), [["Oui", true], ["Non", false]], function () { return S.safe !== false; }, function (v) { S.safe = v; applySafe(); try { localStorage.removeItem("sq-used"); } catch (e) {} safeNote(); });
   safeNote();
   function liteNote() { $("#liteNote").textContent = S.lite ? "Activé : moins d'effets lumineux et animations ralenties, pour que le partage d'écran du téléphone ne coupe pas pendant le live." : "Active-le si ton live coupe pendant le partage d'écran du téléphone : le quiz demande beaucoup moins d'effort au téléphone."; }
@@ -3165,7 +3169,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     var right = bonus ? "<b>×" + bonus + "</b><small>BONUS</small>" : lv && S.chatOn ? "<b id=\"nAns\">0</b><small>RÉPONSES</small>" : "<b>×1</b><small>POINTS</small>";
     return "<div class=\"nb l\"><b>" + (qi + 1) + (n ? "/" + n : "") + "</b><small>QUESTION</small></div><div class=\"nb r\">" + right + "</div>" +
       "<div class=\"nq\"><div class=\"nqs\">" + esc(T.title) + " · Question " + (qi + 1) + (bonus ? " · Bonus ×" + bonus : "") + "</div></div>" +
-      "<div class=\"nins\"><span>" + (lv ? "💬 Réponds uniquement par <b>" + abcd + "</b>" : "⏱️ Trouve la bonne réponse : <b>" + abcd + "</b>") + "</span></div>" +
+      "<div class=\"nins\"><span id=\"nins\">" + (lv ? "💬 Réponds uniquement par <b>" + abcd + "</b> · 🔴 <span class=\"clk\">" + clockTxt() + "</span>" : "⏱️ Trouve la bonne réponse : <b>" + abcd + "</b>") + "</span></div>" +
       (lv && S.chatOn && S.giftsOn ? "<div class=\"nleg\" id=\"nleg\">" + legHTML() + "</div>" : "") +
       (lv ? "<div class=\"np\" id=\"np\">" + panelHTML() + "</div><div class=\"seat\" id=\"seat\">" + seatHTML() + "</div>" : "<div class=\"nsub\">💬 Dis ta réponse en commentaire · 🔔 Abonne-toi</div>");
   }
@@ -3454,7 +3458,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         if (scores[pk] && scores[pk].pic !== m.pic) { scores[pk].pic = m.pic; }
       }
       if (m.type === "chat") {
-        chat.count++;
+        chat.count++; chat.lastAt = Date.now(); if (/^\s*[a-d1-4]\s*$/i.test(String(m.text || ""))) livePing(m);
         chat.last.unshift(m); chat.last = chat.last.slice(0, 3);
         if (chat.state === "connected") $("#bChat").textContent = "Chat ✓ " + chat.count;
         $("#chatLast").innerHTML = "Commentaires reçus : <b>" + chat.count + "</b><br>" + chat.last.map(function (x) { return "« " + esc(String(x.text).slice(0, 40)) + " » (" + esc(x.name || x.id) + ")"; }).join("<br>");
@@ -3512,6 +3516,15 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     if (m) { var i = +m[1] - 1; return i < keys.length ? i : -1; }
     for (var j = 0; j < keys.length; j++) if (plain(BANK[keys[j]].title) === t) return j;
     return -1;
+  }
+  function clockTxt() { var d = new Date(); return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2); }
+  setInterval(function () { Array.prototype.forEach.call(document.querySelectorAll("#stage .clk"), function (e) { e.textContent = clockTxt(); }); }, 5000);
+  var pingT = 0, pingBase = "";
+  function livePing(m) { // montre en direct qui vient de répondre (sans dévoiler sa réponse)
+    var el = document.getElementById("nins"); if (!el || !round || !round.open) return;
+    if (!el.querySelector(".live-ping")) pingBase = el.innerHTML;
+    el.innerHTML = "<span class=\"live-ping\">💬 <b>" + esc(String(m.name || m.id || "").slice(0, 18)) + "</b> a répondu ✓ · 🔴 <span class=\"clk\">" + clockTxt() + "</span></span>";
+    clearTimeout(pingT); pingT = setTimeout(function () { var e2 = document.getElementById("nins"); if (e2 && e2.querySelector(".live-ping")) e2.innerHTML = pingBase; }, 2200);
   }
   function onChat(m) {
     if (vote && vote.open) {
@@ -4031,8 +4044,15 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         shuffle(a); if (last && a.length > 1 && a[0][0] === last[0] && a[0][1] === last[1]) a.push(a.shift());
         queue = a;
       }
+      var quiet = 0; stage.classList.toggle("demo", S.chatOn && cleanUser(S.ttUser).toLowerCase() === "demo");
       while (true) {
         if (!queue.length) refill();
+        if (S.chatOn && S.waitChat !== false && quiet >= 2) { // personne ne joue : le quiz attend le chat au lieu de tourner dans le vide
+          var since = Date.now(), spoke = 0, skip = false;
+          var ws2 = setScene("<div class=\"intro\"><div class=\"big\">⏸️</div><div class=\"ttl\">EN ATTENTE</div><div class=\"sub\">Écris n'importe quoi dans le chat pour lancer la prochaine question !</div><div class=\"bigpill\">🔴 <span class=\"clk\">" + clockTxt() + "</span></div></div>"); ws2.style.pointerEvents = "auto"; ws2.onclick = function () { skip = true; };
+          while (!(chat.lastAt > since) && !skip) { if (Date.now() - spoke > 45000) { spoke = Date.now(); say("Le quiz vous attend ! Écrivez n'importe quoi dans le chat pour lancer la prochaine question."); } await ok(sleep(400)); }
+          quiet = 0; await ok(say("C'est reparti !"));
+        }
         if (S.chatOn && S.giftsOn && num > 0 && num % 10 === 5) {
           await ok(Promise.all([say(GIFT_VOICE), showBoard(15000, giftsHTML())]));
           await ok(sleep(300));
@@ -4090,7 +4110,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         var tEnd = Date.now();
         drumroll(800); await ok(sleep(900));
         scene.classList.add("rev"); showDist(); flash();
-        var cnt = round ? round.answers.length : 0, okN = round ? round.answers.filter(function (x) { return x.a === q.a; }).length : 0;
+        var cnt = round ? round.answers.length : 0; quiet = cnt ? 0 : quiet + 1; var okN = round ? round.answers.filter(function (x) { return x.a === q.a; }).length : 0;
         if (S.tvOn && cnt >= 3 && okN * 2 < cnt) buzzer(); else ding();
         await ok(sleep(450));
         await ok(Promise.all([say("ABCD"[q.a] + ", " + speakable(q.choices[q.a]) + ". " + speakable(q.f)), sleep(2500)]));
