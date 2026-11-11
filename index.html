@@ -4262,9 +4262,14 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     sel.value = gen.theme; sel.onchange = function () { gen.theme = this.value; };
     var box = $("#gpN"); box.innerHTML = ""; [3, 5, 8, 10].forEach(function (n) { var b = document.createElement("button"); b.type = "button"; b.textContent = n; b.setAttribute("aria-pressed", String(gen.n === n)); b.onclick = function () { gen.n = n; Array.prototype.forEach.call(box.children, function (c) { c.setAttribute("aria-pressed", String(+c.textContent === n)); }); }; box.appendChild(b); });
     genVoiceUI();
+    if (gen.crashed) { var eb = $("#gpErr"); eb.textContent = "⚠️ La dernière vidéo a fait planter la page. J'ai activé un mode plus léger (niveau " + genLevel() + "/2) : réessaie avec 3 questions."; eb.hidden = false; gen.crashed = false; }
     if (genVoiceOk()) genVoiceCheck().catch(function () {});
     wrap.hidden = true; $("#genPage").hidden = false; $("#genPage").scrollTop = 0;
   }
+  // Si la page a planté pendant une fabrication, la marque est restée : on passe à un format plus léger.
+  function genMark(l) { try { if (l == null) localStorage.removeItem("sq-genrun"); else localStorage.setItem("sq-genrun", String(l)); } catch (e) {} }
+  function genLevel() { var l = 0; try { l = +localStorage.getItem("sq-genlvl") || 0; } catch (e) {} return Math.min(2, l); }
+  (function () { try { var r = localStorage.getItem("sq-genrun"); if (r != null) { localStorage.setItem("sq-genlvl", String(Math.min(2, (+r || 0) + 1))); localStorage.removeItem("sq-genrun"); gen.crashed = true; } } catch (e) {} })();
   function genRestore() { if (!gen.saved) return; Object.assign(S, gen.saved); gen.saved = null; wrap.classList.toggle("lite", !!S.lite); try { pipLayout(); } catch (e) {} save(); }
   function genRun(how) {
     $("#gpErr").hidden = true; genRestore();
@@ -4292,19 +4297,19 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     if (!gen.on && S.voiceOn && S.voiceEng === "phone" && !confirm("La voix du téléphone ne peut pas être enregistrée dans la vidéo. Choisis « 🎙️ Voix pro gratuite » dans la partie Voix off pour l'avoir.\n\nContinuer sans voix ?")) return;
     keepAwake(); unlockAudio(); if (!ac) { genFail("Le son ne démarre pas sur cet appareil."); return; }
     var dest = ac.createMediaStreamDestination(); recBus(ac).connect(dest);
-    var small = gen.on, cv = document.createElement("canvas"); cv.width = small ? 720 : 1080; cv.height = small ? 1280 : 1920;
+    var small = gen.on, lvl = small ? genLevel() : 0, W = lvl >= 1 ? 540 : small ? 720 : 1080, cv = document.createElement("canvas"); cv.width = W; cv.height = Math.round(W * 16 / 9);
     cv.style.cssText = "position:fixed;left:0;top:0;width:2px;height:2px;opacity:.01;pointer-events:none;z-index:-1";
     document.body.appendChild(cv);
-    var cx = cv.getContext("2d", { alpha: false }), st = cv.captureStream(small ? 24 : 30); if (small) cx.__k = 720 / 1080;
+    var cx = cv.getContext("2d", { alpha: false }), st = cv.captureStream(lvl >= 2 ? 15 : lvl ? 20 : small ? 24 : 30); if (W !== 1080) cx.__k = W / 1080;
     dest.stream.getAudioTracks().forEach(function (t) { st.addTrack(t); });
-    var type = ["video/mp4;codecs=avc1.42E01E,mp4a.40.2", "video/mp4;codecs=avc1,mp4a.40.2", "video/mp4", "video/webm;codecs=vp9,opus", "video/webm"].filter(function (x) { return MediaRecorder.isTypeSupported(x); })[0] || "";
+    var type = (lvl ? ["video/webm;codecs=vp8,opus", "video/webm"] : small ? ["video/mp4;codecs=avc1.42E01E,mp4a.40.2", "video/mp4;codecs=avc1,mp4a.40.2", "video/webm;codecs=vp8,opus", "video/webm"] : ["video/mp4;codecs=avc1.42E01E,mp4a.40.2", "video/mp4;codecs=avc1,mp4a.40.2", "video/mp4", "video/webm;codecs=vp9,opus", "video/webm"]).filter(function (x) { return MediaRecorder.isTypeSupported(x); })[0] || "";
     var rec, ch = [], stopped = false, endAt = 0;
-    try { rec = new MediaRecorder(st, type ? { mimeType: type, videoBitsPerSecond: small ? 3e6 : 9e6 } : {}); } catch (e) { cv.remove(); genFail("Impossible de démarrer l'enregistrement (" + (e && e.message || e) + ")."); return; }
+    try { rec = new MediaRecorder(st, type ? { mimeType: type, videoBitsPerSecond: lvl ? 2e6 : small ? 3e6 : 9e6 } : {}); } catch (e) { cv.remove(); genFail("Impossible de démarrer l'enregistrement (" + (e && e.message || e) + ")."); return; }
     rec.ondataavailable = function (e) { if (e.data && e.data.size) ch.push(e.data); };
     function finish(keep) {
       if (stopped) return; stopped = true; vrec.on = false; $("#recDot").hidden = true;
       rec.onstop = function () {
-        genRestore(); cv.remove(); try { recBus(ac).disconnect(dest); } catch (e) {}
+        genMark(null); genRestore(); cv.remove(); try { recBus(ac).disconnect(dest); } catch (e) {}
         if (!keep || !ch.length) return;
         var mt = rec.mimeType || type || "video/webm", ext = /mp4/.test(mt) ? "mp4" : "webm";
         var name = "quiz-" + (vrec.title || "video").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "." + ext;
@@ -4326,6 +4331,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     $("#vidDl").hidden = true; $("#genMore").hidden = true; $("#endT").textContent = "Fabrication de la vidéo…"; $("#genPage").hidden = true;
     vrec.on = true; vrec.title = ""; $("#recDot").hidden = false;
     music.stop(); musicTrying = false; music.start();
+    if (small) genMark(lvl);
     play(); paintStage(cx); rec.start(1000); requestAnimationFrame(loop);
   }
   function recBus(c) { if (!c.__bus) c.__bus = c.createGain(); return c.__bus; }
