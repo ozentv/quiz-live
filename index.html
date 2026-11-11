@@ -55,6 +55,7 @@ ol.steps li::marker { font-weight: 800; color: var(--accent); }
 .note { color: var(--muted); font-size: .92rem; margin: 12px 0 0; }
 .dock { position: sticky; bottom: 0; background: var(--bg); padding-block: 12px 14px; border-top: 1px solid var(--line); margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); padding-inline: max(16px, env(safe-area-inset-left, 0px)); }
 .dock .btn.rec { margin-top: 10px; background: #e63946; color: #fff; }
+.dock .btn.gen { margin-top: 10px; background: #ffd23f; color: #1a1300; }
 #vidDl { display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.15rem; }
 #vidDl[hidden], .dock .btn[hidden] { display: none; }
 #recDot { position: absolute; top: max(12px, env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: 6; background: #e63946; color: #fff; font: 800 15px var(--body); padding: 8px 14px; border-radius: 999px; pointer-events: none; }
@@ -555,7 +556,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     <div class="row"><span class="lab" id="scN"></span><button class="btn ghost small" id="resetScores" type="button">Effacer les points</button></div>
   </section>
 </main>
-<div class="dock"><button class="btn" id="go" type="button">Lancer le quiz</button><button class="btn rec" id="goRec" type="button">🎬 Télécharger la vidéo</button></div>
+<div class="dock"><button class="btn" id="go" type="button">Lancer le quiz</button><button class="btn rec" id="goRec" type="button">🎬 Télécharger la vidéo</button><button class="btn gen" id="goGen" type="button">🎲 Générer un quiz au hasard</button></div>
 
 <div id="stageWrap" hidden>
   <div id="stage"><div id="studio"><div class="beam b1"></div><div class="beam b2"></div><div class="beam b3"></div><div class="floor"></div><div class="leds top"></div><div class="leds bot"></div><div id="flash"></div></div><div id="deco"></div><div id="scene"></div><div id="giftToast"></div><div id="pulse"></div><div class="mascot" id="mascot" hidden><canvas id="mascCv" width="340" height="500"></canvas><img id="mascImg" alt="" hidden><video id="mascVid" muted loop playsinline hidden></video><div class="masc-l">ANIMATEUR</div></div><div class="pip pip-game" id="pipGame"><canvas id="gameCv" width="694" height="390"></canvas><video id="gameVid" muted loop playsinline hidden></video></div></div>
@@ -2453,7 +2454,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     var lv = S.mode === "live";
     $("#rowN").hidden = lv; $("#rowC").hidden = lv; $("#rowLC").hidden = !lv; $("#rowLB").hidden = !lv; $("#rowChat").hidden = !lv; $("#rowBonus").hidden = !lv; $("#rowRC").hidden = !lv;
     $("#secRec").hidden = lv; $("#secLive").hidden = !lv;
-    $("#go").textContent = lv ? "Lancer le live" : "Lancer le quiz"; $("#goRec").hidden = lv;
+    $("#go").textContent = lv ? "Lancer le live" : "Lancer le quiz"; $("#goRec").hidden = lv; $("#goGen").hidden = lv;
   }
   var DIFF_NOTE = { facile: "Facile : seulement 2 choix de réponse.", normal: "Normal : 4 choix de réponse.", expert: "Expert : les choix n'apparaissent qu'à la moitié du temps." };
   function safeNote() { $("#safeNote").textContent = S.safe === false ? "Toutes les questions sont utilisées, même celles avec des mots sensibles (guerre, mort, alcool…). À éviter en live." : "Activé : " + SAFE_N + " questions avec des mots sensibles pour TikTok (guerre, mort, alcool, drogue…) sont retirées, et les anecdotes sensibles ne sont plus lues."; }
@@ -4389,6 +4390,8 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   $("#again").onclick = function () { music.start(); play(); };
   $("#back").onclick = stopAll;
   $("#goRec").onclick = recordVideo;
+  // Un seul bouton : thème tiré au hasard, puis la vidéo est fabriquée et téléchargée (tes thèmes choisis ne changent pas).
+  $("#goGen").onclick = function () { var keep = S.themes; S.themes = []; try { recordVideo(); } finally { S.themes = keep; } };
   $("#cancel").onclick = stopAll;
   $("#skip").onclick = function () { if (skipFn) skipFn(); };
   $("#copy").onclick = function () {
