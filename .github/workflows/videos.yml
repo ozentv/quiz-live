@@ -36,9 +36,14 @@ jobs:
         with:
           node-version: 20
       - name: Outils
+        timeout-minutes: 25
         run: |
-          sudo apt-get update -q
-          sudo apt-get install -y -q ffmpeg fonts-noto-color-emoji
+          # Les miroirs Ubuntu de GitHub tombent parfois : on réessaie au lieu de rester bloqué.
+          for i in 1 2 3; do
+            sudo apt-get update -q -o Acquire::Retries=3 -o Acquire::http::Timeout=20 && sudo apt-get install -y -q -o Acquire::Retries=3 -o Acquire::http::Timeout=20 ffmpeg fonts-noto-color-emoji && break
+            echo "Nouvel essai dans 30 s"; sleep 30
+          done
+          command -v ffmpeg
           (cd relay && npm ci --omit=dev)
           (cd tools/video && npm install && npx playwright install --with-deps chromium)
       - name: Fabrication des vidéos
