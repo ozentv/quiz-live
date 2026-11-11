@@ -409,6 +409,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 #stage.neon .likes { left: 390px; right: 50px; top: 1678px; }
 .stat { position: absolute; left: 80px; width: 920px; top: 1700px; text-align: center; font-size: 40px; font-weight: 800; opacity: .92; }
 @media (prefers-reduced-motion: reduce) { .scene, .rev .fact { animation: none; } }
+.fact.nf, .rev .fact.nf, #stage.neon .rev .fact.nf { display: none !important; }
 </style>
 
 <main class="app">
@@ -435,6 +436,8 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     <div class="row" id="rowLC" hidden><span class="lab">Temps pour répondre</span><div class="seg" id="segLC" role="group" aria-label="Temps pour répondre"></div></div>
     <div class="row" id="rowD"><span class="lab">Difficulté</span><div class="seg" id="segD" role="group" aria-label="Difficulté"></div></div>
     <p class="note" id="diffNote" style="margin:0"></p>
+    <div class="row" id="rowSafe"><span class="lab">🛡️ Mode TikTok sûr</span><div class="seg" id="segSafe" role="group" aria-label="Mode TikTok sûr"></div></div>
+    <p class="note" id="safeNote" style="margin:0"></p>
     <div class="row" id="rowBonus" hidden><span class="lab">Question bonus ×2</span><div class="seg" id="segBonus" role="group" aria-label="Fréquence des questions bonus"></div></div>
     <div class="row" id="rowRC" hidden><span class="lab">Récap après chaque question</span><div class="seg" id="segRC" role="group" aria-label="Récap après chaque question"></div></div>
     <div class="row" id="rowLB" hidden><span class="lab">Classement automatique</span><div class="seg" id="segLB" role="group" aria-label="Fréquence du classement"></div></div>
@@ -2385,6 +2388,14 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   try { Object.assign(S, JSON.parse(localStorage.getItem("sq-set") || "{}")); } catch (e) {}
   if (!Array.isArray(S.themes)) S.themes = S.theme && S.theme !== "random" && BANK[S.theme] ? [S.theme] : [];
   S.themes = S.themes.filter(function (k) { return BANK[k]; });
+  /* Mode TikTok sûr : retire les questions qui contiennent des mots que TikTok surveille (guerre, mort, alcool, drogue…).
+     Si seule l'anecdote contient un mot sensible, la question reste et l'anecdote n'est ni affichée ni lue. */
+  var RISKY = /\b(guerres?|bataille|bombes?|armes?|fusils?|pistolets?|canons?|soldats?|terroris\w*|attentats?|nucl[ée]aire|atomique|tu[ée]e?s?|tuer|morts?|meurtr\w*|assassin\w*|guillotin\w*|ex[ée]cut\w*|massacres?|g[ée]nocide|suicid\w*|br[ûu]l[ée]e|viols?|viol[ée]e?s?|violen\w*|torture\w*|prisons?|braquage|mafia|gangs?|voleurs?|crimes?|esclav\w*|nazi\w*|hitler|vins?|vodka|whisky|rhum|champagne|alcool\w*|bi[èe]res?|tequila|cocktails?|ivre|drogues?|cannabis|coca[ïi]ne|cigarettes?|tabac|clopes?|casino|paris sportifs|j[ée]sus|islam\w*|religio\w*|allah|chr[ée]tien\w*|juifs?|sexe|sexy|seins?|fesses?|putain|merde|connard|salope)\b/i;
+  var ORIG = {}, SAFE_N = 0; KEYS.forEach(function (k) { ORIG[k] = BANK[k].q; });
+  function applySafe() { SAFE_N = 0; KEYS.forEach(function (k) {
+    if (S.safe === false) { BANK[k].q = ORIG[k]; return; }
+    BANK[k].q = ORIG[k].filter(function (q) { var bad = RISKY.test(q[0] + " " + q[1].join(" ")); if (bad) SAFE_N++; return !bad; }).map(function (q) { return q[3] && RISKY.test(q[3]) ? [q[0], q[1], q[2], ""] : q; }); }); }
+  applySafe();
   function save() { try { localStorage.setItem("sq-set", JSON.stringify(S)); } catch (e) {} }
   function selKeys() { return S.themes.length ? S.themes.slice() : KEYS.slice(); }
   function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
@@ -2430,6 +2441,9 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     $("#go").textContent = lv ? "Lancer le live" : "Lancer le quiz"; $("#goRec").hidden = lv;
   }
   var DIFF_NOTE = { facile: "Facile : seulement 2 choix de réponse.", normal: "Normal : 4 choix de réponse.", expert: "Expert : les choix n'apparaissent qu'à la moitié du temps." };
+  function safeNote() { $("#safeNote").textContent = S.safe === false ? "Toutes les questions sont utilisées, même celles avec des mots sensibles (guerre, mort, alcool…). À éviter en live." : "Activé : " + SAFE_N + " questions avec des mots sensibles pour TikTok (guerre, mort, alcool, drogue…) sont retirées, et les anecdotes sensibles ne sont plus lues."; }
+  seg($("#segSafe"), [["Oui", true], ["Non", false]], function () { return S.safe !== false; }, function (v) { S.safe = v; applySafe(); try { localStorage.removeItem("sq-used"); } catch (e) {} safeNote(); });
+  safeNote();
   seg($("#segD"), [["Facile", "facile"], ["Normal", "normal"], ["Expert", "expert"]], function () { return S.diff; }, function (v) { S.diff = v; $("#diffNote").textContent = DIFF_NOTE[v]; });
   $("#diffNote").textContent = DIFF_NOTE[S.diff] || "";
   seg($("#segRC"), [["Non", 0], ["5 s", 5], ["7 s", 7], ["10 s", 10]], function () { return S.recapSec; }, function (v) { S.recapSec = v; });
@@ -3166,7 +3180,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       "<div class=\"hd-pill\">" + esc(T.title) + "</div><div class=\"hd-logo\"><span class=\"l1\"" + (brandParts()[0].length > 7 ? " style=\"letter-spacing:3px;font-size:22px;padding-left:11px\"" : "") + ">" + esc(brandParts()[0]) + "</span><span class=\"l2\">" + brandParts()[1] + "</span></div><div class=\"hd-count" + (bonus ? " bonus" : "") + "\">" + (bonus === 3 ? "❤️ BONUS ×3" : bonus === 2 ? "⭐ BONUS ×2" : bonus ? "🎁 BONUS ×" + bonus : lv ? "Q" + (qi + 1) : (qi + 1) + "/" + n) + "</div><div class=\"bars\">" + bars + "</div>" +
       "<div class=\"ring\"><svg viewBox=\"0 0 280 280\"><circle cx=\"140\" cy=\"140\" r=\"98\" fill=\"none\" stroke=\"rgba(255,255,255,.22)\" stroke-width=\"20\"/>" +
       "<circle id=\"arc\" cx=\"140\" cy=\"140\" r=\"98\" fill=\"none\" stroke=\"var(--sacc)\" stroke-width=\"20\" stroke-linecap=\"round\" stroke-dasharray=\"" + C + "\" stroke-dashoffset=\"0\"/></svg><div class=\"num\" id=\"num\">" + (lv ? S.liveCount : S.count) + "</div></div>" +
-      "<div class=\"fact" + (neon && !lv ? " low" : "") + "\"><b>LE SAVIEZ-VOUS ?</b><div class=\"ft\" id=\"ft\">" + esc(q.f) + "</div></div>" +
+      "<div class=\"fact" + (neon && !lv ? " low" : "") + (q.f ? "" : " nf") + "\"><b>LE SAVIEZ-VOUS ?</b><div class=\"ft\" id=\"ft\">" + esc(q.f) + "</div></div>" +
       (neon ? neonParts(T, qi, n, q, lv, bonus) : "") + "<div class=\"qbox\"><div class=\"qt\" id=\"qt\">" + esc(q.q) + "</div></div>" + cards +
       (lv ? "<div class=\"cta\">Écris " + (q.choices.length === 2 ? "A ou B" : "A, B, C ou D") + " en commentaire !" + (S.chatOn ? " 1 seule réponse compte" : "") + "</div><div class=\"win\" id=\"win\" hidden></div>" + (S.chatOn ? "<div class=\"stat\" id=\"stat\">💬 0 réponse</div>" : "") : "");
   }
