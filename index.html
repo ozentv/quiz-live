@@ -2650,12 +2650,12 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     return new Promise(function (res) {
       var my = ++sayId; try { if (synth) synth.cancel(); gem.stop(); } catch (e) {}
       clearTimeout(unduckT); music.duck(true);
-      gem.play(String(text), function () { if (my === sayId) mascot.talk(true); }, 9000).then(function () {
+      gem.play(String(text), function () { if (my === sayId) mascot.talk(true); }, vrec.on && gen.on ? 30000 : 9000).then(function () {
         if (my === sayId) { mascot.talk(false); clearTimeout(unduckT); unduckT = setTimeout(function () { if (my === sayId) music.duck(false); }, 450); }
         res();
       }, function (e) {
         gemSt("⚠️ " + (e && e.message || "Voix IA indisponible") + " → voix du téléphone.");
-        if (/quota|trop de temps/i.test(e && e.message || "")) gemPause = Date.now() + 120000;
+        if (/quota|trop de temps/i.test(e && e.message || "") && !(vrec.on && gen.on)) gemPause = Date.now() + 120000;
         if (my !== sayId) return res();
         sayBrowser(text).then(res);
       });
@@ -3281,6 +3281,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     });
   }
   function stopAll() {
+    if (vrec.on && !vrec.started && vrec.abort) vrec.abort();
     mascot.show(false);
     runId++; clearTimeout(curTimer);
     try { if (synth) synth.cancel(); gem.stop(); } catch (e) {}
@@ -4195,6 +4196,14 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       var ks = selKeys(), key = ks[Math.floor(Math.random() * ks.length)];
       var T = BANK[key], qs = pick(key, S.n), n = qs.length;
       qs.forEach(function (q) { gemPre(askText(q)); gemPre("ABCD"[q.a] + ", " + speakable(q.choices[q.a]) + ". " + speakable(q.f)); });
+      // Générateur : toutes les phrases de la voix sont prêtes AVANT de filmer (sinon, sur une connexion lente, la voix du téléphone prend le relais et n'est pas enregistrée).
+      if (vrec.on && gen.on && gemOn() && !vrec.started) {
+        var txts = [speakable("Quiz " + T.title + ". " + n + " questions. Tu fais combien sur " + n + " ?"), "Ton score ? Dis-le en commentaire, et abonne-toi pour le prochain quiz !"];
+        qs.forEach(function (q) { txts.push(askText(q), "ABCD"[q.a] + ", " + speakable(q.choices[q.a]) + ". " + speakable(q.f)); });
+        var nOk = 0; wrap.hidden = false; setScene("<div class=\"intro\"><div class=\"big\">🎙️</div><div class=\"sub\" id=\"vprep\">Préparation de la voix… 0 / " + txts.length + "</div></div>");
+        await ok(Promise.race([Promise.all(txts.map(function (t) { return gem.get(String(t)).then(function () { nOk++; var e = $("#vprep"); if (e) e.textContent = "Préparation de la voix… " + nOk + " / " + txts.length; }, function () {}); })), sleep(120000)]));
+      }
+      if (vrec.on && vrec.begin) vrec.begin();
       $("#endsheet").hidden = true; wrap.hidden = false;
       setPalette(T.pal); fitStage(); tvLayout();
       try { await ok(document.fonts.ready); } catch (e) { if (my !== runId) return; }
@@ -4286,6 +4295,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     }
     var keys = ["mode", "themes", "n", "voiceOn", "voiceEng", "gameOn", "lite"], old = {}; keys.forEach(function (k) { old[k] = S[k]; }); gen.saved = old;
     S.mode = "video"; S.themes = gen.theme ? [gen.theme] : []; S.n = gen.n;
+    gemPause = 0;
     // Léger pour les téléphones : sans mini-jeu, effets lumineux simplifiés à l'écran (la vidéo garde son look).
     S.gameOn = false; S.lite = true; wrap.classList.add("lite"); try { pipLayout(); } catch (e) {}
     if (genVoiceOk() && how !== "novoice") { S.voiceOn = true; S.voiceEng = "edge"; } else S.voiceOn = false;
@@ -4325,7 +4335,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         $("#genMore").hidden = false;
         }
       };
-      try { rec.stop(); } catch (e) { rec.onstop(); }
+      if (rec.state === "inactive") rec.onstop(); else try { rec.stop(); } catch (e) { rec.onstop(); }
     }
     function loop() {
       if (stopped) return;
@@ -4338,7 +4348,11 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     vrec.on = true; vrec.title = ""; $("#recDot").hidden = false;
     music.stop(); musicTrying = false; music.start();
     if (small) genMark(lvl);
-    play(); paintStage(cx); rec.start(1000); recT0 = performance.now(); requestAnimationFrame(loop);
+    // L'enregistrement démarre quand le quiz est prêt (le générateur prépare d'abord toute la voix).
+    vrec.started = false;
+    vrec.begin = function () { if (vrec.started || stopped) return; vrec.started = true; paintStage(cx); rec.start(1000); recT0 = performance.now(); requestAnimationFrame(loop); };
+    vrec.abort = function () { if (!vrec.started) finish(false); };
+    play();
   }
   function recBus(c) { if (!c.__bus) c.__bus = c.createGain(); return c.__bus; }
   // Tout ce qui sort sur les haut-parleurs part aussi vers l'enregistreur.
