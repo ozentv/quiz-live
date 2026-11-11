@@ -418,6 +418,9 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 #stageWrap.lite #pulse.on { animation: none; background: radial-gradient(ellipse at center, rgba(255, 40, 40, 0) 55%, rgba(255, 40, 40, .35)); }
 #stageWrap.lite .rl-dots::after { animation: none; content: "…"; }
 #stage.demo::after { content: "🧪 MODE TEST : faux commentaires, ne pas diffuser en live"; position: absolute; left: 0; right: 0; top: 46%; z-index: 50; padding: 22px 30px; background: rgba(220, 20, 40, .92); color: #fff; font-size: 40px; font-weight: 900; text-align: center; pointer-events: none; }
+.wait-alert .wait-word { font-size: 96px; padding: 18px 60px; animation: waitPulse 1s ease-in-out infinite alternate; }
+@keyframes waitPulse { from { transform: scale(1); } to { transform: scale(1.08); } }
+#stageWrap.lite .wait-alert .wait-word { animation: none; }
 .nins .live-ping { color: #fff; } .nins .live-ping b { color: var(--sacc); }
 </style>
 
@@ -3458,7 +3461,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         if (scores[pk] && scores[pk].pic !== m.pic) { scores[pk].pic = m.pic; }
       }
       if (m.type === "chat") {
-        chat.count++; chat.lastAt = Date.now(); if (/^\s*[a-d1-4]\s*$/i.test(String(m.text || ""))) livePing(m);
+        chat.count++; chat.lastAt = Date.now(); if (/(^|[^a-zà-ÿ])(jou(er|e|é|ez)|play|go)([^a-zà-ÿ]|$)/i.test(String(m.text || ""))) { chat.playAt = Date.now(); chat.playName = String(m.name || m.id || "").slice(0, 20); } if (/^\s*[a-d1-4]\s*$/i.test(String(m.text || ""))) livePing(m);
         chat.last.unshift(m); chat.last = chat.last.slice(0, 3);
         if (chat.state === "connected") $("#bChat").textContent = "Chat ✓ " + chat.count;
         $("#chatLast").innerHTML = "Commentaires reçus : <b>" + chat.count + "</b><br>" + chat.last.map(function (x) { return "« " + esc(String(x.text).slice(0, 40)) + " » (" + esc(x.name || x.id) + ")"; }).join("<br>");
@@ -4049,9 +4052,9 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         if (!queue.length) refill();
         if (S.chatOn && S.waitChat !== false && quiet >= 2) { // personne ne joue : le quiz attend le chat au lieu de tourner dans le vide
           var since = Date.now(), spoke = 0, skip = false;
-          var ws2 = setScene("<div class=\"intro\"><div class=\"big\">⏸️</div><div class=\"ttl\">EN ATTENTE</div><div class=\"sub\">Écris n'importe quoi dans le chat pour lancer la prochaine question !</div><div class=\"bigpill\">🔴 <span class=\"clk\">" + clockTxt() + "</span></div></div>"); ws2.style.pointerEvents = "auto"; ws2.onclick = function () { skip = true; };
-          while (!(chat.lastAt > since) && !skip) { if (Date.now() - spoke > 45000) { spoke = Date.now(); say("Le quiz vous attend ! Écrivez n'importe quoi dans le chat pour lancer la prochaine question."); } await ok(sleep(400)); }
-          quiet = 0; await ok(say("C'est reparti !"));
+          var ws2 = setScene("<div class=\"intro wait-alert\"><div class=\"big\">⚠️</div><div class=\"ttl\">QUIZ EN PAUSE</div><div class=\"sub\">Pour lancer la prochaine question, écris dans le chat :</div><div class=\"bigpill wait-word\">✍️ JOUER</div><div class=\"sub\">🔴 <span class=\"clk\">" + clockTxt() + "</span></div></div>"); ws2.style.pointerEvents = "auto"; ws2.onclick = function () { skip = true; };
+          while (!(chat.playAt > since) && !skip) { if (Date.now() - spoke > 30000) { spoke = Date.now(); say("Le quiz est en pause ! Écrivez jouer dans le chat pour lancer la prochaine question."); } await ok(sleep(400)); }
+          quiet = 0; await ok(say("C'est reparti, merci " + (chat.playName || "à vous") + " !"));
         }
         if (S.chatOn && S.giftsOn && num > 0 && num % 10 === 5) {
           await ok(Promise.all([say(GIFT_VOICE), showBoard(15000, giftsHTML())]));
