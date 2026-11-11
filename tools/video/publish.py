@@ -1,6 +1,6 @@
 # Met à jour la liste des vidéos (dans le texte de la release « videos ») et supprime les plus anciennes.
 import json, os, re, subprocess, sys
-OUT = sys.argv[1]; KEEP = 30; TAG = "videos"
+OUT = sys.argv[1]; KEEP = 400; TAG = "videos"
 def gh(*a, check=True): return subprocess.run(["gh", *a], check=check, capture_output=True, text=True).stdout
 body = gh("release", "view", TAG, "--json", "body", "-q", ".body", check=False)
 m = re.search(r"<!--DATA(.*?)DATA-->", body or "", re.S)

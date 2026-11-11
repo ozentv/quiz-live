@@ -4303,7 +4303,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     var cx = cv.getContext("2d", { alpha: false }), st = cv.captureStream(lvl >= 2 ? 15 : lvl ? 20 : small ? 24 : 30); if (W !== 1080) cx.__k = W / 1080;
     dest.stream.getAudioTracks().forEach(function (t) { st.addTrack(t); });
     var type = (lvl ? ["video/webm;codecs=vp8,opus", "video/webm"] : small ? ["video/mp4;codecs=avc1.42E01E,mp4a.40.2", "video/mp4;codecs=avc1,mp4a.40.2", "video/webm;codecs=vp8,opus", "video/webm"] : ["video/mp4;codecs=avc1.42E01E,mp4a.40.2", "video/mp4;codecs=avc1,mp4a.40.2", "video/mp4", "video/webm;codecs=vp9,opus", "video/webm"]).filter(function (x) { return MediaRecorder.isTypeSupported(x); })[0] || "";
-    var rec, ch = [], stopped = false, endAt = 0;
+    var rec, ch = [], stopped = false, endAt = 0, recT0 = performance.now();
     try { rec = new MediaRecorder(st, type ? { mimeType: type, videoBitsPerSecond: lvl ? 2e6 : small ? 3e6 : 9e6 } : {}); } catch (e) { cv.remove(); genFail("Impossible de démarrer l'enregistrement (" + (e && e.message || e) + ")."); return; }
     rec.ondataavailable = function (e) { if (e.data && e.data.size) ch.push(e.data); };
     function finish(keep) {
@@ -4314,10 +4314,16 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         var mt = rec.mimeType || type || "video/webm", ext = /mp4/.test(mt) ? "mp4" : "webm";
         var name = "quiz-" + (vrec.title || "video").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "." + ext;
         if (vrec.url) URL.revokeObjectURL(vrec.url);
-        vrec.url = URL.createObjectURL(new Blob(ch, { type: mt }));
+        var blob = new Blob(ch, { type: mt }), dur = performance.now() - recT0;
+        $("#endT").textContent = "Finalisation de la vidéo…";
+        // Le WEBM du navigateur n'indique pas sa durée : sans ça, la galerie croit que la vidéo dure quelques secondes.
+        (ext === "webm" && window.ysFixWebmDuration ? window.ysFixWebmDuration(blob, dur, { logger: false }) : Promise.resolve(blob)).then(function (b2) { done(b2); }, function () { done(blob); });
+        function done(b2) {
+        vrec.url = URL.createObjectURL(b2);
         var a = $("#vidDl"); a.href = vrec.url; a.setAttribute("download", name); a.hidden = false;
         $("#endT").textContent = ext === "mp4" ? "Vidéo prête ✅ Appuie sur le bouton pour l'enregistrer" : "Vidéo prête ✅ Appuie sur le bouton pour l'enregistrer (format WEBM : si ta galerie ne la voit pas, ouvre-la dans CapCut)";
         $("#genMore").hidden = false;
+        }
       };
       try { rec.stop(); } catch (e) { rec.onstop(); }
     }
@@ -4332,7 +4338,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     vrec.on = true; vrec.title = ""; $("#recDot").hidden = false;
     music.stop(); musicTrying = false; music.start();
     if (small) genMark(lvl);
-    play(); paintStage(cx); rec.start(1000); requestAnimationFrame(loop);
+    play(); paintStage(cx); rec.start(1000); recT0 = performance.now(); requestAnimationFrame(loop);
   }
   function recBus(c) { if (!c.__bus) c.__bus = c.createGain(); return c.__bus; }
   // Tout ce qui sort sur les haut-parleurs part aussi vers l'enregistreur.
@@ -4502,5 +4508,6 @@ ol.sc b { font-variant-numeric: tabular-nums; }
 })();
 </script>
 
+<script src="webm-duration.js?v=1"></script>
 <script src="nav.js?v=50"></script>
 </body></html>

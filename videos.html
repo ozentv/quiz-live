@@ -24,6 +24,10 @@
   .filters button { min-height: 36px; padding: 0 14px; border-radius: 18px; border: 0; background: rgba(255,255,255,.07); color: var(--txt); font: 600 14px Figtree, system-ui, sans-serif; cursor: pointer; }
   .filters button[aria-pressed=true] { background: var(--acc); color: var(--acc2); }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .card { position: relative; }
+  .card.got video { opacity: .55; }
+  .badge { position: absolute; top: 10px; left: 10px; z-index: 2; background: #1f9d55; color: #fff; font-weight: 800; font-size: 13px; padding: 6px 10px; border-radius: 999px; }
+  .shows button[aria-pressed=true] { background: #ffd23f; color: #1a1300; }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; }
   .card video { width: 100%; aspect-ratio: 9/16; background: #000; display: block; }
   .info { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 8px; }
@@ -46,8 +50,8 @@
     <b>Fabriquer de nouvelles vidéos</b>
     <ol>
       <li>Ouvre la page de fabrication (connecte-toi à GitHub si besoin).</li>
-      <li>Appuie sur « Run workflow », choisis les thèmes (ex : <code>om psg football</code>), puis le bouton vert « Run workflow ».</li>
-      <li>Reviens ici dans 10 minutes environ : les nouvelles vidéos apparaissent en premier.</li>
+      <li>Appuie sur « Run workflow ». Laisse <code>tout</code> pour faire une vidéo de chaque thème (ou écris des thèmes, ex : <code>om psg football</code>), puis le bouton vert « Run workflow ».</li>
+      <li>Reviens ici plus tard (environ 3 minutes par vidéo, presque 2 h pour tous les thèmes) : les nouvelles vidéos apparaissent dans « À télécharger ».</li>
     </ol>
     <div class="row" style="max-width:460px">
       <a class="btn" href="https://github.com/ozentv/quiz-live/actions/workflows/videos.yml" target="_blank" rel="noopener">⚙️ Fabriquer</a>
@@ -55,6 +59,7 @@
     </div>
   </section>
 
+  <div class="filters shows" id="shows" role="group" aria-label="Téléchargées ou non"></div>
   <div class="filters" id="filters" role="group" aria-label="Filtrer par thème"></div>
   <div class="grid" id="grid"><p class="empty">Chargement…</p></div>
 </main>
@@ -62,30 +67,38 @@
 <script>
 (function () {
   var API = "https://api.github.com/repos/ozentv/quiz-live/releases/tags/videos";
-  var NAMES = { om: "OM", psg: "PSG", football: "Football" };
+  var NAMES = {"geographie": "Géographie", "animaux": "Animaux", "sciences": "Sciences", "histoire": "Histoire", "culture": "Culture générale", "sport": "Sport", "gastronomie": "Gastronomie", "corps": "Corps humain", "mythologie": "Mythologie", "langue": "Langue française", "capitales": "Pays et capitales", "techno": "Technologie", "cinema": "Cinéma", "musique": "Musique", "jeuxvideo": "Jeux vidéo", "espace": "Espace", "dessins": "Dessins animés", "football": "Football", "drapeaux": "Drapeaux", "series": "Séries", "marques": "Marques et logos", "france": "France", "calcul": "Calcul mental", "monuments": "Monuments du monde", "inventions": "Inventions", "nature": "Nature", "vraifaux": "Vrai ou faux", "mangas": "Mangas et animes", "anglais": "Anglais", "dinosaures": "Dinosaures et préhistoire", "art": "Art et peinture", "litterature": "Littérature", "rapfr": "Rap français", "om": "OM", "psg": "PSG"};
   var grid = document.getElementById("grid"), filters = document.getElementById("filters"), toast = document.getElementById("toast");
-  var items = [], cur = "all";
+  var items = [], cur = "all", show = "new";
+  // Mémoire des vidéos déjà téléchargées (sur ce téléphone).
+  var DL = {}; try { DL = JSON.parse(localStorage.getItem("vid-dl") || "{}") || {}; } catch (e) {}
+  function mark(f) { DL[f] = Date.now(); try { localStorage.setItem("vid-dl", JSON.stringify(DL)); } catch (e) {} }
   function nice(t) { return NAMES[t] || (t.charAt(0).toUpperCase() + t.slice(1)); }
   function when(d) { var m = /^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(d || ""); if (!m) return ""; var dt = new Date(Date.UTC(+m[1], m[2] - 1, +m[3], +m[4], +m[5])); return dt.toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) + " à " + dt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }); }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]; }); }
   function say(t) { toast.textContent = t; toast.classList.add("on"); clearTimeout(say.t); say.t = setTimeout(function () { toast.classList.remove("on"); }, 1800); }
   function drawFilters() {
     var th = ["all"]; items.forEach(function (i) { if (th.indexOf(i.theme) < 0) th.push(i.theme); });
+    var nNew = items.filter(function (i) { return !DL[i.file]; }).length, nOld = items.length - nNew;
+    document.getElementById("shows").innerHTML = [["new", "🆕 À télécharger (" + nNew + ")"], ["old", "✅ Déjà téléchargées (" + nOld + ")"], ["all", "Toutes (" + items.length + ")"]].map(function (s) { return "<button type=\"button\" data-s=\"" + s[0] + "\" aria-pressed=\"" + (s[0] === show) + "\">" + s[1] + "</button>"; }).join("");
     filters.innerHTML = th.length > 2 ? th.map(function (t) { return "<button type=\"button\" data-t=\"" + esc(t) + "\" aria-pressed=\"" + (t === cur) + "\">" + (t === "all" ? "Toutes" : esc(nice(t))) + "</button>"; }).join("") : "";
   }
   function draw() {
     drawFilters();
-    var list = items.filter(function (i) { return cur === "all" || i.theme === cur; });
-    if (!list.length) { grid.innerHTML = "<p class=\"empty\">Aucune vidéo pour l'instant. Appuie sur « Fabriquer » pour en créer.</p>"; return; }
+    var list = items.filter(function (i) { return (cur === "all" || i.theme === cur) && (show === "all" || (show === "new") === !DL[i.file]); });
+    if (!list.length) { grid.innerHTML = "<p class=\"empty\">" + (!items.length ? "Aucune vidéo pour l'instant. Appuie sur « Fabriquer » pour en créer." : show === "new" ? "🎉 Tu as déjà téléchargé toutes ces vidéos. Appuie sur « Fabriquer » pour en avoir d'autres." : "Aucune vidéo ici.") + "</p>"; return; }
     grid.innerHTML = list.map(function (i, k) {
-      return "<article class=\"card\"><video controls playsinline preload=\"metadata\" src=\"" + esc(i.url) + "#t=0.5\"></video><div class=\"info\">" +
+      var got = DL[i.file];
+      return "<article class=\"card" + (got ? " got" : "") + "\">" + (got ? "<div class=\"badge\">✅ Déjà téléchargée</div>" : "") + "<video controls playsinline preload=\"metadata\" src=\"" + esc(i.url) + "#t=0.5\"></video><div class=\"info\">" +
         "<div class=\"meta\"><b>Quiz " + esc(nice(i.theme)) + "</b><span>" + esc(when(i.date)) + (i.size ? " · " + (i.size / 1048576).toFixed(0) + " Mo" : "") + "</span></div>" +
         (i.cap ? "<div class=\"cap\">" + esc(i.cap) + "</div>" : "") +
-        "<div class=\"row\"><a class=\"btn\" href=\"" + esc(i.url) + "\" download=\"" + esc(i.file) + "\">⬇️ Télécharger</a>" +
+        "<div class=\"row\"><a class=\"btn" + (got ? " ghost" : "") + "\" data-f=\"" + esc(i.file) + "\" href=\"" + esc(i.url) + "\" download=\"" + esc(i.file) + "\">" + (got ? "⬇️ Retélécharger" : "⬇️ Télécharger") + "</a>" +
         (i.cap ? "<button class=\"btn ghost\" type=\"button\" data-cap=\"" + k + "\">📋 Description</button>" : "") + "</div></div></article>";
     }).join("");
+    grid.querySelectorAll("a[data-f]").forEach(function (a) { a.addEventListener("click", function () { var f = a.dataset.f, was = DL[f]; mark(f); say(was ? "Téléchargement relancé" : "Téléchargement lancé ✅"); setTimeout(draw, 1200); }); });
     grid.querySelectorAll("[data-cap]").forEach(function (b) { b.onclick = function () { var t = list[+b.dataset.cap].cap; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { say("Description copiée"); }, function () { prompt("Copie la description :", t); }); }; });
   }
+  document.getElementById("shows").onclick = function (e) { var b = e.target.closest("button"); if (b) { show = b.dataset.s; draw(); } };
   filters.onclick = function (e) { var b = e.target.closest("button"); if (b) { cur = b.dataset.t; draw(); } };
   function load() {
     grid.innerHTML = "<p class=\"empty\">Chargement…</p>";

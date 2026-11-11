@@ -4,14 +4,17 @@ on:
   workflow_dispatch:
     inputs:
       themes:
-        description: "Thèmes séparés par des espaces (ex : om psg football)"
-        default: "om psg football"
+        description: "Thèmes séparés par des espaces (ex : om psg football), ou « tout » pour tous les thèmes"
+        default: "tout"
       questions:
         description: "Nombre de questions par vidéo"
         default: "5"
       seconds:
         description: "Secondes pour répondre"
         default: "3"
+      copies:
+        description: "Nombre de vidéos par thème"
+        default: "1"
 
 permissions:
   contents: write
@@ -23,7 +26,7 @@ concurrency:
 jobs:
   make:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 340
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
@@ -43,11 +46,13 @@ jobs:
           THEMES: ${{ inputs.themes }}
           NQ: ${{ inputs.questions }}
           SEC: ${{ inputs.seconds }}
+          COPIES: ${{ inputs.copies }}
         run: |
           python3 -m http.server 8077 > /dev/null 2>&1 &
           (cd relay && PORT=10077 ADMIN_KEY=k node server.js > /tmp/relay.log 2>&1 &)
           sleep 3
-          tools/video/make.sh "$THEMES" "$NQ" "$SEC" out
+          if [ "$THEMES" = "tout" ] || [ "$THEMES" = "all" ]; then THEMES="$(grep -oP '^    \K[a-z0-9]+(?=: \{ title:)' index.html | tr '\n' ' ')"; fi
+          tools/video/make.sh "$THEMES" "$NQ" "$SEC" out "${COPIES:-1}"
       - name: Mise en ligne
         run: |
           gh release view videos > /dev/null 2>&1 || gh release create videos --title "Vidéos quiz" --notes "Vidéos Studio Quiz" --prerelease
