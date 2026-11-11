@@ -4279,10 +4279,9 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       });
       return;
     }
-    var keys = ["mode", "themes", "n", "voiceOn", "voiceEng", "gameOn"], old = {}; keys.forEach(function (k) { old[k] = S[k]; }); gen.saved = old;
+    var keys = ["mode", "themes", "n", "voiceOn", "voiceEng"], old = {}; keys.forEach(function (k) { old[k] = S[k]; }); gen.saved = old;
     S.mode = "video"; S.themes = gen.theme ? [gen.theme] : []; S.n = gen.n;
     if (genVoiceOk() && how !== "novoice") { S.voiceOn = true; S.voiceEng = "edge"; } else S.voiceOn = false;
-    S.gameOn = false;
     try { recordVideo(); } catch (e) { genFail("Erreur : " + (e && e.message || e)); }
   }
   function recordVideo() {
@@ -4291,7 +4290,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     if (!gen.on && S.voiceOn && S.voiceEng === "phone" && !confirm("La voix du téléphone ne peut pas être enregistrée dans la vidéo. Choisis « 🎙️ Voix pro gratuite » dans la partie Voix off pour l'avoir.\n\nContinuer sans voix ?")) return;
     keepAwake(); unlockAudio(); if (!ac) { genFail("Le son ne démarre pas sur cet appareil."); return; }
     var dest = ac.createMediaStreamDestination(); recBus(ac).connect(dest);
-    var small = gen.on, cv = document.createElement("canvas"); cv.width = small ? 720 : 1080; cv.height = small ? 1280 : 1920;
+    var small = false, cv = document.createElement("canvas"); cv.width = small ? 720 : 1080; cv.height = small ? 1280 : 1920;
     cv.style.cssText = "position:fixed;left:0;top:0;width:2px;height:2px;opacity:.01;pointer-events:none;z-index:-1";
     document.body.appendChild(cv);
     var cx = cv.getContext("2d", { alpha: false }), st = cv.captureStream(30); if (small) cx.__k = 720 / 1080;
