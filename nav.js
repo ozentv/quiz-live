@@ -1,6 +1,6 @@
 /* Menu commun à toutes les pages du studio (une seule source : modifier ici). */
 (function () {
-  var P = [["./", "index.html", "🧠", "Quiz"], ["vs.html", "vs.html", "🆚", "VS"], ["clubs.html", "clubs.html", "⚔️", "Bataille des clubs"], ["duel.html", "duel.html", "📊", "Duel en chiffres"], ["histoire.html", "histoire.html", "💬", "Histoires"], ["packs.html", "packs.html", "🃏", "Packs"], ["videos.html", "videos.html", "🎬", "Vidéos"]];
+  var P = [["./", "index.html", "🧠", "Quiz"], ["vs.html", "vs.html", "🆚", "VS"], ["clubs.html", "clubs.html", "⚔️", "Bataille des clubs"], ["duel.html", "duel.html", "📊", "Duel en chiffres"], ["histoire.html", "histoire.html", "💬", "Histoires"], ["packs.html", "packs.html", "🃏", "Packs"], ["generateur.html", "generateur.html", "🎲", "Générateur"], ["videos.html", "videos.html", "🎬", "Vidéos"]];
   var here = location.pathname.split("/").pop() || "index.html";
   var css = ".sq-nav{position:relative;z-index:50;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:8px max(12px,env(safe-area-inset-left,0px));margin:0 0 6px;background:#0b1220;border-bottom:1px solid rgba(255,255,255,.08);font:600 13px/1 Figtree,system-ui,sans-serif;-webkit-overflow-scrolling:touch}"
     + ".sq-nav::-webkit-scrollbar{display:none}.sq-nav a{flex:none;display:inline-flex;align-items:center;gap:5px;min-height:34px;padding:0 12px;border-radius:17px;color:#cdd6e4;text-decoration:none;background:rgba(255,255,255,.06)}"
