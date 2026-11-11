@@ -85,6 +85,9 @@ body.gen-open > main, body.gen-open > .dock, body.gen-open > .sq-nav { display: 
 #genPage .gp-steps { margin: 0; padding-left: 20px; color: #d8cdf2; line-height: 1.5; }
 #genPage .gp-err { background: #5c1020; border: 1px solid #ff6b81; border-radius: 12px; padding: 12px; font-weight: 700; }
 #genPage .gp-err[hidden] { display: none; }
+#genPage .gp-link { background: none; border: 0; color: #ffd23f; font: 800 1rem var(--body); text-decoration: underline; padding: 6px 0; cursor: pointer; }
+#genPage .gp-in-key { flex: 1; min-width: 0; min-height: 48px; border-radius: 12px; border: 1px solid rgba(255,255,255,.25); background: #1c1236; color: #fff; font: 600 1rem var(--body); padding: 0 12px; }
+#genPage .gp-go:disabled { opacity: .7; }
 #stageWrap { position: fixed; inset: 0; z-index: 100; overflow: hidden; background: linear-gradient(180deg, var(--s1, #0e346e), var(--s2, #061634)); touch-action: manipulation; -webkit-user-select: none; user-select: none; }
 #stage { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 0 0; font-family: var(--display); color: #fff; }
 .deco { position: absolute; border: 6px solid var(--sacc, #2ec4b6); border-radius: 50%; opacity: .18; }
@@ -4239,21 +4242,47 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   /* ---------- Générateur : page à part, réglages propres à la vidéo, sans boîte de dialogue ---------- */
   var gen = { on: false, theme: "", n: 5, saved: null };
   function genFail(m) { if (gen.on) { genRestore(); stopAll(); var e = $("#gpErr"); e.textContent = "⚠️ " + m; e.hidden = false; $("#genPage").hidden = false; } else alert(m); }
-  function genVoiceOk() { return !!(String(S.relay || "").trim() && String(S.lbKey || "").trim()); }
+  function genVoiceOk() { return !!String(S.lbKey || "").trim(); }
+  function genVoiceUI() {
+    var v = $("#gpVoice");
+    if (genVoiceOk()) { v.innerHTML = "🎙️ <b>Voix activée</b> : elle lit les questions, les réponses A B C D, la bonne réponse et l'explication. <button class=\"gp-link\" id=\"gpKeyEdit\" type=\"button\">Changer la clé</button>"; $("#gpKeyEdit").onclick = function () { S.lbKey = ""; save(); genVoiceUI(); }; return; }
+    v.innerHTML = "<label for=\"gpKey\">🎙️ Activer la voix</label><p style=\"margin:0 0 8px\">Écris une seule fois la clé de ton relais (la même que pour le classement, ADMIN_KEY sur Render).</p><div class=\"gp-seg\"><input id=\"gpKey\" class=\"gp-in-key\" type=\"password\" placeholder=\"Clé du relais\" autocomplete=\"off\" autocapitalize=\"off\"><button id=\"gpKeyOk\" type=\"button\" aria-pressed=\"true\" style=\"flex:0 0 auto;padding:0 16px\">OK</button></div><p style=\"margin:8px 0 0;color:#ffb3c1\">Sans clé, la vidéo sera sans voix.</p>";
+    $("#gpKeyOk").onclick = function () { var k = $("#gpKey").value.trim(); if (!k) return; S.lbKey = k; save(); try { $("#lbKey").value = k; } catch (e) {} genVoiceUI(); };
+  }
+  // Le relais gratuit s'endort : on le réveille et on vérifie la voix avant de filmer.
+  function genVoiceCheck() {
+    var c = { relay: S.relay, key: S.lbKey }, u = String(c.relay || "studio-quiz-relais.onrender.com").trim().replace(/\/+$/, ""); if (!/^[a-z]+:\/\//i.test(u)) u = "https://" + u; u = u.replace(/^ws/i, "http");
+    var ctl = window.AbortController ? new AbortController() : null, to = setTimeout(function () { if (ctl) ctl.abort(); }, 90000);
+    return fetch(u + "/tts?engine=edge&voice=" + encodeURIComponent(S.edgeVoice || "fr-FR-HenriNeural") + "&key=" + encodeURIComponent(c.key || "") + "&text=" + encodeURIComponent("Bonjour"), ctl ? { signal: ctl.signal } : {})
+      .then(function (r) { clearTimeout(to); if (r.ok) return true; return r.json().then(function (j) { throw new Error(j.error || "erreur " + r.status); }, function () { throw new Error("le relais répond mal (erreur " + r.status + ")"); }); }, function () { clearTimeout(to); throw new Error("le relais ne répond pas. Réessaie dans une minute."); });
+  }
   function genOpen() {
     gen.on = true; document.body.classList.add("gen-open"); $("#gpErr").hidden = true;
     var sel = $("#gpTheme"); if (!sel.options.length) sel.innerHTML = "<option value=\"\">🎲 Au hasard</option>" + KEYS.map(function (k) { return "<option value=\"" + k + "\">" + esc(BANK[k].title) + "</option>"; }).join("");
     sel.value = gen.theme; sel.onchange = function () { gen.theme = this.value; };
     var box = $("#gpN"); box.innerHTML = ""; [3, 5, 8, 10].forEach(function (n) { var b = document.createElement("button"); b.type = "button"; b.textContent = n; b.setAttribute("aria-pressed", String(gen.n === n)); b.onclick = function () { gen.n = n; Array.prototype.forEach.call(box.children, function (c) { c.setAttribute("aria-pressed", String(+c.textContent === n)); }); }; box.appendChild(b); });
-    $("#gpVoice").innerHTML = genVoiceOk() ? "🎙️ <b>Voix pro activée</b> : la voix sera dans la vidéo." : "🔇 <b>Vidéo sans voix</b> (musique et sons seulement). Pour avoir la voix : dans Réglages, partie Live, remplis l'adresse du relais et la clé du classement.";
+    genVoiceUI();
+    if (genVoiceOk()) genVoiceCheck().catch(function () {});
     wrap.hidden = true; $("#genPage").hidden = false; $("#genPage").scrollTop = 0;
   }
   function genRestore() { if (!gen.saved) return; Object.assign(S, gen.saved); gen.saved = null; save(); }
-  function genRun() {
+  function genRun(how) {
     $("#gpErr").hidden = true; genRestore();
-    var keys = ["mode", "themes", "n", "voiceOn", "voiceEng"], old = {}; keys.forEach(function (k) { old[k] = S[k]; }); gen.saved = old;
+    if (!how && genVoiceOk()) {
+      var go = $("#gpGo"); if (go.disabled) return; go.disabled = true; go.textContent = "⏳ Préparation de la voix… (jusqu'à 1 min)";
+      unlockAudio(); keepAwake();
+      genVoiceCheck().then(function () { go.disabled = false; go.textContent = "🎬 Générer la vidéo"; genRun("voice"); }, function (e) {
+        go.disabled = false; go.textContent = "🎬 Générer la vidéo";
+        var b = $("#gpErr"); b.innerHTML = "⚠️ La voix ne marche pas : " + esc(e.message) + (/clé|key|403/i.test(e.message) ? "<br>Vérifie la clé (bouton « Changer la clé »)." : "") + "<br><button class=\"gp-link\" id=\"gpNoV\" type=\"button\">Faire la vidéo sans voix</button>"; b.hidden = false;
+        $("#gpNoV").onclick = function () { genRun("novoice"); };
+        $("#genPage").hidden = false; wrap.hidden = true;
+      });
+      return;
+    }
+    var keys = ["mode", "themes", "n", "voiceOn", "voiceEng", "gameOn"], old = {}; keys.forEach(function (k) { old[k] = S[k]; }); gen.saved = old;
     S.mode = "video"; S.themes = gen.theme ? [gen.theme] : []; S.n = gen.n;
-    if (genVoiceOk()) { S.voiceOn = true; S.voiceEng = "edge"; } else S.voiceOn = false;
+    if (genVoiceOk() && how !== "novoice") { S.voiceOn = true; S.voiceEng = "edge"; } else S.voiceOn = false;
+    S.gameOn = false;
     try { recordVideo(); } catch (e) { genFail("Erreur : " + (e && e.message || e)); }
   }
   function recordVideo() {
@@ -4262,14 +4291,14 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     if (!gen.on && S.voiceOn && S.voiceEng === "phone" && !confirm("La voix du téléphone ne peut pas être enregistrée dans la vidéo. Choisis « 🎙️ Voix pro gratuite » dans la partie Voix off pour l'avoir.\n\nContinuer sans voix ?")) return;
     keepAwake(); unlockAudio(); if (!ac) { genFail("Le son ne démarre pas sur cet appareil."); return; }
     var dest = ac.createMediaStreamDestination(); recBus(ac).connect(dest);
-    var cv = document.createElement("canvas"); cv.width = 1080; cv.height = 1920;
+    var small = gen.on, cv = document.createElement("canvas"); cv.width = small ? 720 : 1080; cv.height = small ? 1280 : 1920;
     cv.style.cssText = "position:fixed;left:0;top:0;width:2px;height:2px;opacity:.01;pointer-events:none;z-index:-1";
     document.body.appendChild(cv);
-    var cx = cv.getContext("2d"), st = cv.captureStream(30);
+    var cx = cv.getContext("2d", { alpha: false }), st = cv.captureStream(30); if (small) cx.__k = 720 / 1080;
     dest.stream.getAudioTracks().forEach(function (t) { st.addTrack(t); });
     var type = ["video/mp4;codecs=avc1.42E01E,mp4a.40.2", "video/mp4;codecs=avc1,mp4a.40.2", "video/mp4", "video/webm;codecs=vp9,opus", "video/webm"].filter(function (x) { return MediaRecorder.isTypeSupported(x); })[0] || "";
     var rec, ch = [], stopped = false, endAt = 0;
-    try { rec = new MediaRecorder(st, type ? { mimeType: type, videoBitsPerSecond: 9e6 } : {}); } catch (e) { cv.remove(); genFail("Impossible de démarrer l'enregistrement (" + (e && e.message || e) + ")."); return; }
+    try { rec = new MediaRecorder(st, type ? { mimeType: type, videoBitsPerSecond: small ? 4e6 : 9e6 } : {}); } catch (e) { cv.remove(); genFail("Impossible de démarrer l'enregistrement (" + (e && e.message || e) + ")."); return; }
     rec.ondataavailable = function (e) { if (e.data && e.data.size) ch.push(e.data); };
     function finish(keep) {
       if (stopped) return; stopped = true; vrec.on = false; $("#recDot").hidden = true;
@@ -4373,7 +4402,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       function B(el) { var r = el.getBoundingClientRect(); return { x: (r.left - sr.left) / k, y: (r.top - sr.top) / k, w: r.width / k, h: r.height / k }; }
       var ws = cs(wrap), s1 = ws.getPropertyValue("--s1").trim() || "#0e346e", s2 = ws.getPropertyValue("--s2").trim() || "#061634", acc = ws.getPropertyValue("--sacc").trim() || "#2ec4b6";
       var neon = stage.classList.contains("neon"), tv = stage.classList.contains("tv"), now = performance.now() / 1000;
-      c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.globalAlpha = 1; c.shadowBlur = 0;
+      c.save(); var k0 = c.__k || 1; c.setTransform(k0, 0, 0, k0, 0, 0); c.globalAlpha = 1; c.shadowBlur = 0;
       var g = c.createLinearGradient(0, 0, 0, 1920); g.addColorStop(0, s1); g.addColorStop(1, s2); c.fillStyle = g; c.fillRect(0, 0, 1080, 1920);
       if (tv) {
         c.save(); c.globalCompositeOperation = "screen";
@@ -4448,7 +4477,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   $("#back").onclick = function () { stopAll(); if (gen.on) $("#genPage").hidden = false; };
   $("#goRec").onclick = recordVideo;
   // Un seul bouton : thème tiré au hasard, puis la vidéo est fabriquée et téléchargée (tes thèmes choisis ne changent pas).
-  $("#genMore").onclick = function () { if (gen.on) genRun(); else $("#goGen").click(); };
+  $("#genMore").onclick = function () { if (gen.on) { stopAll(); $("#genPage").hidden = false; genRun(); } else $("#goGen").click(); };
   $("#goGen").onclick = function () { genOpen(); };
   $("#gpClose").onclick = function () { gen.on = false; document.body.classList.remove("gen-open"); $("#genPage").hidden = true; if (location.hash === "#gen") history.replaceState(null, "", location.pathname + location.search); };
   $("#gpGo").onclick = function () { genRun(); };
