@@ -57,7 +57,8 @@ ol.steps li::marker { font-weight: 800; color: var(--accent); }
 .dock .btn.rec { margin-top: 10px; background: #e63946; color: #fff; }
 .dock .btn.gen { margin-top: 10px; background: #ffd23f; color: #1a1300; }
 #vidDl { display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.15rem; }
-#vidDl[hidden], .dock .btn[hidden] { display: none; }
+#genMore { background: #ffd23f; color: #1a1300; }
+#vidDl[hidden], #genMore[hidden], .dock .btn[hidden] { display: none; }
 #recDot { position: absolute; top: max(12px, env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: 6; background: #e63946; color: #fff; font: 800 15px var(--body); padding: 8px 14px; border-radius: 999px; pointer-events: none; }
 #recDot[hidden] { display: none; }
 .dock .btn { display: block; width: 100%; max-width: 520px; margin: 0 auto; min-height: 56px; font-size: 1.1rem; font-family: var(--display); }
@@ -575,7 +576,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
     <p id="addMsg">Le premier pseudo validé sur une question devient le WINNER affiché à l'écran.</p>
     <div class="acts"><button class="btn" id="p1" type="button">+1 point</button><button class="btn" id="p3" type="button">+3 points</button><button class="btn ghost" id="undo" type="button">Annuler</button><button class="btn ghost" id="undoGalaxy" type="button" hidden>Annuler la Galaxie</button><button class="btn ghost" id="addClose" type="button">Fermer</button></div>
   </div>
-  <div id="recDot" hidden>● Enregistrement de la vidéo…</div>
+  <div id="recDot" hidden>🎬 La vidéo se fabrique toute seule… pas besoin de capture d'écran</div>
   <div class="overlay" id="preroll" hidden>
     <h3>Lance l'enregistrement d'écran maintenant</h3>
     <div class="big-n" id="preN">10</div>
@@ -584,7 +585,8 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   </div>
   <div class="overlay" id="endsheet" hidden>
     <h3 id="endT">Terminé. Arrête l'enregistrement.</h3>
-    <a class="btn" id="vidDl" href="#" download hidden>⬇️ Télécharger la vidéo</a>
+    <a class="btn" id="vidDl" href="#" download hidden>💾 Enregistrer la vidéo sur mon téléphone</a>
+    <button class="btn" id="genMore" type="button" hidden>🎲 Générer un autre quiz</button>
     <p>Légende prête pour TikTok :</p>
     <textarea id="cap" readonly></textarea>
     <div class="acts"><button class="btn" id="copy" type="button">Copier la légende</button><button class="btn ghost" id="again" type="button">Rejouer</button><button class="btn ghost" id="back" type="button">Réglages</button></div>
@@ -4193,6 +4195,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       var tags = ["quiz", "culturegenerale", "fyp", "pourtoi"].concat(T.tags);
       $("#cap").value = "Quiz " + T.title + " : tu fais combien sur " + n + " ? 👀 Dis ton score en commentaire ! " + tags.map(function (t) { return "#" + t; }).join(" ");
       $("#copy").textContent = "Copier la légende";
+      if (!vrec.on) { $("#genMore").hidden = true; $("#vidDl").hidden = true; $("#endT").textContent = "Terminé. Arrête l'enregistrement."; }
       $("#endsheet").hidden = false;
     } catch (e) { if (e !== 0) { console.error(e); stopAll(); } }
   }
@@ -4224,8 +4227,8 @@ ol.sc b { font-variant-numeric: tabular-nums; }
         if (vrec.url) URL.revokeObjectURL(vrec.url);
         vrec.url = URL.createObjectURL(new Blob(ch, { type: mt }));
         var a = $("#vidDl"); a.href = vrec.url; a.setAttribute("download", name); a.hidden = false;
-        $("#endT").textContent = ext === "mp4" ? "Vidéo prête ✅" : "Vidéo prête ✅ (format WEBM : si ta galerie ne la voit pas, ouvre-la dans CapCut)";
-        try { a.click(); } catch (e) {}
+        $("#endT").textContent = ext === "mp4" ? "Vidéo prête ✅ Appuie sur le bouton pour l'enregistrer" : "Vidéo prête ✅ Appuie sur le bouton pour l'enregistrer (format WEBM : si ta galerie ne la voit pas, ouvre-la dans CapCut)";
+        $("#genMore").hidden = false;
       };
       try { rec.stop(); } catch (e) { rec.onstop(); }
     }
@@ -4236,7 +4239,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
       if (!$("#endsheet").hidden) { if (!endAt) endAt = performance.now(); else if (performance.now() - endAt > 500) return finish(true); }
       requestAnimationFrame(loop);
     }
-    $("#vidDl").hidden = true; $("#endT").textContent = "Enregistrement en cours…";
+    $("#vidDl").hidden = true; $("#genMore").hidden = true; $("#endT").textContent = "Fabrication de la vidéo…";
     vrec.on = true; vrec.title = ""; $("#recDot").hidden = false;
     music.stop(); musicTrying = false; music.start();
     play(); paintStage(cx); rec.start(1000); requestAnimationFrame(loop);
@@ -4391,6 +4394,7 @@ ol.sc b { font-variant-numeric: tabular-nums; }
   $("#back").onclick = stopAll;
   $("#goRec").onclick = recordVideo;
   // Un seul bouton : thème tiré au hasard, puis la vidéo est fabriquée et téléchargée (tes thèmes choisis ne changent pas).
+  $("#genMore").onclick = function () { $("#goGen").click(); };
   $("#goGen").onclick = function () { var keep = S.themes; S.themes = []; try { recordVideo(); } finally { S.themes = keep; } };
   $("#cancel").onclick = stopAll;
   $("#skip").onclick = function () { if (skipFn) skipFn(); };
